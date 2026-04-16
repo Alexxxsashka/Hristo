@@ -68,16 +68,19 @@ if (fs.existsSync(firebaseConfigPath)) {
 // Initialize Firebase Admin with explicit service account key
 let db: any = null;
 const keyPath = path.join(__dirname, "key.json");
-if (firebaseConfig.projectId && fs.existsSync(keyPath)) {
+if (firebaseConfig.projectId) {
   try {
-    const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf-8"));
+    // Use key.json locally, fall back to default credentials on Cloud Run
+    const credential = fs.existsSync(keyPath)
+      ? admin.credential.cert(JSON.parse(fs.readFileSync(keyPath, "utf-8")))
+      : admin.credential.applicationDefault();
     const adminApp = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential,
       storageBucket: firebaseConfig.storageBucket || `${firebaseConfig.projectId}.firebasestorage.app`
     });
     db = getFirestore(adminApp, firebaseConfig.firestoreDatabaseId || '(default)');
     // eslint-disable-next-line no-console
-    console.log("Firebase Admin initialized with service account:", serviceAccount.client_email);
+    console.log("Firebase Admin initialized", fs.existsSync(keyPath) ? "(key.json)" : "(default credentials)");
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Firebase Admin initialization failed:", error);
