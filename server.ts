@@ -120,7 +120,7 @@ const upload = multer({ storage });
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || "3000");
 
   // Helper to upload to Firebase Storage
   const uploadToFirebase = async (file: Express.Multer.File, folder: string) => {
