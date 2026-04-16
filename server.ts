@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import fs from "fs";
@@ -8,94 +11,46 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
-import { PGlite } from '@electric-sql/pglite';
+import pg from "pg";
 import axios from 'axios';
-
-
-// Log outgoing IP for diagnostic purposes
-async function logOutgoingIP() {
-  try {
-    const response = await axios.get('https://api.ipify.org?format=json');
-    console.log('🌐 Server Outgoing IP:', response.data.ip);
-    if (response.data.ip !== '34.170.1.6') {
-      console.warn('⚠️ Outgoing IP has changed! Please update Cloud SQL Authorized Networks with:', response.data.ip);
-    }
-  } catch (error) {
-    console.error('❌ Failed to fetch outgoing IP:', error);
-  }
-}
-logOutgoingIP();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class PGLitePool {
-  private db: PGlite;
-
-  constructor() {
-    this.db = new PGlite(path.join(__dirname, 'data', 'pglite-data'));
-  }
-
-  query(sql: string, paramsOrCallback?: any, callback?: any): any {
-    let params: any[] | undefined = undefined;
-    let cb: Function | undefined = undefined;
-
-    if (typeof paramsOrCallback === 'function') {
-      cb = paramsOrCallback;
-    } else {
-      params = paramsOrCallback;
-      cb = callback;
-    }
-
-    const isMultiStatement = !params && typeof sql === 'string' && sql.trim().includes(';');
-
-    if (cb) {
-      if (isMultiStatement) {
-        this.db.exec(sql).then(() => cb!(null, { rows: [] })).catch((err: any) => cb!(err));
-      } else {
-        this.db.query(sql, params).then((res: any) => cb!(null, res)).catch((err: any) => cb!(err));
-      }
-      return;
-    }
-
-    if (isMultiStatement) {
-      return this.db.exec(sql).then(() => ({ rows: [] }));
-    }
-    return this.db.query(sql, params);
-  }
-
-  on(event: string, cb: any) {}
-
-  async connect() {
-    return {
-      query: async (sql: string, params?: any[]) => {
-        const isMulti = !params && typeof sql === 'string' && sql.trim().includes(';');
-        if (isMulti) return this.db.exec(sql).then(() => ({ rows: [] }));
-        return this.db.query(sql, params);
-      },
-      release: () => {}
-    };
-  }
-}
-
-// Emulate Postgres Connection Pool with PGLite
-const pool = new PGLitePool() as any;
+const pool = new pg.Pool({
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
+  host: process.env.DB_HOST || "34.29.209.72",
+  port: parseInt(process.env.DB_PORT || "5432"),
+  database: process.env.DB_NAME || "postgres",
+  connectionTimeoutMillis: 10000,
+  ssl: { rejectUnauthorized: false },
+});
 
 // Test DB Connection
+// eslint-disable-next-line no-console
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.error('❌ Cloud SQL Connection Error:', err.message);
-    if (err.message.includes('ETIMEDOUT')) {
-      console.error('👉 TIP: Ensure that the IP address 34.34.246.134 is added to "Authorized networks" in your Cloud SQL instance settings.');
+    // eslint-disable-next-line no-console
+    console.error('Cloud SQL Connection Error:', err.message);
+    if (err.message.includes('ETIMEDOUT') || err.message.includes('ECONNREFUSED')) {
+      // eslint-disable-next-line no-console
+      console.error('TIP: Ensure your server IP is added to Authorized networks in Cloud SQL.');
+      axios.get('https://api.ipify.org?format=json')
+        // eslint-disable-next-line no-console
+        .then(r => console.log('Your outgoing IP (add to Cloud SQL authorized networks):', r.data.ip))
+        .catch(() => {});
     }
   } else {
-    console.log('✅ Cloud SQL Connected successfully at:', res.rows[0].now);
-    // Check if tables exist
+    // eslint-disable-next-line no-console
+    console.log('Cloud SQL Connected at:', res.rows[0].now);
     pool.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'", (tErr, tRes) => {
       if (tErr) {
-        console.error('❌ Error checking tables:', tErr.message);
+        // eslint-disable-next-line no-console
+        console.error('Error checking tables:', tErr.message);
       } else {
-        console.log('📊 Existing tables:', tRes.rows.map(r => r.table_name).join(', '));
+        // eslint-disable-next-line no-console
+        console.log('Existing tables:', tRes.rows.map((r: { table_name: string }) => r.table_name).join(', '));
       }
     });
   }
@@ -110,21 +65,36 @@ if (fs.existsSync(firebaseConfigPath)) {
   firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf-8"));
 }
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin with explicit service account key
 let db: any = null;
+const keyPath = path.join(__dirname, "key.json");
 if (firebaseConfig.projectId) {
   try {
+    // Use key.json locally, fall back to default credentials on Cloud Run
+    const credential = fs.existsSync(keyPath)
+      ? admin.credential.cert(JSON.parse(fs.readFileSync(keyPath, "utf-8")))
+      : admin.credential.applicationDefault();
     const adminApp = admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
+      credential,
       storageBucket: firebaseConfig.storageBucket || `${firebaseConfig.projectId}.firebasestorage.app`
     });
     db = getFirestore(adminApp, firebaseConfig.firestoreDatabaseId || '(default)');
+    // eslint-disable-next-line no-console
+    console.log("Firebase Admin initialized", fs.existsSync(keyPath) ? "(key.json)" : "(default credentials)");
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Firebase Admin initialization failed:", error);
   }
 }
 
-const bucket = firebaseConfig.projectId ? admin.storage().bucket() : null;
+let bucket: any = null;
+try {
+  if (firebaseConfig.projectId && admin.apps?.length) {
+    bucket = admin.storage().bucket();
+  }
+} catch {
+  bucket = null;
+}
 
 // Ensure data and models directories exist
 const dataDir = path.join(__dirname, "data");
@@ -150,7 +120,7 @@ const upload = multer({ storage });
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || "3000");
 
   // Helper to upload to Firebase Storage
   const uploadToFirebase = async (file: Express.Multer.File, folder: string) => {
@@ -228,8 +198,16 @@ async function startServer() {
   try {
     const sql = fs.readFileSync(path.join(__dirname, 'init-db.sql'), 'utf8');
     await pool.query(sql);
-    console.log('✅ Database schema initialized');
-    
+
+    // Patch existing tables that may have been created by Data Connect with missing columns
+    const patchPath = path.join(__dirname, 'patch-schema.sql');
+    if (fs.existsSync(patchPath)) {
+      const patchSql = fs.readFileSync(patchPath, 'utf8');
+      await pool.query(patchSql);
+    }
+    // eslint-disable-next-line no-console
+    console.log('Database schema initialized');
+
     await seedAdmin();
     await seedPolicies();
   } catch (error) {
