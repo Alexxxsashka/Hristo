@@ -1,0 +1,12 @@
+specVersion: v1alpha
+serviceId: gen-lang-client-0095323188
+location: us-central1
+schema:
+  source: ./schema
+  datasource:
+    postgresql:
+      database: my-app-db
+      cloudSql:
+        instanceId: my-app-instance
+connectorDirs:
+  - ./connector

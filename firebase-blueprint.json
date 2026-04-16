@@ -1,0 +1,17 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Airsoft weapon or module",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    }
+  },
+  "firestore": {
+    "/products": { "schema": "Product", "description": "List of airsoft products" }
+  }
+}

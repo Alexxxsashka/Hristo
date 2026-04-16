@@ -1,0 +1,121 @@
+# Data Connect Schema
+
+type UserProfile @table {
+  id: String! @primaryKey
+  email: String!
+  username: String
+  displayName: String
+  callsign: String
+  teamName: String
+  role: String! # admin, manager, clerk, tech, user
+  points: Int
+  rank: String
+  nextRankThreshold: Int
+  discountLevel: Int
+  avatar: String
+  createdAt: Timestamp @default(expr: "request.time")
+  updatedAt: Timestamp @default(expr: "request.time")
+}
+
+type Category @table {
+  id: String! @primaryKey
+  name: String!
+  nameHr: String
+  slug: String! @unique
+  image: String
+  parent: String
+  discount: Int
+}
+
+type Product @table {
+  id: String! @primaryKey
+  uid: String! @unique
+  sku: String
+  barcode: String
+  slug: String @unique
+  name: String!
+  description: String!
+  type: String! # weapon, module, gear, part, consumable
+  category: String!
+  subcategory: String
+  brand: String
+  model: String
+  price: Float!
+  landingCost: Float
+  msrp: Float
+  currency: String
+  discount: Int
+  stock: Int!
+  minStockLevel: Int
+  status: String
+  image: String
+  model3D: String!
+  model3DName: String
+  meshName: String
+  has3D: Boolean
+  mountType: String
+  longDescription: String
+}
+
+type BlogPost @table {
+  id: String! @primaryKey
+  title: String!
+  slug: String! @unique
+  image: String!
+  excerpt: String!
+  content: String!
+  date: String!
+  category: String!
+  author: String!
+}
+
+type PolicyPage @table {
+  id: String! @primaryKey
+  title: String!
+  content: String!
+  title_hr: String
+  content_hr: String
+  lastUpdated: Timestamp @default(expr: "request.time")
+}
+
+type Order @table {
+  id: String! @primaryKey
+  orderNumber: String! @unique
+  userId: String!
+  subtotal: Float!
+  tax: Float!
+  shippingCost: Float!
+  total: Float!
+  profit: Float!
+  status: String!
+  createdAt: Timestamp @default(expr: "request.time")
+  updatedAt: Timestamp @default(expr: "request.time")
+  notes: String
+}
+
+type ServiceRequest @table {
+  id: String! @primaryKey
+  userId: String!
+  weaponName: String!
+  description: String!
+  status: String!
+  date: String!
+}
+
+type SavedBuild @table {
+  id: String! @primaryKey
+  userId: String!
+  name: String!
+  weaponId: String!
+  weaponName: String!
+  image: String
+  createdAt: Timestamp @default(expr: "request.time")
+}
+
+type Loadout @table {
+  id: String! @primaryKey
+  userId: String!
+  name: String!
+  description: String
+  createdAt: Timestamp @default(expr: "request.time")
+}

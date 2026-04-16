@@ -1,0 +1,38 @@
+[
+  {
+    "id": "post-1",
+    "title": "Choosing Your First Airsoft Rifle",
+    "slug": "choosing-your-first-airsoft-rifle",
+    "image": "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop",
+    "excerpt": "A comprehensive guide for beginners on how to select their first AEG rifle, covering budget, performance, and reliability.",
+    "content": "# Choosing Your First Airsoft Rifle\n\nStarting your airsoft journey can be overwhelming with so many options available. The most important decision you'll make is your first primary weapon...\n\n## 1. Budget\nDon't just look at the price of the gun. Remember to budget for batteries, chargers, and safety gear.\n\n## 2. Platform\nWhile M4 and AK platforms are the most common, choose something that feels comfortable in your hands.\n\n## 3. Performance\nLook for a rifle with a reliable gearbox and decent out-of-the-box accuracy.",
+    "date": "2024-03-10",
+    "category": "Guides",
+    "author": "Admin",
+    "relatedProductIds": ["tx-15"]
+  },
+  {
+    "id": "post-2",
+    "title": "TX-15 Carbine: In-Depth Review",
+    "slug": "tx-15-carbine-review",
+    "image": "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop",
+    "excerpt": "We take a close look at the Lone Star Armory TX-15 Carbine. Is it worth the premium price tag?",
+    "content": "# TX-15 Carbine: In-Depth Review\n\nThe TX-15 from Lone Star Armory has been making waves in the airsoft community. We spent a month testing its limits...\n\n## Build Quality\nThe full metal construction feels incredibly solid. No wobble in the handguard or stock.\n\n## Performance\nWith a consistent 400 FPS, this rifle is a beast on the field. The trigger response is crisp thanks to the high-torque motor.",
+    "date": "2024-03-05",
+    "category": "Product Reviews",
+    "author": "Admin",
+    "relatedProductIds": ["tx-15"]
+  },
+  {
+    "id": "post-3",
+    "title": "Maintenance Tips for Gas Blowback Pistols",
+    "slug": "gbb-maintenance-tips",
+    "image": "https://images.unsplash.com/photo-1590492459113-b31c396fafba?q=80&w=800&auto=format&fit=crop",
+    "excerpt": "Learn how to keep your GBB pistol running smoothly with these essential maintenance tips.",
+    "content": "# Maintenance Tips for Gas Blowback Pistols\n\nGas blowback pistols like the Glock 17 require regular maintenance to ensure longevity and performance...\n\n## Cleaning\nAlways clean the inner barrel after every game day to prevent dust buildup.\n\n## Lubrication\nUse high-quality silicone oil on the slide rails and O-rings. Avoid petroleum-based lubricants as they can damage the rubber seals.",
+    "date": "2024-02-28",
+    "category": "Tutorials",
+    "author": "Admin",
+    "relatedProductIds": ["glock17"]
+  }
+]

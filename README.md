@@ -1,11 +1,34 @@
-<div align="center">
+# Forge3D - Advanced Product Configurator
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A high-performance 3D product configurator with real-time price updates and modular attachment system.
 
-  <h1>Built with AI Studio</h2>
+## Features
+- **3D Configurator**: Real-time 3D visualization of product modifications.
+- **Dynamic Pricing**: Instant price updates as parts are added or removed.
+- **Modular System**: Attachment points for various categories (Optics, Foregrips, etc.).
+- **Full-Stack**: Express backend with JSON storage and React frontend.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Tech Stack
+- **Frontend**: React, Three.js, React Three Fiber, Zustand, TailwindCSS, Motion.
+- **Backend**: Node.js, Express.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Installation
 
-</div>
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the application (starts both backend and frontend):
+   ```bash
+   npm run dev
+   ```
+
+The application will be available at `http://localhost:3000`.
+
+## Project Structure
+- `backend/` (integrated in `server.ts` for this environment)
+- `data/products.json`: Product and parts database.
+- `src/store/`: Zustand state management.
+- `src/components/`: 3D and UI components.
+- `src/pages/`: Application views.

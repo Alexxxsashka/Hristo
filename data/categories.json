@@ -1,0 +1,100 @@
+[
+  {
+    "id": "airsoft_weapons",
+    "name": "Airsoft Weapons",
+    "slug": "airsoft-weapons",
+    "parent": null,
+    "image": "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop",
+    "filters": [
+      { "id": "brand", "label": "Brand", "type": "select", "options": ["CYMA", "Specna Arms", "E&L", "LCT", "Tokyo Marui", "G&G", "Ares", "Krytac"] },
+      { "id": "velocity_fps", "label": "Muzzle Velocity (FPS)", "type": "range" },
+      { "id": "color", "label": "Color", "type": "select", "options": ["Black", "Tan", "Olive", "Grey", "Two-Tone"] },
+      { "id": "body_material", "label": "Body Material", "type": "select", "options": ["Full Metal", "Polymer", "Steel", "Aluminum", "Nylon Fiber"] },
+      { "id": "gearbox", "label": "Gearbox", "type": "select", "options": ["Standard", "Reinforced", "Upgraded", "HPA"] },
+      { "id": "gearbox_type", "label": "Gearbox Type", "type": "select", "options": ["V2", "V3", "V6", "V7", "AEP", "Custom"] },
+      { "id": "gearbox_material", "label": "Gearbox Material", "type": "select", "options": ["Metal", "Reinforced Metal", "Polymer"] },
+      { "id": "battery_included", "label": "Battery Included", "type": "boolean" },
+      { "id": "blowback", "label": "Blowback", "type": "boolean" }
+    ]
+  },
+  {
+    "id": "assault_rifles",
+    "name": "Assault Rifles",
+    "slug": "assault-rifles",
+    "parent": "airsoft_weapons",
+    "filters": [
+      { "id": "platform", "label": "Platform", "type": "select", "options": ["AR-15/M4", "AK", "G36", "SCAR", "AUG", "MP5"] }
+    ]
+  },
+  {
+    "id": "pistols",
+    "name": "Pistols",
+    "slug": "pistols",
+    "parent": "airsoft_weapons",
+    "filters": [
+      { "id": "power_source", "label": "Power Source", "type": "select", "options": ["Green Gas", "CO2", "Electric (AEP)"] }
+    ]
+  },
+  {
+    "id": "sniper_rifles",
+    "name": "Sniper Rifles",
+    "slug": "sniper-rifles",
+    "parent": "airsoft_weapons",
+    "filters": [
+      { "id": "action", "label": "Action", "type": "select", "options": ["Bolt Action", "Semi-Auto", "Gas"] }
+    ]
+  },
+  {
+    "id": "batteries_chargers",
+    "name": "Batteries & Chargers",
+    "slug": "batteries-chargers",
+    "parent": null,
+    "image": "https://images.unsplash.com/photo-1619641782842-83f2246fdc21?q=80&w=800&auto=format&fit=crop",
+    "filters": [
+      { "id": "voltage", "label": "Voltage", "type": "select", "options": ["7.4V", "11.1V", "9.6V", "8.4V"] },
+      { "id": "type", "label": "Battery Type", "type": "select", "options": ["LiPo", "NiMH", "LiFe"] }
+    ]
+  },
+  {
+    "id": "consumables",
+    "name": "Consumables",
+    "slug": "consumables",
+    "parent": null,
+    "image": "https://images.unsplash.com/photo-1590492459113-b31c396fafba?q=80&w=800&auto=format&fit=crop",
+    "filters": [
+      { "id": "weight", "label": "BB Weight", "type": "select", "options": ["0.20g", "0.25g", "0.28g", "0.30g", "0.36g", "0.40g"] }
+    ]
+  },
+  {
+    "id": "tactical_gear",
+    "name": "Tactical Gear",
+    "slug": "tactical-gear",
+    "parent": null,
+    "image": "https://images.unsplash.com/photo-1508103861931-709129549fa0?q=80&w=800&auto=format&fit=crop",
+    "filters": [
+      { "id": "color", "label": "Color/Camo", "type": "select", "options": ["Black", "Olive", "Coyote", "Multicam", "A-TACS"] }
+    ]
+  },
+  {
+    "id": "vests",
+    "name": "Vests & Plate Carriers",
+    "slug": "vests",
+    "parent": "tactical_gear"
+  },
+  {
+    "id": "helmets",
+    "name": "Helmets",
+    "slug": "helmets",
+    "parent": "tactical_gear"
+  },
+  {
+    "id": "clothing",
+    "name": "Clothing",
+    "slug": "clothing",
+    "parent": null,
+    "image": "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?q=80&w=800&auto=format&fit=crop",
+    "filters": [
+      { "id": "size", "label": "Size", "type": "select", "options": ["S", "M", "L", "XL", "XXL"] }
+    ]
+  }
+]
