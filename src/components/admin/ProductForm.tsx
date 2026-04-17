@@ -97,6 +97,13 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
       if (modelFile) {
         console.log('Uploading 3D model...', modelFile.name);
+        
+        // If there was an existing model, delete it to save space
+        if (initialData?.model3D) {
+          console.log('Deleting old 3D model...', initialData.model3D);
+          await firebaseService.deleteFile(initialData.model3D);
+        }
+
         setUploadingFile('3D Model');
         try {
           const extension = modelFile.name.split('.').pop();

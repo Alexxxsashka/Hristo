@@ -295,3 +295,19 @@ export interface ServiceRequest {
   date: string;
   updates: { date: string; message: string }[];
 }
+
+export interface SiteSettings {
+  id: string;
+  logoUrl?: string;
+  heroImageUrl?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  address?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  announcement?: string;
+  showAnnouncement?: boolean;
+}

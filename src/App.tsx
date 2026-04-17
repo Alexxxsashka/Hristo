@@ -19,7 +19,6 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ defaul
 const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.InfoPage })));
 const WishlistPage = lazy(() => import('./pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
 const UserDashboard = lazy(() => import('./pages/UserDashboard').then(m => ({ default: m.UserDashboard })));
-const MigrationPage = lazy(() => import('./pages/MigrationPage').then(m => ({ default: m.MigrationPage })));
 
 import { FloatingCompare } from './components/FloatingCompare';
 import { Navbar } from './components/Navbar';
@@ -88,13 +87,6 @@ export default function App() {
                         <ProtectedAdminRoute>
                           <AdminDashboard />
                         </ProtectedAdminRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/admin/migrate" 
-                      element={
-                        <MigrationPage />
                       } 
                     />
                   </Routes>

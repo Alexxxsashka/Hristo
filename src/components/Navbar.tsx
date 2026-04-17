@@ -10,6 +10,7 @@ import { useWishlistStore } from '../store/wishlistStore';
 import { useCompareStore } from '../store/compareStore';
 import { firebaseService } from '../services/firebaseService';
 import { useTranslation } from '../hooks/useTranslation';
+import { SiteSettings } from '../types';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -20,19 +21,18 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
-    const fetchLogo = async () => {
+    const fetchSettings = async () => {
       try {
-        const url = await firebaseService.getFileURL('site/2d/изображение_2026-03-19_095239239.png');
-        setLogoUrl(url);
+        const data = await firebaseService.getSiteSettings();
+        setSettings(data);
       } catch (err) {
-        console.error('Failed to fetch logo:', err);
-        setLogoUrl('FALLBACK');
+        console.error('Failed to fetch site settings:', err);
       }
     };
-    fetchLogo();
+    fetchSettings();
   }, []);
 
   const isHomePage = location.pathname === '/';
@@ -136,14 +136,14 @@ export const Navbar: React.FC = () => {
       <nav className="bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
           <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
-            {logoUrl && logoUrl !== 'FALLBACK' ? (
+            {settings?.logoUrl ? (
               <img 
-                src={logoUrl} 
+                src={settings.logoUrl} 
                 alt="HRISTO Airsoft" 
                 className="h-8 sm:h-10 md:h-12 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
-            ) : logoUrl === 'FALLBACK' ? (
+            ) : settings ? (
               <span className="text-xl font-black text-white tracking-tighter">HRISTO<span className="text-red-600">.</span></span>
             ) : (
               <div className="h-8 sm:h-10 md:h-12 w-24 sm:w-32 bg-zinc-900 animate-pulse rounded-lg" />

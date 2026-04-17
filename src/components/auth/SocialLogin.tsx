@@ -1,7 +1,6 @@
 import React from 'react';
-import { auth, db } from '../../firebase';
+import { auth } from '../../firebase';
 import { GoogleAuthProvider, OAuthProvider, signInWithPopup, multiFactor } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuthStore } from '../../store/authStore';
 import { getAuthErrorMessage } from '../../utils/authErrors';
 import { firebaseService } from '../../services/firebaseService';
@@ -25,23 +24,28 @@ export const SocialLogin: React.FC = () => {
       
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
-
-      // Check if user exists in Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', firebaseUser.uid), {
-          username: firebaseUser.displayName || 'User',
-          email: firebaseUser.email,
-          role: 'user',
-          createdAt: new Date().toISOString()
-        });
-      }
-
-      const userData = (await getDoc(doc(db, 'users', firebaseUser.uid))).data();
       const token = await firebaseUser.getIdToken();
 
-      console.log("Login successful, user data:", userData);
-      console.log("Database ID:", (db as any)._databaseId?.databaseId || "default");
+      // Sync user to SQL instead of Firestore using PUT (upsert)
+      const res = await fetch(`/api/users/${firebaseUser.uid}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          username: firebaseUser.displayName || 'User',
+          email: firebaseUser.email,
+          role: 'user'
+        })
+      });
+
+      let userData = null;
+      if (res.ok) {
+        userData = await res.json();
+      }
+
+      console.log("Login successful, user data synced to SQL");
 
       login(token, {
         id: firebaseUser.uid,

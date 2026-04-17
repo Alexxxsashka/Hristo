@@ -19,6 +19,11 @@ import {
   AlertCircle,
   Archive
 } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { StripePaymentForm } from '../components/checkout/StripePaymentForm';
+
+const stripePromise = loadStripe((import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 interface ShippingMethod {
   id: 'hp_shipping' | 'gls_express' | 'boxnow_locker' | 'pickup' | 'courier';
@@ -113,6 +118,7 @@ export const CheckoutPage: React.FC = () => {
 
   const [selectedShipping, setSelectedShipping] = useState(SHIPPING_METHODS[0]);
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0]);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -147,6 +153,21 @@ export const CheckoutPage: React.FC = () => {
   const discountedSubtotal = subtotal - discountAmount;
   const total = discountedSubtotal + selectedShipping.price;
 
+  useEffect(() => {
+    if (step === 2 && selectedPayment.id === 'stripe' && !stripeClientSecret) {
+      const initStripe = async () => {
+        try {
+          const { clientSecret } = await firebaseService.createPaymentIntent(total);
+          setStripeClientSecret(clientSecret);
+        } catch (err: any) {
+          console.error('Stripe Init Error:', err);
+          setError('Failed to initialize Stripe payment. Please try another method or contact support.');
+        }
+      };
+      initStripe();
+    }
+  }, [step, selectedPayment, total, stripeClientSecret]);
+
   const handleNext = () => {
     setError(null);
     setStep(s => s + 1);
@@ -156,8 +177,8 @@ export const CheckoutPage: React.FC = () => {
     setStep(s => s - 1);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent, isStripePaid: boolean = false) => {
+    if (e) e.preventDefault();
     setIsProcessing(true);
     setError(null);
     
@@ -177,6 +198,8 @@ export const CheckoutPage: React.FC = () => {
         } : undefined
       }));
 
+      const isPaid = isStripePaid || (selectedPayment.id !== 'cod' && selectedPayment.id !== 'bank_transfer');
+
       const orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> = {
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,
@@ -185,13 +208,13 @@ export const CheckoutPage: React.FC = () => {
         shippingCost: selectedShipping.price,
         total,
         profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
-        status: selectedPayment.id === 'cod' || selectedPayment.id === 'bank_transfer' ? 'pending' : 'paid',
+        status: isPaid ? 'paid' : 'pending',
         payment: {
           method: selectedPayment.id,
-          status: selectedPayment.id === 'cod' || selectedPayment.id === 'bank_transfer' ? 'pending' : 'paid',
+          status: isPaid ? 'paid' : 'pending',
           amount: total,
           currency: 'EUR',
-          paidAt: selectedPayment.id === 'stripe' || selectedPayment.id === 'keks_pay' ? new Date().toISOString() : null
+          paidAt: isPaid ? new Date().toISOString() : null
         },
         shipping: {
           method: selectedShipping.id,
@@ -432,12 +455,32 @@ export const CheckoutPage: React.FC = () => {
                     >
                       {t('back')}
                     </button>
-                    <button 
-                      onClick={handleNext}
-                      className="flex-[2] py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 text-xs sm:text-sm"
-                    >
-                      {t('review_order')}
-                    </button>
+                    {selectedPayment.id === 'stripe' ? (
+                      <div className="flex-[2]">
+                        {stripeClientSecret ? (
+                          <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
+                            <StripePaymentForm 
+                              total={total} 
+                              onSuccess={() => {
+                                // For Stripe, we confirm payment then create order marked as paid
+                                handleSubmit(new Event('submit') as any, true);
+                              }} 
+                            />
+                          </Elements>
+                        ) : (
+                          <div className="w-full py-4 sm:py-5 bg-zinc-800 rounded-xl sm:rounded-2xl flex items-center justify-center">
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={handleNext}
+                        className="flex-[2] py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 text-xs sm:text-sm"
+                      >
+                        {t('review_order')}
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               )}

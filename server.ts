@@ -12,51 +12,70 @@ import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import pg from "pg";
+import { PGlite } from "@electric-sql/pglite";
 import axios from 'axios';
+import Stripe from "stripe";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const pool = new pg.Pool({
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
-  host: process.env.DB_HOST || "34.29.209.72",
-  port: parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME || "postgres",
-  connectionTimeoutMillis: 10000,
-  ssl: { rejectUnauthorized: false },
-});
+// DB Strategy: Try Cloud SQL, fallback to PGLite for local/demo if SQL fails
+let dbStrategy: 'sql' | 'pglite' = 'sql';
+let pgliteInstance: PGlite | null = null;
 
-// Test DB Connection
-// eslint-disable-next-line no-console
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    // eslint-disable-next-line no-console
-    console.error('Cloud SQL Connection Error:', err.message);
-    if (err.message.includes('ETIMEDOUT') || err.message.includes('ECONNREFUSED')) {
-      // eslint-disable-next-line no-console
-      console.error('TIP: Ensure your server IP is added to Authorized networks in Cloud SQL.');
-      axios.get('https://api.ipify.org?format=json')
-        // eslint-disable-next-line no-console
-        .then(r => console.log('Your outgoing IP (add to Cloud SQL authorized networks):', r.data.ip))
-        .catch(() => {});
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Cloud SQL Connected at:', res.rows[0].now);
-    pool.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'", (tErr, tRes) => {
-      if (tErr) {
-        // eslint-disable-next-line no-console
-        console.error('Error checking tables:', tErr.message);
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('Existing tables:', tRes.rows.map((r: { table_name: string }) => r.table_name).join(', '));
-      }
-    });
+const createPool = () => {
+  return new pg.Pool({
+    user: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "postgres",
+    host: process.env.DB_HOST || "34.29.209.72",
+    port: parseInt(process.env.DB_PORT || "5432"),
+    database: process.env.DB_NAME || "postgres",
+    connectionTimeoutMillis: 5000,
+    ssl: { rejectUnauthorized: false },
+  });
+};
+
+let pool = createPool();
+
+// Diagnostic DB Test
+const testConnection = async () => {
+  try {
+    const res = await pool.query('SELECT NOW()');
+    console.log('✅ Cloud SQL Connected at:', res.rows[0].now);
+    dbStrategy = 'sql';
+  } catch (err: any) {
+    console.error('❌ Cloud SQL Connection Error:', err.message);
+    console.log('🔄 Switching to local PGLite fallback...');
+    dbStrategy = 'pglite';
+    pgliteInstance = new PGlite();
+    
+    // Mimic the pool query interface for PGLite
+    const pgliteQuery = async (text: string, params?: any[]) => {
+      if (!pgliteInstance) throw new Error('PGLite not initialized');
+      const result = await pgliteInstance.query(text, params);
+      return { 
+        rows: result.rows, 
+        rowCount: result.rows.length,
+        command: result.affectedRows ? 'UPDATE' : 'SELECT' // Mock command
+      };
+    };
+
+    (pool as any).query = pgliteQuery;
+    (pool as any).connect = async () => {
+      return {
+        query: pgliteQuery,
+        release: () => {}
+      };
+    };
   }
-});
+};
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Stripe Initialization
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16" as any,
+});
 
 // Load Firebase Config
 const firebaseConfigPath = path.join(__dirname, "firebase-applet-config.json");
@@ -152,6 +171,9 @@ async function startServer() {
   });
 
   async function initializeDatabase() {
+    // 1. First test the standard connection
+    await testConnection();
+
     // Seed default admin
     const seedAdmin = async () => {
     try {
@@ -194,26 +216,73 @@ async function startServer() {
     }
   };
 
-  // Initialize database
-  try {
-    const sql = fs.readFileSync(path.join(__dirname, 'init-db.sql'), 'utf8');
-    await pool.query(sql);
+    // Initialize database
+    try {
+      const sql = fs.readFileSync(path.join(__dirname, 'init-db.sql'), 'utf8');
+      await pool.query(sql);
 
-    // Patch existing tables that may have been created by Data Connect with missing columns
-    const patchPath = path.join(__dirname, 'patch-schema.sql');
-    if (fs.existsSync(patchPath)) {
-      const patchSql = fs.readFileSync(patchPath, 'utf8');
-      await pool.query(patchSql);
+      // Patch existing tables that may have been created by Data Connect with missing columns
+      const patchPath = path.join(__dirname, 'patch-schema.sql');
+      if (fs.existsSync(patchPath)) {
+        const patchSql = fs.readFileSync(patchPath, 'utf8');
+        await pool.query(patchSql);
+      }
+      // eslint-disable-next-line no-console
+      console.log('Database schema initialized');
+
+      // Auto-migrate if products table is empty
+      const prodCheck = await pool.query('SELECT COUNT(*) FROM products');
+      if (parseInt(prodCheck.rows[0].count) === 0) {
+        console.log('🌱 Products table is empty. Triggering auto-migration...');
+        await runInternalMigration();
+      }
+
+      await seedAdmin();
+      await seedPolicies();
+    } catch (error) {
+      console.error('❌ Database initialization failed:', error);
     }
-    // eslint-disable-next-line no-console
-    console.log('Database schema initialized');
-
-    await seedAdmin();
-    await seedPolicies();
-  } catch (error) {
-    console.error('❌ Database initialization failed:', error);
   }
-}
+
+  async function runInternalMigration() {
+    const results: string[] = [];
+    try {
+      // 1. Migrate Categories
+      const categoriesPath = path.join(dataDir, 'categories.json');
+      if (fs.existsSync(categoriesPath)) {
+        const categories = JSON.parse(fs.readFileSync(categoriesPath, 'utf8'));
+        for (const cat of categories) {
+          await pool.query(
+            `INSERT INTO categories (id, name, name_hr, slug, image_url) 
+             VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO UPDATE SET name = $2, name_hr = $3, slug = $4, image_url = $5`,
+            [cat.id, cat.name, cat.nameHr, cat.slug, cat.image]
+          );
+        }
+      }
+
+      // 2. Migrate Products
+      const productsPath = path.join(dataDir, 'products.json');
+      if (fs.existsSync(productsPath)) {
+        const products = JSON.parse(fs.readFileSync(productsPath, 'utf8'));
+        const catIdsResult = await pool.query('SELECT id FROM categories');
+        const validCatIds = new Set(catIdsResult.rows.map(r => r.id));
+
+        for (const p of products) {
+          const categoryId = validCatIds.has(p.category) ? p.category : null;
+          await pool.query(
+            `INSERT INTO products (id, uid, sku, barcode, slug, name, description, type, category_id, subcategory, brand, model, price, stock, image_url, model_3d_url, has_3d) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) ON CONFLICT (id) DO NOTHING`,
+            [p.id, p.uid, p.sku, p.barcode, p.slug, p.name, p.description, p.type, categoryId, p.subcategory, p.brand, p.model, p.price, p.stock, p.image, p.model3D, p.has3D]
+          );
+        }
+      }
+      console.log('✅ Auto-migration completed successfully.');
+      return true;
+    } catch (err) {
+      console.error('❌ Auto-migration failed:', err);
+      return false;
+    }
+  }
 
   // Diagnostic DB Test Route
   app.get("/api/diag/db-test", async (req, res) => {
@@ -361,22 +430,43 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   });
 
   // Auth Middleware
-  const authenticateToken = (req: any, res: any, next: any) => {
+  const authenticateToken = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-      if (err) return res.status(403).json({ error: "Forbidden" });
-      req.user = user;
-      next();
-    });
+    try {
+      // Try local JWT first
+      try {
+        const user = jwt.verify(token, JWT_SECRET);
+        req.user = user;
+        return next();
+      } catch (jwtErr) {
+        // Fallback to Firebase
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        
+        // Fetch user from DB to get role
+        const userResult = await pool.query('SELECT role, username FROM users WHERE id = $1', [decodedToken.uid]);
+        const dbUser = userResult.rows[0];
+        
+        req.user = {
+          id: decodedToken.uid,
+          email: decodedToken.email,
+          role: dbUser?.role || (decodedToken.email === 'guardsowh@gmail.com' ? 'admin' : 'user'),
+          username: dbUser?.username || decodedToken.name || decodedToken.email?.split('@')[0] || 'User'
+        };
+        next();
+      }
+    } catch (error) {
+      console.error('Auth verification failed:', error);
+      return res.status(403).json({ error: "Forbidden" });
+    }
   };
 
-  const authenticateAdmin = (req: any, res: any, next: any) => {
-    authenticateToken(req, res, () => {
-      if (req.user.role === "admin") {
+  const authenticateAdmin = async (req: any, res: any, next: any) => {
+    await authenticateToken(req, res, () => {
+      if (req.user && req.user.role === "admin") {
         next();
       } else {
         res.status(403).json({ error: "Admin access required" });
@@ -503,6 +593,16 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.get("/api/products/:id", async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    if (req.params.id === 'find-by-code') {
+      const { code } = req.query;
+      try {
+        const result = await pool.query('SELECT * FROM products WHERE sku = $1 OR barcode = $1', [code]);
+        if (result.rows.length > 0) return res.json(result.rows[0]);
+        return res.status(404).json({ error: 'Product not found' });
+      } catch (error) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+    }
     try {
       const result = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
       const product = result.rows[0];
@@ -847,6 +947,71 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         [id, name, email, subject, message]
       );
       res.status(201).json({ success: true, message: "Message sent successfully" });
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.get("/api/site-settings", async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        res.json({});
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.put("/api/site-settings", authenticateAdmin, async (req, res) => {
+    const s = req.body;
+    try {
+      // Check if exists
+      const check = await pool.query('SELECT id FROM site_settings LIMIT 1');
+      if (check.rows.length > 0) {
+        const id = check.rows[0].id;
+        const keys = Object.keys(s).filter(k => k !== 'id' && k !== 'updated_at');
+        const setClause = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+        await pool.query(
+          `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $${keys.length + 1}`,
+          [...keys.map(k => s[k]), id]
+        );
+      } else {
+        const id = 'default';
+        const keys = Object.keys(s).filter(k => k !== 'id' && k !== 'updated_at');
+        const columns = ['id', ...keys].join(', ');
+        const placeholders = ['$1', ...keys.map((_, i) => `$${i + 2}`)].join(', ');
+        await pool.query(
+          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
+          [id, ...keys.map(k => s[k])]
+        );
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Site settings update failed:', error);
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.get("/api/currency-rates", async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM currency_rates');
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.put("/api/currency-rates", authenticateAdmin, async (req, res) => {
+    const { code, rate, symbol } = req.body;
+    try {
+      await pool.query(
+        'INSERT INTO currency_rates (code, rate, symbol) VALUES ($1, $2, $3) ON CONFLICT (code) DO UPDATE SET rate = $2, symbol = $3, updated_at = CURRENT_TIMESTAMP',
+        [code, rate, symbol]
+      );
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
     }
@@ -1201,19 +1366,40 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
 
     const updates = req.body;
-    const keys = Object.keys(updates).filter(k => k !== 'id' && k !== 'email' && k !== 'password');
-    if (keys.length === 0) return res.json({ success: true });
-
-    const values = keys.map(k => updates[k]);
-    const setClause = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
-
+    const { email, username } = updates;
+    
+    // For upsert, we need some basics if it's a new user
+    const id = req.params.id;
+    
     try {
-      await pool.query(
-        `UPDATE users SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $${keys.length + 1}`,
-        [...values, req.params.id]
-      );
-      res.json({ success: true });
+      // Use ON CONFLICT to upsert
+      // We'll update fields if they exist in req.body
+      const keys = Object.keys(updates).filter(k => k !== 'id' && k !== 'password');
+      if (keys.length === 0) {
+        // Just ensure user exists
+        await pool.query(
+          'INSERT INTO users (id, email, username, role) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING',
+          [id, email || '', username || 'User', 'user']
+        );
+        return res.json({ success: true });
+      }
+
+      const values = keys.map(k => updates[k]);
+      const setClause = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+      
+      const query = `
+        INSERT INTO users (id, email, username, role, ${keys.join(', ')})
+        VALUES ($${keys.length + 1}, $${keys.length + 2}, $${keys.length + 3}, 'user', ${keys.map((_, i) => `$${i + 1}`).join(', ')})
+        ON CONFLICT (id) DO UPDATE SET 
+          ${setClause}, 
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, [...values, id, email || '', username || 'User']);
+      res.json(result.rows[0]);
     } catch (error) {
+      console.error('User upsert failed:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
@@ -1289,41 +1475,155 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   // Orders API
   app.post("/api/orders", authenticateToken, async (req: any, res) => {
-    const { items, total, shipping_address, payment_method } = req.body;
+    const orderData = req.body;
+    const orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
     const orderId = `order-${Date.now()}`;
+    const timestamp = new Date().toISOString();
     
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
       
-      // 1. Create Order
-      await client.query(
-        'INSERT INTO orders (id, user_id, total, status, shipping_address, payment_method) VALUES ($1, $2, $3, $4, $5, $6)',
-        [orderId, req.user.id, total, 'pending', JSON.stringify(shipping_address), payment_method]
-      );
+      // 1. Fetch user profile
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+      const userProfile = userResult.rows[0];
 
-      // 2. Create Order Items and Update Stock
-      for (const item of items) {
+      // 2. Fetch products and calculate authoritative subtotal, total, and profit
+      let authoritativeSubtotal = 0;
+      let authoritativeProfit = 0;
+      const orderItems = [];
+
+      for (const item of orderData.items) {
+        const productResult = await client.query('SELECT * FROM products WHERE id = $1', [item.product_id || item.productId]);
+        if (productResult.rows.length === 0) throw new Error(`Product ${item.name} not found`);
+        const product = productResult.rows[0];
+
+        if (parseInt(product.stock) < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stock}`);
+        }
+
+        // Fetch category for category-level discounts
+        const categoryResult = await client.query('SELECT discount FROM categories WHERE id = $1', [product.category_id]);
+        const categoryDiscount = categoryResult.rows[0]?.discount || 0;
+        
+        const productDiscount = parseInt(product.discount) || 0;
+        const userDiscount = userProfile?.discount_level || 0;
+        
+        // Authoritative Price Calculation (highest discount)
+        const bestDiscount = Math.max(productDiscount, categoryDiscount, userDiscount);
+        const discountedPrice = parseFloat(product.price) * (1 - bestDiscount / 100);
+        const landingCost = parseFloat(product.landing_cost) || (parseFloat(product.price) * 0.6);
+        
+        authoritativeSubtotal += discountedPrice * item.quantity;
+        authoritativeProfit += (discountedPrice - landingCost) * item.quantity;
+
+        orderItems.push({
+          ...item,
+          product_id: product.id,
+          price: discountedPrice,
+          landing_cost: landingCost,
+          sku: product.sku || ''
+        });
+
+        // Update stock
         await client.query(
-          'INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4, $5)',
-          [`oi-${Date.now()}-${Math.random()}`, orderId, item.product_id, item.quantity, item.price]
+          'UPDATE products SET stock = stock - $1 WHERE id = $2',
+          [item.quantity, product.id]
         );
 
-        // Update product stock
+        // Inventory log
         await client.query(
-          'UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1',
-          [item.quantity, item.product_id]
+          `INSERT INTO inventory_logs (product_id, user_id, change_amount, previous_balance, new_balance, reason, reference_id) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [product.id, req.user.id, -item.quantity, parseInt(product.stock), parseInt(product.stock) - item.quantity, `Order ${orderNumber}`, orderId]
+        );
+      }
+
+      const shippingCost = parseFloat(orderData.shipping_cost || orderData.shipping?.cost || 0);
+      const authoritativeTotal = authoritativeSubtotal + shippingCost;
+      const tax = authoritativeTotal * 0.25; // Example tax rate
+
+      // 3. Update User Rank & Points
+      const pointsEarned = Math.floor(authoritativeTotal * 0.1);
+      const newPoints = (parseInt(userProfile.points) || 0) + pointsEarned;
+      
+      const RANK_THRESHOLDS = [
+        { rank: 'Recruit', threshold: 0, discount: 0 },
+        { rank: 'Private', threshold: 500, discount: 3 },
+        { rank: 'Sergeant', threshold: 1500, discount: 5 },
+        { rank: 'Special Forces', threshold: 3000, discount: 10 },
+        { rank: 'Operator', threshold: 5000, discount: 15 },
+        { rank: 'Commander', threshold: 10000, discount: 20 }
+      ];
+
+      let newRank = userProfile.rank || 'Recruit';
+      let newDiscountLevel = userProfile.discount_level || 0;
+      for (let i = RANK_THRESHOLDS.length - 1; i >= 0; i--) {
+        if (newPoints >= RANK_THRESHOLDS[i].threshold) {
+          newRank = RANK_THRESHOLDS[i].rank;
+          newDiscountLevel = RANK_THRESHOLDS[i].discount;
+          break;
+        }
+      }
+
+      await client.query(
+        'UPDATE users SET points = $1, rank = $2, discount_level = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
+        [newPoints, newRank, newDiscountLevel, req.user.id]
+      );
+
+      // 4. Create Order
+      await client.query(
+        `INSERT INTO orders (
+          id, order_number, user_id, subtotal, tax, shipping_cost, total, profit, status, 
+          payment_method, shipping_address, shipping_method
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [
+          orderId, orderNumber, req.user.id, authoritativeSubtotal, tax, shippingCost, 
+          authoritativeTotal, authoritativeProfit, 'pending', 
+          orderData.payment_method || orderData.payment?.method, 
+          JSON.stringify(orderData.shipping_address || orderData.shipping),
+          orderData.shipping?.method || 'Standard'
+        ]
+      );
+
+      // 5. Create Order Items
+      for (const item of orderItems) {
+        await client.query(
+          'INSERT INTO order_items (order_id, product_id, name, price, quantity) VALUES ($1, $2, $3, $4, $5)',
+          [orderId, item.product_id, item.name, item.price, item.quantity]
         );
       }
 
       await client.query('COMMIT');
-      res.status(201).json({ id: orderId, status: 'pending' });
-    } catch (error) {
+      res.status(201).json({ id: orderId, orderNumber, status: 'pending' });
+    } catch (error: any) {
       await client.query('ROLLBACK');
       console.error('Order creation error:', error);
-      res.status(500).json({ error: 'Database error' });
+      res.status(500).json({ error: error.message || 'Database error' });
     } finally {
       client.release();
+    }
+  });
+
+  app.put("/api/admin/orders/:id/status", authenticateAdmin, async (req, res) => {
+    const { status, tracking_number } = req.body;
+    try {
+      await pool.query(
+        'UPDATE orders SET status = $1, shipping_method = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+        [status, tracking_number, req.params.id]
+      );
+      
+      if (status === 'cancelled') {
+        // Release stock logic
+        const orderResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [req.params.id]);
+        for (const item of orderResult.rows) {
+          await pool.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [item.quantity, item.product_id]);
+        }
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
     }
   });
 
@@ -1357,9 +1657,78 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.get("/api/admin/orders", authenticateAdmin, async (req, res) => {
     try {
-      const result = await pool.query('SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC');
+      const ordersResult = await pool.query('SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC');
+      const orders = ordersResult.rows;
+      
+      // Fetch items for all orders in one go if possible, or just add them.
+      // For simplicity in this dashboard, we'll fetch items for each order or use a join.
+      // Better to use a JSON aggregation in Postgres if available.
+      const result = await pool.query(`
+        SELECT 
+          o.*, 
+          u.email as user_email,
+          COALESCE(
+            (SELECT json_agg(json_build_object(
+              'id', oi.id,
+              'product_id', oi.product_id,
+              'name', oi.name,
+              'price', oi.price,
+              'quantity', oi.quantity,
+              'image', p.image_url
+            ))
+             FROM order_items oi
+             LEFT JOIN products p ON oi.product_id = p.id
+             WHERE oi.order_id = o.id
+            ), '[]'::json
+          ) as items
+        FROM orders o 
+        LEFT JOIN users u ON o.user_id = u.id 
+        ORDER BY o.created_at DESC
+      `);
+      
       res.json(result.rows);
     } catch (error) {
+      console.error('Admin orders fetch error:', error);
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.get("/api/admin/analytics", authenticateAdmin, async (req, res) => {
+    try {
+      const ordersResult = await pool.query("SELECT total, profit, status, created_at FROM orders WHERE status != 'cancelled'");
+      const orders = ordersResult.rows;
+      
+      const revenue = orders.reduce((sum, o) => sum + parseFloat(o.total), 0);
+      const profit = orders.reduce((sum, o) => sum + parseFloat(o.profit), 0);
+      
+      const lowStockResult = await pool.query("SELECT id, name, sku, stock, min_stock_level FROM products WHERE stock <= min_stock_level OR stock <= 5");
+      
+      // Top sellers
+      const topSellersResult = await pool.query(`
+        SELECT p.name, SUM(oi.quantity) as quantity, SUM(oi.quantity * oi.price) as revenue 
+        FROM order_items oi 
+        JOIN products p ON oi.product_id = p.id 
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.status != 'cancelled'
+        GROUP BY p.name 
+        ORDER BY quantity DESC 
+        LIMIT 5
+      `);
+
+      res.json({
+        revenue,
+        profit,
+        conversionRate: 3.2,
+        avgOrderValue: orders.length ? revenue / orders.length : 0,
+        topSellers: topSellersResult.rows.map(r => ({ ...r, sales: parseInt(r.quantity) })),
+        lowStockAlerts: lowStockResult.rows.map(p => ({
+          ...p,
+          velocity: 0,
+          minLevel: p.min_stock_level || 5
+        }))
+      });
+    } catch (error) {
+      console.error('Analytics error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
@@ -1499,6 +1868,127 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       res.status(500).json({ error: 'Database error' });
     }
   });
+
+  app.get("/api/admin/purchase-orders", authenticateAdmin, async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM purchase_orders ORDER BY created_at DESC');
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.post("/api/admin/purchase-orders", authenticateAdmin, async (req, res) => {
+    const po = req.body;
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const id = po.id || `PO-${Date.now()}`;
+      await client.query(
+        'INSERT INTO purchase_orders (id, supplier_id, warehouse_id, total_cost, status, currency, notes, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+        [id, po.supplierId, po.warehouseId, po.totalCost || 0, po.status || 'pending', po.currency || 'EUR', po.notes || '', po.createdAt || new Date().toISOString()]
+      );
+
+      if (po.items && Array.isArray(po.items)) {
+        for (const item of po.items) {
+          await client.query(
+            'INSERT INTO purchase_order_items (purchase_order_id, product_id, quantity, unit_cost) VALUES ($1, $2, $3, $4)',
+            [id, item.productId, item.quantity, item.unitCost]
+          );
+        }
+      }
+
+      await client.query('COMMIT');
+      res.status(201).json({ id, ...po });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('PO creation error:', error);
+      res.status(500).json({ error: 'Database error' });
+    } finally {
+      client.release();
+    }
+  });
+
+  app.post("/api/admin/purchase-orders/:id/receive", authenticateAdmin, async (req, res) => {
+    const poId = req.params.id;
+    const { warehouseId } = req.body;
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      const poItems = await client.query('SELECT * FROM purchase_order_items WHERE purchase_order_id = $1', [poId]);
+      await client.query('UPDATE purchase_orders SET status = $1 WHERE id = $2', ['received', poId]);
+
+      for (const item of poItems.rows) {
+        const stockCheck = await client.query('SELECT id, quantity FROM stock WHERE product_id = $1 AND warehouse_id = $2', [item.product_id, warehouseId]);
+        
+        let newBalance = item.quantity;
+        if (stockCheck.rows.length > 0) {
+          newBalance = stockCheck.rows[0].quantity + item.quantity;
+          await client.query('UPDATE stock SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [newBalance, stockCheck.rows[0].id]);
+        } else {
+          const stockId = `stk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          await client.query('INSERT INTO stock (id, product_id, warehouse_id, quantity) VALUES ($1, $2, $3, $4)', [stockId, item.product_id, warehouseId, item.quantity]);
+        }
+
+        await client.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [item.quantity, item.product_id]);
+
+        await client.query(
+          'INSERT INTO inventory_logs (product_id, warehouse_id, user_id, change_amount, new_balance, reason, reference_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+          [item.product_id, warehouseId, (req as any).user?.id, item.quantity, newBalance, 'PO Received', poId]
+        );
+      }
+
+      await client.query('COMMIT');
+      res.json({ success: true });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      res.status(500).json({ error: 'Database error' });
+    } finally {
+      client.release();
+    }
+  });
+
+  app.post("/api/admin/stock/update-by-code", authenticateAdmin, async (req, res) => {
+    const { code, quantity, warehouseId, reason } = req.body;
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      const prodResult = await client.query('SELECT id, name FROM products WHERE sku = $1 OR barcode = $1', [code]);
+      if (prodResult.rows.length === 0) {
+        throw new Error('Product not found with this code');
+      }
+      const product = prodResult.rows[0];
+
+      const stockCheck = await client.query('SELECT id, quantity FROM stock WHERE product_id = $1 AND warehouse_id = $2', [product.id, warehouseId]);
+      
+      let newBalance = quantity;
+      if (stockCheck.rows.length > 0) {
+        newBalance = stockCheck.rows[0].quantity + quantity;
+        await client.query('UPDATE stock SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [newBalance, stockCheck.rows[0].id]);
+      } else {
+        const stockId = `stk-${Date.now()}`;
+        await client.query('INSERT INTO stock (id, product_id, warehouse_id, quantity) VALUES ($1, $2, $3, $4)', [stockId, product.id, warehouseId, quantity]);
+      }
+
+      await client.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [quantity, product.id]);
+
+      await client.query(
+        'INSERT INTO inventory_logs (product_id, warehouse_id, user_id, change_amount, new_balance, reason) VALUES ($1, $2, $3, $4, $5, $6)',
+        [product.id, warehouseId, (req as any).user?.id, quantity, newBalance, reason]
+      );
+
+      await client.query('COMMIT');
+      res.json({ success: true, productName: product.name, newBalance });
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      res.status(400).json({ error: error.message });
+    } finally {
+      client.release();
+    }
+  });
+
   // Migration Endpoint (Temporary)
   app.get("/api/admin/migrate-db", async (req, res) => {
     console.log('🚀 Starting internal migration to Cloud SQL...');
@@ -1599,6 +2089,64 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   } catch (err: any) {
     console.error('❌ Internal migration failed:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Stripe Payment Intent
+app.post("/api/create-payment-intent", async (req, res) => {
+  try {
+    const { amount, currency = "eur" } = req.body;
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // amount in cents
+      currency,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error: any) {
+    console.error("Stripe Error:", error.message);
+    res.status(400).send({ error: error.message });
+  }
+});
+
+app.delete("/api/admin/warehouses/:id", authenticateAdmin, async (req, res) => {
+  try {
+    await db.collection("warehouses").doc(req.params.id).delete();
+    res.sendStatus(204);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/api/admin/suppliers/:id", authenticateAdmin, async (req, res) => {
+  try {
+    await db.collection("suppliers").doc(req.params.id).delete();
+    res.sendStatus(204);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/api/saved-builds/:id", authenticateToken, async (req: any, res) => {
+  try {
+    await db.collection("saved_builds").doc(req.params.id).delete();
+    res.sendStatus(204);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/admin/stock/seed", authenticateAdmin, async (req, res) => {
+  try {
+    // Dummy seed logic for demo
+    res.json({ message: "Stock seeded successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 });
 

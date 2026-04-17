@@ -3,9 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, UserPlus, AlertCircle } from 'lucide-react';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 import { getAuthErrorMessage } from '../utils/authErrors';
 import { SocialLogin } from '../components/auth/SocialLogin';
 import { PasswordStrength } from '../components/auth/PasswordStrength';
@@ -47,13 +46,20 @@ export const RegisterPage: React.FC = () => {
       await updateProfile(user, { displayName: username });
       await sendEmailVerification(user);
 
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        username,
-        email,
-        role: 'user',
-        createdAt: new Date().toISOString()
+      // Sync user to SQL instead of Firestore
+      const token = await user.getIdToken();
+      await fetch(`/api/users/${user.uid}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          username,
+          email,
+          role: 'user'
+        })
       });
 
       navigate('/');

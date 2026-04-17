@@ -9,9 +9,21 @@
         "name": { "type": "string" }
       },
       "required": ["id", "name"]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global website configuration",
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string" },
+        "heroImageUrl": { "type": "string" },
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" }
+      }
     }
   },
   "firestore": {
-    "/products": { "schema": "Product", "description": "List of airsoft products" }
+    "/products": { "schema": "Product", "description": "List of airsoft products" },
+    "/site_configs": { "schema": "SiteSettings", "description": "Global site settings documents" }
   }
 }

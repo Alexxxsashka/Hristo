@@ -84,7 +84,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   const handleSeedStock = async () => {
     setIsSeeding(true);
     try {
-      await firebaseService.seedStockData(products);
+      await firebaseService.seedStockData();
       onNotify('Stock data seeded successfully for all products');
       loadERPData();
     } catch (err) {

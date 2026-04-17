@@ -29,8 +29,6 @@ import {
   RefreshCw,
   Lock
 } from 'lucide-react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useConfiguratorStore, SavedBuild } from '../store/configuratorStore';
@@ -91,12 +89,18 @@ export const UserDashboard: React.FC = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const [userProfile, userBuilds] = await Promise.all([
+      const [userProfile, userBuilds, userOrders, userLoadouts, userServices] = await Promise.all([
         firebaseService.getUserProfile(user.id),
-        firebaseService.getUserBuilds(user.id)
+        firebaseService.getUserBuilds(user.id),
+        firebaseService.getUserOrders(user.id),
+        firebaseService.getUserLoadouts(user.id),
+        firebaseService.getUserServiceRequests(user.id)
       ]);
 
       setProfile(userProfile as UserProfile);
+      setOrders(userOrders as Order[]);
+      setLoadouts(userLoadouts as Loadout[]);
+      setServiceRequests(userServices as ServiceRequest[]);
       useConfiguratorStore.setState({ savedBuilds: (userBuilds || []) as SavedBuild[] });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -112,43 +116,6 @@ export const UserDashboard: React.FC = () => {
     }
 
     fetchData();
-
-    // Set up real-time listeners
-    const ordersQ = query(
-      collection(db, "orders"), 
-      where("userId", "==", user.id), 
-      orderBy("createdAt", "desc")
-    );
-
-    const loadoutsQ = query(
-      collection(db, "loadouts"), 
-      where("userId", "==", user.id), 
-      orderBy("createdAt", "desc")
-    );
-
-    const servicesQ = query(
-      collection(db, "service_requests"), 
-      where("userId", "==", user.id), 
-      orderBy("date", "desc")
-    );
-
-    const unsubOrders = onSnapshot(ordersQ, (snapshot) => {
-      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[]);
-    });
-
-    const unsubLoadouts = onSnapshot(loadoutsQ, (snapshot) => {
-      setLoadouts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Loadout[]);
-    });
-
-    const unsubServices = onSnapshot(servicesQ, (snapshot) => {
-      setServiceRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ServiceRequest[]);
-    });
-
-    return () => {
-      unsubOrders();
-      unsubLoadouts();
-      unsubServices();
-    };
   }, [user, navigate]);
 
   const handleLogout = async () => {
@@ -472,7 +439,7 @@ const OrderHistory: React.FC<{
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         setCancellingId(orderId);
         try {
-          await firebaseService.cancelOrder(orderId, user.id);
+          await firebaseService.cancelOrder(orderId);
         } catch (error) {
           console.error('Error cancelling order:', error);
         } finally {

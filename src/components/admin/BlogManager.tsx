@@ -18,33 +18,58 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      let imageUrl = editingPost?.image || '';
-      if (imageFile) {
-        const extension = imageFile.name.split('.').pop();
-        const safeName = `blog_${Date.now()}.${extension}`;
-        imageUrl = await firebaseService.uploadFile(imageFile, `blog/images/${safeName}`);
-      }
+    
+    if (isSubmitting) return;
 
-      const postToSave = {
-        ...editingPost,
-        image: imageUrl,
-        date: editingPost?.date || new Date().toISOString()
-      };
-
-      await firebaseService.saveBlogPost(postToSave as any);
-      setIsEditing(false);
-      setEditingPost(null);
-      setImageFile(null);
-      onUpdate();
-      onNotify('Post saved successfully');
-    } catch (err) {
-      console.error('Failed to save blog post', err);
-      onNotify('Failed to save blog post', 'error');
-    } finally {
-      setIsSubmitting(false);
+    if (!editingPost?.title || !editingPost?.content) {
+      onNotify('Title and content are required', 'error');
+      return;
     }
+
+    const action = async () => {
+      // Final check to prevent race conditions or double-clicks on the confirm button
+      if (isSubmitting) return;
+      
+      setIsSubmitting(true);
+      try {
+        // Simple client-side check for duplicate slugs (for new posts only)
+        if (!editingPost.id && posts.some(p => p.slug === editingPost.slug)) {
+          throw new Error('A post with this slug already exists. Please choose a different title or slug.');
+        }
+
+        let imageUrl = editingPost?.image || '';
+        if (imageFile) {
+          const extension = imageFile.name.split('.').pop();
+          const safeName = `blog_${Date.now()}.${extension}`;
+          imageUrl = await firebaseService.uploadFile(imageFile, `blog/images/${safeName}`);
+        }
+
+        const postToSave = {
+          ...editingPost,
+          image: imageUrl,
+          date: editingPost?.date || new Date().toISOString()
+        };
+
+        await firebaseService.saveBlogPost(postToSave as any);
+        setIsEditing(false);
+        setEditingPost(null);
+        setImageFile(null);
+        onUpdate();
+        onNotify('Post saved successfully');
+      } catch (err: any) {
+        console.error('Failed to save blog post', err);
+        onNotify(err.message || 'Failed to save blog post', 'error');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    onConfirm(
+      editingPost.id 
+        ? 'Save changes to this post?' 
+        : 'Are you sure you want to publish this new post?', 
+      action
+    );
   };
 
   const handleDelete = async (id: string) => {

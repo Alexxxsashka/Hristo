@@ -11,26 +11,32 @@ import { useAuthStore } from '../store/authStore';
 import { User as UserIcon } from 'lucide-react';
 
 import { SEO } from '../components/SEO';
+import { SiteSettings } from '../types';
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const { t } = useTranslation();
   const { user } = useAuthStore();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await firebaseService.getProducts();
-        setProducts(data || []);
+        const [productsData, settingsData] = await Promise.all([
+          firebaseService.getProducts(),
+          firebaseService.getSiteSettings()
+        ]);
+        setProducts(productsData || []);
+        setSettings(settingsData);
       } catch (err) {
-        console.error('Failed to fetch products', err);
+        console.error('Failed to fetch data', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const featuredProducts = products.slice(0, 4);
@@ -42,6 +48,16 @@ const HomePage: React.FC = () => {
         title="Home"
         description="Welcome to Hristo Airsoft Store. The best place for airsoft weapons, tactical gear, and custom 3D weapon configurations."
       />
+
+      {settings?.showAnnouncement && settings?.announcement && (
+        <div className="fixed top-0 left-0 w-full z-[60] bg-red-600 py-2.5 px-4 text-center">
+          <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3">
+            <Zap size={14} className="fill-white animate-pulse" />
+            {settings.announcement}
+            <Zap size={14} className="fill-white animate-pulse" />
+          </p>
+        </div>
+      )}
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center px-4 sm:px-8 overflow-hidden pt-20 lg:pt-0">
@@ -70,12 +86,21 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.85] mb-8">
-              {t('build_your')} <br />
-              <span className="text-red-600">{t('ultimate')}</span> <br />
-              {t('arsenal')}
+              {settings?.heroTitle ? (
+                <>
+                  {settings.heroTitle.split(' ').slice(0, -1).join(' ')} <br />
+                  <span className="text-red-600">{settings.heroTitle.split(' ').slice(-1)}</span>
+                </>
+              ) : (
+                <>
+                  {t('build_your')} <br />
+                  <span className="text-red-600">{t('ultimate')}</span> <br />
+                  {t('arsenal')}
+                </>
+              )}
             </h1>
             <p className="text-zinc-400 text-sm sm:text-base md:text-xl leading-relaxed mb-10 max-w-xl font-medium mx-auto lg:mx-0">
-              {t('hero_desc')}
+              {settings?.heroSubtitle || t('hero_desc')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
@@ -115,7 +140,7 @@ const HomePage: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-tr from-red-600/20 to-transparent rounded-full blur-[120px] opacity-50 group-hover:opacity-80 transition-opacity" />
             <div className="w-full h-full relative z-10">
               <img 
-                src="https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=1200&auto=format&fit=crop" 
+                src={settings?.heroImageUrl || "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=1200&auto=format&fit=crop"} 
                 className="w-full h-full object-contain filter drop-shadow-[0_0_50px_rgba(220,38,38,0.2)]"
                 alt="3D Weapon Preview"
                 referrerPolicy="no-referrer"
@@ -313,7 +338,7 @@ const HomePage: React.FC = () => {
           {[
             { id: 'weapons', name: 'Weapons', img: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop' },
             { id: 'attachments', name: 'Optics & Attach', img: 'https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop' },
-            { id: 'gear', name: 'Tactical Gear', img: 'https://images.unsplash.com/photo-1508103861931-709129549fa0?q=80&w=800&auto=format&fit=crop' },
+            { id: 'gear', name: 'Tactical Gear', img: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop' },
             { id: 'internal_parts', name: 'Internal Parts', img: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop' },
           ].map((cat) => {
             const count = products.filter(p => p.category === cat.id).length;
@@ -407,7 +432,7 @@ const HomePage: React.FC = () => {
         <div className="relative rounded-[32px] md:rounded-[40px] overflow-hidden bg-red-600 p-8 sm:p-12 md:p-24">
           <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
             <img 
-              src="https://images.unsplash.com/photo-1508103861931-709129549fa0?q=80&w=800&auto=format&fit=crop" 
+              src="https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop" 
               className="w-full h-full object-cover opacity-50 mix-blend-overlay"
               referrerPolicy="no-referrer"
             />

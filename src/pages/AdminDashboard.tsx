@@ -41,21 +41,10 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  where,
-  limit,
-  getDocs,
-  doc,
-  updateDoc
-} from 'firebase/firestore';
-import { db } from '../firebase';
 import { useAuthStore } from '../store/authStore';
 import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
 import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
@@ -80,8 +69,10 @@ import {
 
 
 
+import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
+
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'database' | 'media' | 'erp' | 'orders'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'database' | 'media' | 'erp' | 'orders' | 'settings'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -306,6 +297,14 @@ export const AdminDashboard: React.FC = () => {
             showHelp={showHelp}
             active={activeTab === 'database'} 
             onClick={() => { setActiveTab('database'); setSearchQuery(''); }} 
+          />
+          <SidebarItem 
+            icon={<Globe size={20} />} 
+            label="Website" 
+            description="Site branding & configuration"
+            showHelp={showHelp}
+            active={activeTab === 'settings'} 
+            onClick={() => { setActiveTab('settings'); setSearchQuery(''); }} 
           />
           <SidebarItem 
             icon={<Upload size={20} />} 
@@ -603,6 +602,10 @@ export const AdminDashboard: React.FC = () => {
 
             {activeTab === 'media' && (
               <MediaManager onNotify={showNotification} onConfirm={confirmAction} />
+            )}
+
+            {activeTab === 'settings' && (
+              <SiteSettingsManager onNotify={showNotification} />
             )}
           </AnimatePresence>
         </div>
@@ -2733,17 +2736,25 @@ const OrderManager = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setOrders(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Order)));
-      setLoading(false);
-    });
-    return unsubscribe;
+    loadOrders();
   }, []);
+
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const data = await firebaseService.getAllOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error('Failed to load orders', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleStatusChange = async (orderId: string, status: Order['status'], reason?: string) => {
     try {
-      await firebaseService.updateOrderStatus(orderId, status, undefined, 'Admin', reason);
+      await firebaseService.updateOrderStatus(orderId, status, undefined);
+      loadOrders(); // Refresh after update
     } catch (error) {
       console.error(error);
     }

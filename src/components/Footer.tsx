@@ -14,24 +14,24 @@ import {
 import { useTranslation } from '../hooks/useTranslation';
 import { firebaseService } from '../services/firebaseService';
 import { useAuthStore } from '../store/authStore';
+import { SiteSettings } from '../types';
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
-  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [paymentLogos, setPaymentLogos] = useState<{ [key: string]: string }>({});
   const { user } = useAuthStore();
 
   useEffect(() => {
-    const fetchAssets = async () => {
+    const fetchSettings = async () => {
       try {
-        const logo = await firebaseService.getFileURL('site/2d/изображение_2026-03-19_095239239.png');
-        setLogoUrl(logo);
+        const data = await firebaseService.getSiteSettings();
+        setSettings(data);
       } catch (err) {
         console.error('Failed to fetch assets:', err);
-        setLogoUrl('FALLBACK');
       }
     };
-    fetchAssets();
+    fetchSettings();
   }, []);
 
   return (
@@ -41,14 +41,14 @@ export const Footer: React.FC = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-8">
             <Link to="/" className="flex items-center gap-2">
-              {logoUrl && logoUrl !== 'FALLBACK' ? (
+              {settings?.logoUrl ? (
                 <img 
-                  src={logoUrl} 
+                  src={settings.logoUrl} 
                   alt="HRISTO Airsoft" 
                   className="h-12 w-auto object-contain"
                   referrerPolicy="no-referrer"
                 />
-              ) : logoUrl === 'FALLBACK' ? (
+              ) : settings ? (
                 <span className="text-2xl font-black text-white tracking-tighter">HRISTO<span className="text-red-600">.</span></span>
               ) : (
                 <div className="h-12 w-32 bg-zinc-900 animate-pulse rounded-lg" />
@@ -58,13 +58,13 @@ export const Footer: React.FC = () => {
               Professional airsoft equipment and advanced 3D weapon customization. We provide the highest quality gear for enthusiasts and professionals alike.
             </p>
             <div className="flex items-center gap-4">
-              <a href="https://www.facebook.com/HristoAirsoftTrgovina/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
+              <a href={settings?.facebookUrl || "https://www.facebook.com/HristoAirsoftTrgovina/"} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
                 <Facebook size={20} />
               </a>
-              <a href="https://www.instagram.com/hristotrgovina/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
+              <a href={settings?.instagramUrl || "https://www.instagram.com/hristotrgovina/"} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
                 <Instagram size={20} />
               </a>
-              <a href="https://www.youtube.com/channel/UC8AcfE1diaC1gk1XniOa3Lw" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
+              <a href={settings?.youtubeUrl || "https://www.youtube.com/channel/UC8AcfE1diaC1gk1XniOa3Lw"} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
                 <Youtube size={20} />
               </a>
             </div>
@@ -105,17 +105,16 @@ export const Footer: React.FC = () => {
               <div className="flex items-start gap-4">
                 <MapPin size={18} className="text-red-600 shrink-0" />
                 <p className="text-zinc-500 text-xs font-bold leading-relaxed uppercase tracking-widest">
-                  Ulica grada Chicaga 31<br />
-                  10 000 Zagreb, Croatia
+                  {settings?.address || 'Ulica grada Chicaga 31\n10 000 Zagreb, Croatia'}
                 </p>
               </div>
               <div className="flex items-center gap-4">
                 <Phone size={18} className="text-red-600 shrink-0" />
-                <p className="text-zinc-500 text-xs font-black tracking-widest uppercase">+385 1 613 1713</p>
+                <p className="text-zinc-500 text-xs font-black tracking-widest uppercase">{settings?.contactPhone || '+385 1 613 1713'}</p>
               </div>
               <div className="flex items-center gap-4">
                 <Mail size={18} className="text-red-600 shrink-0" />
-                <p className="text-red-500 text-xs font-black tracking-widest uppercase">order@hristo.hr</p>
+                <p className="text-red-500 text-xs font-black tracking-widest uppercase">{settings?.contactEmail || 'order@hristo.hr'}</p>
               </div>
             </div>
           </div>
@@ -124,7 +123,7 @@ export const Footer: React.FC = () => {
         {/* Payment & Trust */}
         <div className="border-t border-zinc-900 py-12 flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="flex flex-wrap justify-center gap-8 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-700 items-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" alt="Visa" className="h-4" referrerPolicy="no-referrer" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-2.5" referrerPolicy="no-referrer" />
             <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-8" referrerPolicy="no-referrer" />
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-5" referrerPolicy="no-referrer" />
           </div>

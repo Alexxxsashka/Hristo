@@ -8,8 +8,5 @@
       "database": "main-db",
       "rules": "firestore.rules"
     }
-  ],
-  "dataconnect": {
-    "source": "dataconnect"
-  }
+  ]
 }
