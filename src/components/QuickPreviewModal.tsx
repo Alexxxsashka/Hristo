@@ -115,7 +115,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                     </span>
                   </div>
                   <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 leading-none">
-                    {language === 'hr' && product.nameHr ? product.nameHr : product.name}
+                    {language === 'HR' && product.nameHr ? product.nameHr : product.name}
                   </h2>
                 </div>
                 <button 
@@ -161,7 +161,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               <div className="space-y-4 mb-10">
                 {product.description && (
                   <p className="text-zinc-500 text-lg leading-relaxed">
-                    {language === 'hr' && product.descriptionHr ? product.descriptionHr : product.description}
+                    {language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
                   </p>
                 )}
                 

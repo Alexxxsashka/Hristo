@@ -51,7 +51,7 @@ export const ProductPage: React.FC = () => {
   const { user } = useAuthStore();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { addItem } = useCartStore();
   const { toggleCompare, isInCompare } = useCompareStore();
   const { toggleItem: toggleWishlist, isInWishlist } = useWishlistStore();
@@ -138,8 +138,8 @@ export const ProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 flex flex-col pt-32">
       <SEO 
-        title={language === 'hr' && product.nameHr ? product.nameHr : product.name}
-        description={language === 'hr' && product.descriptionHr ? product.descriptionHr : product.description}
+        title={language === 'HR' && product.nameHr ? product.nameHr : product.name}
+        description={language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
         keywords={`${product.name}, ${product.brand}, ${product.category}, airsoft`}
         ogType="product"
         structuredData={structuredData}
@@ -248,7 +248,7 @@ export const ProductPage: React.FC = () => {
                     {!product.longDescription && <span className="text-[8px] text-zinc-500 tracking-normal">(Admin: No description added yet)</span>}
                   </h3>
                   <div className="prose prose-invert prose-sm md:prose-base max-w-none text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap">
-                    {language === 'hr' && product.longDescriptionHr ? product.longDescriptionHr : (product.longDescription || (user?.role === 'admin' ? 'This product has no description yet. Go to the admin panel to add a detailed history or description.' : ''))}
+                    {language === 'HR' && product.longDescriptionHr ? product.longDescriptionHr : (product.longDescription || (user?.role === 'admin' ? 'This product has no description yet. Go to the admin panel to add a detailed history or description.' : ''))}
                   </div>
                 </div>
                 
@@ -272,7 +272,7 @@ export const ProductPage: React.FC = () => {
                 </span>
               </div>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tighter mb-6 leading-[0.9] text-white">
-                {language === 'hr' && product.nameHr ? product.nameHr : product.name}
+                {language === 'HR' && product.nameHr ? product.nameHr : product.name}
               </h1>
               <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
                 <div className="flex flex-col">
@@ -302,7 +302,7 @@ export const ProductPage: React.FC = () => {
             <div className="space-y-6 md:space-y-8 mb-8 md:mb-12">
               {product.description && (
                 <p className="text-zinc-400 text-sm sm:text-base md:text-lg leading-relaxed font-medium">
-                  {language === 'hr' && product.descriptionHr ? product.descriptionHr : product.description}
+                  {language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
                 </p>
               )}
               

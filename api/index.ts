@@ -2,7 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { put, del, handleUpload } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
+import { handleUpload } from "@vercel/blob/client";
 
 const { Pool } = pg;
 
@@ -166,7 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const jsonResponse = await handleUpload({
           body: req.body,
           request: req as any,
-          onBeforeGenerateToken: async (pathname, clientPayload) => {
+          onBeforeGenerateToken: async () => {
             const user = getUser(req);
             if (!user || user.role !== "admin") throw new Error("Forbidden");
 
@@ -178,7 +179,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               tokenPayload: JSON.stringify({ userId: user.id }),
             };
           },
-          onUploadCompleted: async ({ blob, tokenPayload }) => {
+          onUploadCompleted: async () => {
             // Optional metadata logic
           },
         });
