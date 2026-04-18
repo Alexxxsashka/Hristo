@@ -96,19 +96,30 @@ let db: any = null;
 const keyPath = path.join(__dirname, "key.json");
 if (firebaseConfig.projectId) {
   try {
-    // Use key.json locally, fall back to default credentials on Cloud Run
-    const credential = fs.existsSync(keyPath)
-      ? admin.credential.cert(JSON.parse(fs.readFileSync(keyPath, "utf-8")))
-      : admin.credential.applicationDefault();
-    const adminApp = admin.initializeApp({
-      credential,
+    let credential;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      credential = admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT));
+    } else if (fs.existsSync(keyPath)) {
+      credential = admin.credential.cert(JSON.parse(fs.readFileSync(keyPath, "utf-8")));
+    } else {
+      try {
+        credential = admin.credential.applicationDefault();
+      } catch (e) {
+        // applicationDefault throws if no environment variables are set
+        credential = null;
+      }
+    }
+
+    const initOptions: any = {
+      projectId: firebaseConfig.projectId,
       storageBucket: firebaseConfig.storageBucket || `${firebaseConfig.projectId}.firebasestorage.app`
-    });
+    };
+    if (credential) initOptions.credential = credential;
+
+    const adminApp = admin.initializeApp(initOptions);
     db = getFirestore(adminApp, firebaseConfig.firestoreDatabaseId || '(default)');
-    // eslint-disable-next-line no-console
-    console.log("Firebase Admin initialized", fs.existsSync(keyPath) ? "(key.json)" : "(default credentials)");
+    console.log("Firebase Admin initialized successfully.");
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Firebase Admin initialization failed:", error);
   }
 }
