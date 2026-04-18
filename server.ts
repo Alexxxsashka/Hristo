@@ -155,9 +155,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-async function startServer() {
-  const app = express();
-  const PORT = parseInt(process.env.PORT || "3000");
+export const app = express();
+const PORT = parseInt(process.env.PORT || "3000");
 
   // Helper to upload to Vercel Blob
   const uploadToFirebase = async (file: Express.Multer.File, folder: string) => {
@@ -181,13 +180,15 @@ async function startServer() {
   app.use(express.json());
   app.use("/models", express.static(modelsDir));
 
-  // Start listening immediately to avoid timeout
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-    
-    // Perform initialization in the background
-    initializeDatabase();
-  });
+  // Start listening only if not running on Vercel serverless
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+      
+      // Perform initialization in the background
+      initializeDatabase();
+    });
+  }
 
   async function initializeDatabase() {
     // 1. First test the standard connection
@@ -2177,12 +2178,13 @@ app.post("/api/admin/stock/seed", authenticateAdmin, async (req, res) => {
     });
     app.use(vite.middlewares);
   } else {
-    // Serve static files in production
-    app.use(express.static(path.join(__dirname, "build")));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "build", "index.html"));
-    });
+    // Serve static files in production if not Vercel
+    if (!process.env.VERCEL) {
+      app.use(express.static(path.join(__dirname, "build")));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "build", "index.html"));
+      });
+    }
   }
-}
 
-startServer();
+export default app;
