@@ -17,7 +17,7 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
   ];
 
   const initializeFolders = async () => {
-    onConfirm('Create placeholder files in Google Cloud Storage? This will make the "site/" and "blog/" folders visible in your bucket console.', async () => {
+    onConfirm('Create placeholder files in Vercel Blob Storage? This will make the "site/" and "blog/" folders visible in your storage browser.', async () => {
       setUploading(true);
       setProgress(0);
       
@@ -32,7 +32,7 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
           setProgress(((i + 1) / folders.length) * 100);
         }
         
-        onNotify('Bucket structure initialized! You can now see the "site/" folder in your Firebase console.');
+        onNotify('Blob structure initialized! You can now see the "site/" folder in your Vercel Blob storage.');
       } catch (err) {
         console.error('Initialization failed', err);
         onNotify('Initialization failed: ' + (err instanceof Error ? err.message : String(err)), 'error');
@@ -56,7 +56,7 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
           </div>
           <h3 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 mb-6">Cloud Storage Structure</h3>
           <p className="text-zinc-500 font-medium mb-12 leading-relaxed text-lg">
-            To see the <span className="text-red-600 font-bold">site/</span> folder in your Google Cloud Storage console (as shown in your screenshot), you must initialize the folder structure. Storage buckets only display "folders" if they contain at least one file. 
+            To see the <span className="text-red-600 font-bold">site/</span> folder in your Vercel Blob storage, initialize the folder structure first. Storage buckets only display "folders" when they contain at least one file.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12 text-left">
@@ -95,7 +95,7 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
             ) : (
               <div className="space-y-6">
                 <p className="text-xs text-zinc-400 font-medium max-w-md mx-auto">
-                  Click below to create <code className="text-red-500 font-bold">.keep</code> placeholder files in all directories. This will make them visible in your Firebase console.
+                  Click below to create <code className="text-red-500 font-bold">.keep</code> placeholder files in all directories. This makes them visible in your Vercel Blob storage.
                 </p>
                 <button
                   onClick={initializeFolders}
@@ -113,9 +113,9 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
       <div className="bg-zinc-900 rounded-[48px] p-12 overflow-hidden relative">
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <h4 className="text-white text-2xl font-black uppercase tracking-tighter mb-4">Why Google Storage?</h4>
+            <h4 className="text-white text-2xl font-black uppercase tracking-tighter mb-4">Why Vercel Blob?</h4>
             <p className="text-zinc-500 font-medium leading-relaxed">
-              Your previous local storage was temporary and would be lost on every application update. By using Google Cloud Storage, all website assets (Logos, Hero Images, Banners) are persisted securely and delivered via high-speed CDN.
+              Local disk storage is temporary and can be lost on redeploy. With Vercel Blob, all website assets (logos, hero images, and banners) are persisted and delivered through Vercel infrastructure.
             </p>
           </div>
           <div className="flex justify-center">

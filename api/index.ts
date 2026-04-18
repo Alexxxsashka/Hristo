@@ -12,6 +12,7 @@ const connectionString =
   process.env.POSTGRES_URL ||
   process.env.hrdatabase_DATABASE_URL ||
   process.env.hrdatabase_POSTGRES_URL;
+const hasDatabaseConfig = Boolean(connectionString);
 
 const pool = new Pool({
   connectionString,
@@ -78,6 +79,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const method = req.method || "GET";
 
   try {
+    if (!hasDatabaseConfig) {
+      return res.status(500).json({
+        error: "Database is not configured. Set DATABASE_URL (Neon) in Vercel project environment variables.",
+      });
+    }
+
     // ── DB Test ───────────────────────────────────────────────────────────────
     if (path === "/db-test" || path === "/diag/db-test") {
       const r = await pool.query("SELECT NOW()");

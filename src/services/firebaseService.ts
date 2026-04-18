@@ -1,9 +1,3 @@
-import { 
-  getAuth,
-} from "firebase/auth";
-import { ref, uploadBytes, getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
-import { storage, auth } from "../firebase";
-
 import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings } from "../types";
 
 const VERCEL_FUNCTION_BODY_LIMIT_BYTES = 4 * 1024 * 1024;
@@ -104,17 +98,6 @@ export const firebaseService = {
 
   async deleteFile(urlOrPath: string): Promise<void> {
     if (!urlOrPath) return;
-    
-    // Support Firebase Storage deletion
-    if (urlOrPath.includes('firebasestorage.googleapis.com')) {
-      try {
-        const fileRef = ref(storage, urlOrPath);
-        await deleteObject(fileRef);
-      } catch (error: any) {
-        if (error.code !== 'storage/object-not-found') console.error(`Error deleting Firebase file: ${urlOrPath}`, error);
-      }
-      return;
-    }
 
     // Support Vercel Blob deletion
     if (urlOrPath.includes('blob.vercel-storage.com')) {
@@ -133,13 +116,9 @@ export const firebaseService = {
 
   async getFileURL(path: string): Promise<string> {
     if (this._urlCache[path]) return this._urlCache[path];
-    try {
-      const url = await getDownloadURL(ref(storage, path));
-      this._urlCache[path] = url;
-      return url;
-    } catch {
-      return `/${path}`;
-    }
+    const resolvedPath = `/${path}`;
+    this._urlCache[path] = resolvedPath;
+    return resolvedPath;
   },
 
   // Auth Helpers
