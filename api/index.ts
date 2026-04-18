@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { put, del } from "@vercel/blob";
 
 const { Pool } = pg;
 
@@ -90,6 +91,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(204).end();
     }
 
+    // ── POST /admin/upload ─────────────────────────────────────────────────────
+    if (path === "/admin/upload" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+
+      const filename = req.query.filename as string || `upload_${Date.now()}`;
+      const contentType = req.headers['content-type'] || 'application/octet-stream';
+      
+      // Create a promise to read the raw body if it's not already a buffer
+      let body: any = req.body;
+      if (!Buffer.isBuffer(body) && typeof body !== 'string') {
+        // Vercel might have already parsed it or it's a stream
+        // If it's a stream, we can pass it directly to put
+        body = req; 
+      }
+
+      const blob = await put(filename, body, { 
+        access: 'public',
+        contentType,
+        token: process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN
+      });
+
+      return res.json(blob);
+    }
+
+    // ── DELETE /admin/upload ───────────────────────────────────────────────────
+    if (path === "/admin/upload" && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+
+      const url = req.query.url as string;
+      if (!url) return res.status(400).json({ error: "URL is required" });
+
+      await del(url, {
+        token: process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN
+      });
+
+      return res.status(204).end();
+    }
+
     // ── GET /products ──────────────────────────────────────────────────────────
     if (path === "/products" && method === "GET") {
       const { category, search, minPrice, maxPrice, limit = "100", offset = "0" } = req.query as any;
@@ -136,6 +177,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         image: p.image_url,
         category: p.parent_cat_id || p.category_id,
         subcategory: p.parent_cat_id ? p.category_id : null,
+        nameHr: p.name_hr,
+        descriptionHr: p.description_hr,
+        longDescriptionHr: p.long_description_hr,
         model3D: p.model_3d_url,
         has3D: p.has_3d
       })));
@@ -158,6 +202,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         image: p.image_url,
         category: p.parent_cat_id || p.category_id,
         subcategory: p.parent_cat_id ? p.category_id : null,
+        nameHr: p.name_hr,
+        descriptionHr: p.description_hr,
+        longDescriptionHr: p.long_description_hr,
         model3D: p.model_3d_url,
         has3D: p.has_3d
       });

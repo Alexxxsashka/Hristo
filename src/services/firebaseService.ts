@@ -22,34 +22,56 @@ export const firebaseService = {
   _categoriesCache: null as Category[] | null,
 
   async uploadFile(file: File, path: string, onProgress?: (progress: number) => void): Promise<string> {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("You must be logged in to upload files.");
-
     try {
-      const storageRef = ref(storage, path);
-      return new Promise((resolve, reject) => {
-        const uploadTask = uploadBytesResumable(storageRef, file);
-        uploadTask.on('state_changed', 
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            if (onProgress) onProgress(progress);
-          }, 
-          (error) => reject(new Error(`Upload failed: ${error.message}`)), 
-          async () => resolve(await getDownloadURL(uploadTask.snapshot.ref))
-        );
+      const token = this.getToken();
+      const res = await fetch(`/api/admin/upload?filename=${encodeURIComponent(path)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': file.type
+        },
+        body: file
       });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errorData.error || `Upload failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      return data.url;
     } catch (error: any) {
-      throw new Error(`Failed to initialize upload: ${error.message}`);
+      console.error('Blob upload error:', error);
+      throw new Error(`Failed to upload to Vercel Blob: ${error.message}`);
     }
   },
 
   async deleteFile(urlOrPath: string): Promise<void> {
-    if (!urlOrPath || !urlOrPath.includes('firebasestorage.googleapis.com')) return;
-    try {
-      const fileRef = ref(storage, urlOrPath);
-      await deleteObject(fileRef);
-    } catch (error: any) {
-      if (error.code !== 'storage/object-not-found') console.error(`Error deleting file: ${urlOrPath}`, error);
+    if (!urlOrPath) return;
+    
+    // Support Firebase Storage deletion
+    if (urlOrPath.includes('firebasestorage.googleapis.com')) {
+      try {
+        const fileRef = ref(storage, urlOrPath);
+        await deleteObject(fileRef);
+      } catch (error: any) {
+        if (error.code !== 'storage/object-not-found') console.error(`Error deleting Firebase file: ${urlOrPath}`, error);
+      }
+      return;
+    }
+
+    // Support Vercel Blob deletion
+    if (urlOrPath.includes('blob.vercel-storage.com')) {
+      try {
+        const token = this.getToken();
+        await fetch(`/api/admin/upload?url=${encodeURIComponent(urlOrPath)}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.error('Error deleting Vercel Blob:', error);
+      }
+      return;
     }
   },
 
