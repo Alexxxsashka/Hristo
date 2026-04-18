@@ -64,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── GET /categories ────────────────────────────────────────────────────────
     if (path === "/categories" && method === "GET") {
       const r = await pool.query(
-        "SELECT id, name, slug, image_url, parent_id, filters FROM categories ORDER BY name"
+        "SELECT id, name, name_hr as \"nameHr\", slug, image_url as image, parent_id as parent, filters FROM categories ORDER BY name"
       );
       return res.json(r.rows);
     }
@@ -106,7 +106,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       q += ` ORDER BY p.name LIMIT $${i} OFFSET $${i + 1}`;
       params.push(Number(limit), Number(offset));
       const r = await pool.query(q, params);
-      return res.json(r.rows);
+      return res.json(r.rows.map((p: any) => ({
+        ...p,
+        image: p.image_url,
+        category: p.category_id,
+        model3D: p.model_3d_url,
+        has3D: p.has_3d
+      })));
     }
 
     // ── GET /products/:id ──────────────────────────────────────────────────────
@@ -117,7 +123,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         [prodId[0]]
       );
       if (!r.rows.length) return res.status(404).json({ error: "Not found" });
-      return res.json(r.rows[0]);
+      const p = r.rows[0];
+      return res.json({
+        ...p,
+        image: p.image_url,
+        category: p.category_id,
+        model3D: p.model_3d_url,
+        has3D: p.has_3d
+      });
     }
 
     // ── POST /admin/products ───────────────────────────────────────────────────
