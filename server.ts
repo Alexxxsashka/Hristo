@@ -24,9 +24,15 @@ let dbStrategy: 'sql' | 'pglite' = 'sql';
 let pgliteInstance: PGlite | null = null;
 
 const createPool = () => {
-  if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
+  const connectionString = 
+    process.env.DATABASE_URL || 
+    process.env.POSTGRES_URL || 
+    process.env.hrdatabase_DATABASE_URL || 
+    process.env.hrdatabase_POSTGRES_URL;
+
+  if (connectionString) {
     return new pg.Pool({
-      connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
+      connectionString,
       connectionTimeoutMillis: 5000,
       ssl: { rejectUnauthorized: false },
     });
