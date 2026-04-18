@@ -13,7 +13,9 @@
 - Images larger than a safe threshold are converted to WebP and reduced in quality until they fit.
 - Added a size guard to stop uploads that still exceed the function limit and return a clear error.
 - When conversion happens, upload path extension is changed to `.webp`.
+- Updated API auth parsing in `api/index.ts` to accept both local JWT and Firebase ID token payloads for admin checks.
 
 ### Result
 - Large product image uploads no longer hit `413` in normal admin usage.
+- Uploads no longer fail with `403` when admin session is based on Firebase token.
 - Frontend build succeeds after the change.

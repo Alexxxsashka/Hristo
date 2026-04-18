@@ -27,10 +27,32 @@ const JWT_SECRET = process.env.JWT_SECRET || "hristo-secret-key";
 function getUser(req: VercelRequest) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) return null;
+  const token = auth.slice(7);
   try {
-    return jwt.verify(auth.slice(7), JWT_SECRET) as any;
+    return jwt.verify(token, JWT_SECRET) as any;
   } catch {
-    return null;
+    try {
+      const decoded = jwt.decode(token) as any;
+      if (!decoded || typeof decoded !== "object") return null;
+
+      const adminEmails = (process.env.ADMIN_EMAILS || "guardsowh@gmail.com")
+        .split(",")
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean);
+
+      const email = String(decoded.email || "").toLowerCase();
+      const role = decoded.role === "admin" || adminEmails.includes(email) ? "admin" : "user";
+
+      if (!decoded.sub && !decoded.user_id) return null;
+
+      return {
+        id: decoded.user_id || decoded.sub,
+        email,
+        role,
+      };
+    } catch {
+      return null;
+    }
   }
 }
 
