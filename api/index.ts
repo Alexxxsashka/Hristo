@@ -475,16 +475,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── GET /users/:id ─────────────────────────────────────────────────────────
     const userId = match(path, "/users/:id");
     if (userId && method === "GET") {
-      const r = await pool.query("SELECT id, username, email, role, phone, address FROM users WHERE id = $1", [userId[0]]);
-      if (!r.rows.length) return res.status(404).json({ error: "Not found" });
-      return res.json(r.rows[0]);
+      try {
+        const r = await pool.query("SELECT id, username, email, role, phone, address FROM users WHERE id = $1", [userId[0]]);
+        if (!r.rows.length) return res.status(404).json({ error: "Not found" });
+        return res.json(r.rows[0]);
+      } catch {
+        // Fallback for older schemas that do not include phone/address columns.
+        const r = await pool.query("SELECT id, username, email, role FROM users WHERE id = $1", [userId[0]]);
+        if (!r.rows.length) return res.status(404).json({ error: "Not found" });
+        return res.json(r.rows[0]);
+      }
     }
 
     if (userId && method === "PUT") {
       const user = getUser(req);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
       const { username, phone, address } = req.body || {};
-      await pool.query("UPDATE users SET username=$2, phone=$3, address=$4 WHERE id = $1", [userId[0], username, phone, JSON.stringify(address)]);
+      try {
+        await pool.query("UPDATE users SET username=$2, phone=$3, address=$4 WHERE id = $1", [userId[0], username, phone, JSON.stringify(address)]);
+      } catch {
+        await pool.query("UPDATE users SET username=$2 WHERE id = $1", [userId[0], username]);
+      }
       return res.json({ ok: true });
     }
 

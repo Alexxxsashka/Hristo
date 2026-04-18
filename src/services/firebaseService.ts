@@ -432,7 +432,18 @@ export const firebaseService = {
     const res = await fetch('/api/admin/analytics', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    if (res.ok) return await res.json();
+    if (res.ok) {
+      const raw = await res.json();
+      return {
+        revenue: Number(raw?.revenue ?? raw?.totalRevenue ?? 0),
+        profit: Number(raw?.profit ?? 0),
+        conversionRate: Number(raw?.conversionRate ?? 0),
+        avgOrderValue: Number(raw?.avgOrderValue ?? 0),
+        salesVelocity: Array.isArray(raw?.salesVelocity) ? raw.salesVelocity : [],
+        topSellers: Array.isArray(raw?.topSellers) ? raw.topSellers : [],
+        lowStockAlerts: Array.isArray(raw?.lowStockAlerts) ? raw.lowStockAlerts : [],
+      };
+    }
     throw new Error('Failed to fetch analytics');
   },
 

@@ -307,7 +307,7 @@ export const ProductPage: React.FC = () => {
               )}
               
               <div className="flex flex-wrap gap-2 md:gap-3">
-                {product.tags.map(tag => (
+                {(product.tags || []).map(tag => (
                   <span key={tag} className="px-2.5 py-1 md:px-4 md:py-2 bg-zinc-900 border border-zinc-800 text-zinc-500 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:text-zinc-300 hover:border-zinc-700 transition-all cursor-default">
                     #{tag}
                   </span>
