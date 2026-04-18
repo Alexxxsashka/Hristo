@@ -15,7 +15,7 @@ import pg from "pg";
 import { PGlite } from "@electric-sql/pglite";
 import axios from 'axios';
 import Stripe from "stripe";
-
+import { put } from "@vercel/blob";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -148,18 +148,19 @@ async function startServer() {
   const app = express();
   const PORT = parseInt(process.env.PORT || "3000");
 
-  // Helper to upload to Firebase Storage
+  // Helper to upload to Vercel Blob
   const uploadToFirebase = async (file: Express.Multer.File, folder: string) => {
-    if (!bucket) return null;
-    const filename = `${folder}/${Date.now()}-${file.originalname}`;
-    const fileRef = bucket.file(filename);
-    
-    await fileRef.save(file.buffer, {
-      metadata: { contentType: file.mimetype },
-      public: true
-    });
-
-    return `https://storage.googleapis.com/${bucket.name}/${filename}`;
+    try {
+      const filename = `${folder}/${Date.now()}-${file.originalname}`;
+      const blob = await put(filename, file.buffer, {
+        access: 'public',
+        token: process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
+      });
+      return blob.url;
+    } catch (error) {
+      console.error("Vercel Blob upload error:", error);
+      return null;
+    }
   };
 
   // Multer configuration for memory storage
