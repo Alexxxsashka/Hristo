@@ -93,23 +93,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── GET /products ──────────────────────────────────────────────────────────
     if (path === "/products" && method === "GET") {
       const { category, search, minPrice, maxPrice, limit = "100", offset = "0" } = req.query as any;
-      let q = `SELECT p.*, c.name as category_name, c.slug as category_slug
-               FROM products p
-               LEFT JOIN categories c ON p.category_id = c.id
-               WHERE p.status = 'active'`;
+      
+      let where = ["p.status = 'active'"];
       const params: any[] = [];
       let i = 1;
-      if (category) { q += ` AND (c.id = $${i} OR c.slug = $${i})`; params.push(category); i++; }
-      if (search) { q += ` AND (p.name ILIKE $${i} OR p.description ILIKE $${i})`; params.push(`%${search}%`); i++; }
-      if (minPrice) { q += ` AND p.price >= $${i}`; params.push(Number(minPrice)); i++; }
-      if (maxPrice) { q += ` AND p.price <= $${i}`; params.push(Number(maxPrice)); i++; }
-      q += ` ORDER BY p.name LIMIT $${i} OFFSET $${i + 1}`;
+      
+      if (category) {
+        where.push(`(c.id = $${i} OR c.slug = $${i} OR c.parent_id = $${i})`);
+        params.push(category);
+        i++;
+      }
+      if (search) {
+        where.push(`(p.name ILIKE $${i} OR p.description ILIKE $${i})`);
+        params.push(`%${search}%`);
+        i++;
+      }
+      if (minPrice) {
+        where.push(`p.price >= $${i}`);
+        params.push(Number(minPrice));
+        i++;
+      }
+      if (maxPrice) {
+        where.push(`p.price <= $${i}`);
+        params.push(Number(maxPrice));
+        i++;
+      }
+
+      const q = `
+        SELECT p.*, c.parent_id as parent_cat_id 
+        FROM products p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        WHERE ${where.join(' AND ')}
+        ORDER BY p.name 
+        LIMIT $${i} OFFSET $${i + 1}
+      `;
       params.push(Number(limit), Number(offset));
+      
       const r = await pool.query(q, params);
+
       return res.json(r.rows.map((p: any) => ({
         ...p,
         image: p.image_url,
-        category: p.category_id,
+        category: p.parent_cat_id || p.category_id,
+        subcategory: p.parent_cat_id ? p.category_id : null,
         model3D: p.model_3d_url,
         has3D: p.has_3d
       })));
@@ -119,7 +145,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const prodId = match(path, "/products/:id");
     if (prodId && method === "GET") {
       const r = await pool.query(
-        `SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = $1 OR p.slug = $1`,
+        `SELECT p.*, c.parent_id as parent_cat_id 
+         FROM products p 
+         LEFT JOIN categories c ON p.category_id = c.id 
+         WHERE p.id = $1 OR p.slug = $1`,
         [prodId[0]]
       );
       if (!r.rows.length) return res.status(404).json({ error: "Not found" });
@@ -127,7 +156,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({
         ...p,
         image: p.image_url,
-        category: p.category_id,
+        category: p.parent_cat_id || p.category_id,
+        subcategory: p.parent_cat_id ? p.category_id : null,
         model3D: p.model_3d_url,
         has3D: p.has_3d
       });
