@@ -6,6 +6,49 @@ import { storage, auth } from "../firebase";
 
 import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings } from "../types";
 
+const VERCEL_FUNCTION_BODY_LIMIT_BYTES = 4 * 1024 * 1024;
+const IMAGE_COMPRESSION_TARGET_BYTES = Math.floor(VERCEL_FUNCTION_BODY_LIMIT_BYTES * 0.9);
+
+async function compressImageToTargetSize(file: File, targetBytes: number): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+
+  const imageUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Failed to load image for compression"));
+      image.src = imageUrl;
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0);
+
+    let quality = 0.9;
+    let compressedBlob: Blob | null = null;
+    while (quality >= 0.45) {
+      // WebP gives better compression for product images.
+      compressedBlob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/webp", quality)
+      );
+      if (compressedBlob && compressedBlob.size <= targetBytes) break;
+      quality -= 0.1;
+    }
+
+    if (!compressedBlob) return file;
+    if (compressedBlob.size >= file.size) return file;
+
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    return new File([compressedBlob], `${baseName}.webp`, { type: "image/webp" });
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',
@@ -25,11 +68,24 @@ export const firebaseService = {
     try {
       const { upload } = await import('@vercel/blob/client');
       const token = this.getToken();
+      let fileForUpload = file;
+      let uploadPath = path;
+
+      if (file.type.startsWith("image/") && file.size > IMAGE_COMPRESSION_TARGET_BYTES) {
+        fileForUpload = await compressImageToTargetSize(file, IMAGE_COMPRESSION_TARGET_BYTES);
+        if (fileForUpload.type === "image/webp" && !uploadPath.toLowerCase().endsWith(".webp")) {
+          uploadPath = uploadPath.replace(/\.[^/.]+$/, "") + ".webp";
+        }
+      }
       
-      const blob = await upload(path, file, {
+      if (fileForUpload.size > VERCEL_FUNCTION_BODY_LIMIT_BYTES) {
+        throw new Error("Image is too large for upload. Please use a smaller file.");
+      }
+
+      const blob = await upload(uploadPath, fileForUpload, {
         access: 'public',
         handleUploadUrl: '/api/admin/upload-handle',
-        clientPayload: JSON.stringify({ path }),
+        clientPayload: JSON.stringify({ path: uploadPath }),
         // @ts-ignore - passing token for the backend to verify
         headers: {
           'Authorization': `Bearer ${token}`
