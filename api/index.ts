@@ -33,6 +33,15 @@ function getUser(req: VercelRequest) {
   }
 }
 
+// ─── Helper ───────────────────────────────────────────────────────────────────
+function match(path: string, pattern: string): string[] | null {
+  const keys: string[] = [];
+  const re = new RegExp("^" + pattern.replace(/:([^/]+)/g, (_, k) => { keys.push(k); return "([^/]+)"; }) + "$");
+  const m = path.match(re);
+  if (!m) return null;
+  return keys.map((_, i) => m[i + 1]);
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -42,25 +51,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const url = req.url || "/";
-  const path = url.replace(/^\/api/, "").split("?")[0];
+  const path = "/" + (url.replace(/^\/api\/?/, "").split("?")[0]);
+  const method = req.method || "GET";
 
   try {
-    // ── GET /api/db-test ──────────────────────────────────────────────────────
+    // ── DB Test ───────────────────────────────────────────────────────────────
     if (path === "/db-test" || path === "/diag/db-test") {
       const r = await pool.query("SELECT NOW()");
       return res.json({ ok: true, time: r.rows[0].now, conn: connectionString?.slice(0, 40) });
     }
 
-    // ── GET /api/categories ────────────────────────────────────────────────────
-    if (path === "/categories" && req.method === "GET") {
+    // ── GET /categories ────────────────────────────────────────────────────────
+    if (path === "/categories" && method === "GET") {
       const r = await pool.query(
         "SELECT id, name, slug, image_url, parent_id, filters FROM categories ORDER BY name"
       );
       return res.json(r.rows);
     }
 
-    // ── GET /api/products ──────────────────────────────────────────────────────
-    if (path === "/products" && req.method === "GET") {
+    // ── POST /admin/categories ─────────────────────────────────────────────────
+    if (path === "/admin/categories" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const { id, name, slug, image_url, parent_id, filters } = req.body || {};
+      await pool.query(
+        "INSERT INTO categories (id, name, slug, image_url, parent_id, filters) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO UPDATE SET name=$2, slug=$3, image_url=$4, parent_id=$5, filters=$6",
+        [id || slug, name, slug, image_url, parent_id || null, JSON.stringify(filters || [])]
+      );
+      return res.json({ ok: true });
+    }
+
+    // ── DELETE /admin/categories/:id ───────────────────────────────────────────
+    const catDel = match(path, "/admin/categories/:id");
+    if (catDel && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      await pool.query("DELETE FROM categories WHERE id = $1", [catDel[0]]);
+      return res.status(204).end();
+    }
+
+    // ── GET /products ──────────────────────────────────────────────────────────
+    if (path === "/products" && method === "GET") {
       const { category, search, minPrice, maxPrice, limit = "100", offset = "0" } = req.query as any;
       let q = `SELECT p.*, c.name as category_name, c.slug as category_slug
                FROM products p
@@ -78,38 +109,118 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(r.rows);
     }
 
-    // ── GET /api/products/:id ──────────────────────────────────────────────────
-    if (path.startsWith("/products/") && req.method === "GET") {
-      const id = path.split("/")[2];
+    // ── GET /products/:id ──────────────────────────────────────────────────────
+    const prodId = match(path, "/products/:id");
+    if (prodId && method === "GET") {
       const r = await pool.query(
         `SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = $1 OR p.slug = $1`,
-        [id]
+        [prodId[0]]
       );
       if (!r.rows.length) return res.status(404).json({ error: "Not found" });
       return res.json(r.rows[0]);
     }
 
-    // ── GET /api/blog-posts ────────────────────────────────────────────────────
-    if (path === "/blog-posts" && req.method === "GET") {
-      const r = await pool.query(
-        "SELECT * FROM blog_posts WHERE status = 'published' ORDER BY created_at DESC"
+    // ── POST /admin/products ───────────────────────────────────────────────────
+    if (path === "/admin/products" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const p = req.body || {};
+      const id = p.id || `prod-${Date.now()}`;
+      await pool.query(
+        `INSERT INTO products (id, uid, sku, slug, name, description, type, category_id, brand, model, price, stock, image_url, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'active')
+         ON CONFLICT (id) DO UPDATE SET name=$5, price=$11, stock=$12`,
+        [id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', p.price||0, p.stock||0, p.image_url||null]
       );
-      return res.json(r.rows);
+      return res.json({ id });
     }
 
-    // ── GET /api/blog-posts/:id ────────────────────────────────────────────────
-    if (path.startsWith("/blog-posts/") && req.method === "GET") {
-      const id = path.split("/")[2];
-      const r = await pool.query(
-        "SELECT * FROM blog_posts WHERE id = $1 OR slug = $1",
-        [id]
+    // ── PUT /admin/products/:id ────────────────────────────────────────────────
+    const adminProd = match(path, "/admin/products/:id");
+    if (adminProd && method === "PUT") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const p = req.body || {};
+      await pool.query(
+        "UPDATE products SET name=$2, price=$3, stock=$4, description=$5, image_url=$6, status=$7 WHERE id = $1",
+        [adminProd[0], p.name, p.price, p.stock, p.description, p.image_url, p.status||'active']
       );
+      return res.json({ ok: true });
+    }
+
+    // ── DELETE /admin/products/:id ─────────────────────────────────────────────
+    if (adminProd && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      await pool.query("DELETE FROM products WHERE id = $1", [adminProd[0]]);
+      return res.status(204).end();
+    }
+
+    // ── GET /blog  (фронтенд использует /api/blog) ─────────────────────────────
+    if ((path === "/blog" || path === "/blog-posts") && method === "GET") {
+      const { category, limit = "20" } = req.query as any;
+      let q = "SELECT * FROM blog_posts WHERE status = 'published'";
+      const params: any[] = [];
+      if (category) { q += " AND category = $1"; params.push(category); }
+      q += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
+      params.push(Number(limit));
+      const r = await pool.query(q, params);
+      // Поддерживаем оба формата: { posts: [] } и просто []
+      return res.json({ posts: r.rows, total: r.rows.length });
+    }
+
+    // ── GET /blog/:id ──────────────────────────────────────────────────────────
+    const blogId = match(path, "/blog/:id");
+    if (blogId && method === "GET") {
+      const r = await pool.query("SELECT * FROM blog_posts WHERE id = $1 OR slug = $1", [blogId[0]]);
       if (!r.rows.length) return res.status(404).json({ error: "Not found" });
       return res.json(r.rows[0]);
     }
 
-    // ── POST /api/auth/register ────────────────────────────────────────────────
-    if (path === "/auth/register" && req.method === "POST") {
+    // ── GET /blog-posts/:id ────────────────────────────────────────────────────
+    const blogPostId = match(path, "/blog-posts/:id");
+    if (blogPostId && method === "GET") {
+      const r = await pool.query("SELECT * FROM blog_posts WHERE id = $1 OR slug = $1", [blogPostId[0]]);
+      if (!r.rows.length) return res.status(404).json({ error: "Not found" });
+      return res.json(r.rows[0]);
+    }
+
+    // ── POST /admin/blog ───────────────────────────────────────────────────────
+    if (path === "/admin/blog" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const p = req.body || {};
+      const id = p.id || `blog-${Date.now()}`;
+      await pool.query(
+        "INSERT INTO blog_posts (id, slug, title, content, category, image_url, author, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET title=$3, content=$4, status=$8",
+        [id, p.slug||id, p.title, p.content, p.category||'general', p.image_url||null, p.author||'Admin', p.status||'published']
+      );
+      return res.json({ id });
+    }
+
+    // ── PUT /admin/blog/:id ────────────────────────────────────────────────────
+    const adminBlog = match(path, "/admin/blog/:id");
+    if (adminBlog && method === "PUT") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const p = req.body || {};
+      await pool.query(
+        "UPDATE blog_posts SET title=$2, content=$3, status=$4, image_url=$5 WHERE id = $1",
+        [adminBlog[0], p.title, p.content, p.status||'published', p.image_url||null]
+      );
+      return res.json({ ok: true });
+    }
+
+    // ── DELETE /admin/blog/:id ─────────────────────────────────────────────────
+    if (adminBlog && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      await pool.query("DELETE FROM blog_posts WHERE id = $1", [adminBlog[0]]);
+      return res.status(204).end();
+    }
+
+    // ── POST /auth/register ────────────────────────────────────────────────────
+    if (path === "/auth/register" && method === "POST") {
       const { username, email, password } = req.body || {};
       if (!email || !password) return res.status(400).json({ error: "Email and password required" });
       const exists = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
@@ -124,8 +235,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ token, user: { id, email, username: username || email.split("@")[0], role: "user" } });
     }
 
-    // ── POST /api/auth/login ───────────────────────────────────────────────────
-    if (path === "/auth/login" && req.method === "POST") {
+    // ── POST /auth/login ───────────────────────────────────────────────────────
+    if (path === "/auth/login" && method === "POST") {
       const { email, password } = req.body || {};
       if (!email || !password) return res.status(400).json({ error: "Email and password required" });
       const r = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -137,8 +248,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } });
     }
 
-    // ── GET /api/orders ────────────────────────────────────────────────────────
-    if (path === "/orders" && req.method === "GET") {
+    // ── GET /orders ────────────────────────────────────────────────────────────
+    if (path === "/orders" && method === "GET") {
       const user = getUser(req);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
       const r = await pool.query(
@@ -148,8 +259,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(r.rows);
     }
 
-    // ── POST /api/orders ────────────────────────────────────────────────────────
-    if (path === "/orders" && req.method === "POST") {
+    // ── POST /orders ───────────────────────────────────────────────────────────
+    if (path === "/orders" && method === "POST") {
       const user = getUser(req);
       const { items, total, address, payment_method } = req.body || {};
       const userId = user?.id || "guest";
@@ -162,29 +273,75 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         for (const item of items) {
           await pool.query(
             "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
-            [id, item.productId, item.quantity, item.price]
+            [id, item.productId || item.id, item.quantity, item.price]
           );
         }
       }
       return res.json({ id, status: "pending" });
     }
 
-    // ── GET /api/policies/:id ──────────────────────────────────────────────────
-    if (path.startsWith("/policies/") && req.method === "GET") {
-      const id = path.split("/")[2];
-      const r = await pool.query("SELECT * FROM policies WHERE id = $1", [id]);
-      if (!r.rows.length) return res.status(404).json({ error: "Not found" });
-      return res.json(r.rows[0]);
+    // ── GET /admin/orders ──────────────────────────────────────────────────────
+    if (path === "/admin/orders" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const r = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+      return res.json(r.rows);
     }
 
-    // ── GET /api/policies ──────────────────────────────────────────────────────
-    if (path === "/policies" && req.method === "GET") {
+    // ── PUT /admin/orders/:id/status ───────────────────────────────────────────
+    const orderStatus = match(path, "/admin/orders/:id/status");
+    if (orderStatus && method === "PUT") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const { status, tracking_number } = req.body || {};
+      await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
+      return res.json({ ok: true });
+    }
+
+    // ── GET/POST /policies ─────────────────────────────────────────────────────
+    if (path === "/policies" && method === "GET") {
       const r = await pool.query("SELECT * FROM policies");
       return res.json(r.rows);
     }
 
-    // ── POST /api/contact ──────────────────────────────────────────────────────
-    if (path === "/contact" && req.method === "POST") {
+    const policyId = match(path, "/policies/:id");
+    if (policyId && method === "GET") {
+      const r = await pool.query("SELECT * FROM policies WHERE id = $1", [policyId[0]]);
+      if (!r.rows.length) return res.status(404).json({ error: "Not found" });
+      return res.json(r.rows[0]);
+    }
+
+    const adminPolicyId = match(path, "/admin/policies/:id");
+    if (adminPolicyId && (method === "PUT" || method === "DELETE")) {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      if (method === "DELETE") {
+        await pool.query("DELETE FROM policies WHERE id = $1", [adminPolicyId[0]]);
+        return res.status(204).end();
+      }
+      const { title, content } = req.body || {};
+      await pool.query("UPDATE policies SET title=$2, content=$3 WHERE id = $1", [adminPolicyId[0], title, content]);
+      return res.json({ ok: true });
+    }
+
+    // ── GET /users/:id ─────────────────────────────────────────────────────────
+    const userId = match(path, "/users/:id");
+    if (userId && method === "GET") {
+      const r = await pool.query("SELECT id, username, email, role, phone, address FROM users WHERE id = $1", [userId[0]]);
+      if (!r.rows.length) return res.status(404).json({ error: "Not found" });
+      return res.json(r.rows[0]);
+    }
+
+    if (userId && method === "PUT") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const { username, phone, address } = req.body || {};
+      await pool.query("UPDATE users SET username=$2, phone=$3, address=$4 WHERE id = $1", [userId[0], username, phone, JSON.stringify(address)]);
+      return res.json({ ok: true });
+    }
+
+    // ── POST /contact ──────────────────────────────────────────────────────────
+    if (path === "/contact" && method === "POST") {
       const { name, email, message, subject } = req.body || {};
       await pool.query(
         "INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)",
@@ -193,22 +350,68 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ ok: true });
     }
 
-    // ── Seed admin ─────────────────────────────────────────────────────────────
-    if (path === "/admin/init" && req.method === "GET") {
+    // ── GET /admin/messages ────────────────────────────────────────────────────
+    if (path === "/admin/messages" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const r = await pool.query("SELECT * FROM contact_messages ORDER BY created_at DESC");
+      return res.json(r.rows);
+    }
+
+    // ── GET /admin/analytics ───────────────────────────────────────────────────
+    if (path === "/admin/analytics" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const [orders, products, users] = await Promise.all([
+        pool.query("SELECT COUNT(*) as count, COALESCE(SUM(total),0) as revenue FROM orders"),
+        pool.query("SELECT COUNT(*) as count FROM products"),
+        pool.query("SELECT COUNT(*) as count FROM users"),
+      ]);
+      return res.json({
+        totalOrders: parseInt(orders.rows[0].count),
+        totalRevenue: parseFloat(orders.rows[0].revenue),
+        totalProducts: parseInt(products.rows[0].count),
+        totalUsers: parseInt(users.rows[0].count),
+      });
+    }
+
+    // ── GET /admin/stock ───────────────────────────────────────────────────────
+    if (path === "/admin/stock" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const r = await pool.query("SELECT p.id, p.name, p.sku, p.stock, p.price FROM products p ORDER BY p.name");
+      return res.json(r.rows);
+    }
+
+    // ── GET /admin/inventory-logs ──────────────────────────────────────────────
+    if (path === "/admin/inventory-logs" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const r = await pool.query("SELECT * FROM inventory_logs ORDER BY created_at DESC LIMIT 100");
+      return res.json(r.rows);
+    }
+
+    // ── GET /site-settings ─────────────────────────────────────────────────────
+    if (path === "/site-settings") {
+      return res.json({ id: "default", name: "Hristo Airsoft", currency: "EUR" });
+    }
+
+    // ── Admin init ─────────────────────────────────────────────────────────────
+    if (path === "/admin/init" && method === "GET") {
       const exists = await pool.query("SELECT id FROM users WHERE role = 'admin'");
       if (!exists.rows.length) {
         const hashed = await bcrypt.hash("admin123", 10);
         await pool.query(
-          "INSERT INTO users (id, username, email, password, role) VALUES ($1, $2, $3, $4, 'admin')",
-          ["admin-1", "admin", "admin@hristo.com", hashed, "admin"]
+          "INSERT INTO users (id, username, email, password, role) VALUES ($1, $2, $3, $4, 'admin') ON CONFLICT (id) DO NOTHING",
+          ["admin-1", "admin", "admin@hristo.com", hashed]
         );
       }
       return res.json({ ok: true, admin: "admin@hristo.com / admin123" });
     }
 
-    return res.status(404).json({ error: `Route ${req.method} ${path} not found` });
+    return res.status(404).json({ error: `Route ${method} ${path} not found` });
   } catch (err: any) {
     console.error("API Error:", err);
-    return res.status(500).json({ error: err.message, conn: connectionString ? "set" : "MISSING" });
+    return res.status(500).json({ error: err.message, conn: connectionString ? "set" : "MISSING!" });
   }
 }
