@@ -23,23 +23,23 @@ export const firebaseService = {
 
   async uploadFile(file: File, path: string, onProgress?: (progress: number) => void): Promise<string> {
     try {
+      const { upload } = await import('@vercel/blob/client');
       const token = this.getToken();
-      const res = await fetch(`/api/admin/upload?filename=${encodeURIComponent(path)}`, {
-        method: 'POST',
+      
+      const blob = await upload(path, file, {
+        access: 'public',
+        handleUploadUrl: '/api/admin/upload-handle',
+        clientPayload: JSON.stringify({ path }),
+        // @ts-ignore - passing token for the backend to verify
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': file.type
+          'Authorization': `Bearer ${token}`
         },
-        body: file
+        onUploadProgress: (progressEvent) => {
+          if (onProgress) onProgress(progressEvent.percentage);
+        }
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'Upload failed' }));
-        throw new Error(errorData.error || `Upload failed with status ${res.status}`);
-      }
-
-      const data = await res.json();
-      return data.url;
+      return blob.url;
     } catch (error: any) {
       console.error('Blob upload error:', error);
       throw new Error(`Failed to upload to Vercel Blob: ${error.message}`);

@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { put, del } from "@vercel/blob";
+import { put, del, handleUpload } from "@vercel/blob";
 
 const { Pool } = pg;
 
@@ -129,6 +129,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(204).end();
+    }
+
+    // ── POST /admin/upload-handle ────────────────────────────────────────────────
+    if (path === "/admin/upload-handle" && method === "POST") {
+      try {
+        const jsonResponse = await handleUpload({
+          body: req.body,
+          request: req as any,
+          onBeforeGenerateToken: async (pathname, clientPayload) => {
+            const user = getUser(req);
+            if (!user || user.role !== "admin") throw new Error("Forbidden");
+
+            return {
+              allowedContentTypes: [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+                'model/gltf-binary', 'model/gltf+json', 'application/octet-stream'
+              ],
+              tokenPayload: JSON.stringify({ userId: user.id }),
+            };
+          },
+          onUploadCompleted: async ({ blob, tokenPayload }) => {
+            // Optional metadata logic
+          },
+        });
+        return res.status(200).json(jsonResponse);
+      } catch (error) {
+        return res.status(400).json({ error: (error as Error).message });
+      }
     }
 
     // ── GET /products ──────────────────────────────────────────────────────────
