@@ -6,6 +6,7 @@ import { ModelViewer } from './ModelViewer';
 import { useCartStore } from '../store/cartStore';
 import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/price';
+import { useTranslation } from '../hooks/useTranslation';
 
 const RedIcon = ({ emoji, size = 20 }: { emoji: string; size?: number }) => {
   const iconMap: Record<string, any> = {
@@ -42,6 +43,7 @@ interface QuickPreviewModalProps {
 
 export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, isOpen, onClose }) => {
   const { addItem } = useCartStore();
+  const { language } = useTranslation();
 
   if (!product) return null;
 
@@ -113,7 +115,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                     </span>
                   </div>
                   <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 leading-none">
-                    {product.name}
+                    {language === 'hr' && product.nameHr ? product.nameHr : product.name}
                   </h2>
                 </div>
                 <button 
@@ -159,7 +161,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               <div className="space-y-4 mb-10">
                 {product.description && (
                   <p className="text-zinc-500 text-lg leading-relaxed">
-                    {product.description}
+                    {language === 'hr' && product.descriptionHr ? product.descriptionHr : product.description}
                   </p>
                 )}
                 

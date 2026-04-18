@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { QuickPreviewModal } from './QuickPreviewModal';
 import { getDiscountedPrice } from '../utils/price';
 import { useWishlistStore } from '../store/wishlistStore';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
   const { toggleItem: toggleWishlist, isInWishlist } = useWishlistStore();
   const { setActiveProduct } = useConfiguratorStore();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { language } = useTranslation();
   const navigate = useNavigate();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -131,13 +133,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 </div>
               </div>
               <h3 className={`${viewMode === 'list' ? 'text-sm sm:text-base md:text-xl' : 'text-[9px] xs:text-[10px] sm:text-xs md:text-sm'} font-bold text-zinc-100 group-hover:text-red-500 transition-colors line-clamp-2 leading-snug uppercase tracking-tight`}>
-                {product.name}
+                {language === 'hr' && product.nameHr ? product.nameHr : product.name}
               </h3>
               {viewMode === 'list' && (product.description || product.longDescription) && (
                 <div className="space-y-2 mt-1 md:mt-2">
                   {product.description && (
                     <p className="text-[10px] sm:text-xs md:text-sm text-zinc-500 line-clamp-2 font-medium">
-                      {product.description}
+                      {language === 'hr' && product.descriptionHr ? product.descriptionHr : product.description}
                     </p>
                   )}
                   {product.longDescription && (

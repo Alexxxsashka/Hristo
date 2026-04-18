@@ -53,7 +53,9 @@ export interface Product {
   barcode?: string;
   slug?: string;
   name: string;
+  nameHr?: string;
   description: string;
+  descriptionHr?: string;
   type: 'weapon' | 'module' | 'gear' | 'part' | 'consumable';
   category: string;
   subcategory: string;
@@ -81,6 +83,7 @@ export interface Product {
   has3D?: boolean;
   mountType?: string; // e.g., 'Picatinny', 'M-LOK', 'Dovetail', 'KeyMod'
   longDescription?: string; // Extended product story/history
+  longDescriptionHr?: string;
   
   // Compatibility Engine fields
   allowedSlots?: string[]; // Types of slots this item can fit into
