@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, LayoutGrid, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Category } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface CatalogMenuProps {
@@ -17,7 +17,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
   const { t, language } = useTranslation();
 
   useEffect(() => {
-    firebaseService.getCategories()
+    databaseService.getCategories()
       .then(data => {
         if (data) {
           setCategories(data);

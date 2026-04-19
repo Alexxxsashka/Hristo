@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Product, Category, FilterState } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 interface ShopState {
   products: Product[];
@@ -49,7 +49,7 @@ export const useShopStore = create<ShopState>((set, get) => ({
     if (get().products.length > 0) return;
     set({ isLoading: true });
     try {
-      const data = await firebaseService.getProducts();
+      const data = await databaseService.getProducts();
       set({ products: data as Product[], isLoading: false });
     } catch (error) {
       set({ error: 'Failed to fetch products', isLoading: false });
@@ -59,7 +59,7 @@ export const useShopStore = create<ShopState>((set, get) => ({
   fetchCategories: async () => {
     if (get().categories.length > 0) return;
     try {
-      const data = await firebaseService.getCategories();
+      const data = await databaseService.getCategories();
       set({ categories: data as Category[] });
     } catch (error) {
       console.error('Failed to fetch categories', error);

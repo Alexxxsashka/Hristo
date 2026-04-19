@@ -12,7 +12,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { useAuthStore } from '../store/authStore';
 import { SiteSettings } from '../types';
 
@@ -25,7 +25,7 @@ export const Footer: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await firebaseService.getSiteSettings();
+        const data = await databaseService.getSiteSettings();
         setSettings(data);
       } catch (err) {
         console.error('Failed to fetch assets:', err);

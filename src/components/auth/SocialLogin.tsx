@@ -3,7 +3,7 @@ import { auth } from '../../firebase';
 import { GoogleAuthProvider, OAuthProvider, signInWithPopup, multiFactor } from 'firebase/auth';
 import { useAuthStore } from '../../store/authStore';
 import { getAuthErrorMessage } from '../../utils/authErrors';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 
 export const SocialLogin: React.FC = () => {
   const { login } = useAuthStore();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Edit, X, Check } from 'lucide-react';
 import { Category } from '../../types';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { WEAPON_SLOTS, MODULE_CATEGORIES } from '../../constants';
 import { formatEnum } from '../../utils/format';
 
@@ -29,7 +29,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
         id: editingCat ? editingCat.id : newCat.name?.toLowerCase().replace(/\s+/g, '_')
       };
       
-      await firebaseService.saveCategory(categoryToSave as any);
+      await databaseService.saveCategory(categoryToSave as any);
       setNewCat({ name: '', parent: '', slots: [], compatibleModuleCategories: [], filters: [] });
       setEditingCat(null);
       onUpdate();
@@ -106,7 +106,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
   const handleDelete = async (id: string) => {
     onConfirm('Delete this category?', async () => {
       try {
-        await firebaseService.deleteCategory(id);
+        await databaseService.deleteCategory(id);
         onUpdate();
         onNotify('Category deleted successfully');
       } catch (err) {

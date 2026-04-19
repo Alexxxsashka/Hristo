@@ -52,7 +52,7 @@ export enum OperationType {
   WRITE = 'write',
 }
 
-export const firebaseService = {
+export const databaseService = {
   // Storage
   _urlCache: {} as Record<string, string>,
   _productsCache: null as Product[] | null,

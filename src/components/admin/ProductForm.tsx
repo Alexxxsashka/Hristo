@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Save, ArrowUp, ArrowDown, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { Product, Category, Characteristic, ProductVariant, ProductAttribute } from '../../types';
 import { WEAPON_SLOTS } from '../../constants';
 import { formatEnum, formatModelName } from '../../utils/format';
@@ -101,7 +101,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         // If there was an existing model, delete it to save space
         if (initialData?.model3D) {
           console.log('Deleting old 3D model...', initialData.model3D);
-          await firebaseService.deleteFile(initialData.model3D);
+          await databaseService.deleteFile(initialData.model3D);
         }
 
         setUploadingFile('3D Model');
@@ -109,7 +109,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           const extension = modelFile.name.split('.').pop();
           const originalName = modelFile.name;
           const safeName = `model_${Date.now()}.${extension}`;
-          modelUrl = await firebaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
+          modelUrl = await databaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
           modelName = originalName;
           console.log('3D model uploaded successfully:', modelUrl);
         } catch (uploadErr) {
@@ -133,7 +133,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           try {
             const extension = item.name.split('.').pop();
             const safeName = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
-            const url = await firebaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
+            const url = await databaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
             finalImageUrls.push(url);
             console.log(`Image ${i + 1} uploaded successfully:`, url);
           } catch (uploadErr) {
@@ -157,8 +157,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         has3D: !!modelUrl
       };
 
-      console.log('Saving product to Firestore...', productToSave);
-      await firebaseService.saveProduct(productToSave as any);
+      console.log('Saving product to database...', productToSave);
+      await databaseService.saveProduct(productToSave as any);
       console.log('Product saved successfully!');
       onNotify('Product saved successfully!');
       onSuccess();

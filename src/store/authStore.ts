@@ -17,7 +17,7 @@ import {
   User as FirebaseUser,
   multiFactor
 } from 'firebase/auth';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export interface User {
   id: string;
@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
             if (firebaseUser) {
               let userData: any = null;
               try {
-                userData = await firebaseService.getUserProfile(firebaseUser.uid);
+                userData = await databaseService.getUserProfile(firebaseUser.uid);
               } catch (fsError) {
                 console.warn("AuthStore: Could not fetch user profile:", fsError);
               }
@@ -187,10 +187,10 @@ export const useAuthStore = create<AuthState>()(
         }
 
         // Update SQL
-        await firebaseService.updateProfile(firebaseUser.uid, data);
+        await databaseService.updateProfile(firebaseUser.uid, data);
 
         // Refresh local state
-        const userData = await firebaseService.getUserProfile(firebaseUser.uid);
+        const userData = await databaseService.getUserProfile(firebaseUser.uid);
         
         set((state) => ({
           user: state.user ? {

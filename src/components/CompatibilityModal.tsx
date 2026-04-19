@@ -4,7 +4,7 @@ import { Product } from '../types';
 import { X, CheckCircle2, AlertTriangle, XCircle, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 interface CompatibilityModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
 
   React.useEffect(() => {
     if (isOpen) {
-      firebaseService.getProducts()
+      databaseService.getProducts()
         .then(data => {
           if (data) {
             setAllModules(data.filter((p: Product) => p.type === 'module'));

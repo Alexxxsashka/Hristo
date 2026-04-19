@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, OAuthProvider, EmailAuthProvider, PhoneAuthProvider } from 'firebase/auth';
-import firebaseConfig from '../firebase-applet-config.json';
+import firebaseConfig from '../auth-config.json';
 
 const app = initializeApp(firebaseConfig);
 

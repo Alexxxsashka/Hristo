@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit, X, Upload, Calendar, User, Tag } from 'lucide-react';
 import { BlogPost } from '../../types';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { BLOG_CATEGORIES } from '../../constants';
 
 export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: { 
@@ -41,7 +41,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
         if (imageFile) {
           const extension = imageFile.name.split('.').pop();
           const safeName = `blog_${Date.now()}.${extension}`;
-          imageUrl = await firebaseService.uploadFile(imageFile, `blog/images/${safeName}`);
+          imageUrl = await databaseService.uploadFile(imageFile, `blog/images/${safeName}`);
         }
 
         const postToSave = {
@@ -50,7 +50,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           date: editingPost?.date || new Date().toISOString()
         };
 
-        await firebaseService.saveBlogPost(postToSave as any);
+        await databaseService.saveBlogPost(postToSave as any);
         setIsEditing(false);
         setEditingPost(null);
         setImageFile(null);
@@ -75,7 +75,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   const handleDelete = async (id: string) => {
     onConfirm('Delete this post?', async () => {
       try {
-        await firebaseService.deleteBlogPost(id);
+        await databaseService.deleteBlogPost(id);
         onUpdate();
         onNotify('Post deleted successfully');
       } catch (err) {

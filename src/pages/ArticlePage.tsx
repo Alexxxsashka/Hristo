@@ -17,7 +17,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '../hooks/useTranslation';
 import { BlogPost, Product } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -36,7 +36,7 @@ export const ArticlePage: React.FC = () => {
   const fetchPost = async () => {
     setIsLoading(true);
     try {
-      const posts = await firebaseService.getBlogPosts();
+      const posts = await databaseService.getBlogPosts();
       const data = posts?.find((p: BlogPost) => p.slug === slug);
       
       if (data) {
@@ -44,7 +44,7 @@ export const ArticlePage: React.FC = () => {
         
         // Fetch related products if any
         if (data.relatedProductIds && data.relatedProductIds.length > 0) {
-          const allProducts = await firebaseService.getProducts();
+          const allProducts = await databaseService.getProducts();
           if (allProducts) {
             setRelatedProducts(allProducts.filter((p: Product) => data.relatedProductIds?.includes(p.id)));
           }

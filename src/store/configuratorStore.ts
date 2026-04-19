@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Product, AttachPoint } from '../types';
 import { CompatibilityEngine } from '../services/configuratorService';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export interface SavedBuild {
   id: string;
@@ -156,11 +156,11 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     };
 
     try {
-      await firebaseService.saveBuild(newBuild);
+      await databaseService.saveBuild(newBuild);
       const newSavedBuilds = [newBuild, ...savedBuilds];
       set({ savedBuilds: newSavedBuilds });
     } catch (error) {
-      console.error('Error saving build to Firebase:', error);
+      console.error('Error saving build to database:', error);
     }
   },
 
@@ -177,11 +177,11 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   deleteBuild: async (id) => {
     const { savedBuilds } = get();
     try {
-      await firebaseService.deleteBuild(id);
+      await databaseService.deleteBuild(id);
       const newSavedBuilds = savedBuilds.filter(b => b.id !== id);
       set({ savedBuilds: newSavedBuilds });
     } catch (error) {
-      console.error('Error deleting build from Firebase:', error);
+      console.error('Error deleting build from database:', error);
     }
   },
 

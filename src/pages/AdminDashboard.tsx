@@ -48,7 +48,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
 import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { formatEnum, formatModelName } from '../utils/format';
 import { 
   BarChart, 
@@ -101,7 +101,7 @@ export const AdminDashboard: React.FC = () => {
         fetchCategories(),
         fetchBlogPosts(),
         fetchPolicies(),
-        firebaseService.getMessages().then(m => setMessages(m || []))
+        databaseService.getMessages().then(m => setMessages(m || []))
       ]);
       setIsLoading(false);
     };
@@ -120,7 +120,7 @@ export const AdminDashboard: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const p = await firebaseService.getProducts();
+      const p = await databaseService.getProducts();
       setProducts(p as Product[] || []);
     } catch (err) {
       console.error('Failed to fetch products', err);
@@ -129,7 +129,7 @@ export const AdminDashboard: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const c = await firebaseService.getCategories();
+      const c = await databaseService.getCategories();
       setCategories(c || []);
     } catch (err) {
       console.error('Failed to fetch categories', err);
@@ -138,7 +138,7 @@ export const AdminDashboard: React.FC = () => {
 
   const fetchBlogPosts = async () => {
     try {
-      const b = await firebaseService.getBlogPosts();
+      const b = await databaseService.getBlogPosts();
       setBlogPosts(b as BlogPost[] || []);
     } catch (err) {
       console.error('Failed to fetch blog posts', err);
@@ -147,7 +147,7 @@ export const AdminDashboard: React.FC = () => {
 
   const fetchPolicies = async () => {
     try {
-      const pol = await firebaseService.getPolicies();
+      const pol = await databaseService.getPolicies();
       setPolicies(pol as PolicyPage[] || []);
     } catch (err) {
       console.error('Failed to fetch policies', err);
@@ -162,7 +162,7 @@ export const AdminDashboard: React.FC = () => {
   const deleteProduct = async (id: string) => {
     confirmAction('Are you sure you want to delete this product?', async () => {
       try {
-        await firebaseService.deleteProduct(id);
+        await databaseService.deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
         showNotification('Product deleted successfully');
       } catch (err) {
@@ -175,7 +175,7 @@ export const AdminDashboard: React.FC = () => {
   const deletePost = async (id: string) => {
     confirmAction('Are you sure you want to delete this post?', async () => {
       try {
-        await firebaseService.deleteBlogPost(id);
+        await databaseService.deleteBlogPost(id);
         setBlogPosts(blogPosts.filter(p => p.id !== id));
         showNotification('Post deleted successfully');
       } catch (err) {
@@ -188,7 +188,7 @@ export const AdminDashboard: React.FC = () => {
   const deleteMessage = async (id: string) => {
     confirmAction('Are you sure you want to delete this message?', async () => {
       try {
-        await firebaseService.deleteMessage(id);
+        await databaseService.deleteMessage(id);
         setMessages(messages.filter(m => m.id !== id));
         showNotification('Message deleted successfully');
       } catch (err) {
@@ -676,7 +676,7 @@ const BIAnalytics = () => {
     const loadAnalytics = async () => {
       setLoading(true);
       try {
-        const analytics = await firebaseService.getBIAnalytics();
+        const analytics = await databaseService.getBIAnalytics();
         setData(analytics);
       } catch (err) {
         console.error('Failed to load analytics', err);
@@ -953,7 +953,7 @@ const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm: any }
         for (let i = 0; i < folders.length; i++) {
           const folder = folders[i];
           const path = `${folder.id}/.keep`;
-          await firebaseService.uploadFile(fileToUpload, path);
+          await databaseService.uploadFile(fileToUpload, path);
           setProgress(((i + 1) / folders.length) * 100);
         }
         
@@ -1191,7 +1191,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding categories...');
       for (const cat of defaultCategories) {
-        await firebaseService.saveCategory(cat);
+        await databaseService.saveCategory(cat);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added category: ${cat.name}`);
@@ -1199,7 +1199,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding products...');
       for (const prod of defaultProducts) {
-        await firebaseService.saveProduct(prod as any);
+        await databaseService.saveProduct(prod as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added product: ${prod.name}`);
@@ -1207,7 +1207,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding warehouses...');
       for (const wh of defaultWarehouses) {
-        await firebaseService.saveWarehouse(wh);
+        await databaseService.saveWarehouse(wh);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added warehouse: ${wh.name}`);
@@ -1215,7 +1215,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding suppliers...');
       for (const sup of defaultSuppliers) {
-        await firebaseService.saveSupplier(sup);
+        await databaseService.saveSupplier(sup);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added supplier: ${sup.name}`);
@@ -1223,7 +1223,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding stock...');
       for (const st of defaultStock) {
-        await firebaseService.saveStockItem(st);
+        await databaseService.saveStockItem(st);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added stock item for product ${st.productId}`);
@@ -1231,7 +1231,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding blog posts...');
       for (const post of defaultBlogPosts) {
-        await firebaseService.saveBlogPost(post as any);
+        await databaseService.saveBlogPost(post as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added blog post: ${post.title}`);
@@ -1239,7 +1239,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding messages...');
       for (const msg of defaultMessages) {
-        await firebaseService.saveMessage(msg);
+        await databaseService.saveMessage(msg);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added message from: ${msg.name}`);
@@ -1437,7 +1437,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding test categories...');
       for (const cat of testCategories) {
-        await firebaseService.saveCategory(cat as any);
+        await databaseService.saveCategory(cat as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added test category: ${cat.name}`);
@@ -1445,7 +1445,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
 
       addLog('Seeding test products...');
       for (const prod of testProducts) {
-        await firebaseService.saveProduct(prod as any);
+        await databaseService.saveProduct(prod as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added test product: ${prod.name}`);
@@ -1476,7 +1476,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
           { id: 'size', label: 'Size', type: 'select', options: ['S', 'M', 'L', 'XL', 'XXL'] }
         ]
       };
-      await firebaseService.saveCategory(apparelCategory);
+      await databaseService.saveCategory(apparelCategory);
       addLog('Created "Apparel" subcategory.');
 
       // 2. Create the product assigned to that subcategory
@@ -1559,7 +1559,7 @@ const MigrationTool = ({ products, categories, confirmAction, onNotify }: {
         ],
         tags: ["tactical", "combat", "apparel", "shirt"],
       };
-      await firebaseService.saveProduct(clothingProduct);
+      await databaseService.saveProduct(clothingProduct);
       addLog('Successfully seeded clothing product!');
       setStatus('success');
       onNotify('Test clothing product and category added!');

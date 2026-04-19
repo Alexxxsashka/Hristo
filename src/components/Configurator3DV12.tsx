@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { X, Lightbulb, MousePointer2, Move, ZoomIn, Mouse, Eye, EyeOff, Maximize, Layout, Minimize, Sparkles, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 // EFT Style Slot Metadata
 interface DiscoveredSlot {
@@ -672,7 +672,7 @@ export const Configurator3DV12: React.FC = () => {
   } = useConfiguratorStore();
 
   React.useEffect(() => {
-    firebaseService.getProducts()
+    databaseService.getProducts()
       .then(data => {
         if (data) {
           // Include both 'module' and 'part' types as they are used interchangeably for attachments
