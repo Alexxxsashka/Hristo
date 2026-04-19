@@ -468,6 +468,7 @@ const PartModel = ({
             path={modelPath} 
             socketPoint={part.socketPoint}
             slotType={slot.type}
+            partName={part.name}
             onLoad={(scene) => setModelScene(scene)}
           />
         </Suspense>
@@ -506,11 +507,13 @@ const ActualPartModel = ({
   path, 
   socketPoint,
   slotType,
+  partName,
   onLoad 
 }: { 
   path: string | null; 
   socketPoint?: [number, number, number];
   slotType?: string;
+  partName: string;
   onLoad: (scene: THREE.Group) => void;
 }) => {
   if (path) console.log(`[ActualPartModel V1.2] Attempting useGLTF with path:`, path);
@@ -608,7 +611,7 @@ const ActualPartModel = ({
     const box = new THREE.Box3().setFromObject(clone);
     const size = new THREE.Vector3();
     box.getSize(size);
-    console.log(`[ActualPartModel V1.2] Computed Size for "${part.name}":`, {
+    console.log(`[ActualPartModel V1.2] Computed Size for "${partName}":`, {
       width: size.x.toFixed(4),
       height: size.y.toFixed(4),
       depth: size.z.toFixed(4)
@@ -616,12 +619,12 @@ const ActualPartModel = ({
 
     // If size is suspicious (too small), force a minimum scale
     if (size.length() < 0.001) {
-      console.warn(`[ActualPartModel V1.2] Model "${part.name}" is too small, forcing scale 100x`);
+      console.warn(`[ActualPartModel V1.2] Model "${partName}" is too small, forcing scale 100x`);
       clone.scale.set(100, 100, 100);
     }
 
     return clone;
-  }, [scene, socketPoint, path, slotType, part.name]);
+  }, [scene, socketPoint, path, slotType, partName]);
 
   React.useEffect(() => {
     if (clonedScene) {
