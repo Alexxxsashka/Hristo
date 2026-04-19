@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Save, ArrowUp, ArrowDown, Plus } from 'lucide-react';
+import { Upload, X, Save, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
 import { Product, Category, Characteristic, ProductVariant, ProductAttribute } from '../../types';
@@ -67,6 +67,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   const [newAttributeOptions, setNewAttributeOptions] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
 
   const validateField = (field: string, value: any) => {
     let error = '';
@@ -240,6 +241,19 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
       console.log('Saving product to database...', productToSave);
       await databaseService.saveProduct(productToSave as any);
+      
+      // Permanently delete orphaned blobs from storage after successful DB save
+      if (deletedBlobs.length > 0) {
+        console.log(`Cleaning up ${deletedBlobs.length} orphaned blobs...`);
+        for (const url of deletedBlobs) {
+          try {
+            await databaseService.deleteFile(url);
+          } catch (err) {
+            console.warn("Failed to delete orphaned blob:", url, err);
+          }
+        }
+      }
+
       console.log('Product saved successfully!');
       onNotify('Product saved successfully!');
       onSuccess();
@@ -968,13 +982,17 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                   <button 
                     type="button" 
                     onClick={() => {
+                      const item = combinedImages[index];
+                      if (typeof item === 'string') {
+                        setDeletedBlobs(prev => [...prev, item]);
+                      }
                       const newImages = combinedImages.filter((_, i) => i !== index);
                       setCombinedImages(newImages);
                       // Mгновенно обновляем formData, чтобы удаление точно зафиксировалось
                       setFormData(prev => ({
                         ...prev,
                         images: newImages.filter(img => typeof img === 'string') as string[],
-                        image: (newImages[0] && typeof newImages[0] === 'string') ? newImages[0] : (prev.image === combinedImages[index] ? '' : prev.image)
+                        image: (newImages[0] && typeof newImages[0] === 'string') ? newImages[0] : (prev.image === item ? '' : prev.image)
                       }));
                     }}
                     className="p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -1023,6 +1041,23 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     onChange={e => setModelFile(e.target.files?.[0] || null)}
                   />
                 </label>
+                {(modelFile || formData.model3D) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (modelFile) {
+                        setModelFile(null);
+                      } else if (formData.model3D) {
+                        setDeletedBlobs(prev => [...prev, formData.model3D!]);
+                        setFormData({...formData, model3D: '', model3DName: ''});
+                      }
+                    }}
+                    className="p-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition-all"
+                    title="Remove 3D model"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                )}
               </div>
             </div>
           )}
