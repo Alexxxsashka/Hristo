@@ -40,7 +40,7 @@ export const RegisterPage: React.FC = () => {
     switch (field) {
       case 'username':
         if (!value.trim()) {
-          error = 'Username is required';
+          error = 'Username is ';
         } else if (value.length < 3) {
           error = 'Username must be at least 3 characters';
         } else if (value.length > 50) {
@@ -51,7 +51,7 @@ export const RegisterPage: React.FC = () => {
         break;
       case 'email':
         if (!value.trim()) {
-          error = 'Email is required';
+          error = 'Email is ';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           error = 'Please enter a valid email address';
         } else if (value.length > 255) {
@@ -60,7 +60,7 @@ export const RegisterPage: React.FC = () => {
         break;
       case 'password':
         if (!value) {
-          error = 'Password is required';
+          error = 'Password is ';
         } else if (value.length < 8) {
           error = 'Password must be at least 8 characters';
         } else if (value.length > 128) {

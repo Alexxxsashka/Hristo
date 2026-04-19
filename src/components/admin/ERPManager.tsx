@@ -740,8 +740,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   value={newWarehouse.name}
                   onChange={e => setNewWarehouse({...newWarehouse, name: e.target.value})}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-                  placeholder="Main Warehouse"
-                  required
+                  placeholder="Main Warehouse" 
                 />
               </div>
               <div className="space-y-2">
@@ -802,8 +801,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                     type="text" 
                     value={newSupplier.name}
                     onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
-                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-                    required
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900" 
                   />
                 </div>
                 <div className="space-y-2">

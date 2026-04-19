@@ -56,6 +56,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     return existingImages;
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
   const [newSlot, setNewSlot] = useState('');
@@ -73,7 +74,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     switch (field) {
       case 'name':
         if (!value?.trim()) {
-          error = 'Product name is required';
+          error = 'Product name is ';
         } else if (value.length < 2) {
           error = 'Product name must be at least 2 characters';
         } else if (value.length > 255) {
@@ -82,7 +83,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         break;
       case 'description':
         if (!value?.trim()) {
-          error = 'Description is required';
+          error = 'Description is ';
         } else if (value.length < 10) {
           error = 'Description must be at least 10 characters';
         } else if (value.length > 2000) {
@@ -427,12 +428,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.name}
-              onChange={e => handleFieldChange('name', e.target.value)}
+              onChange={e =>
+            {formErrors.name && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.name}</p>} handleFieldChange('name', e.target.value)}
               className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
                 fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
               }`}
-              maxLength={255}
-              required
+              maxLength={255} 
             />
             {fieldErrors.name && (
               <p className="text-red-500 text-xs">{fieldErrors.name}</p>
@@ -444,7 +445,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.brand}
-              onChange={e => handleFieldChange('brand', e.target.value)}
+              onChange={e =>
+            {formErrors.brand && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.brand}</p>} handleFieldChange('brand', e.target.value)}
               className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
                 fieldErrors.brand ? 'border-red-500' : 'border-zinc-200'
               }`}
@@ -461,14 +463,14 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="number" 
               value={formData.price}
-              onChange={e => handleFieldChange('price', Number(e.target.value))}
+              onChange={e =>
+            {formErrors.price && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.price}</p>} handleFieldChange('price', Number(e.target.value))}
               className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
                 fieldErrors.price ? 'border-red-500' : 'border-zinc-200'
               }`}
               min="0"
               max="999999.99"
-              step="0.01"
-              required
+              step="0.01" 
             />
             {fieldErrors.price && (
               <p className="text-red-500 text-xs">{fieldErrors.price}</p>
@@ -480,7 +482,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="number" 
               value={formData.discount || 0}
-              onChange={e => setFormData({...formData, discount: Number(e.target.value)})}
+              onChange={e =>
+            {formErrors.discount && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.discount}</p>} setFormData({...formData, discount: Number(e.target.value)})}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               min="0"
               max="100"
@@ -495,8 +498,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <select 
               value={formData.type}
               onChange={e => setFormData({...formData, type: e.target.value as any})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-              required
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900" 
             >
               <option value="weapon">Weapon</option>
               <option value="module">Module</option>
@@ -589,13 +591,13 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="number" 
               value={formData.stock}
-              onChange={e => handleFieldChange('stock', Number(e.target.value))}
+              onChange={e =>
+            {formErrors.stock && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.stock}</p>} handleFieldChange('stock', Number(e.target.value))}
               className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
                 fieldErrors.stock ? 'border-red-500' : 'border-zinc-200'
               }`}
               min="0"
-              max="999999"
-              required
+              max="999999" 
             />
             {fieldErrors.stock && (
               <p className="text-red-500 text-xs">{fieldErrors.stock}</p>
@@ -618,9 +620,9 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <label className="text-sm font-semibold text-zinc-700">Category</label>
             <select 
               value={formData.category}
-              onChange={e => setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-              required
+              onChange={e =>
+            {formErrors.category && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.category}</p>} setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}})}
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900" 
             >
               <option value="">Select Category</option>
               {categories.filter(c => !c.parent).map(c => (
@@ -633,8 +635,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <select 
               value={formData.subcategory}
               onChange={e => setFormData({...formData, subcategory: e.target.value})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-              required
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900" 
             >
               <option value="">Select Subcategory</option>
               {categories.filter(c => c.parent === formData.category).map(c => (
@@ -821,12 +822,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Brief summary of the product (appears in lists).</p>}
           <textarea 
             value={formData.description}
-            onChange={e => handleFieldChange('description', e.target.value)}
+            onChange={e =>
+            {formErrors.description && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.description}</p>} handleFieldChange('description', e.target.value)}
             className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none ${
               fieldErrors.description ? 'border-red-500' : 'border-zinc-200'
             }`}
-            maxLength={2000}
-            required
+            maxLength={2000} 
           />
           {fieldErrors.description && (
             <p className="text-red-500 text-xs">{fieldErrors.description}</p>

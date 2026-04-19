@@ -97,8 +97,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                 value={editingPolicy.id || ''}
                 onChange={e => setEditingPolicy({ ...editingPolicy, id: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
-                placeholder="privacy-policy"
-                required
+                placeholder="privacy-policy" 
               />
             </div>
           )}
@@ -114,8 +113,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                   type="text" 
                   value={editingPolicy.title || ''}
                   onChange={e => setEditingPolicy({ ...editingPolicy, title: e.target.value })}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
-                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none" 
                 />
               </div>
 
@@ -124,8 +122,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                 <textarea 
                   value={editingPolicy.content || ''}
                   onChange={e => setEditingPolicy({ ...editingPolicy, content: e.target.value })}
-                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-[300px] resize-none font-mono text-sm"
-                  required
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-[300px] resize-none font-mono text-sm" 
                 />
               </div>
             </div>

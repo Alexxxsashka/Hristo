@@ -12,6 +12,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void
 }) => {
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [newCat, setNewCat] = useState<Partial<Category>>({ 
     name: '', 
     parent: '', 
@@ -27,7 +28,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
     switch (field) {
       case 'name':
         if (!value?.trim()) {
-          error = 'Category name is required';
+          error = 'Category name is ';
         } else if (value.length < 2) {
           error = 'Category name must be at least 2 characters';
         } else if (value.length > 100) {
@@ -171,12 +172,12 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
                 type="text"
                 placeholder="Category Name"
                 value={newCat.name}
-                onChange={e => handleFieldChange('name', e.target.value)}
+                onChange={e =>
+              {formErrors.name && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.name}</p>} handleFieldChange('name', e.target.value)}
                 className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none ${
                   fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
                 }`}
-                maxLength={100}
-                required
+                maxLength={100} 
               />
               {fieldErrors.name && (
                 <p className="text-red-500 text-xs">{fieldErrors.name}</p>
@@ -201,7 +202,8 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
                 type="number"
                 placeholder="Disc %"
                 value={newCat.discount || 0}
-                onChange={e => setNewCat({ ...newCat, discount: Number(e.target.value) })}
+                onChange={e =>
+              {formErrors.discount && <p className="text-xs text-red-500 mt-1 font-medium">{formErrors.discount}</p>} setNewCat({ ...newCat, discount: Number(e.target.value) })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
                 min="0"
                 max="100"
