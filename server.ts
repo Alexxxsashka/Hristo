@@ -15,7 +15,7 @@ import pg from "pg";
 import { PGlite } from "@electric-sql/pglite";
 import axios from 'axios';
 import Stripe from "stripe";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -83,7 +83,7 @@ const testConnection = async () => {
   }
 };
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
 
 // Stripe Initialization
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy", {
@@ -161,8 +161,59 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Multer configuration for memory storage
+const memoryStorage = multer.memoryStorage();
+const uploadMemory = multer({ storage: memoryStorage });
+
 export const app = express();
 const PORT = parseInt(process.env.PORT || "3000");
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Auth Middleware
+const authenticateToken = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    // Try local JWT first
+    try {
+      const user = jwt.verify(token, JWT_SECRET);
+      req.user = user;
+      return next();
+    } catch (jwtErr) {
+      // Fallback to Firebase
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      
+      // Fetch user from DB to get role
+      const userResult = await pool.query('SELECT role, username FROM users WHERE id = $1', [decodedToken.uid]);
+      const dbUser = userResult.rows[0];
+      
+      req.user = {
+        id: decodedToken.uid,
+        email: decodedToken.email,
+        role: dbUser?.role || (decodedToken.email === 'guardsowh@gmail.com' ? 'admin' : 'user'),
+        username: dbUser?.username || decodedToken.name || decodedToken.email?.split('@')[0] || 'User'
+      };
+      next();
+    }
+  } catch (error) {
+    console.error('Auth verification failed:', error);
+    return res.status(403).json({ error: "Forbidden" });
+  }
+};
+
+const authenticateAdmin = async (req: any, res: any, next: any) => {
+  await authenticateToken(req, res, () => {
+    if (req.user && req.user.role === "admin") {
+      next();
+    } else {
+      res.status(403).json({ error: "Admin access required" });
+    }
+  });
+};
 
   // Helper to upload to Vercel Blob
   const uploadToFirebase = async (file: Express.Multer.File, folder: string) => {
@@ -218,9 +269,7 @@ const PORT = parseInt(process.env.PORT || "3000");
     }
   });
 
-  // Multer configuration for memory storage
-  const memoryStorage = multer.memoryStorage();
-  const uploadMemory = multer({ storage: memoryStorage });
+,
 
   app.use(express.json());
   app.use("/models", express.static(modelsDir));
@@ -494,50 +543,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
   });
 
-  // Auth Middleware
-  const authenticateToken = async (req: any, res: any, next: any) => {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-    try {
-      // Try local JWT first
-      try {
-        const user = jwt.verify(token, JWT_SECRET);
-        req.user = user;
-        return next();
-      } catch (jwtErr) {
-        // Fallback to Firebase
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        
-        // Fetch user from DB to get role
-        const userResult = await pool.query('SELECT role, username FROM users WHERE id = $1', [decodedToken.uid]);
-        const dbUser = userResult.rows[0];
-        
-        req.user = {
-          id: decodedToken.uid,
-          email: decodedToken.email,
-          role: dbUser?.role || (decodedToken.email === 'guardsowh@gmail.com' ? 'admin' : 'user'),
-          username: dbUser?.username || decodedToken.name || decodedToken.email?.split('@')[0] || 'User'
-        };
-        next();
-      }
-    } catch (error) {
-      console.error('Auth verification failed:', error);
-      return res.status(403).json({ error: "Forbidden" });
-    }
-  };
-
-  const authenticateAdmin = async (req: any, res: any, next: any) => {
-    await authenticateToken(req, res, () => {
-      if (req.user && req.user.role === "admin") {
-        next();
-      } else {
-        res.status(403).json({ error: "Admin access required" });
-      }
-    });
-  };
+,
 
   // Public API Routes
   app.get("/api/products", async (req, res) => {
