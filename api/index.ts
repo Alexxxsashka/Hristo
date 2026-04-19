@@ -348,6 +348,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (adminProd && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      
+      try {
+        // Cleanup blobs
+        const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProd[0]]);
+        if (result.rows.length > 0) {
+          const p = result.rows[0];
+          const urlsToDelete: string[] = [];
+          
+          if (p.image_url) urlsToDelete.push(p.image_url);
+          if (p.model_3d_url) urlsToDelete.push(p.model_3d_url);
+          if (Array.isArray(p.images)) {
+            p.images.forEach((u: any) => { if (typeof u === 'string') urlsToDelete.push(u); });
+          } else if (typeof p.images === 'string') {
+            try {
+              const parsed = JSON.parse(p.images);
+              if (Array.isArray(parsed)) parsed.forEach((u: any) => { if (typeof u === 'string') urlsToDelete.push(u); });
+            } catch (e) {}
+          }
+
+          const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+          for (const url of urlsToDelete) {
+            if (url && url.includes('blob.vercel-storage.com')) {
+              try { await del(url, { token }); } catch (e) { console.error(`Failed to delete blob: ${url}`, e); }
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Blob cleanup error during product delete:', e);
+      }
+
       await pool.query("DELETE FROM products WHERE id = $1 OR slug = $1", [adminProd[0]]);
       return res.status(204).end();
     }
@@ -411,7 +441,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (adminBlog && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      await pool.query("DELETE FROM blog_posts WHERE id = $1", [adminBlog[0]]);
+      
+      try {
+        const result = await pool.query('SELECT image_url FROM blog_posts WHERE id = $1 OR slug = $1', [adminBlog[0]]);
+        if (result.rows.length > 0 && result.rows[0].image_url) {
+          const url = result.rows[0].image_url;
+          if (url && url.includes('blob.vercel-storage.com')) {
+            const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+            try { await del(url, { token }); } catch (e) { console.error(`Failed to delete blog image blob: ${url}`, e); }
+          }
+        }
+      } catch (e) {
+        console.error('Blob cleanup error during blog delete:', e);
+      }
+
+      await pool.query("DELETE FROM blog_posts WHERE id = $1 OR slug = $1", [adminBlog[0]]);
       return res.status(204).end();
     }
 
@@ -599,8 +643,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── GET /site-settings ─────────────────────────────────────────────────────
-    if (path === "/site-settings") {
-      return res.json({ id: "default", name: "Hristo Airsoft", currency: "EUR" });
+    if (path === "/site-settings" && method === "GET") {
+      const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
+      if (result.rows.length > 0) {
+        return res.json(result.rows[0]);
+      } else {
+        return res.json({ id: 'default' });
+      }
+    }
+
+    // ── PUT /site-settings ─────────────────────────────────────────────────────
+    if (path === "/site-settings" && method === "PUT") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+
+      const settings = req.body;
+      const id = settings.id || 'default';
+      
+      const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
+      
+      if (exists.rows.length > 0) {
+        const keys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_'));
+        if (keys.length === 0) return res.json({ success: true });
+        
+        const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
+        const values = keys.map(k => settings[k]);
+        
+        await pool.query(
+          `UPDATE site_settings SET ${setClause} WHERE id = $1`,
+          [id, ...values]
+        );
+      } else {
+        const keys = Object.keys(settings);
+        const columns = keys.map(k => `"${k}"`).join(', ');
+        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+        const values = keys.map(k => settings[k]);
+        
+        await pool.query(
+          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
+          values
+        );
+      }
+      return res.json({ success: true });
     }
 
     // ── Admin init ─────────────────────────────────────────────────────────────

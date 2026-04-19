@@ -259,7 +259,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                       >
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img 
-                            src={weapon.image?.startsWith('http') ? weapon.image : (weapon.image || `https://picsum.photos/seed/${weapon.id}/800/500`)}
+                            src={weapon.images && weapon.images.length > 0 ? weapon.images[0] : (weapon.image?.startsWith('http') ? weapon.image : (weapon.image || `https://picsum.photos/seed/${weapon.id}/800/500`))}
                             alt={weapon.name}
                             className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                           />
@@ -303,7 +303,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                             }}
                           >
                             <img 
-                              src={build.activeProduct.image?.startsWith('http') ? build.activeProduct.image : (build.activeProduct.image || `https://picsum.photos/seed/${build.activeProduct.id}/800/500`)}
+                              src={build.activeProduct.images && build.activeProduct.images.length > 0 ? build.activeProduct.images[0] : (build.activeProduct.image?.startsWith('http') ? build.activeProduct.image : (build.activeProduct.image || `https://picsum.photos/seed/${build.activeProduct.id}/800/500`))}
                               alt={build.name}
                               className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                             />

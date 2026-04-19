@@ -208,7 +208,7 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
                   : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 text-zinc-300'
               }`}
             >
-              <img src={module.image?.startsWith('http') ? module.image : module.image} className="w-8 h-8 object-cover rounded bg-black shrink-0" />
+              <img src={module.images && module.images.length > 0 ? module.images[0] : (module.image?.startsWith('http') ? module.image : (module.image || `https://picsum.photos/seed/${module.id}/100/100`))} className="w-8 h-8 object-cover rounded bg-black shrink-0" alt={module.name} />
               <div className="text-left overflow-hidden">
                 <p className="text-[10px] font-bold truncate uppercase">{module.name}</p>
                 <p className="text-[9px] text-zinc-500 font-mono mt-0.5">€{module.price}</p>
@@ -334,7 +334,7 @@ const Socket = ({
                   >
                     {currentPart ? (
                       <img 
-                        src={currentPart.image} 
+                        src={currentPart.images && currentPart.images.length > 0 ? currentPart.images[0] : (currentPart.image?.startsWith('http') ? currentPart.image : (currentPart.image || `https://picsum.photos/seed/${currentPart.id}/200/200`))} 
                         className="w-full h-full object-cover opacity-90 group-hover/cell:opacity-100 transition-opacity" 
                         alt={currentPart.name}
                       />

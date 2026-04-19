@@ -170,7 +170,8 @@ const PORT = parseInt(process.env.PORT || "3000");
       const filename = `${folder}/${Date.now()}-${file.originalname}`;
       const blob = await put(filename, file.buffer, {
         access: 'public',
-        token: process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
+        contentType: file.mimetype,
+        token: process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN
       });
       return blob.url;
     } catch (error) {
@@ -178,6 +179,44 @@ const PORT = parseInt(process.env.PORT || "3000");
       return null;
     }
   };
+
+  // Generic upload endpoint
+  app.post("/api/admin/upload", authenticateAdmin, uploadMemory.single("file"), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      const path = req.body.path || "uploads";
+      const url = await uploadToFirebase(req.file, path);
+      
+      if (!url) {
+        throw new Error("Failed to upload to Vercel Blob");
+      }
+      
+      res.json({ url });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
+
+  // Generic delete endpoint
+  app.delete("/api/admin/upload", authenticateAdmin, async (req, res) => {
+    try {
+      const url = req.query.url as string;
+      if (!url) {
+        return res.status(400).json({ error: "No URL provided" });
+      }
+
+      const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+      await del(url, { token });
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete error:", error);
+      res.status(500).json({ error: "Delete failed" });
+    }
+  });
 
   // Multer configuration for memory storage
   const memoryStorage = multer.memoryStorage();
@@ -537,13 +576,22 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const categoryData = categories.find((c: any) => c.id === p.category_id || c.id === p.subcategory);
       const product = {
         ...p,
-        category: p.category_id, // Map for frontend
+        id: p.id,
+        image: p.image_url,
+        images: Array.isArray(p.images) ? p.images : (p.image_url ? [p.image_url] : []),
+        longDescription: p.long_description,
+        nameHr: p.name_hr,
+        descriptionHr: p.description_hr,
+        longDescriptionHr: p.long_description_hr,
+        category: p.category_id,
+        subcategory: p.subcategory || null,
         price: parseFloat(p.price),
         landing_cost: p.landing_cost ? parseFloat(p.landing_cost) : null,
         msrp: p.msrp ? parseFloat(p.msrp) : null,
         stock: parseInt(p.stock),
         discount: p.discount ? parseInt(p.discount) : 0,
-        has3D: p.has_3d === true || p.has_3d === 'true'
+        model3D: p.model_3d_url,
+        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url
       };
 
       if (categoryData) {
@@ -674,12 +722,19 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         `INSERT INTO products (
           id, uid, sku, barcode, slug, name, description, type, 
           category_id, subcategory, brand, model, price, stock, 
-          image_url, model_3d_url, has_3d, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+          image_url, model_3d_url, has_3d, status,
+          images, characteristics, variants, variant_attributes,
+          category_filters, long_description, name_hr, description_hr,
+          long_description_hr
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)`,
         [
           id, p.uid || id, p.sku, p.barcode, p.slug || id, p.name, p.description, p.type,
           p.category, p.subcategory, p.brand, p.model, p.price, p.stock,
-          p.image, p.model3D, p.has3D, 'active'
+          p.image, p.model3D, p.has3D, 'active',
+          JSON.stringify(p.images || []), JSON.stringify(p.characteristics || []), 
+          JSON.stringify(p.variants || []), JSON.stringify(p.variantAttributes || []),
+          JSON.stringify(p.categoryFilters || {}), p.longDescription, 
+          p.nameHr, p.descriptionHr, p.longDescriptionHr
         ]
       );
       
@@ -700,7 +755,13 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         category: 'category_id',
         image: 'image_url',
         model3D: 'model_3d_url',
-        has3D: 'has_3d'
+        has3D: 'has_3d',
+        longDescription: 'long_description',
+        nameHr: 'name_hr',
+        descriptionHr: 'description_hr',
+        longDescriptionHr: 'long_description_hr',
+        variantAttributes: 'variant_attributes',
+        categoryFilters: 'category_filters'
       };
 
       const updates: Record<string, any> = {};
@@ -711,10 +772,17 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         const allowedKeys = [
           'sku', 'barcode', 'slug', 'name', 'description', 'type', 
           'category_id', 'subcategory', 'brand', 'model', 'price', 
-          'stock', 'image_url', 'model_3d_url', 'has_3d', 'status', 'uid'
+          'stock', 'image_url', 'model_3d_url', 'has_3d', 'status', 'uid',
+          'images', 'characteristics', 'variants', 'variant_attributes', 
+          'category_filters', 'long_description', 'name_hr', 'description_hr', 
+          'long_description_hr'
         ];
         if (allowedKeys.includes(sqlKey)) {
-          updates[sqlKey] = p[key];
+          let value = p[key];
+          if (['images', 'characteristics', 'variants', 'variant_attributes', 'category_filters'].includes(sqlKey)) {
+            value = JSON.stringify(value || (sqlKey === 'images' ? [] : (sqlKey === 'category_filters' ? {} : [])));
+          }
+          updates[sqlKey] = value;
         }
       });
 
@@ -1210,9 +1278,20 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const finalSlug = newProduct.slug || newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
       await pool.query(
-        `INSERT INTO products (id, uid, sku, barcode, slug, name, description, type, category_id, subcategory, brand, model, price, stock, image_url, model_3d_url, has_3d) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-        [id, uid, newProduct.sku, newProduct.barcode, finalSlug, newProduct.name, newProduct.description, newProduct.type, newProduct.category, newProduct.subcategory, newProduct.brand, newProduct.model, newProduct.price, newProduct.stock, newProduct.image_url, newProduct.model_3d_url, newProduct.has_3d || false]
+        `INSERT INTO products (
+          id, uid, sku, barcode, slug, name, description, type, category_id, subcategory, 
+          brand, model, price, stock, image_url, images, model_3d_url, has_3d, 
+          characteristics, variant_attributes, variants, category_filters, slots, 
+          compatible_module_categories, socket_point
+        ) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
+        [
+          id, uid, newProduct.sku, newProduct.barcode, finalSlug, newProduct.name, newProduct.description, newProduct.type, newProduct.category, newProduct.subcategory, 
+          newProduct.brand, newProduct.model, newProduct.price, newProduct.stock, newProduct.image_url, JSON.stringify(newProduct.images || []), newProduct.model_3d_url, newProduct.has_3d || false,
+          JSON.stringify(newProduct.characteristics || []), JSON.stringify(newProduct.variant_attributes || []), JSON.stringify(newProduct.variants || []), 
+          JSON.stringify(newProduct.category_filters || {}), JSON.stringify(newProduct.slots || []), 
+          JSON.stringify(newProduct.compatible_module_categories || []), JSON.stringify(newProduct.socket_point || [])
+        ]
       );
 
       res.status(201).json({ ...newProduct, id, uid, slug: finalSlug });
@@ -1246,9 +1325,19 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         `UPDATE products SET 
           sku = $1, barcode = $2, slug = $3, name = $4, description = $5, 
           type = $6, category_id = $7, subcategory = $8, brand = $9, model = $10, 
-          price = $11, stock = $12, image_url = $13, model_3d_url = $14, has_3d = $15 
-         WHERE id = $16`,
-        [updatedProduct.sku, updatedProduct.barcode, updatedProduct.slug, updatedProduct.name, updatedProduct.description, updatedProduct.type, updatedProduct.category, updatedProduct.subcategory, updatedProduct.brand, updatedProduct.model, updatedProduct.price, updatedProduct.stock, updatedProduct.image_url, updatedProduct.model_3d_url, updatedProduct.has_3d, productId]
+          price = $11, stock = $12, image_url = $13, images = $14, model_3d_url = $15, 
+          has_3d = $16, characteristics = $17, variant_attributes = $18, variants = $19, 
+          category_filters = $20, slots = $21, compatible_module_categories = $22, socket_point = $23 
+         WHERE id = $24`,
+        [
+          updatedProduct.sku, updatedProduct.barcode, updatedProduct.slug, updatedProduct.name, updatedProduct.description, 
+          updatedProduct.type, updatedProduct.category, updatedProduct.subcategory, updatedProduct.brand, updatedProduct.model, 
+          updatedProduct.price, updatedProduct.stock, updatedProduct.image_url, JSON.stringify(updatedProduct.images || []), updatedProduct.model_3d_url, 
+          updatedProduct.has_3d, JSON.stringify(updatedProduct.characteristics || []), JSON.stringify(updatedProduct.variant_attributes || []), JSON.stringify(updatedProduct.variants || []), 
+          JSON.stringify(updatedProduct.category_filters || {}), JSON.stringify(updatedProduct.slots || []), 
+          JSON.stringify(updatedProduct.compatible_module_categories || []), JSON.stringify(updatedProduct.socket_point || []),
+          productId
+        ]
       );
 
       res.json({ ...updatedProduct, id: productId });
@@ -1260,6 +1349,26 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.delete("/api/admin/products/:id", authenticateAdmin, async (req, res) => {
     try {
+      // 1. Get product media to delete from blob storage
+      const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1', [req.params.id]);
+      if (result.rows.length > 0) {
+        const product = result.rows[0];
+        const urlsToDelete = [];
+        if (product.image_url) urlsToDelete.push(product.image_url);
+        if (product.model_3d_url) urlsToDelete.push(product.model_3d_url);
+        if (product.images) {
+           const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+           if (Array.isArray(images)) urlsToDelete.push(...images);
+        }
+
+        const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+        for (const url of urlsToDelete) {
+          if (url && url.includes('blob.vercel-storage.com')) {
+            try { await del(url, { token }); } catch (e) { console.error(`Failed to delete blob during product removal: ${url}`, e); }
+          }
+        }
+      }
+
       await pool.query('DELETE FROM products WHERE id = $1', [req.params.id]);
       res.status(204).send();
     } catch (error) {
@@ -1357,9 +1466,71 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.delete("/api/admin/blog/:id", authenticateAdmin, async (req, res) => {
     try {
+      // Cleanup blog image
+      const result = await pool.query('SELECT image_url FROM blog_posts WHERE id = $1', [req.params.id]);
+      if (result.rows.length > 0 && result.rows[0].image_url) {
+        const url = result.rows[0].image_url;
+        if (url && url.includes('blob.vercel-storage.com')) {
+          const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+          try { await del(url, { token }); } catch (e) { console.error(`Failed to delete blog image blob: ${url}`, e); }
+        }
+      }
+
       await pool.query('DELETE FROM blog_posts WHERE id = $1', [req.params.id]);
       res.status(204).send();
     } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  // Site Settings API
+  app.get("/api/site-settings", async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        res.json({ id: 'default' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Database error' });
+    }
+  });
+
+  app.put("/api/site-settings", authenticateAdmin, async (req, res) => {
+    try {
+      const settings = req.body;
+      const id = settings.id || 'default';
+      
+      const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
+      
+      if (exists.rows.length > 0) {
+        // Build dynamic update query
+        const keys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_'));
+        if (keys.length === 0) return res.json({ success: true, message: "No fields to update" });
+        
+        const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
+        const values = keys.map(k => settings[k]);
+        
+        await pool.query(
+          `UPDATE site_settings SET ${setClause} WHERE id = $1`,
+          [id, ...values]
+        );
+      } else {
+        const keys = Object.keys(settings);
+        const columns = keys.map(k => `"${k}"`).join(', ');
+        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+        const values = keys.map(k => settings[k]);
+        
+        await pool.query(
+          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
+          values
+        );
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Settings update error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
