@@ -290,8 +290,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const id = p.id || `prod-${Date.now()}`;
       
       const imageUrl = p.image_url || p.image || null;
-      const model3dUrl = p.model_3d_url || p.model3D || null;
-      const baseHas3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      // Prioritize model3D (frontend field) over model_3d_url (backend field) to avoid using cached/old DB values
+      const model3dUrl = p.model3D || p.model_3d_url || null;
+      const baseHas3d = p.has3D !== undefined ? p.has3D : (p.has_3d !== undefined ? p.has_3d : false);
       const has3d = model3dUrl ? true : baseHas3d;
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description || p.longDescription || null;
@@ -327,9 +328,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
       
-      const imageUrl = p.image_url !== undefined ? p.image_url : (p.image !== undefined ? p.image : null);
-      const model3dUrl = p.model_3d_url !== undefined ? p.model_3d_url : (p.model3D !== undefined ? p.model3D : null);
-      const baseHas3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const imageUrl = p.image !== undefined ? p.image : (p.image_url !== undefined ? p.image_url : null);
+      // Prioritize model3D (frontend field) over model_3d_url (backend field) to avoid using cached/old DB values
+      const model3dUrl = p.model3D !== undefined ? p.model3D : (p.model_3d_url !== undefined ? p.model_3d_url : null);
+      const baseHas3d = p.has3D !== undefined ? p.has3D : (p.has_3d !== undefined ? p.has_3d : false);
       const has3d = model3dUrl ? true : baseHas3d;
       const imagesArr = Array.isArray(p.images) ? p.images : (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description !== undefined ? p.long_description : (p.longDescription !== undefined ? p.longDescription : null);

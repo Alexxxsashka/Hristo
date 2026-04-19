@@ -1261,23 +1261,26 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     { name: "imageFile", maxCount: 1 }
   ]), async (req: any, res) => {
     try {
-      const newProduct = JSON.parse(req.body.product);
+      const p = req.body.product ? JSON.parse(req.body.product) : req.body;
       
       if (req.files) {
         if (req.files.modelFile) {
           const url = await uploadToFirebase(req.files.modelFile[0], "models");
-          newProduct.model_3d_url = url;
-          newProduct.has_3d = true;
+          p.model_3d_url = url;
+          p.has_3d = true;
         }
         if (req.files.imageFile) {
           const url = await uploadToFirebase(req.files.imageFile[0], "images");
-          newProduct.image_url = url;
+          p.image_url = url;
         }
       }
 
-      const id = newProduct.id || `prod-${Date.now()}`;
-      const uid = newProduct.uid || id;
-      const finalSlug = newProduct.slug || newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const id = p.id || `prod-${Date.now()}`;
+      const uid = p.uid || id;
+      const finalSlug = p.slug || (p.name ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
+      const model3dUrl = p.model3D || p.model_3d_url || null;
+      const has3d = !!model3dUrl || p.has3D || p.has_3d || false;
+      const imageUrl = p.image || p.image_url || null;
 
       await pool.query(
         `INSERT INTO products (
@@ -1288,15 +1291,15 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         ) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
         [
-          id, uid, newProduct.sku, newProduct.barcode, finalSlug, newProduct.name, newProduct.description, newProduct.type, newProduct.category, newProduct.subcategory, 
-          newProduct.brand, newProduct.model, newProduct.price, newProduct.stock, newProduct.image_url, JSON.stringify(newProduct.images || []), newProduct.model_3d_url, newProduct.has_3d || false,
-          JSON.stringify(newProduct.characteristics || []), JSON.stringify(newProduct.variant_attributes || []), JSON.stringify(newProduct.variants || []), 
-          JSON.stringify(newProduct.category_filters || {}), JSON.stringify(newProduct.slots || []), 
-          JSON.stringify(newProduct.compatible_module_categories || []), JSON.stringify(newProduct.socket_point || [])
+          id, uid, p.sku||id, p.barcode||'', finalSlug, p.name||'Unnamed Product', p.description||'', p.type||'weapon', p.category||p.category_id||null, p.subcategory||null, 
+          p.brand||'', p.model||'', p.price||0, p.stock||0, imageUrl, JSON.stringify(p.images || []), model3dUrl, has3d,
+          JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
+          JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
+          JSON.stringify(p.compatible_module_categories || []), JSON.stringify(p.socket_point || [0,0,0])
         ]
       );
 
-      res.status(201).json({ ...newProduct, id, uid, slug: finalSlug });
+      res.status(201).json({ ...p, id, uid, slug: finalSlug });
     } catch (error) {
       console.error('Product creation error:', error);
       res.status(500).json({ error: 'Database error' });
@@ -1309,19 +1312,23 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   ]), async (req: any, res) => {
     try {
       const productId = req.params.id;
-      const updatedProduct = JSON.parse(req.body.product);
+      const p = req.body.product ? JSON.parse(req.body.product) : req.body;
       
       if (req.files) {
         if (req.files.modelFile) {
           const url = await uploadToFirebase(req.files.modelFile[0], "models");
-          updatedProduct.model_3d_url = url;
-          updatedProduct.has_3d = true;
+          p.model_3d_url = url;
+          p.has_3d = true;
         }
         if (req.files.imageFile) {
           const url = await uploadToFirebase(req.files.imageFile[0], "images");
-          updatedProduct.image_url = url;
+          p.image_url = url;
         }
       }
+
+      const model3dUrl = p.model3D !== undefined ? p.model3D : (p.model_3d_url || null);
+      const has3d = !!model3dUrl || p.has3D || p.has_3d || false;
+      const imageUrl = p.image !== undefined ? p.image : (p.image_url || null);
 
       await pool.query(
         `UPDATE products SET 
@@ -1332,17 +1339,17 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           category_filters = $20, slots = $21, compatible_module_categories = $22, socket_point = $23 
          WHERE id = $24`,
         [
-          updatedProduct.sku, updatedProduct.barcode, updatedProduct.slug, updatedProduct.name, updatedProduct.description, 
-          updatedProduct.type, updatedProduct.category, updatedProduct.subcategory, updatedProduct.brand, updatedProduct.model, 
-          updatedProduct.price, updatedProduct.stock, updatedProduct.image_url, JSON.stringify(updatedProduct.images || []), updatedProduct.model_3d_url, 
-          updatedProduct.has_3d, JSON.stringify(updatedProduct.characteristics || []), JSON.stringify(updatedProduct.variant_attributes || []), JSON.stringify(updatedProduct.variants || []), 
-          JSON.stringify(updatedProduct.category_filters || {}), JSON.stringify(updatedProduct.slots || []), 
-          JSON.stringify(updatedProduct.compatible_module_categories || []), JSON.stringify(updatedProduct.socket_point || []),
+          p.sku, p.barcode, p.slug, p.name, p.description, 
+          p.type, p.category||p.category_id, p.subcategory, p.brand, p.model, 
+          p.price, p.stock, imageUrl, JSON.stringify(p.images || []), model3dUrl, 
+          has3d, JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
+          JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
+          JSON.stringify(p.compatible_module_categories || []), JSON.stringify(p.socket_point || []),
           productId
         ]
       );
 
-      res.json({ ...updatedProduct, id: productId });
+      res.json({ ...p, id: productId });
     } catch (error) {
       console.error('Product update error:', error);
       res.status(500).json({ error: 'Database error' });
