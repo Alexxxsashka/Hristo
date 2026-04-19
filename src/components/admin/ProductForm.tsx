@@ -1066,24 +1066,6 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           )}
         </div>
 
-        {formData.has3D && (
-          <div className="space-y-4">
-            <label className="text-sm font-semibold text-zinc-700">3D Configurator Settings</label>
-            <div className="grid grid-cols-1 gap-6 p-6 bg-zinc-50 rounded-2xl border border-zinc-200">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Unique ID (UID)</label>
-                {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Tarkov-style ID for compatibility logic (e.g. mount_picatinny_01).</p>}
-                <input 
-                  type="text" 
-                  value={formData.uid || ''}
-                  onChange={e => setFormData({...formData, uid: e.target.value})}
-                  placeholder="e.g. sight_reflex_01"
-                  className="w-full px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
-                />
-              </div>
-            </div>
-          </div>
-        )}
 
         {formData.type === 'weapon' && (
           <div className="space-y-6">
@@ -1093,20 +1075,6 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
         {formData.type === 'module' && (
           <div className="space-y-6 p-6 bg-zinc-50 rounded-2xl border border-zinc-200">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Attachment Slot</label>
-              <select 
-                value={formData.attachmentSlot}
-                onChange={e => setFormData({...formData, attachmentSlot: e.target.value})}
-                className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl outline-none"
-              >
-                <option value="">Select Slot Type</option>
-                {WEAPON_SLOTS.map(slot => (
-                  <option key={slot} value={slot}>{formatEnum(slot)}</option>
-                ))}
-              </select>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold">The slot ID on the weapon this module attaches to</p>
-            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Mount Type</label>
