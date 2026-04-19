@@ -1862,7 +1862,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
           </button>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-6">
+        <form onSubmit={handleSave} noValidate className="space-y-6">
           {isNew && (
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Policy ID (slug, e.g. privacy-policy)</label>
@@ -2144,7 +2144,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           </button>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-6">
+        <form onSubmit={handleSave} noValidate className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Title</label>
