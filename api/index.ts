@@ -27,9 +27,16 @@ const JWT_SECRET = process.env.JWT_SECRET || "hristo-secret-key";
 
 // ─── Auth middleware ──────────────────────────────────────────────────────────
 function getUser(req: VercelRequest) {
+  let token = "";
   const auth = req.headers.authorization;
-  if (!auth?.startsWith("Bearer ")) return null;
-  const token = auth.slice(7);
+  if (auth?.startsWith("Bearer ")) {
+    token = auth.slice(7);
+  } else if (req.query.token) {
+    token = String(req.query.token);
+  }
+
+  if (!token) return null;
+
   try {
     return jwt.verify(token, JWT_SECRET) as any;
   } catch {

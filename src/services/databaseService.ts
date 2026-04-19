@@ -78,12 +78,8 @@ export const databaseService = {
 
       const blob = await upload(uploadPath, fileForUpload, {
         access: 'public',
-        handleUploadUrl: '/api/admin/upload-handle',
+        handleUploadUrl: `/api/admin/upload-handle?token=${token}`,
         clientPayload: JSON.stringify({ path: uploadPath }),
-        // @ts-ignore - passing token for the backend to verify
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         onUploadProgress: (progressEvent) => {
           if (onProgress) onProgress(progressEvent.percentage);
         }
