@@ -152,6 +152,25 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     });
   };
 
+  const addCompatibleWeapon = () => {
+    if (!newCompatibleWeapon) return;
+    const current = formData.compatibleWeapons || [];
+    if (!current.includes(newCompatibleWeapon)) {
+      setFormData({
+        ...formData,
+        compatibleWeapons: [...current, newCompatibleWeapon]
+      });
+    }
+    setNewCompatibleWeapon('');
+  };
+
+  const removeCompatibleWeapon = (uid: string) => {
+    setFormData({
+      ...formData,
+      compatibleWeapons: (formData.compatibleWeapons || []).filter(id => id !== uid)
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
