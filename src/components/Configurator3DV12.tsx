@@ -96,13 +96,22 @@ const ScaleCompensator = ({ children }: { children: ReactNode }) => {
       weaponRoot.getWorldScale(targetWorldScale);
       
       if (parentWorldScale.x !== 0 && parentWorldScale.y !== 0 && parentWorldScale.z !== 0) {
-        const sx = targetWorldScale.x / parentWorldScale.x;
-        const sy = targetWorldScale.y / parentWorldScale.y;
-        const sz = targetWorldScale.z / parentWorldScale.z;
+        let sx = targetWorldScale.x / parentWorldScale.x;
+        let sy = targetWorldScale.y / parentWorldScale.y;
+        let sz = targetWorldScale.z / parentWorldScale.z;
         
+        // HYPER-SCALE PROTECTION:
+        // If the compensation factor is extreme (like 100x), it usually means 
+        // the parent model is using Blender's 0.01 units. In this case, 
+        // we should actually NOT compensate if our part is already real-world size.
+        if (sx > 10 || sx < 0.1) {
+          console.log(`[ScaleCompensator] Hyper-scaling detected (${sx.toFixed(2)}x). Reverting to 1:1 to prevent visual bugs.`);
+          sx = 1; sy = 1; sz = 1;
+        }
+
         // Only update if changed significantly to avoid jitter
         if (Math.abs(groupRef.current.scale.x - sx) > 0.0001) {
-          console.log(`[ScaleCompensator] Adjusting scale to compensate parent. New Scale:`, { sx, sy, sz });
+          console.log(`[ScaleCompensator] Adjusting scale. Final:`, { sx, sy, sz });
           groupRef.current.scale.set(sx, sy, sz);
         }
       }
