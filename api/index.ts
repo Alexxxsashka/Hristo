@@ -198,6 +198,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── GET /products ──────────────────────────────────────────────────────────
     if (path === "/products" && method === "GET") {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const { category, type, limit = "20", offset = "0" } = req.query as any;
       const where = ["p.status = 'active'"];
       const params: any[] = [];
@@ -227,21 +228,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       return res.json(r.rows.map((p: any) => ({
         ...p,
+        id: p.id,
         image: p.image_url,
+        images: Array.isArray(p.images) ? p.images : (p.image_url ? [p.image_url] : []),
         longDescription: p.long_description,
-        category: p.parent_cat_id || p.category_id,
-        subcategory: p.parent_cat_id ? p.category_id : null,
         nameHr: p.name_hr,
         descriptionHr: p.description_hr,
         longDescriptionHr: p.long_description_hr,
+        category: p.parent_cat_id || p.category_id,
+        subcategory: p.parent_cat_id ? p.category_id : null,
+        price: parseFloat(p.price) || 0,
+        landing_cost: p.landing_cost ? parseFloat(p.landing_cost) : null,
+        msrp: p.msrp ? parseFloat(p.msrp) : null,
+        stock: parseInt(p.stock) || 0,
+        discount: p.discount ? parseInt(p.discount) : 0,
         model3D: p.model_3d_url,
-        has3D: p.has_3d
+        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url
       })));
     }
 
     // ── GET /products/:id ──────────────────────────────────────────────────────
     const prodId = match(path, "/products/:id");
     if (prodId && method === "GET") {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const r = await pool.query(
         `SELECT p.*, c.parent_id as parent_cat_id 
          FROM products p 
@@ -253,15 +262,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const p = r.rows[0];
       return res.json({
         ...p,
+        id: p.id,
         image: p.image_url,
+        images: Array.isArray(p.images) ? p.images : (p.image_url ? [p.image_url] : []),
         longDescription: p.long_description,
-        category: p.parent_cat_id || p.category_id,
-        subcategory: p.parent_cat_id ? p.category_id : null,
         nameHr: p.name_hr,
         descriptionHr: p.description_hr,
         longDescriptionHr: p.long_description_hr,
+        category: p.parent_cat_id || p.category_id,
+        subcategory: p.parent_cat_id ? p.category_id : null,
+        price: parseFloat(p.price) || 0,
+        landing_cost: p.landing_cost ? parseFloat(p.landing_cost) : null,
+        msrp: p.msrp ? parseFloat(p.msrp) : null,
+        stock: parseInt(p.stock) || 0,
+        discount: p.discount ? parseInt(p.discount) : 0,
         model3D: p.model_3d_url,
-        has3D: p.has_3d
+        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url
       });
     }
 
