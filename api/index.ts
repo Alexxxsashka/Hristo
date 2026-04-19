@@ -313,30 +313,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const model3dUrl = p.model_3d_url || p.model3D || null;
       const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
+      const longDescription = p.long_description || p.longDescription || null;
 
-      await pool.query(
+      const r = await pool.query(
         `UPDATE products SET 
-          name=$2, description=$3, price=$4, stock=$5, image_url=$6, images=$7, 
-          model_3d_url=$8, has_3d=$9, characteristics=$10, variants=$11, 
-          variant_attributes=$12, category_filters=$13, brand=$14, model=$15, 
-          sku=$16, type=$17, status=$18 
-         WHERE id = $1`,
+          name=$2, description=$3, long_description=$4, price=$5, stock=$6, image_url=$7, images=$8, 
+          model_3d_url=$9, has_3d=$10, characteristics=$11, variants=$12, 
+          variant_attributes=$13, category_filters=$14, 
+          name_hr=$15, description_hr=$16, long_description_hr=$17,
+          brand=$18, model=$19, sku=$20, type=$21, status=$22 
+         WHERE id = $1 OR slug = $1
+         RETURNING id`,
         [
-          adminProd[0], p.name, p.description, p.price, p.stock, imageUrl, 
+          adminProd[0], p.name, p.description, longDescription, p.price, p.stock, imageUrl, 
           JSON.stringify(imagesArr), model3dUrl, has3d, 
           JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), 
           JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
+          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null,
           p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active'
         ]
       );
-      return res.json({ ok: true });
+
+      if (r.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found to update" });
+      }
+
+      return res.json({ ok: true, id: r.rows[0].id });
     }
 
     // ── DELETE /admin/products/:id ─────────────────────────────────────────────
     if (adminProd && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      await pool.query("DELETE FROM products WHERE id = $1", [adminProd[0]]);
+      await pool.query("DELETE FROM products WHERE id = $1 OR slug = $1", [adminProd[0]]);
       return res.status(204).end();
     }
 
