@@ -159,7 +159,18 @@ export const databaseService = {
       },
       body: JSON.stringify(product)
     });
-    if (!res.ok) throw new Error('Failed to save product');
+    if (!res.ok) {
+      let errorDetail = 'Unknown error';
+      try {
+        const errJson = await res.json();
+        errorDetail = errJson.message || errJson.error || JSON.stringify(errJson);
+      } catch (e) {
+        try {
+          errorDetail = await res.text();
+        } catch (e2) {}
+      }
+      throw new Error(`Failed to save product: ${errorDetail}`);
+    }
   },
 
   async deleteProduct(id: string) {

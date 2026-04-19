@@ -130,22 +130,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── DB Test ───────────────────────────────────────────────────────────────
     if (path === "/db-test" || path === "/diag/db-test") {
-      // Auto-migrate schema on test
-      try {
-        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
-        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
-        await pool.query(`
-          CREATE TABLE IF NOT EXISTS product_compatibility (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            parent_uid TEXT NOT NULL,
-            child_uid TEXT NOT NULL,
-            slot_name TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(parent_uid, child_uid, slot_name)
-          )
-        `);
-      } catch (e) {}
-
       const r = await pool.query("SELECT NOW()");
       return res.json({ ok: true, time: r.rows[0].now });
     }
@@ -364,6 +348,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const longDescription = p.long_description || p.longDescription || null;
 
       try {
+        // Just-in-time migration
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS product_compatibility (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            parent_uid TEXT NOT NULL,
+            child_uid TEXT NOT NULL,
+            slot_name TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(parent_uid, child_uid, slot_name)
+          )
+        `);
+      } catch (e) {
+        console.error("Migration error:", e);
+      }
+
+      try {
         const productData = [
           id, 
           p.uid || id, 
@@ -458,6 +461,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const has3d = model3dUrl ? true : baseHas3d;
       const imagesArr = Array.isArray(p.images) ? p.images : (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description !== undefined ? p.long_description : (p.longDescription !== undefined ? p.longDescription : null);
+
+      try {
+        // Just-in-time migration
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS product_compatibility (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            parent_uid TEXT NOT NULL,
+            child_uid TEXT NOT NULL,
+            slot_name TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(parent_uid, child_uid, slot_name)
+          )
+        `);
+      } catch (e) {
+        console.error("Migration error:", e);
+      }
 
       try {
         const productData = [
