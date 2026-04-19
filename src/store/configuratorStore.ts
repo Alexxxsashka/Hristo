@@ -195,9 +195,11 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       const attachmentSlot = part.attachmentSlot?.toLowerCase();
       
       // EFT Logic 1: Check specific UID compatibility (Must fit the weapon/parent)
-      const allowedIds = part.compatibleIds || part.compatibleWeapons || [];
-      if (allowedIds && allowedIds.length > 0) {
-        if (!allowedIds.includes(activeProduct.uid)) {
+      const allowedIds = (part.compatibleWeapons && part.compatibleWeapons.length > 0) ? part.compatibleWeapons : 
+                        ((part.compatibleIds && part.compatibleIds.length > 0) ? part.compatibleIds : []);
+      
+      if (allowedIds.length > 0) {
+        if (!allowedIds.includes(activeProduct.uid) && !allowedIds.includes(activeProduct.id)) {
           return { 
             compatible: false, 
             reason: `Direct mismatch: ${part.name} is not in the whitelist for ${activeProduct.name}` 

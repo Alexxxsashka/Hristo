@@ -29,14 +29,22 @@ export class CompatibilityEngine {
 
     // 3. Check if parent explicitly allows this category
     if (parent.compatibleModuleCategories && !parent.compatibleModuleCategories.includes(attachment.subcategory || attachment.category)) {
-      console.log(`CompatibilityEngine: ${parent.name} does not support category ${attachment.subcategory || attachment.category}`);
-      return false;
+    if (parent.compatibleModuleCategories && parent.compatibleModuleCategories.length > 0) {
+      if (!parent.compatibleModuleCategories.includes(attachment.subcategory || attachment.category)) {
+        console.log(`CompatibilityEngine: ${parent.name} does not support category ${attachment.subcategory || attachment.category}`);
+        return false;
+      }
     }
 
-    // 4. Check specific UID compatibility (Tarkov-style specific links)
-    if (parent.compatibleIds && !parent.compatibleIds.includes(attachment.uid)) {
-      console.log(`CompatibilityEngine: ${parent.name} does not support specific UID ${attachment.uid}`);
-      return false;
+    // 4. Check specific UID compatibility (Whitelisting)
+    const allowedIds = (attachment.compatibleWeapons && attachment.compatibleWeapons.length > 0) ? attachment.compatibleWeapons : 
+                       ((parent.compatibleIds && parent.compatibleIds.length > 0) ? parent.compatibleIds : []);
+    
+    if (allowedIds.length > 0) {
+      if (!allowedIds.includes(parent.uid) && !allowedIds.includes(attachment.uid)) {
+        console.log(`CompatibilityEngine: ${parent.name} has a whitelist that does not include ${attachment.uid}`);
+        return false;
+      }
     }
 
     // 5. Check global weapon compatibility

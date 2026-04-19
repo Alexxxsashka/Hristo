@@ -159,10 +159,13 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
     
     const typeMatch = category === sType || fitsInSlot || allowedInSlots;
     
-    // Check weapon compatibility if specified
+    // Check weapon compatibility if specified (Whitelisting)
     const activeProd = useConfiguratorStore.getState().activeProduct;
-    const weaponMatch = !m.compatibleWeapons || m.compatibleWeapons.length === 0 || 
-      m.compatibleWeapons.some(w => 
+    const allowedWeapons = (m.compatibleWeapons && m.compatibleWeapons.length > 0) ? m.compatibleWeapons :
+                          ((m.compatibleIds && m.compatibleIds.length > 0) ? m.compatibleIds : []);
+
+    const weaponMatch = allowedWeapons.length === 0 || 
+      allowedWeapons.some(w => 
         w.toLowerCase() === parentId.toLowerCase() || 
         (activeProd && (
           w.toLowerCase() === activeProd.id.toLowerCase() || 

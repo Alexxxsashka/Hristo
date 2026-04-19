@@ -58,13 +58,16 @@ export const PartSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => 
     
     const typeMatch = category === slotType || fitsInSlot || allowedInSlots;
     
-    // Check weapon compatibility if specified
-    const weaponMatch = !m.compatibleWeapons || m.compatibleWeapons.length === 0 || 
-      m.compatibleWeapons.includes(parentId) || 
+    // Check weapon compatibility if specified (Whitelisting)
+    const allowedWeapons = (m.compatibleWeapons && m.compatibleWeapons.length > 0) ? m.compatibleWeapons :
+                          ((m.compatibleIds && m.compatibleIds.length > 0) ? m.compatibleIds : []);
+
+    const weaponMatch = allowedWeapons.length === 0 || 
+      allowedWeapons.includes(parentId) || 
       (activeProduct && (
-        m.compatibleWeapons.includes(activeProduct.id) || 
-        m.compatibleWeapons.includes(activeProduct.uid) || 
-        m.compatibleWeapons.includes(activeProduct.name)
+        allowedWeapons.includes(activeProduct.id) || 
+        allowedWeapons.includes(activeProduct.uid) || 
+        allowedWeapons.includes(activeProduct.name)
       ));
     
     return typeMatch && weaponMatch;
