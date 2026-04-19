@@ -468,7 +468,6 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               <p className="text-red-500 text-xs">{fieldErrors.brand}</p>
             )}
           </div>
-          </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Price (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Selling price in Euros.</p>}
