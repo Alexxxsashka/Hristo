@@ -4,7 +4,7 @@ import { Product } from '../types';
 import { Plus, X, Info, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export const PartSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
   const { activeProduct, selectedParts, addPart, removePart, checkCompatibility, selectedSlotId, setSelectedSlotId } = useConfiguratorStore();
@@ -32,7 +32,7 @@ export const PartSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => 
   };
   
   React.useEffect(() => {
-    firebaseService.getProducts()
+    databaseService.getProducts()
       .then(data => {
         if (data) {
           // Include both 'module' and 'part' types

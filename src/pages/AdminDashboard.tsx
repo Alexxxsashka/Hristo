@@ -1585,24 +1585,24 @@ const DataMigrationTool = ({ onNotify }: {
             // Use appropriate service method based on collection
             switch (collection.name) {
               case 'categories':
-                await firebaseService.saveCategory(item);
+                await databaseService.saveCategory(item);
                 break;
               case 'products':
-                await firebaseService.saveProduct(item);
+                await databaseService.saveProduct(item);
                 break;
               case 'blog_posts':
-                await firebaseService.saveBlogPost(item);
+                await databaseService.saveBlogPost(item);
                 break;
               case 'contact_messages':
-                await firebaseService.saveMessage(item);
+                await databaseService.saveMessage(item);
                 break;
               case 'policies':
-                await firebaseService.savePolicy(item);
+                await databaseService.savePolicy(item);
                 break;
               case 'users':
                 // For users, we might need a special handling if we want to migrate auth too
                 // For now, just save the profile
-                await firebaseService.saveUserProfile(item.id, item);
+                await databaseService.saveUserProfile(item.id, item);
                 break;
             }
             processedItems++;
@@ -1797,7 +1797,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
       ];
 
       for (const policy of defaults) {
-        await firebaseService.savePolicy(policy);
+        await databaseService.savePolicy(policy);
       }
       onNotify('Default policies seeded successfully');
       onUpdate();
@@ -1819,7 +1819,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
     setIsSaving(true);
     try {
       const id = editingPolicy.id || editingPolicy.title.toLowerCase().replace(/\s+/g, '-');
-      await firebaseService.savePolicy({
+      await databaseService.savePolicy({
         ...editingPolicy,
         id,
         lastUpdated: new Date().toISOString()
@@ -1838,7 +1838,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
   const handleDelete = async (id: string) => {
     onConfirm('Are you sure you want to delete this policy?', async () => {
       try {
-        await firebaseService.deletePolicy(id);
+        await databaseService.deletePolicy(id);
         onNotify('Policy deleted successfully');
         onUpdate();
       } catch (err) {
@@ -2097,7 +2097,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
       if (imageFile) {
         const extension = imageFile.name.split('.').pop();
         const safeName = `blog_${Date.now()}.${extension}`;
-        imageUrl = await firebaseService.uploadFile(imageFile, `blog/images/${safeName}`);
+        imageUrl = await databaseService.uploadFile(imageFile, `blog/images/${safeName}`);
       }
 
       const postToSave = {
@@ -2105,7 +2105,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
         image: imageUrl
       };
 
-      await firebaseService.saveBlogPost(postToSave);
+      await databaseService.saveBlogPost(postToSave);
       setIsEditing(false);
       setEditingPost(null);
       setImageFile(null);
@@ -2120,7 +2120,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   const handleDelete = async (id: string) => {
     onConfirm('Delete this post?', async () => {
       try {
-        await firebaseService.deleteBlogPost(id);
+        await databaseService.deleteBlogPost(id);
         onUpdate();
         onNotify('Post deleted successfully');
       } catch (err) {
@@ -2351,7 +2351,7 @@ const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onConfirm }
         id: editingCat ? editingCat.id : newCat.name?.toLowerCase().replace(/\s+/g, '_')
       };
       
-      await firebaseService.saveCategory(categoryToSave);
+      await databaseService.saveCategory(categoryToSave);
       setNewCat({ name: '', parent: '', slots: [], compatibleModuleCategories: [], filters: [] });
       setEditingCat(null);
       onUpdate();
@@ -2426,7 +2426,7 @@ const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onConfirm }
   const handleDelete = async (id: string) => {
     onConfirm('Delete this category?', async () => {
       try {
-        await firebaseService.deleteCategory(id);
+        await databaseService.deleteCategory(id);
         onUpdate();
         onNotify('Category deleted successfully');
       } catch (err) {
@@ -2710,7 +2710,7 @@ const OrderManager = () => {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const data = await firebaseService.getAllOrders();
+      const data = await databaseService.getAllOrders();
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders', error);
@@ -2721,7 +2721,7 @@ const OrderManager = () => {
 
   const handleStatusChange = async (orderId: string, status: Order['status'], reason?: string) => {
     try {
-      await firebaseService.updateOrderStatus(orderId, status, undefined);
+      await databaseService.updateOrderStatus(orderId, status, undefined);
       loadOrders(); // Refresh after update
     } catch (error) {
       console.error(error);
@@ -2764,7 +2764,7 @@ const OrderManager = () => {
   const handleSyncCourier = async (orderId: string) => {
     setIsProcessing(true);
     try {
-      await firebaseService.syncCourierAPI(orderId);
+      await databaseService.syncCourierAPI(orderId);
     } catch (error) {
       console.error(error);
     } finally {
@@ -2774,7 +2774,7 @@ const OrderManager = () => {
 
   const handlePrintInvoice = async (orderId: string) => {
     try {
-      const html = await firebaseService.generateInvoice(orderId);
+      const html = await databaseService.generateInvoice(orderId);
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(html);
@@ -3180,12 +3180,12 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     setIsLoading(true);
     try {
       const [w, s, po, st, l, r] = await Promise.all([
-        firebaseService.getWarehouses(),
-        firebaseService.getSuppliers(),
-        firebaseService.getPurchaseOrders(),
-        firebaseService.getStock(),
-        firebaseService.getInventoryLogs(),
-        firebaseService.getCurrencyRates()
+        databaseService.getWarehouses(),
+        databaseService.getSuppliers(),
+        databaseService.getPurchaseOrders(),
+        databaseService.getStock(),
+        databaseService.getInventoryLogs(),
+        databaseService.getCurrencyRates()
       ]);
       setWarehouses(w || []);
       setSuppliers(s || []);
@@ -3209,7 +3209,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     if (!newWarehouse.name) return;
     try {
       const id = `wh-${Date.now()}`;
-      await firebaseService.saveWarehouse({ ...newWarehouse, id });
+      await databaseService.saveWarehouse({ ...newWarehouse, id });
       onNotify('Warehouse added successfully');
       setShowWarehouseModal(false);
       setNewWarehouse({ name: '', location: '', type: 'distribution' });
@@ -3224,7 +3224,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     if (!newSupplier.name) return;
     try {
       const id = `sup-${Date.now()}`;
-      await firebaseService.saveSupplier({ ...newSupplier, id });
+      await databaseService.saveSupplier({ ...newSupplier, id });
       onNotify('Supplier added successfully');
       setShowSupplierModal(false);
       setNewSupplier({ name: '', contactName: '', email: '', phone: '', leadTimeDays: 7, brands: [] });
@@ -3244,7 +3244,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     try {
       const totalCost = newPO.items.reduce((acc, item) => acc + (item.quantity * item.unitCost), 0);
       const id = `PO-${Date.now()}`;
-      await firebaseService.savePurchaseOrder({
+      await databaseService.savePurchaseOrder({
         ...newPO,
         id,
         totalCost,
@@ -3269,7 +3269,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   const handleReceivePO = async (poId: string, warehouseId: string) => {
     onConfirm(`Are you sure you want to receive PO ${poId}? This will update stock levels.`, async () => {
       try {
-        await firebaseService.receivePurchaseOrder(poId, warehouseId);
+        await databaseService.receivePurchaseOrder(poId, warehouseId);
         onNotify('Purchase order received and stock updated');
         loadERPData();
       } catch (err) {
@@ -3282,7 +3282,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     const newRate = prompt(`Enter new rate for ${code} / EUR:`);
     if (newRate && !isNaN(Number(newRate))) {
       try {
-        await firebaseService.saveCurrencyRate({ code, rate: Number(newRate) });
+        await databaseService.saveCurrencyRate({ code, rate: Number(newRate) });
         onNotify('Currency rate updated');
         loadERPData();
       } catch (err) {
@@ -3304,7 +3304,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
 
     setIsUpdatingStock(true);
     try {
-      await firebaseService.updateStockByCode(quickCode, quickQty, quickWarehouse, quickReason);
+      await databaseService.updateStockByCode(quickCode, quickQty, quickWarehouse, quickReason);
       onNotify(`Stock updated successfully for ${quickCode}`);
       setQuickCode('');
       setQuickQty(1);
@@ -4253,7 +4253,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   <button 
                     onClick={async () => {
                       try {
-                        await firebaseService.savePurchaseOrder({...selectedPO, status: 'ordered'});
+                        await databaseService.savePurchaseOrder({...selectedPO, status: 'ordered'});
                         onNotify('PO status updated to Ordered');
                         setSelectedPO(null);
                         loadERPData();
@@ -4397,7 +4397,7 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         try {
           const extension = modelFile.name.split('.').pop();
           const safeName = `model_${Date.now()}.${extension}`;
-          modelUrl = await firebaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
+          modelUrl = await databaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
           console.log('3D model uploaded successfully:', modelUrl);
         } catch (uploadErr) {
           console.error('3D Model upload failed:', uploadErr);
@@ -4420,7 +4420,7 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           try {
             const extension = item.name.split('.').pop();
             const safeName = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
-            const url = await firebaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
+            const url = await databaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
             finalImageUrls.push(url);
             console.log(`Image ${i + 1} uploaded successfully:`, url);
           } catch (uploadErr) {
@@ -4445,7 +4445,7 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
       };
 
       console.log('Saving product to Firestore...', productToSave);
-      await firebaseService.saveProduct(productToSave);
+      await databaseService.saveProduct(productToSave);
       console.log('Product saved successfully!');
       onNotify('Product saved successfully!');
       onSuccess();

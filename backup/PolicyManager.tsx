@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit, X, FileText, Database } from 'lucide-react';
 import { PolicyPage } from '../../types';
-import { databaseService } from '../../services/databaseService';
+import { firebaseService } from '../../services/firebaseService';
 import { defaultPolicies } from '../../data/defaultPolicies';
 
 export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
@@ -20,7 +20,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
     setIsSeeding(true);
     try {
       for (const policy of defaultPolicies) {
-        await databaseService.savePolicy({
+        await firebaseService.savePolicy({
           ...policy,
           lastUpdated: new Date().toISOString()
         } as PolicyPage);
@@ -45,7 +45,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
     setIsSaving(true);
     try {
       const id = editingPolicy.id || editingPolicy.title.toLowerCase().replace(/\s+/g, '-');
-      await databaseService.savePolicy({
+      await firebaseService.savePolicy({
         ...editingPolicy,
         id,
         lastUpdated: new Date().toISOString()
@@ -64,7 +64,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
   const handleDelete = async (id: string) => {
     onConfirm('Are you sure you want to delete this policy?', async () => {
       try {
-        await databaseService.deletePolicy(id);
+        await firebaseService.deletePolicy(id);
         onNotify('Policy deleted successfully');
         onUpdate();
       } catch (err) {
@@ -98,6 +98,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                 onChange={e => setEditingPolicy({ ...editingPolicy, id: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
                 placeholder="privacy-policy"
+                required
               />
             </div>
           )}
@@ -114,6 +115,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                   value={editingPolicy.title || ''}
                   onChange={e => setEditingPolicy({ ...editingPolicy, title: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                  required
                 />
               </div>
 
@@ -123,6 +125,7 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                   value={editingPolicy.content || ''}
                   onChange={e => setEditingPolicy({ ...editingPolicy, content: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-[300px] resize-none font-mono text-sm"
+                  required
                 />
               </div>
             </div>

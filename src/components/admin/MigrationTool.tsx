@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Database, Plus, Crosshair, Shield, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { Product, Category } from '../../types';
 
 export const MigrationTool = ({ products, categories, confirmAction, onNotify }: { 
@@ -172,7 +172,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding categories...');
       for (const cat of defaultCategories) {
-        await firebaseService.saveCategory(cat as any);
+        await databaseService.saveCategory(cat as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added category: ${cat.name}`);
@@ -180,7 +180,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding products...');
       for (const prod of defaultProducts) {
-        await firebaseService.saveProduct(prod as any);
+        await databaseService.saveProduct(prod as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added product: ${prod.name}`);
@@ -188,7 +188,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding warehouses...');
       for (const wh of defaultWarehouses) {
-        await firebaseService.saveWarehouse(wh as any);
+        await databaseService.saveWarehouse(wh as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added warehouse: ${wh.name}`);
@@ -196,7 +196,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding suppliers...');
       for (const sup of defaultSuppliers) {
-        await firebaseService.saveSupplier(sup as any);
+        await databaseService.saveSupplier(sup as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added supplier: ${sup.name}`);
@@ -204,7 +204,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding stock...');
       for (const st of defaultStock) {
-        await firebaseService.saveStockItem(st as any);
+        await databaseService.saveStockItem(st as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added stock item for product ${st.productId}`);
@@ -212,7 +212,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding blog posts...');
       for (const post of defaultBlogPosts) {
-        await firebaseService.saveBlogPost(post as any);
+        await databaseService.saveBlogPost(post as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added blog post: ${post.title}`);
@@ -220,7 +220,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding messages...');
       for (const msg of defaultMessages) {
-        await firebaseService.saveMessage(msg as any);
+        await databaseService.saveMessage(msg as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added message from: ${msg.name}`);
@@ -417,7 +417,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding test categories...');
       for (const cat of testCategories) {
-        await firebaseService.saveCategory(cat as any);
+        await databaseService.saveCategory(cat as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added test category: ${cat.name}`);
@@ -425,7 +425,7 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
 
       addLog('Seeding test products...');
       for (const prod of testProducts) {
-        await firebaseService.saveProduct(prod as any);
+        await databaseService.saveProduct(prod as any);
         current++;
         setProgress(Math.round((current / total) * 100));
         addLog(`Added test product: ${prod.name}`);
@@ -485,24 +485,24 @@ export const MigrationTool = ({ products, categories, confirmAction, onNotify }:
             // Use appropriate service method based on collection
             switch (collection.name) {
               case 'categories':
-                await firebaseService.saveCategory(item);
+                await databaseService.saveCategory(item);
                 break;
               case 'products':
-                await firebaseService.saveProduct(item);
+                await databaseService.saveProduct(item);
                 break;
               case 'blog_posts':
-                await firebaseService.saveBlogPost(item);
+                await databaseService.saveBlogPost(item);
                 break;
               case 'contact_messages':
-                await firebaseService.saveMessage(item);
+                await databaseService.saveMessage(item);
                 break;
               case 'policies':
-                await firebaseService.savePolicy(item);
+                await databaseService.savePolicy(item);
                 break;
               case 'users':
                 // For users, we might need a special handling if we want to migrate auth too
                 // For now, just save the profile
-                await firebaseService.saveUserProfile(item.id, item);
+                await databaseService.saveUserProfile(item.id, item);
                 break;
             }
             processedItems++;

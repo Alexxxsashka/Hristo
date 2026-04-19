@@ -108,6 +108,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 value={editingPost?.title || ''}
                 onChange={e => setEditingPost({ ...editingPost, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -117,6 +118,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 value={editingPost?.slug || ''}
                 onChange={e => setEditingPost({ ...editingPost, slug: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                required
               />
             </div>
           </div>
@@ -128,6 +130,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 value={editingPost?.category || ''}
                 onChange={e => setEditingPost({ ...editingPost, category: e.target.value as any })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                required
               >
                 <option value="">Select Category</option>
                 {BLOG_CATEGORIES.map(cat => (
@@ -142,6 +145,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 value={editingPost?.author || ''}
                 onChange={e => setEditingPost({ ...editingPost, author: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                required
               />
             </div>
           </div>
@@ -152,6 +156,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
               value={editingPost?.excerpt || ''}
               onChange={e => setEditingPost({ ...editingPost, excerpt: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-20 resize-none"
+              required
             />
           </div>
 
@@ -161,6 +166,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
               value={editingPost?.content || ''}
               onChange={e => setEditingPost({ ...editingPost, content: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-64 resize-none"
+              required
             />
           </div>
 

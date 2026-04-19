@@ -22,7 +22,7 @@ import {
   X 
 } from 'lucide-react';
 import { Order } from '../../types';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
 
 
@@ -47,7 +47,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm }: {
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      await firebaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
+      await databaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
       onNotify(`Order status updated to ${newStatus}`);
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });

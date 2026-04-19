@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Product } from '../../types';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
 
 
@@ -57,12 +57,12 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     setIsLoading(true);
     try {
       const [w, s, po, st, l, r] = await Promise.all([
-        firebaseService.getWarehouses(),
-        firebaseService.getSuppliers(),
-        firebaseService.getPurchaseOrders(),
-        firebaseService.getStock(),
-        firebaseService.getInventoryLogs(),
-        firebaseService.getCurrencyRates()
+        databaseService.getWarehouses(),
+        databaseService.getSuppliers(),
+        databaseService.getPurchaseOrders(),
+        databaseService.getStock(),
+        databaseService.getInventoryLogs(),
+        databaseService.getCurrencyRates()
       ]);
       setWarehouses(w || []);
       setSuppliers(s || []);
@@ -84,7 +84,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   const handleSeedStock = async () => {
     setIsSeeding(true);
     try {
-      await firebaseService.seedStockData();
+      await databaseService.seedStockData();
       onNotify('Stock data seeded successfully for all products');
       loadERPData();
     } catch (err) {
@@ -103,7 +103,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     setIsCreatingWarehouse(true);
     try {
       const id = `wh-${Date.now()}`;
-      await firebaseService.saveWarehouse({ ...newWarehouse, id });
+      await databaseService.saveWarehouse({ ...newWarehouse, id });
       onNotify(t('warehouse_added_success') || 'Warehouse added successfully');
       setShowWarehouseModal(false);
       setNewWarehouse({ name: '', location: '', type: 'distribution' });
@@ -121,7 +121,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
     if (!newSupplier.name) return;
     try {
       const id = `sup-${Date.now()}`;
-      await firebaseService.saveSupplier({ ...newSupplier, id });
+      await databaseService.saveSupplier({ ...newSupplier, id });
       onNotify('Supplier added successfully');
       setShowSupplierModal(false);
       setNewSupplier({ name: '', contactName: '', email: '', phone: '', leadTimeDays: 7, brands: [] });
@@ -138,7 +138,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   const handleDeleteWarehouse = (id: string) => {
     onConfirm('Are you sure you want to delete this warehouse?', async () => {
       try {
-        await firebaseService.deleteWarehouse(id);
+        await databaseService.deleteWarehouse(id);
         onNotify('Warehouse deleted successfully');
         loadERPData();
       } catch (err) {
@@ -150,7 +150,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   const handleDeleteSupplier = (id: string) => {
     onConfirm('Are you sure you want to delete this supplier?', async () => {
       try {
-        await firebaseService.deleteSupplier(id);
+        await databaseService.deleteSupplier(id);
         onNotify('Supplier deleted successfully');
         loadERPData();
       } catch (err) {
@@ -168,7 +168,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
 
     setIsUpdatingStock(true);
     try {
-      await firebaseService.updateStockByCode(quickCode, quickQty, quickWarehouse, quickReason);
+      await databaseService.updateStockByCode(quickCode, quickQty, quickWarehouse, quickReason);
       onNotify(`Stock updated successfully for ${quickCode}`);
       setQuickCode('');
       setQuickQty(1);

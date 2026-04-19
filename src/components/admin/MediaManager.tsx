@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Database, X, Folder, File as FileIcon, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 
 export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm: any }) => {
   const [uploading, setUploading] = useState(false);
@@ -28,7 +28,7 @@ export const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm
         for (let i = 0; i < folders.length; i++) {
           const folder = folders[i];
           const path = `${folder.id}/.keep`;
-          await firebaseService.uploadFile(fileToUpload, path);
+          await databaseService.uploadFile(fileToUpload, path);
           setProgress(((i + 1) / folders.length) * 100);
         }
         

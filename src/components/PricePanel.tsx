@@ -5,7 +5,7 @@ import { ShoppingCart, RotateCcw, Check, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
 import { SaveBuildModal } from './SaveBuildModal';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export const PricePanel: React.FC = () => {
   const { totalPrice, resetConfiguration, selectedParts, activeProduct, saveBuild } = useConfiguratorStore();

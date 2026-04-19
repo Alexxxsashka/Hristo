@@ -432,6 +432,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                 fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
               }`}
               maxLength={255}
+              required
             />
             {fieldErrors.name && (
               <p className="text-red-500 text-xs">{fieldErrors.name}</p>
@@ -467,6 +468,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               min="0"
               max="999999.99"
               step="0.01"
+              required
             />
             {fieldErrors.price && (
               <p className="text-red-500 text-xs">{fieldErrors.price}</p>
@@ -494,6 +496,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               value={formData.type}
               onChange={e => setFormData({...formData, type: e.target.value as any})}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              required
             >
               <option value="weapon">Weapon</option>
               <option value="module">Module</option>
@@ -592,6 +595,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               }`}
               min="0"
               max="999999"
+              required
             />
             {fieldErrors.stock && (
               <p className="text-red-500 text-xs">{fieldErrors.stock}</p>
@@ -616,6 +620,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               value={formData.category}
               onChange={e => setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}})}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              required
             >
               <option value="">Select Category</option>
               {categories.filter(c => !c.parent).map(c => (
@@ -629,6 +634,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               value={formData.subcategory}
               onChange={e => setFormData({...formData, subcategory: e.target.value})}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              required
             >
               <option value="">Select Subcategory</option>
               {categories.filter(c => c.parent === formData.category).map(c => (
@@ -820,6 +826,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               fieldErrors.description ? 'border-red-500' : 'border-zinc-200'
             }`}
             maxLength={2000}
+            required
           />
           {fieldErrors.description && (
             <p className="text-red-500 text-xs">{fieldErrors.description}</p>

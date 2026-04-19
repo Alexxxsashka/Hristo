@@ -164,7 +164,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
             </div>
           )}
         </div>
-        <form noValidate onSubmit={handleAdd} className="space-y-6">
+        <form onSubmit={handleAdd} className="space-y-6">
           <div className="flex gap-4">
             <div className="flex-1 space-y-1">
               <input
@@ -176,6 +176,7 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
                   fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
                 }`}
                 maxLength={100}
+                required
               />
               {fieldErrors.name && (
                 <p className="text-red-500 text-xs">{fieldErrors.name}</p>
