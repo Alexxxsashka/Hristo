@@ -102,6 +102,7 @@ const ScaleCompensator = ({ children }: { children: ReactNode }) => {
         
         // Only update if changed significantly to avoid jitter
         if (Math.abs(groupRef.current.scale.x - sx) > 0.0001) {
+          console.log(`[ScaleCompensator] Adjusting scale to compensate parent. New Scale:`, { sx, sy, sz });
           groupRef.current.scale.set(sx, sy, sz);
         }
       }
@@ -612,13 +613,21 @@ const ActualPartModel = ({
     const FinalBox = new THREE.Box3().setFromObject(clone);
     const size = new THREE.Vector3();
     FinalBox.getSize(size);
-    if (size.length() < 0.001) {
-      console.warn(`[ActualPartModel V1.2] Forced 100x scale for tiny model`);
+    
+    console.log(`[ActualPartModel V1.2] Computed Size for "${partName}":`, {
+      width: size.x.toFixed(4),
+      height: size.y.toFixed(4),
+      depth: size.z.toFixed(4),
+      totalLength: size.length().toFixed(4)
+    });
+
+    if (size.length() < 0.01) {
+      console.warn(`[ActualPartModel V1.2] Model is TINY (under 1cm), forcing 100x scale`);
       clone.scale.set(100, 100, 100);
     }
     
     return clone;
-  }, [scene, socketPoint, path, slotType]);
+  }, [scene, socketPoint, path, slotType, partName]);
 
   React.useEffect(() => {
     if (clonedScene) {
