@@ -340,7 +340,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: "Product not found to update" });
       }
 
-      return res.json({ ok: true, id: r.rows[0].id });
+      // Возвращаем обновленные данные, чтобы фронтенд мог их проверить
+      return res.json({ ok: true, product: r.rows[0] });
     }
 
     // ── DELETE /admin/products/:id ─────────────────────────────────────────────

@@ -934,6 +934,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                         const newImages = [...combinedImages];
                         [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
                         setCombinedImages(newImages);
+                        // Синхронизируем с formData
+                        setFormData(prev => ({
+                          ...prev,
+                          images: newImages.filter(img => typeof img === 'string') as string[],
+                          image: (newImages[0] && typeof newImages[0] === 'string') ? newImages[0] : prev.image
+                        }));
                       }}
                       className="p-1.5 bg-white text-zinc-900 rounded-lg hover:bg-zinc-100"
                     >
@@ -947,6 +953,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                         const newImages = [...combinedImages];
                         [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]];
                         setCombinedImages(newImages);
+                        // Синхронизируем с formData
+                        setFormData(prev => ({
+                          ...prev,
+                          images: newImages.filter(img => typeof img === 'string') as string[],
+                          image: (newImages[0] && typeof newImages[0] === 'string') ? newImages[0] : prev.image
+                        }));
                       }}
                       className="p-1.5 bg-white text-zinc-900 rounded-lg hover:bg-zinc-100"
                     >
