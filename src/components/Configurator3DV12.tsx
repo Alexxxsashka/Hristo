@@ -513,6 +513,8 @@ const ActualPartModel = ({
   slotType?: string;
   onLoad: (scene: THREE.Group) => void;
 }) => {
+  if (path) console.log(`[ActualPartModel V1.2] Attempting useGLTF with path:`, path);
+  
   if (!path) {
     console.warn('[ActualPartModel V1.2] No path provided for part model');
     return null;
