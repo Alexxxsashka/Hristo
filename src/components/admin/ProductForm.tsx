@@ -233,8 +233,9 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         model3D: modelUrl,
         model3DName: modelName,
         images: finalImageUrls,
+        image_url: finalImageUrls[0] || '', // Явно передаем и image_url и image для бэкенда
         image: finalImageUrls[0] || '',
-        has3D: !!modelUrl
+        has3D: !!modelUrl || formData.has3D
       };
 
       console.log('Saving product to database...', productToSave);
@@ -957,6 +958,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     onClick={() => {
                       const newImages = combinedImages.filter((_, i) => i !== index);
                       setCombinedImages(newImages);
+                      // Mгновенно обновляем formData, чтобы удаление точно зафиксировалось
+                      setFormData(prev => ({
+                        ...prev,
+                        images: newImages.filter(img => typeof img === 'string') as string[],
+                        image: (newImages[0] && typeof newImages[0] === 'string') ? newImages[0] : (prev.image === combinedImages[index] ? '' : prev.image)
+                      }));
                     }}
                     className="p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700"
                   >

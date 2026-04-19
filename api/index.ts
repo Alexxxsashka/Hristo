@@ -274,7 +274,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       const imageUrl = p.image_url || p.image || null;
       const model3dUrl = p.model_3d_url || p.model3D || null;
-      const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const baseHas3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const has3d = model3dUrl ? true : baseHas3d;
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description || p.longDescription || null;
 
@@ -311,7 +312,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       const imageUrl = p.image_url || p.image || null;
       const model3dUrl = p.model_3d_url || p.model3D || null;
-      const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const baseHas3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const has3d = model3dUrl ? true : baseHas3d;
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description || p.longDescription || null;
 
