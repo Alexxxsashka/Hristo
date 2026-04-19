@@ -282,6 +282,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
       const id = p.id || `prod-${Date.now()}`;
+      
+      const imageUrl = p.image_url || p.image || null;
+      const model3dUrl = p.model_3d_url || p.model3D || null;
+      const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
+
       await pool.query(
         `INSERT INTO products (
           id, uid, sku, slug, name, description, type, category_id, brand, model, 
@@ -295,7 +301,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           variant_attributes=$19, category_filters=$20, brand=$9, model=$10, sku=$3, type=$7`,
         [
           id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
-          p.price||0, p.stock||0, p.image_url||null, JSON.stringify(p.images||[]), p.model_3d_url||null, p.has_3d||false, 
+          p.price||0, p.stock||0, imageUrl, JSON.stringify(imagesArr), model3dUrl, has3d, 
           JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{})
         ]
       );
@@ -308,6 +314,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
+      
+      const imageUrl = p.image_url || p.image || null;
+      const model3dUrl = p.model_3d_url || p.model3D || null;
+      const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
+      const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
+
       await pool.query(
         `UPDATE products SET 
           name=$2, description=$3, price=$4, stock=$5, image_url=$6, images=$7, 
@@ -316,8 +328,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           sku=$16, type=$17, status=$18 
          WHERE id = $1`,
         [
-          adminProd[0], p.name, p.description, p.price, p.stock, p.image_url, 
-          JSON.stringify(p.images||[]), p.model_3d_url||null, p.has_3d||false, 
+          adminProd[0], p.name, p.description, p.price, p.stock, imageUrl, 
+          JSON.stringify(imagesArr), model3dUrl, has3d, 
           JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), 
           JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
           p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active'
