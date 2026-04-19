@@ -163,16 +163,20 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
     };
 
     const sType = slotType.toLowerCase();
-    const category = m.category?.toLowerCase() || m.type?.toLowerCase() || '';
+    const cat = (m.category || '').toLowerCase();
+    const subcat = (m.subcategory || '').toLowerCase();
+    const catId = (m.category_id || '').toLowerCase();
+    const mType = (m.type || '').toLowerCase();
     
-    // 1. SLOT TYPE MATCH (Mandatory)
+    // 1. SLOT TYPE MATCH (Check all possible category fields)
     const isSynonymMatch = slotSynonyms[sType]?.some(syn => 
-      category.toLowerCase().includes(syn) || syn.includes(category.toLowerCase())
+      cat.includes(syn) || subcat.includes(syn) || catId.includes(syn) || syn.includes(cat) || syn.includes(subcat) || syn.includes(catId)
     );
-    const fitsInSlot = m.attachmentSlot?.toLowerCase() === sType;
-    const allowedInSlots = m.allowedSlots?.some(s => s.toLowerCase() === sType);
     
-    const typeMatch = category === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
+    const fitsInSlot = (m.attachmentSlot || '').toLowerCase() === sType;
+    const allowedInSlots = (m.allowedSlots || []).some(s => s.toLowerCase() === sType);
+    
+    const typeMatch = cat === sType || subcat === sType || catId === sType || mType === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
     
     // 2. WEAPON MATCH (Whitelists)
     const activeProd = useConfiguratorStore.getState().activeProduct;
@@ -194,7 +198,9 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
 
     if (sType === 'muzzle' || sType === 'scope') {
       console.log(`[Configurator V1.2] Checking module "${m.name}" for slot "${sType}":`, {
-        category,
+        cat,
+        subcat,
+        catId,
         typeMatch,
         weaponMatch,
         isCompatible,
