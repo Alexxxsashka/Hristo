@@ -147,7 +147,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const blob = await put(filename, body, { 
         access: 'public',
         contentType,
-        token: process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN
+        token: process.env.HR_STORAGE_TOKEN
       });
 
       return res.json(blob);
@@ -162,7 +162,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!url) return res.status(400).json({ error: "URL is required" });
 
       await del(url, {
-        token: process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN
+        token: process.env.HR_STORAGE_TOKEN
       });
 
       return res.status(204).end();
@@ -172,6 +172,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/upload-handle" && method === "POST") {
       try {
         const jsonResponse = await handleUpload({
+          token: process.env.HR_STORAGE_TOKEN,
           body: req.body,
           request: req as any,
           onBeforeGenerateToken: async () => {
