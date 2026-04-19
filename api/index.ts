@@ -283,10 +283,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const p = req.body || {};
       const id = p.id || `prod-${Date.now()}`;
       await pool.query(
-        `INSERT INTO products (id, uid, sku, slug, name, description, type, category_id, brand, model, price, stock, image_url, status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'active')
-         ON CONFLICT (id) DO UPDATE SET name=$5, price=$11, stock=$12`,
-        [id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', p.price||0, p.stock||0, p.image_url||null]
+        `INSERT INTO products (
+          id, uid, sku, slug, name, description, type, category_id, brand, model, 
+          price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
+          variants, variant_attributes, category_filters, status
+        )
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'active')
+         ON CONFLICT (id) DO UPDATE SET 
+          name=$5, description=$6, price=$11, stock=$12, image_url=$13, images=$14, 
+          model_3d_url=$15, has_3d=$16, characteristics=$17, variants=$18, 
+          variant_attributes=$19, category_filters=$20, brand=$9, model=$10, sku=$3, type=$7`,
+        [
+          id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
+          p.price||0, p.stock||0, p.image_url||null, JSON.stringify(p.images||[]), p.model_3d_url||null, p.has_3d||false, 
+          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{})
+        ]
       );
       return res.json({ id });
     }
@@ -298,8 +309,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
       await pool.query(
-        "UPDATE products SET name=$2, price=$3, stock=$4, description=$5, image_url=$6, status=$7 WHERE id = $1",
-        [adminProd[0], p.name, p.price, p.stock, p.description, p.image_url, p.status||'active']
+        `UPDATE products SET 
+          name=$2, description=$3, price=$4, stock=$5, image_url=$6, images=$7, 
+          model_3d_url=$8, has_3d=$9, characteristics=$10, variants=$11, 
+          variant_attributes=$12, category_filters=$13, brand=$14, model=$15, 
+          sku=$16, type=$17, status=$18 
+         WHERE id = $1`,
+        [
+          adminProd[0], p.name, p.description, p.price, p.stock, p.image_url, 
+          JSON.stringify(p.images||[]), p.model_3d_url||null, p.has_3d||false, 
+          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), 
+          JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
+          p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active'
+        ]
       );
       return res.json({ ok: true });
     }
