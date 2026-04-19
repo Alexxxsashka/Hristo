@@ -190,8 +190,23 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
     const weaponMatch = allowedWeapons.length === 0 || isExplicitlyWhitelisted;
 
     // Both must be true: It must fit the SLOT TYPE and be allowed on this WEAPON
-    return typeMatch && weaponMatch;
+    const isCompatible = typeMatch && weaponMatch;
+
+    if (sType === 'muzzle' || sType === 'scope') {
+      console.log(`[Configurator V1.2] Checking module "${m.name}" for slot "${sType}":`, {
+        category,
+        typeMatch,
+        weaponMatch,
+        isCompatible,
+        allowedWeapons,
+        parentId
+      });
+    }
+
+    return isCompatible;
   });
+
+  console.log(`[Configurator V1.2] Slot "${slotType}" (${slotId}) final compatible modules:`, compatibleModules.length);
 
   const fullSlotId = `${parentId}:${slotId}`;
   const currentPart = selectedParts[fullSlotId];

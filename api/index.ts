@@ -300,10 +300,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model3DName: p.model3d_name, // Optional: if added to DB
         has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
         socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
-        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : [],
-        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : [], // Backwards compatibility
-        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : [],
-        slots: Array.isArray(p.slots) ? p.slots : [],
+        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
+        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
+        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : (typeof p.compatible_module_categories === 'string' ? JSON.parse(p.compatible_module_categories) : []),
+        slots: Array.isArray(p.slots) ? p.slots : (typeof p.slots === 'string' ? JSON.parse(p.slots) : []),
         attachmentSlot: p.attachment_slot,
         mountType: p.mount_type
       })));
@@ -342,10 +342,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model3DName: p.model3d_name, 
         has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
         socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
-        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : [],
-        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : [], 
-        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : [],
-        slots: Array.isArray(p.slots) ? p.slots : [],
+        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
+        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
+        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : (typeof p.compatible_module_categories === 'string' ? JSON.parse(p.compatible_module_categories) : []),
+        slots: Array.isArray(p.slots) ? p.slots : (typeof p.slots === 'string' ? JSON.parse(p.slots) : []),
         attachmentSlot: p.attachment_slot,
         mountType: p.mount_type
       });
