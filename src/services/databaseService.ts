@@ -72,9 +72,8 @@ export const databaseService = {
         }
       }
       
-      if (fileForUpload.size > VERCEL_FUNCTION_BODY_LIMIT_BYTES) {
-        throw new Error("Image is too large for upload. Please use a smaller file.");
-      }
+      // Client-side upload via handleUploadUrl doesn't have the 4.5MB limit 
+      // of Vercel Serverless Functions, so we can upload much larger files.
 
       const blob = await upload(uploadPath, fileForUpload, {
         access: 'public',
