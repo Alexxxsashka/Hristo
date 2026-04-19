@@ -431,13 +431,29 @@ const PartModel = ({
   const { selectedParts, setSelectedSlotId, selectedSlotId } = useConfiguratorStore();
   const fullSlotId = `${parentId}:${slot.id}`;
   
-  const rawPath = part.model3D || part.model;
+  // Backwards compatibility for all naming conventions
+  const rawPath = part.model3D || part.model || (part as any).model_3d_url || (part as any).model_url;
+  
+  console.log(`[PartModel V1.2] Rendering part "${part.name}" (ID: ${part.id}) for slot "${slot.id}". RawPath:`, rawPath);
+
   const modelPath = rawPath 
     ? (rawPath.startsWith('http') ? rawPath : `/models/${rawPath}`)
     : null;
   
+  if (!modelPath) {
+    console.warn(`[PartModel V1.2] No valid 3D path for "${part.name}". Data:`, {
+      model3D: part.model3D,
+      model: part.model,
+      model_3d_url: (part as any).model_3d_url
+    });
+  }
+
   const [modelScene, setModelScene] = React.useState<THREE.Group | null>(null);
-  const discoveredSlots = useMemo(() => modelScene ? discoverSlots(modelScene) : [], [modelScene]);
+  const discoveredSlots = useMemo(() => {
+    if (!modelScene) return [];
+    console.log(`[PartModel V1.2] Model scene ready for "${part.name}". Discovering sub-slots...`);
+    return discoverSlots(modelScene);
+  }, [modelScene, part.name]);
 
   return (
     <Socket 
