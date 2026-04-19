@@ -101,17 +101,16 @@ const ScaleCompensator = ({ children }: { children: ReactNode }) => {
         let sz = targetWorldScale.z / parentWorldScale.z;
         
         // HYPER-SCALE PROTECTION:
-        // If the compensation factor is extreme (like 100x), it usually means 
-        // the parent model is using Blender's 0.01 units. In this case, 
-        // we should actually NOT compensate if our part is already real-world size.
-        if (sx > 10 || sx < 0.1) {
-          console.log(`[ScaleCompensator] Hyper-scaling detected (${sx.toFixed(2)}x). Reverting to 1:1 to prevent visual bugs.`);
+        // Many Blender models use 0.01 scale bones. We should allow up to ~100x-150x 
+        // to compensate for this, but block anything crazy like 1000x.
+        if (sx > 200 || sx < 0.005) {
+          console.warn(`[ScaleCompensator] Extreme scaling detected (${sx.toFixed(2)}x). Blocking to prevent bugs.`);
           sx = 1; sy = 1; sz = 1;
         }
 
         // Only update if changed significantly to avoid jitter
         if (Math.abs(groupRef.current.scale.x - sx) > 0.0001) {
-          console.log(`[ScaleCompensator] Adjusting scale. Final:`, { sx, sy, sz });
+          console.log(`[ScaleCompensator] Final scaling applied: ${sx.toFixed(2)}x`);
           groupRef.current.scale.set(sx, sy, sz);
         }
       }
@@ -630,9 +629,8 @@ const ActualPartModel = ({
       totalLength: size.length().toFixed(4)
     });
 
-    if (size.length() < 0.01) {
-      console.warn(`[ActualPartModel V1.2] Model is TINY (under 1cm), forcing 100x scale`);
-      clone.scale.set(100, 100, 100);
+    if (size.length() < 0.0001) {
+      console.warn(`[ActualPartModel V1.2] Model is EMPTY or too small to be visible`);
     }
     
     return clone;
