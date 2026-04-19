@@ -135,7 +135,7 @@ export const ConfiguratorPageV12: React.FC = () => {
         className="h-16 border-b border-zinc-800 flex items-center justify-between px-4 sm:px-8 bg-zinc-950/50 backdrop-blur-xl z-50 absolute top-0 left-0 w-full"
       >
         <div className="flex items-center gap-4 sm:gap-8">
-          <Link to={isSelectionScreen ? "/" : "/configurator/v1.2"} className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
+          <Link to={isSelectionScreen ? "/" : "/configurator"} className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
             <ArrowLeft size={20} />
           </Link>
           <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
@@ -255,7 +255,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + index * 0.1, duration: 0.6 }}
                         className="group relative bg-zinc-900/40 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 hover:bg-zinc-900/60 transition-all duration-500 cursor-pointer"
-                        onClick={() => navigate(`/configurator/v1.2/${weapon.id}`)}
+                        onClick={() => navigate(`/configurator/${weapon.id}`)}
                       >
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img 
@@ -299,7 +299,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                             className="aspect-[16/10] relative overflow-hidden"
                             onClick={() => {
                               loadBuild(build);
-                              navigate(`/configurator/v1.2/${build.activeProduct.id}`);
+                              navigate(`/configurator/${build.activeProduct.id}`);
                             }}
                           >
                             <img 
@@ -328,7 +328,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                             </div>
                             <div onClick={() => {
                               loadBuild(build);
-                              navigate(`/configurator/v1.2/${build.activeProduct.id}`);
+                              navigate(`/configurator/${build.activeProduct.id}`);
                             }}>
                               <h3 className="text-xl font-black text-white uppercase tracking-tight mb-1 group-hover:text-red-500 transition-colors">
                                 {build.name}
