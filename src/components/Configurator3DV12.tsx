@@ -507,7 +507,6 @@ const PartModel = ({
     </Socket>
   );
 };
-
 const ActualPartModel = ({ 
   path, 
   socketPoint,
@@ -521,17 +520,35 @@ const ActualPartModel = ({
   partName: string;
   onLoad: (scene: THREE.Group) => void;
 }) => {
-  if (path) console.log(`[ActualPartModel V1.2] Attempting useGLTF with path:`, path);
-  
-  if (!path) {
-    console.warn('[ActualPartModel V1.2] No path provided for part model');
-    return null;
-  }
-  
-  const { scene } = useGLTF(path);
-  
+  const [scene, setScene] = React.useState<THREE.Group | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!path) return;
+    
+    console.log(`[ActualPartModel V1.2] Manual Loading started for "${partName}":`, path);
+    const loader = new GLTFLoader();
+    
+    loader.load(
+      path,
+      (gltf) => {
+        console.log(`[ActualPartModel V1.2] Manual Loading SUCCESS for "${partName}"`);
+        setScene(gltf.scene);
+      },
+      (xhr) => {
+        // Progress
+        // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      },
+      (err) => {
+        console.error(`[ActualPartModel V1.2] Manual Loading ERROR for "${partName}":`, err);
+        setError(String(err));
+      }
+    );
+  }, [path, partName]);
+
   const clonedScene = useMemo(() => {
     if (!scene) return null;
+    
     console.log(`[ActualPartModel V1.2] Processing model: ${path} for slot type: ${slotType}`);
     const clone = scene.clone();
     
@@ -539,17 +556,12 @@ const ActualPartModel = ({
     clone.visible = true;
     
     let mountPoint: THREE.Object3D | null = null;
-
     clone.traverse((child) => {
       child.visible = true;
-      
       const name = child.name.toLowerCase();
-      // Look for the "magnet" point (mod_...)
-      // We prioritize exact mod_ + slotType (e.g. mod_muzzle)
       if (slotType && name === `mod_${slotType.toLowerCase()}`) {
         mountPoint = child;
       } else if (!mountPoint && name.startsWith('mod_')) {
-        // Fallback to any mod_ point if specific one not found
         mountPoint = child;
       }
 
@@ -557,7 +569,6 @@ const ActualPartModel = ({
         const mesh = child as THREE.Mesh;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        
         if (mesh.material) {
           const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
           materials.forEach(mat => {
@@ -573,34 +584,21 @@ const ActualPartModel = ({
       }
     });
 
-    // Apply offset logic
     if (mountPoint) {
-      // "Magnet" logic: The mod_ point should be at the parent's origin (the slot)
-      // We use matrix inversion to perfectly align position and rotation
-      
-      // Reset clone to identity to ensure we're calculating the relative transform correctly
       clone.position.set(0, 0, 0);
       clone.quaternion.set(0, 0, 0, 1);
       clone.scale.set(1, 1, 1);
       clone.updateMatrix();
       clone.updateMatrixWorld(true);
 
-      // 2. Calculate the local matrix of mountPoint Relative to clone
       const relativeMatrix = mountPoint.matrixWorld.clone();
-      
-      // 3. Invert and apply to root to bring mountPoint to (0,0,0)
       const inverseMatrix = new THREE.Matrix4().copy(relativeMatrix).invert();
       clone.applyMatrix4(inverseMatrix);
-      
-      // Mark as mount point so discoverSlots ignores it
       (mountPoint as any).isMountPoint = true;
-      console.log(`[ActualPartModel V1.2] Matrix Aligned: ${mountPoint.name}`);
+      console.log(`[ActualPartModel V1.2] Matrix Aligned via Manual Loader: ${mountPoint.name}`);
     } else if (socketPoint && Array.isArray(socketPoint)) {
-      // Fallback to database socketPoint
       clone.position.set(-socketPoint[0], -socketPoint[1], -socketPoint[2]);
     } else {
-      // Center the model if no magnet and no socket point
-      // This prevents the model from floating far away if its origin is offset
       const box = new THREE.Box3().setFromObject(clone);
       if (!box.isEmpty()) {
         const center = new THREE.Vector3();
@@ -609,27 +607,30 @@ const ActualPartModel = ({
       }
     }
     
-    // Force scale to 1.0 to match Blender relative sizes when parented.
     clone.scale.set(1, 1, 1);
-    
-    // Debug: Calculate bounding box size to detect "tiny" models
-    const box = new THREE.Box3().setFromObject(clone);
+    const FinalBox = new THREE.Box3().setFromObject(clone);
     const size = new THREE.Vector3();
-    box.getSize(size);
-    console.log(`[ActualPartModel V1.2] Computed Size for "${partName}":`, {
-      width: size.x.toFixed(4),
-      height: size.y.toFixed(4),
-      depth: size.z.toFixed(4)
-    });
-
-    // If size is suspicious (too small), force a minimum scale
+    FinalBox.getSize(size);
     if (size.length() < 0.001) {
-      console.warn(`[ActualPartModel V1.2] Model "${partName}" is too small, forcing scale 100x`);
+      console.warn(`[ActualPartModel V1.2] Forced 100x scale for tiny model`);
       clone.scale.set(100, 100, 100);
     }
-
+    
     return clone;
-  }, [scene, socketPoint, path, slotType, partName]);
+  }, [scene, socketPoint, path, slotType]);
+
+  React.useEffect(() => {
+    if (clonedScene) {
+      onLoad(clonedScene);
+    }
+  }, [clonedScene, onLoad]);
+  
+  if (error) return null;
+  if (!clonedScene) return null;
+  
+  return <primitive object={clonedScene} />;
+};
+
 
   React.useEffect(() => {
     if (clonedScene) {
