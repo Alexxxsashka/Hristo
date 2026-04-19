@@ -413,10 +413,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.nameHr || null, 
           p.descriptionHr || null, 
           p.longDescriptionHr || null,
-          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
-          JSON.stringify(p.compatibleModuleCategories || []),
-          JSON.stringify(p.socketPoint || []),
-          JSON.stringify(p.slots || []),
+          JSON.stringify(
+            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
+            ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
+          ),
+          JSON.stringify(
+            (p.compatibleModuleCategories && p.compatibleModuleCategories.length > 0) ? p.compatibleModuleCategories : []
+          ),
+          JSON.stringify(
+            (p.socketPoint && p.socketPoint.length > 0) ? p.socketPoint : []
+          ),
+          JSON.stringify(
+            (p.slots && p.slots.length > 0) ? p.slots : []
+          ),
           p.mountType || null,
           p.attachmentSlot || null
         ];
@@ -531,10 +540,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.status || 'active',
           p.category_id || p.category || null,
           p.subcategory || null,
-          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
-          JSON.stringify(p.compatibleModuleCategories || []),
-          JSON.stringify(p.socketPoint || []),
-          JSON.stringify(p.slots || []),
+          JSON.stringify(
+            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
+            ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
+          ),
+          JSON.stringify(
+            (p.compatibleModuleCategories && p.compatibleModuleCategories.length > 0) ? p.compatibleModuleCategories : []
+          ),
+          JSON.stringify(
+            (p.socketPoint && p.socketPoint.length > 0) ? p.socketPoint : []
+          ),
+          JSON.stringify(
+            (p.slots && p.slots.length > 0) ? p.slots : []
+          ),
           p.mountType || null,
           p.attachmentSlot || null
         ];
@@ -563,8 +581,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Simple sync for compatibility whitelist
         const currentUid = p.uid || adminProd[0];
         try {
-          if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
-            const uids = p.compatibleIds || p.compatibleWeapons;
+          const uids = (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
+                       ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : null);
+          
+          if (Array.isArray(uids)) {
             console.log(`[DB] Syncing ${uids.length} compatible weapons for ${currentUid}`);
             await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
             for (const parentUid of uids) {
