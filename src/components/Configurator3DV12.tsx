@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { X, Lightbulb, MousePointer2, Move, ZoomIn, Mouse, Eye, EyeOff, Maximize, Layout, Minimize, Sparkles, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { databaseService } from '../services/databaseService';
 
 // EFT Style Slot Metadata
@@ -626,18 +627,6 @@ const ActualPartModel = ({
   }, [clonedScene, onLoad]);
   
   if (error) return null;
-  if (!clonedScene) return null;
-  
-  return <primitive object={clonedScene} />;
-};
-
-
-  React.useEffect(() => {
-    if (clonedScene) {
-      onLoad(clonedScene);
-    }
-  }, [clonedScene, onLoad]);
-  
   if (!clonedScene) return null;
   
   return <primitive object={clonedScene} />;

@@ -59,6 +59,7 @@ export interface Product {
   type: 'weapon' | 'module' | 'gear' | 'part' | 'consumable';
   category: string;
   subcategory: string;
+  category_id?: string;
   brand: string;
   model: string;
   price: number;
