@@ -165,37 +165,29 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
     const sType = slotType.toLowerCase();
     const category = m.category?.toLowerCase() || m.type?.toLowerCase() || '';
     
-    // Check synonyms first
+    // 1. SLOT TYPE MATCH (Mandatory)
     const isSynonymMatch = slotSynonyms[sType]?.some(syn => 
       category.toLowerCase().includes(syn) || syn.includes(category.toLowerCase())
     );
     const fitsInSlot = m.attachmentSlot?.toLowerCase() === sType;
     const allowedInSlots = m.allowedSlots?.some(s => s.toLowerCase() === sType);
     
-    let typeMatch = category === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
+    const typeMatch = category === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
     
-    // Check weapon compatibility if specified (Whitelisting)
+    // 2. WEAPON MATCH (Whitelists)
     const activeProd = useConfiguratorStore.getState().activeProduct;
     const allowedWeapons = (m.compatibleWeapons && m.compatibleWeapons.length > 0) ? m.compatibleWeapons :
                           ((m.compatibleIds && m.compatibleIds.length > 0) ? m.compatibleIds : []);
 
-    const weaponMatch = allowedWeapons.length === 0 || 
-      allowedWeapons.some(w => 
-        w.toLowerCase() === parentId.toLowerCase() || 
-        (activeProd && (
-          w.toLowerCase() === activeProd.id.toLowerCase() || 
-          w.toLowerCase() === (activeProd.uid || '').toLowerCase() || 
-          w.toLowerCase() === activeProd.name.toLowerCase()
-        ))
-      );
-    
-    // CRITICAL: If specifically whitelisted for this weapon, we allow it even if category/synonym check fails
     const isExplicitlyWhitelisted = allowedWeapons.some(w => 
       w.toLowerCase() === parentId.toLowerCase() || 
       (activeProd && w.toLowerCase() === activeProd.id.toLowerCase())
     );
 
-    return (typeMatch && weaponMatch) || isExplicitlyWhitelisted;
+    const weaponMatch = allowedWeapons.length === 0 || isExplicitlyWhitelisted;
+
+    // Both must be true: It must fit the SLOT TYPE and be allowed on this WEAPON
+    return typeMatch && weaponMatch;
   });
 
   const fullSlotId = `${parentId}:${slotId}`;
