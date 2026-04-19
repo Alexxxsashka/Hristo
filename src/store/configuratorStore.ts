@@ -192,16 +192,23 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     if (fullSlotId) {
       const [parentId, slotType] = fullSlotId.split(':');
       const category = part.category?.toLowerCase() || part.type?.toLowerCase();
+      const attachmentSlot = part.attachmentSlot?.toLowerCase();
       
-      // EFT Logic: Check specific product compatibility if defined
-      const allowedIds = part.compatibleIds || (part as any).compatibleWeapons || [];
+      // EFT Logic 1: Check specific UID compatibility (Must fit the weapon/parent)
+      const allowedIds = part.compatibleIds || part.compatibleWeapons || [];
       if (allowedIds && allowedIds.length > 0) {
         if (!allowedIds.includes(activeProduct.uid)) {
           return { 
             compatible: false, 
-            reason: `Part ${part.name} is not compatible with ${activeProduct.name}` 
+            reason: `Direct mismatch: ${part.name} is not in the whitelist for ${activeProduct.name}` 
           };
         }
+      }
+
+      // EFT Logic 2: Slot Type matching
+      // Priority: attachmentSlot > category > part type
+      if (attachmentSlot && attachmentSlot === slotType.toLowerCase()) {
+        return { compatible: true };
       }
 
       if (category === slotType.toLowerCase()) {
@@ -210,7 +217,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
       return { 
         compatible: false, 
-        reason: `Part ${part.name} (${category}) is not compatible with slot ${slotType}` 
+        reason: `Slot mismatch: ${part.name} requires ${attachmentSlot || category || 'unknown'} slot, but this is ${slotType}` 
       };
     }
     

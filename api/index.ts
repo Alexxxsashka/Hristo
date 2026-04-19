@@ -94,10 +94,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // ── DB Migration ─────────────────────────────────────────────────────────
+    if (path === "/admin/migrate" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      
+      const results = [];
+      try {
+        // Add attachment_slot if missing
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
+        results.push("Added attachment_slot column");
+        
+        // Add mount_type if missing
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
+        results.push("Added mount_type column");
+
+        // Create product_compatibility table
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS product_compatibility (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            parent_uid TEXT NOT NULL,
+            child_uid TEXT NOT NULL,
+            slot_name TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(parent_uid, child_uid, slot_name)
+          )
+        `);
+        results.push("Created product_compatibility table");
+
+        return res.json({ success: true, results });
+      } catch (err: any) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
     // ── DB Test ───────────────────────────────────────────────────────────────
     if (path === "/db-test" || path === "/diag/db-test") {
+      // Auto-migrate schema on test
+      try {
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS product_compatibility (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            parent_uid TEXT NOT NULL,
+            child_uid TEXT NOT NULL,
+            slot_name TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(parent_uid, child_uid, slot_name)
+          )
+        `);
+      } catch (e) {}
+
       const r = await pool.query("SELECT NOW()");
-      return res.json({ ok: true, time: r.rows[0].now, conn: connectionString?.slice(0, 40) });
+      return res.json({ ok: true, time: r.rows[0].now });
     }
 
     // ── GET /categories ────────────────────────────────────────────────────────
@@ -313,34 +363,69 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description || p.longDescription || null;
 
-      await pool.query(
+      const r = await pool.query(
         `INSERT INTO products (
-          id, uid, sku, slug, name, description, long_description, type, category_id, brand, model, 
+          id, uid, sku, slug, name, description, long_description, type, category_id, subcategory, brand, model, 
           price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
           variants, variant_attributes, category_filters, 
           name_hr, description_hr, long_description_hr, status,
-          compatible_ids, compatible_module_categories, socket_point, slots, mount_type
+          compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot
         )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'active',$25,$26,$27,$28,$29)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,'active',$26,$27,$28,$29,$30,$31)
          ON CONFLICT (id) DO UPDATE SET 
-          name=$5, description=$6, long_description=$7, price=$12, stock=$13, image_url=$14, images=$15, 
-          model_3d_url=$16, has_3d=$17, characteristics=$18, variants=$19, 
-          variant_attributes=$20, category_filters=$21, 
-          name_hr=$22, description_hr=$23, long_description_hr=$24,
-          brand=$10, model=$11, sku=$3, type=$8,
-          compatible_ids=$25, compatible_module_categories=$26, socket_point=$27, slots=$28, mount_type=$29`,
+          name=$5, description=$6, long_description=$7, price=$13, stock=$14, image_url=$15, images=$16, 
+          model_3d_url=$17, has_3d=$18, characteristics=$19, variants=$20, 
+          variant_attributes=$21, category_filters=$22, 
+          name_hr=$23, description_hr=$24, long_description_hr=$25,
+          brand=$11, model=$12, sku=$3, type=$8, category_id=$9, subcategory=$10,
+          compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31`,
         [
-          id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, longDescription, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
-          p.price||0, p.stock||0, imageUrl, JSON.stringify(imagesArr), model3dUrl, has3d, 
-          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
-          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null,
+          id, 
+          p.uid || id, 
+          p.sku || '', 
+          p.slug || id, 
+          p.name || 'Unnamed Product', 
+          p.description || '', 
+          longDescription || '', 
+          p.type || 'weapon', 
+          p.category_id || p.category || null, 
+          p.subcategory || null,
+          p.brand || '', 
+          p.model || '', 
+          parseFloat(p.price) || 0, 
+          parseInt(p.stock) || 0, 
+          imageUrl, 
+          JSON.stringify(imagesArr), 
+          model3dUrl, 
+          !!has3d, 
+          JSON.stringify(p.characteristics || []), 
+          JSON.stringify(p.variants || []), 
+          JSON.stringify(p.variant_attributes || []), 
+          JSON.stringify(p.category_filters || {}),
+          p.nameHr || null, 
+          p.descriptionHr || null, 
+          p.longDescriptionHr || null,
           JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
           JSON.stringify(p.compatibleModuleCategories || []),
           JSON.stringify(p.socketPoint || []),
           JSON.stringify(p.slots || []),
-          p.mountType || null
+          p.mountType || null,
+          p.attachmentSlot || null
         ]
       );
+
+      // Sync compatibility table for whitelist
+      if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
+        const uids = p.compatibleIds || p.compatibleWeapons;
+        // Simple logic: this product (child) fits these weapons (parents)
+        for (const parentUid of uids) {
+          await pool.query(
+            "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            [parentUid, p.uid || id]
+          );
+        }
+      }
+
       return res.json({ id });
     }
 
@@ -366,23 +451,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           variant_attributes=$13, category_filters=$14, 
           name_hr=$15, description_hr=$16, long_description_hr=$17,
           brand=$18, model=$19, sku=$20, type=$21, status=$22,
-          compatible_ids=$23, compatible_module_categories=$24, socket_point=$25, slots=$26, mount_type=$27
+          category_id=$23, subcategory=$24,
+          compatible_ids=$25, compatible_module_categories=$26, socket_point=$27, slots=$28, mount_type=$29, attachment_slot=$30
          WHERE id = $1 OR slug = $1
          RETURNING id`,
         [
-          adminProd[0], p.name, p.description, longDescription, p.price, p.stock, imageUrl, 
-          JSON.stringify(imagesArr), model3dUrl, has3d, 
-          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), 
-          JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
-          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null,
-          p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active',
+          adminProd[0], 
+          p.name || 'Unnamed Product', 
+          p.description || '', 
+          longDescription || '', 
+          parseFloat(p.price) || 0, 
+          parseInt(p.stock) || 0, 
+          imageUrl, 
+          JSON.stringify(imagesArr), 
+          model3dUrl, 
+          !!has3d, 
+          JSON.stringify(p.characteristics || []), 
+          JSON.stringify(p.variants || []), 
+          JSON.stringify(p.variant_attributes || []), 
+          JSON.stringify(p.category_filters || {}),
+          p.nameHr || null, 
+          p.descriptionHr || null, 
+          p.longDescriptionHr || null,
+          p.brand || '', 
+          p.model || '', 
+          p.sku || '', 
+          p.type || 'weapon', 
+          p.status || 'active',
+          p.category_id || p.category || null,
+          p.subcategory || null,
           JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
           JSON.stringify(p.compatibleModuleCategories || []),
           JSON.stringify(p.socketPoint || []),
           JSON.stringify(p.slots || []),
-          p.mountType || null
+          p.mountType || null,
+          p.attachmentSlot || null
         ]
       );
+
+      // Simple sync for compatibility whitelist
+      const currentUid = p.uid || adminProd[0];
+      if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
+        const uids = p.compatibleIds || p.compatibleWeapons;
+        // Clear old ones and insert new ones
+        await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
+        for (const parentUid of uids) {
+          await pool.query(
+            "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            [parentUid, currentUid]
+          );
+        }
+      }
 
       if (r.rowCount === 0) {
         return res.status(404).json({ error: "Product not found to update" });

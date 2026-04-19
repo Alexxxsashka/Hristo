@@ -4444,8 +4444,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         has3D: formData.has3D
       };
 
-      console.log('Saving product to Firestore...', productToSave);
-      await databaseService.saveProduct(productToSave);
+      console.log('Starting product save process...');
+      console.log('Saving product to Database...', productToSave);
+      await databaseService.saveProduct(productToSave as any);
       console.log('Product saved successfully!');
       onNotify('Product saved successfully!');
       onSuccess();
