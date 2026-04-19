@@ -72,7 +72,7 @@ import {
 import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'database' | 'media' | 'erp' | 'orders' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -291,28 +291,12 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => { setActiveTab('erp'); setSearchQuery(''); }} 
           />
           <SidebarItem 
-            icon={<Database size={20} />} 
-            label="Database" 
-            description="Migrate local data to Cloud"
-            showHelp={showHelp}
-            active={activeTab === 'database'} 
-            onClick={() => { setActiveTab('database'); setSearchQuery(''); }} 
-          />
-          <SidebarItem 
             icon={<Globe size={20} />} 
             label="Website" 
             description="Site branding & configuration"
             showHelp={showHelp}
             active={activeTab === 'settings'} 
             onClick={() => { setActiveTab('settings'); setSearchQuery(''); }} 
-          />
-          <SidebarItem 
-            icon={<Upload size={20} />} 
-            label="Media Library" 
-            description="Manage site assets & files"
-            showHelp={showHelp}
-            active={activeTab === 'media'} 
-            onClick={() => { setActiveTab('media'); setSearchQuery(''); }} 
           />
 
         </nav>
@@ -358,8 +342,6 @@ export const AdminDashboard: React.FC = () => {
                 {activeTab === 'blog' && 'Manage news and articles for your customers'}
                 {activeTab === 'messages' && 'Read and reply to customer messages'}
                 {activeTab === 'policies' && 'Edit legal documents and information pages'}
-                {activeTab === 'database' && 'Migrate your local data to the Firebase database'}
-                {activeTab === 'media' && 'Upload and manage images, 3D models, and videos'}
               </span>
             )}
           </div>
@@ -590,18 +572,6 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab('products');
                 }}
               />
-            )}
-            {activeTab === 'database' && (
-              <MigrationTool 
-                products={products} 
-                categories={categories} 
-                confirmAction={confirmAction} 
-                onNotify={showNotification} 
-              />
-            )}
-
-            {activeTab === 'media' && (
-              <MediaManager onNotify={showNotification} onConfirm={confirmAction} />
             )}
 
             {activeTab === 'settings' && (
@@ -1020,15 +990,10 @@ const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm: any }
         </div>
       </div>
     </motion.div>
-  );
 };
 
-const MigrationTool = ({ products, categories, confirmAction, onNotify }: { 
-  products: Product[], 
-  categories: Category[], 
-  confirmAction: (msg: string, onConfirm: () => void) => void,
-  onNotify: (msg: string, type?: 'success' | 'error') => void
-}) => {
+const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
+  policies: PolicyPage[], 
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [logs, setLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);

@@ -11,7 +11,37 @@ export const PhoneAuth: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [timer, setTimer] = React.useState(0);
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const recaptchaRef = React.useRef<HTMLDivElement>(null);
+
+  const validateField = (field: string, value: any) => {
+    let error = '';
+    switch (field) {
+      case 'phoneNumber':
+        if (!value?.trim()) {
+          error = 'Phone number is required';
+        } else if (!/^\+[0-9]{7,15}$/.test(value)) {
+          error = 'Please enter a valid phone number with country code (e.g. +385123456789)';
+        }
+        break;
+      case 'otp':
+        if (!value?.trim()) {
+          error = 'Verification code is required';
+        } else if (!/^[0-9]{6}$/.test(value)) {
+          error = 'Verification code must be 6 digits';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    if (field === 'phoneNumber') setPhoneNumber(value);
+    else if (field === 'otp') setOtp(value);
+    
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   React.useEffect(() => {
     let interval: any;
@@ -34,6 +64,14 @@ export const PhoneAuth: React.FC = () => {
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate phone number
+    const phoneError = validateField('phoneNumber', phoneNumber);
+    if (phoneError) {
+      setFieldErrors({ phoneNumber: phoneError });
+      return;
+    }
+    
     setError(null);
     setLoading(true);
     try {
@@ -55,6 +93,14 @@ export const PhoneAuth: React.FC = () => {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationId) return;
+    
+    // Validate OTP
+    const otpError = validateField('otp', otp);
+    if (otpError) {
+      setFieldErrors({ otp: otpError });
+      return;
+    }
+    
     setError(null);
     setLoading(true);
     try {
@@ -80,12 +126,17 @@ export const PhoneAuth: React.FC = () => {
               <input
                 type="tel"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
                 placeholder="+1 234 567 8900"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-red-600 transition-colors"
+                className={`w-full bg-zinc-900 border rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-red-600 transition-colors ${
+                  fieldErrors.phoneNumber ? 'border-red-500' : 'border-zinc-800'
+                }`}
                 required
               />
             </div>
+            {fieldErrors.phoneNumber && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.phoneNumber}</p>
+            )}
           </div>
           <button
             type="submit"
@@ -102,12 +153,17 @@ export const PhoneAuth: React.FC = () => {
             <input
               type="text"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => handleFieldChange('otp', e.target.value)}
               placeholder="123456"
               maxLength={6}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2.5 px-4 text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-red-600 transition-colors"
+              className={`w-full bg-zinc-900 border rounded-lg py-2.5 px-4 text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-red-600 transition-colors ${
+                fieldErrors.otp ? 'border-red-500' : 'border-zinc-800'
+              }`}
               required
             />
+            {fieldErrors.otp && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.otp}</p>
+            )}
           </div>
           <div className="flex justify-between items-center text-xs">
             <button

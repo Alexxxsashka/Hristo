@@ -20,9 +20,46 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
     filters: []
   });
   const [editingCat, setEditingCat] = useState<Category | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: any) => {
+    let error = '';
+    switch (field) {
+      case 'name':
+        if (!value?.trim()) {
+          error = 'Category name is required';
+        } else if (value.length < 2) {
+          error = 'Category name must be at least 2 characters';
+        } else if (value.length > 100) {
+          error = 'Category name must be less than 100 characters';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setNewCat(prev => ({ ...prev, [field]: value }));
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate fields
+    const errors: Record<string, string> = {};
+    Object.keys(newCat).forEach(key => {
+      const error = validateField(key, newCat[key as keyof Category]);
+      if (error) errors[key] = error;
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      onNotify('Please fix the validation errors before submitting', 'error');
+      return;
+    }
+    
     try {
       const categoryToSave = {
         ...newCat,
@@ -134,10 +171,16 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
                 type="text"
                 placeholder="Category Name"
                 value={newCat.name}
-                onChange={e => setNewCat({ ...newCat, name: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                onChange={e => handleFieldChange('name', e.target.value)}
+                className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none ${
+                  fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
+                }`}
+                maxLength={100}
                 required
               />
+              {fieldErrors.name && (
+                <p className="text-red-500 text-xs">{fieldErrors.name}</p>
+              )}
               {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
             </div>
             <div className="w-48 space-y-1">

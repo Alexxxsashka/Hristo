@@ -129,6 +129,79 @@ export const CheckoutPage: React.FC = () => {
     postalCode: '',
     phone: ''
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: any) => {
+    let error = '';
+    switch (field) {
+      case 'firstName':
+        if (!value?.trim()) {
+          error = 'First name is required';
+        } else if (value.length < 2) {
+          error = 'First name must be at least 2 characters';
+        } else if (value.length > 50) {
+          error = 'First name must be less than 50 characters';
+        }
+        break;
+      case 'lastName':
+        if (!value?.trim()) {
+          error = 'Last name is required';
+        } else if (value.length < 2) {
+          error = 'Last name must be at least 2 characters';
+        } else if (value.length > 50) {
+          error = 'Last name must be less than 50 characters';
+        }
+        break;
+      case 'email':
+        if (!value?.trim()) {
+          error = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        } else if (value.length > 255) {
+          error = 'Email must be less than 255 characters';
+        }
+        break;
+      case 'address':
+        if (!value?.trim()) {
+          error = 'Address is required';
+        } else if (value.length < 5) {
+          error = 'Address must be at least 5 characters';
+        } else if (value.length > 200) {
+          error = 'Address must be less than 200 characters';
+        }
+        break;
+      case 'city':
+        if (!value?.trim()) {
+          error = 'City is required';
+        } else if (value.length < 2) {
+          error = 'City must be at least 2 characters';
+        } else if (value.length > 100) {
+          error = 'City must be less than 100 characters';
+        }
+        break;
+      case 'postalCode':
+        if (!value?.trim()) {
+          error = 'Postal code is required';
+        } else if (!/^[0-9]{4,10}$/.test(value.replace(/\s/g, ''))) {
+          error = 'Postal code must be 4-10 digits';
+        }
+        break;
+      case 'phone':
+        if (!value?.trim()) {
+          error = 'Phone number is required';
+        } else if (!/^[0-9+\-\s()]{7,20}$/.test(value)) {
+          error = 'Please enter a valid phone number';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   useEffect(() => {
     const fetchLogos = async () => {
@@ -179,6 +252,20 @@ export const CheckoutPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent, isStripePaid: boolean = false) => {
     if (e) e.preventDefault();
+    
+    // Validate all fields
+    const errors: Record<string, string> = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key as keyof typeof formData]);
+      if (error) errors[key] = error;
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please fix the validation errors before submitting');
+      return;
+    }
+    
     setIsProcessing(true);
     setError(null);
     
@@ -297,9 +384,15 @@ export const CheckoutPage: React.FC = () => {
                           type="text" 
                           required
                           value={formData.firstName}
-                          onChange={e => setFormData({...formData, firstName: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('firstName', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.firstName ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={50}
                         />
+                        {fieldErrors.firstName && (
+                          <p className="text-red-500 text-xs">{fieldErrors.firstName}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('last_name')}</label>
@@ -307,9 +400,15 @@ export const CheckoutPage: React.FC = () => {
                           type="text" 
                           required
                           value={formData.lastName}
-                          onChange={e => setFormData({...formData, lastName: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('lastName', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.lastName ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={50}
                         />
+                        {fieldErrors.lastName && (
+                          <p className="text-red-500 text-xs">{fieldErrors.lastName}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('your_email')}</label>
@@ -317,9 +416,15 @@ export const CheckoutPage: React.FC = () => {
                           type="email" 
                           required
                           value={formData.email}
-                          onChange={e => setFormData({...formData, email: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('email', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.email ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={255}
                         />
+                        {fieldErrors.email && (
+                          <p className="text-red-500 text-xs">{fieldErrors.email}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('address')}</label>
@@ -327,9 +432,15 @@ export const CheckoutPage: React.FC = () => {
                           type="text" 
                           required
                           value={formData.address}
-                          onChange={e => setFormData({...formData, address: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('address', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.address ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={200}
                         />
+                        {fieldErrors.address && (
+                          <p className="text-red-500 text-xs">{fieldErrors.address}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('city')}</label>
@@ -337,9 +448,15 @@ export const CheckoutPage: React.FC = () => {
                           type="text" 
                           required
                           value={formData.city}
-                          onChange={e => setFormData({...formData, city: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('city', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.city ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={100}
                         />
+                        {fieldErrors.city && (
+                          <p className="text-red-500 text-xs">{fieldErrors.city}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('postal_code')}</label>
@@ -347,9 +464,14 @@ export const CheckoutPage: React.FC = () => {
                           type="text" 
                           required
                           value={formData.postalCode}
-                          onChange={e => setFormData({...formData, postalCode: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('postalCode', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.postalCode ? 'border-red-500' : 'border-zinc-800'
+                          }`}
                         />
+                        {fieldErrors.postalCode && (
+                          <p className="text-red-500 text-xs">{fieldErrors.postalCode}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
                         <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('phone')}</label>
@@ -357,10 +479,15 @@ export const CheckoutPage: React.FC = () => {
                           type="tel" 
                           required
                           value={formData.phone}
-                          onChange={e => setFormData({...formData, phone: e.target.value})}
-                          className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border border-zinc-800 rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm"
+                          onChange={e => handleFieldChange('phone', e.target.value)}
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
+                            fieldErrors.phone ? 'border-red-500' : 'border-zinc-800'
+                          }`}
                           placeholder="+385..."
                         />
+                        {fieldErrors.phone && (
+                          <p className="text-red-500 text-xs">{fieldErrors.phone}</p>
+                        )}
                       </div>
                     </div>
                   </section>

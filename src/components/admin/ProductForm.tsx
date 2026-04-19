@@ -66,6 +66,72 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   const [newAttributeName, setNewAttributeName] = useState('');
   const [newAttributeOptions, setNewAttributeOptions] = useState('');
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: any) => {
+    let error = '';
+    switch (field) {
+      case 'name':
+        if (!value?.trim()) {
+          error = 'Product name is required';
+        } else if (value.length < 2) {
+          error = 'Product name must be at least 2 characters';
+        } else if (value.length > 255) {
+          error = 'Product name must be less than 255 characters';
+        }
+        break;
+      case 'description':
+        if (!value?.trim()) {
+          error = 'Description is required';
+        } else if (value.length < 10) {
+          error = 'Description must be at least 10 characters';
+        } else if (value.length > 2000) {
+          error = 'Description must be less than 2000 characters';
+        }
+        break;
+      case 'sku':
+        if (value && value.length > 50) {
+          error = 'SKU must be less than 50 characters';
+        }
+        break;
+      case 'barcode':
+        if (value && !/^[0-9]{8,18}$/.test(value)) {
+          error = 'Barcode must be 8-18 digits';
+        }
+        break;
+      case 'price':
+        if (value < 0) {
+          error = 'Price cannot be negative';
+        } else if (value > 999999.99) {
+          error = 'Price cannot exceed 999,999.99';
+        }
+        break;
+      case 'stock':
+        if (value < 0) {
+          error = 'Stock cannot be negative';
+        } else if (value > 999999) {
+          error = 'Stock cannot exceed 999,999';
+        }
+        break;
+      case 'brand':
+        if (value && value.length > 100) {
+          error = 'Brand must be less than 100 characters';
+        }
+        break;
+      case 'model':
+        if (value && value.length > 100) {
+          error = 'Model must be less than 100 characters';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   useEffect(() => {
     if (formData.category) {
@@ -87,6 +153,20 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const errors: Record<string, string> = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key as keyof Product]);
+      if (error) errors[key] = error;
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      onNotify('Please fix the validation errors before submitting', 'error');
+      return;
+    }
+    
     setIsSubmitting(true);
     console.log('Starting product save process...');
 
@@ -339,7 +419,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       animate={{ opacity: 1, x: 0 }}
       className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 max-w-4xl mx-auto"
     >
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} noValidate className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Name</label>
@@ -347,10 +427,16 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              onChange={e => handleFieldChange('name', e.target.value)}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              maxLength={255}
               required
             />
+            {fieldErrors.name && (
+              <p className="text-red-500 text-xs">{fieldErrors.name}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Brand</label>
@@ -358,10 +444,16 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.brand}
-              onChange={e => setFormData({...formData, brand: e.target.value})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
-              required
+              onChange={e => handleFieldChange('brand', e.target.value)}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.brand ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              maxLength={100}
             />
+            {fieldErrors.brand && (
+              <p className="text-red-500 text-xs">{fieldErrors.brand}</p>
+            )}
+          </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Price (€)</label>
@@ -369,10 +461,18 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="number" 
               value={formData.price}
-              onChange={e => setFormData({...formData, price: Number(e.target.value)})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              onChange={e => handleFieldChange('price', Number(e.target.value))}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.price ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              min="0"
+              max="999999.99"
+              step="0.01"
               required
             />
+            {fieldErrors.price && (
+              <p className="text-red-500 text-xs">{fieldErrors.price}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Discount (%)</label>
@@ -433,10 +533,16 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.sku || ''}
-              onChange={e => setFormData({...formData, sku: e.target.value})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
+              onChange={e => handleFieldChange('sku', e.target.value)}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${
+                fieldErrors.sku ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              maxLength={50}
               placeholder="e.g. SA-E01-PRO"
             />
+            {fieldErrors.sku && (
+              <p className="text-red-500 text-xs">{fieldErrors.sku}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Barcode</label>
@@ -444,10 +550,15 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="text" 
               value={formData.barcode || ''}
-              onChange={e => setFormData({...formData, barcode: e.target.value})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
+              onChange={e => handleFieldChange('barcode', e.target.value)}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${
+                fieldErrors.barcode ? 'border-red-500' : 'border-zinc-200'
+              }`}
               placeholder="e.g. 5901234567890"
             />
+            {fieldErrors.barcode && (
+              <p className="text-red-500 text-xs">{fieldErrors.barcode}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Landing Cost (€)</label>
@@ -478,10 +589,17 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <input 
               type="number" 
               value={formData.stock}
-              onChange={e => setFormData({...formData, stock: Number(e.target.value)})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              onChange={e => handleFieldChange('stock', Number(e.target.value))}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.stock ? 'border-red-500' : 'border-zinc-200'
+              }`}
+              min="0"
+              max="999999"
               required
             />
+            {fieldErrors.stock && (
+              <p className="text-red-500 text-xs">{fieldErrors.stock}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Min. Stock Level</label>
@@ -703,10 +821,16 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Brief summary of the product (appears in lists).</p>}
           <textarea 
             value={formData.description}
-            onChange={e => setFormData({...formData, description: e.target.value})}
-            className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none"
+            onChange={e => handleFieldChange('description', e.target.value)}
+            className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none ${
+              fieldErrors.description ? 'border-red-500' : 'border-zinc-200'
+            }`}
+            maxLength={2000}
             required
           />
+          {fieldErrors.description && (
+            <p className="text-red-500 text-xs">{fieldErrors.description}</p>
+          )}
         </div>
 
         <div className="space-y-2">

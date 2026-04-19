@@ -16,6 +16,12 @@ export const RegisterPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
@@ -29,19 +35,94 @@ export const RegisterPage: React.FC = () => {
     return pass.length >= 8 && /[A-Z]/.test(pass) && /[0-9]/.test(pass) && /[^A-Za-z0-9]/.test(pass);
   };
 
+  const validateField = (field: string, value: string) => {
+    let error = '';
+    switch (field) {
+      case 'username':
+        if (!value.trim()) {
+          error = 'Username is required';
+        } else if (value.length < 3) {
+          error = 'Username must be at least 3 characters';
+        } else if (value.length > 50) {
+          error = 'Username must be less than 50 characters';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          error = 'Username can only contain letters, numbers, and underscores';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        } else if (value.length > 255) {
+          error = 'Email must be less than 255 characters';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = 'Password is required';
+        } else if (value.length < 8) {
+          error = 'Password must be at least 8 characters';
+        } else if (value.length > 128) {
+          error = 'Password must be less than 128 characters';
+        } else if (!/[A-Z]/.test(value)) {
+          error = 'Password must contain at least one uppercase letter';
+        } else if (!/[a-z]/.test(value)) {
+          error = 'Password must contain at least one lowercase letter';
+        } else if (!/[0-9]/.test(value)) {
+          error = 'Password must contain at least one number';
+        } else if (!/[^A-Za-z0-9]/.test(value)) {
+          error = 'Password must contain at least one special character';
+        }
+        break;
+      case 'confirmPassword':
+        if (!value) {
+          error = 'Please confirm your password';
+        } else if (value !== password) {
+          error = 'Passwords do not match';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    switch (field) {
+      case 'username':
+        setUsername(value);
+        break;
+      case 'email':
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+      case 'confirmPassword':
+        setConfirmPassword(value);
+        break;
+    }
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
+    // Validate all fields
+    const errors = {
+      username: validateField('username', username),
+      email: validateField('email', email),
+      password: validateField('password', password),
+      confirmPassword: validateField('confirmPassword', confirmPassword)
+    };
 
-    if (!isPasswordStrong(password)) {
-      setError('Password does not meet tactical security requirements.');
+    setFieldErrors(errors);
+
+    // Check if any errors exist
+    const hasErrors = Object.values(errors).some(error => error !== '');
+    if (hasErrors) {
       setLoading(false);
       return;
     }
@@ -108,12 +189,17 @@ export const RegisterPage: React.FC = () => {
                 <input 
                   type="text" 
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                  onChange={e => handleFieldChange('username', e.target.value)}
+                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                    fieldErrors.username ? 'border-red-500' : 'border-zinc-700'
+                  }`}
                   placeholder="johndoe"
-                  required
+                  maxLength={50}
                 />
               </div>
+              {fieldErrors.username && (
+                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.username}</p>
+              )}
             </div>
 
             <div>
@@ -123,12 +209,17 @@ export const RegisterPage: React.FC = () => {
                 <input 
                   type="email" 
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                  onChange={e => handleFieldChange('email', e.target.value)}
+                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                    fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                  }`}
                   placeholder="name@example.com"
-                  required
+                  maxLength={255}
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -138,13 +229,18 @@ export const RegisterPage: React.FC = () => {
                 <input 
                   type="password" 
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                  onChange={e => handleFieldChange('password', e.target.value)}
+                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                    fieldErrors.password ? 'border-red-500' : 'border-zinc-700'
+                  }`}
                   placeholder="••••••••"
-                  required
+                  maxLength={128}
                 />
               </div>
               <PasswordStrength password={password} />
+              {fieldErrors.password && (
+                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>
+              )}
             </div>
 
             <div>
@@ -154,12 +250,17 @@ export const RegisterPage: React.FC = () => {
                 <input 
                   type="password" 
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                  onChange={e => handleFieldChange('confirmPassword', e.target.value)}
+                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                    fieldErrors.confirmPassword ? 'border-red-500' : 'border-zinc-700'
+                  }`}
                   placeholder="••••••••"
-                  required
+                  maxLength={128}
                 />
               </div>
+              {fieldErrors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
 
             <button 

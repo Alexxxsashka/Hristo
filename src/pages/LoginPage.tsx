@@ -19,6 +19,10 @@ export const LoginPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    password: ''
+  });
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
@@ -28,10 +32,61 @@ export const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const validateField = (field: string, value: string) => {
+    let error = '';
+    switch (field) {
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        } else if (value.length > 255) {
+          error = 'Email must be less than 255 characters';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = 'Password is required';
+        } else if (value.length > 128) {
+          error = 'Password must be less than 128 characters';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    switch (field) {
+      case 'email':
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+    }
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Validate all fields
+    const errors = {
+      email: validateField('email', email),
+      password: validateField('password', password)
+    };
+
+    setFieldErrors(errors);
+
+    // Check if any errors exist
+    const hasErrors = Object.values(errors).some(error => error !== '');
+    if (hasErrors) {
+      setLoading(false);
+      return;
+    }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -130,12 +185,17 @@ export const LoginPage: React.FC = () => {
                     <input 
                       type="email" 
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                      onChange={e => handleFieldChange('email', e.target.value)}
+                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                        fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                      }`}
                       placeholder="name@example.com"
-                      required
+                      maxLength={255}
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>
+                  )}
                 </div>
                 <button 
                   type="submit"
@@ -169,12 +229,17 @@ export const LoginPage: React.FC = () => {
                     <input 
                       type="email" 
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                      onChange={e => handleFieldChange('email', e.target.value)}
+                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                        fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                      }`}
                       placeholder="name@example.com"
-                      required
+                      maxLength={255}
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>
+                  )}
                 </div>
 
                 <div>
@@ -193,12 +258,17 @@ export const LoginPage: React.FC = () => {
                     <input 
                       type="password" 
                       value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100"
+                      onChange={e => handleFieldChange('password', e.target.value)}
+                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
+                        fieldErrors.password ? 'border-red-500' : 'border-zinc-700'
+                      }`}
                       placeholder="••••••••"
-                      required
+                      maxLength={128}
                     />
                   </div>
+                  {fieldErrors.password && (
+                    <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>
+                  )}
                 </div>
 
                 <button 

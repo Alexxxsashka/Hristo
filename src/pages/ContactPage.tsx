@@ -26,11 +26,83 @@ export const ContactPage: React.FC = () => {
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  const validateField = (field: string, value: string) => {
+    let error = '';
+    switch (field) {
+      case 'name':
+        if (!value.trim()) {
+          error = 'Ime je obavezno';
+        } else if (value.length < 2) {
+          error = 'Ime mora imati najmanje 2 znaka';
+        } else if (value.length > 100) {
+          error = 'Ime ne može biti duže od 100 znakova';
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          error = 'Ime može sadržavati samo slova i razmake';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email je obavezan';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Unesite valjanu email adresu';
+        } else if (value.length > 255) {
+          error = 'Email ne može biti duži od 255 znakova';
+        }
+        break;
+      case 'subject':
+        if (!value.trim()) {
+          error = 'Predmet je obavezan';
+        } else if (value.length > 200) {
+          error = 'Predmet ne može biti duži od 200 znakova';
+        }
+        break;
+      case 'message':
+        if (!value.trim()) {
+          error = 'Poruka je obavezna';
+        } else if (value.length < 10) {
+          error = 'Poruka mora imati najmanje 10 znakova';
+        } else if (value.length > 2000) {
+          error = 'Poruka ne može biti duža od 2000 znakova';
+        }
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    const error = validateField(field, value);
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMessage('');
+
+    // Validate all fields
+    const errors = {
+      name: validateField('name', formData.name),
+      email: validateField('email', formData.email),
+      subject: validateField('subject', formData.subject),
+      message: validateField('message', formData.message)
+    };
+
+    setFieldErrors(errors);
+
+    // Check if any errors exist
+    const hasErrors = Object.values(errors).some(error => error !== '');
+    if (hasErrors) {
+      setStatus('idle');
+      return;
+    }
 
     try {
       await databaseService.sendContactMessage(formData);
@@ -41,6 +113,7 @@ export const ContactPage: React.FC = () => {
         subject: 'Pitanje o proizvodu',
         message: ''
       });
+      setFieldErrors({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
       setErrorMessage('Mrežna pogreška. Molimo pokušajte ponovno.');
       setStatus('error');
@@ -172,23 +245,33 @@ export const ContactPage: React.FC = () => {
                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_name')}</label>
                           <input 
                             type="text" 
-                            required
                             placeholder="Vaše ime"
                             value={formData.name}
-                            onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all"
+                            onChange={e => handleFieldChange('name', e.target.value)}
+                            className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${
+                              fieldErrors.name ? 'border-red-500' : 'border-zinc-800'
+                            }`}
+                            maxLength={100}
                           />
+                          {fieldErrors.name && (
+                            <p className="text-red-500 text-xs ml-4">{fieldErrors.name}</p>
+                          )}
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_email')}</label>
                           <input 
                             type="email" 
-                            required
                             placeholder="Vaš email"
                             value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all"
+                            onChange={e => handleFieldChange('email', e.target.value)}
+                            className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${
+                              fieldErrors.email ? 'border-red-500' : 'border-zinc-800'
+                            }`}
+                            maxLength={255}
                           />
+                          {fieldErrors.email && (
+                            <p className="text-red-500 text-xs ml-4">{fieldErrors.email}</p>
+                          )}
                         </div>
                       </div>
 
@@ -196,8 +279,10 @@ export const ContactPage: React.FC = () => {
                         <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('subject')}</label>
                         <select 
                           value={formData.subject}
-                          onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                          className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-white outline-none focus:border-red-600 transition-all appearance-none cursor-pointer"
+                          onChange={e => handleFieldChange('subject', e.target.value)}
+                          className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white outline-none focus:border-red-600 transition-all appearance-none cursor-pointer ${
+                            fieldErrors.subject ? 'border-red-500' : 'border-zinc-800'
+                          }`}
                         >
                           <option>{t('product_question')}</option>
                           <option>{t('order_status')}</option>
@@ -205,18 +290,26 @@ export const ContactPage: React.FC = () => {
                           <option>{t('complaint')}</option>
                           <option>{t('other')}</option>
                         </select>
+                        {fieldErrors.subject && (
+                          <p className="text-red-500 text-xs ml-4">{fieldErrors.subject}</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_message')}</label>
                         <textarea 
-                          required
                           placeholder={t('how_can_we_help') || 'How can we help you?'}
                           rows={6}
                           value={formData.message}
-                          onChange={e => setFormData({ ...formData, message: e.target.value })}
-                          className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all resize-none"
+                          onChange={e => handleFieldChange('message', e.target.value)}
+                          className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all resize-none ${
+                            fieldErrors.message ? 'border-red-500' : 'border-zinc-800'
+                          }`}
+                          maxLength={2000}
                         />
+                        {fieldErrors.message && (
+                          <p className="text-red-500 text-xs ml-4">{fieldErrors.message}</p>
+                        )}
                       </div>
 
                       {status === 'error' && (
