@@ -188,7 +188,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             };
           },
           onUploadCompleted: async () => {
-            // Optional metadata logic
           },
         });
         return res.status(200).json(jsonResponse);
@@ -199,30 +198,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── GET /products ──────────────────────────────────────────────────────────
     if (path === "/products" && method === "GET") {
-      const { category, search, minPrice, maxPrice, limit = "100", offset = "0" } = req.query as any;
-      
-      let where = ["p.status = 'active'"];
+      const { category, type, limit = "20", offset = "0" } = req.query as any;
+      const where = ["p.status = 'active'"];
       const params: any[] = [];
       let i = 1;
-      
       if (category) {
-        where.push(`(c.id = $${i} OR c.slug = $${i} OR c.parent_id = $${i})`);
+        where.push(`(p.category_id = $${i} OR c.parent_id = $${i})`);
         params.push(category);
         i++;
       }
-      if (search) {
-        where.push(`(p.name ILIKE $${i} OR p.description ILIKE $${i})`);
-        params.push(`%${search}%`);
-        i++;
-      }
-      if (minPrice) {
-        where.push(`p.price >= $${i}`);
-        params.push(Number(minPrice));
-        i++;
-      }
-      if (maxPrice) {
-        where.push(`p.price <= $${i}`);
-        params.push(Number(maxPrice));
+      if (type) {
+        where.push(`p.type = $${i}`);
+        params.push(type);
         i++;
       }
 
@@ -241,6 +228,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(r.rows.map((p: any) => ({
         ...p,
         image: p.image_url,
+        longDescription: p.long_description,
         category: p.parent_cat_id || p.category_id,
         subcategory: p.parent_cat_id ? p.category_id : null,
         nameHr: p.name_hr,
@@ -266,6 +254,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({
         ...p,
         image: p.image_url,
+        longDescription: p.long_description,
         category: p.parent_cat_id || p.category_id,
         subcategory: p.parent_cat_id ? p.category_id : null,
         nameHr: p.name_hr,
@@ -287,22 +276,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const model3dUrl = p.model_3d_url || p.model3D || null;
       const has3d = p.has_3d !== undefined ? p.has_3d : (p.has3D !== undefined ? p.has3D : false);
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
+      const longDescription = p.long_description || p.longDescription || null;
 
       await pool.query(
         `INSERT INTO products (
-          id, uid, sku, slug, name, description, type, category_id, brand, model, 
+          id, uid, sku, slug, name, description, long_description, type, category_id, brand, model, 
           price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
-          variants, variant_attributes, category_filters, status
+          variants, variant_attributes, category_filters, 
+          name_hr, description_hr, long_description_hr, status
         )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'active')
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'active')
          ON CONFLICT (id) DO UPDATE SET 
-          name=$5, description=$6, price=$11, stock=$12, image_url=$13, images=$14, 
-          model_3d_url=$15, has_3d=$16, characteristics=$17, variants=$18, 
-          variant_attributes=$19, category_filters=$20, brand=$9, model=$10, sku=$3, type=$7`,
+          name=$5, description=$6, long_description=$7, price=$12, stock=$13, image_url=$14, images=$15, 
+          model_3d_url=$16, has_3d=$17, characteristics=$18, variants=$19, 
+          variant_attributes=$20, category_filters=$21, 
+          name_hr=$22, description_hr=$23, long_description_hr=$24,
+          brand=$10, model=$11, sku=$3, type=$8`,
         [
-          id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
+          id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, longDescription, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
           p.price||0, p.stock||0, imageUrl, JSON.stringify(imagesArr), model3dUrl, has3d, 
-          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{})
+          JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
+          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null
         ]
       );
       return res.json({ id });
