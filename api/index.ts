@@ -244,7 +244,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         stock: parseInt(p.stock) || 0,
         discount: p.discount ? parseInt(p.discount) : 0,
         model3D: p.model_3d_url,
-        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url
+        model3DName: p.model3d_name, // Optional: if added to DB
+        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
+        socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
+        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : [],
+        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : [], // Backwards compatibility
+        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : [],
+        slots: Array.isArray(p.slots) ? p.slots : [],
+        attachmentSlot: p.attachment_slot,
+        mountType: p.mount_type
       })));
     }
 
@@ -278,7 +286,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         stock: parseInt(p.stock) || 0,
         discount: p.discount ? parseInt(p.discount) : 0,
         model3D: p.model_3d_url,
-        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url
+        model3DName: p.model3d_name, 
+        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
+        socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
+        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : [],
+        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : [], 
+        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : [],
+        slots: Array.isArray(p.slots) ? p.slots : [],
+        attachmentSlot: p.attachment_slot,
+        mountType: p.mount_type
       });
     }
 
@@ -302,20 +318,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           id, uid, sku, slug, name, description, long_description, type, category_id, brand, model, 
           price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
           variants, variant_attributes, category_filters, 
-          name_hr, description_hr, long_description_hr, status
+          name_hr, description_hr, long_description_hr, status,
+          compatible_ids, compatible_module_categories, socket_point, slots, attachment_slot, mount_type
         )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'active')
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'active',$25,$26,$27,$28,$29,$30)
          ON CONFLICT (id) DO UPDATE SET 
           name=$5, description=$6, long_description=$7, price=$12, stock=$13, image_url=$14, images=$15, 
           model_3d_url=$16, has_3d=$17, characteristics=$18, variants=$19, 
           variant_attributes=$20, category_filters=$21, 
           name_hr=$22, description_hr=$23, long_description_hr=$24,
-          brand=$10, model=$11, sku=$3, type=$8`,
+          brand=$10, model=$11, sku=$3, type=$8,
+          compatible_ids=$25, compatible_module_categories=$26, socket_point=$27, slots=$28, attachment_slot=$29, mount_type=$30`,
         [
           id, p.uid||id, p.sku||id, p.slug||id, p.name, p.description, longDescription, p.type||'weapon', p.category_id||p.category||null, p.brand||'', p.model||'', 
           p.price||0, p.stock||0, imageUrl, JSON.stringify(imagesArr), model3dUrl, has3d, 
           JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
-          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null
+          p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null,
+          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
+          JSON.stringify(p.compatibleModuleCategories || []),
+          JSON.stringify(p.socketPoint || []),
+          JSON.stringify(p.slots || []),
+          p.attachmentSlot || null,
+          p.mountType || null
         ]
       );
       return res.json({ id });
@@ -342,7 +366,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           model_3d_url=$9, has_3d=$10, characteristics=$11, variants=$12, 
           variant_attributes=$13, category_filters=$14, 
           name_hr=$15, description_hr=$16, long_description_hr=$17,
-          brand=$18, model=$19, sku=$20, type=$21, status=$22 
+          brand=$18, model=$19, sku=$20, type=$21, status=$22,
+          compatible_ids=$23, compatible_module_categories=$24, socket_point=$25, slots=$26, attachment_slot=$27, mount_type=$28
          WHERE id = $1 OR slug = $1
          RETURNING id`,
         [
@@ -351,7 +376,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           JSON.stringify(p.characteristics||[]), JSON.stringify(p.variants||[]), 
           JSON.stringify(p.variant_attributes||[]), JSON.stringify(p.category_filters||{}),
           p.nameHr||null, p.descriptionHr||null, p.longDescriptionHr||null,
-          p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active'
+          p.brand||'', p.model||'', p.sku||'', p.type||'weapon', p.status||'active',
+          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
+          JSON.stringify(p.compatibleModuleCategories || []),
+          JSON.stringify(p.socketPoint || []),
+          JSON.stringify(p.slots || []),
+          p.attachmentSlot || null,
+          p.mountType || null
         ]
       );
 

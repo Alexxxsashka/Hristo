@@ -193,6 +193,17 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       const [parentId, slotType] = fullSlotId.split(':');
       const category = part.category?.toLowerCase() || part.type?.toLowerCase();
       
+      // EFT Logic: Check specific product compatibility if defined
+      const allowedIds = part.compatibleIds || (part as any).compatibleWeapons || [];
+      if (allowedIds && allowedIds.length > 0) {
+        if (!allowedIds.includes(activeProduct.uid)) {
+          return { 
+            compatible: false, 
+            reason: `Part ${part.name} is not compatible with ${activeProduct.name}` 
+          };
+        }
+      }
+
       if (category === slotType.toLowerCase()) {
         return { compatible: true };
       }
