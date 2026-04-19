@@ -455,6 +455,8 @@ const PartModel = ({
     return discoverSlots(modelScene);
   }, [modelScene, part.name]);
 
+  console.log(`[PartModel V1.2] Preparing to mount ActualPartModel for "${part.name}". Path: ${modelPath}`);
+
   return (
     <Socket 
       slot={slot}
@@ -469,7 +471,10 @@ const PartModel = ({
             socketPoint={part.socketPoint}
             slotType={slot.type}
             partName={part.name}
-            onLoad={(scene) => setModelScene(scene)}
+            onLoad={(scene) => {
+              console.log(`[PartModel V1.2] ActualPartModel LOADED for "${part.name}"`);
+              setModelScene(scene);
+            }}
           />
         </Suspense>
       </ErrorBoundary>
