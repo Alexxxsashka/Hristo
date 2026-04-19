@@ -181,7 +181,10 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
 
     const isExplicitlyWhitelisted = allowedWeapons.some(w => 
       w.toLowerCase() === parentId.toLowerCase() || 
-      (activeProd && w.toLowerCase() === activeProd.id.toLowerCase())
+      (activeProd && (
+        w.toLowerCase() === activeProd.id.toLowerCase() || 
+        w.toLowerCase() === (activeProd.uid || '').toLowerCase()
+      ))
     );
 
     const weaponMatch = allowedWeapons.length === 0 || isExplicitlyWhitelisted;
@@ -680,8 +683,10 @@ export const Configurator3DV12: React.FC = () => {
     databaseService.getProducts()
       .then(data => {
         if (data) {
-          // Include both 'module' and 'part' types as they are used interchangeably for attachments
-          const modules = data.filter((p: Product) => p.type === 'module' || p.type === 'part');
+          // Broaden filter: catch anything that isn't a primary weapon
+          const modules = data.filter((p: Product) => 
+            p.type !== 'weapon' && p.category?.toLowerCase() !== 'weapons'
+          );
           setAllModules(modules);
         }
       });
