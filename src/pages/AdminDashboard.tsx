@@ -990,10 +990,13 @@ const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm: any }
         </div>
       </div>
     </motion.div>
+  );
 };
 
-const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
-  policies: PolicyPage[], 
+const DataMigrationTool = ({ onNotify }: { 
+  onNotify: (msg: string, type?: 'success' | 'error') => void
+}) => {
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [logs, setLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
