@@ -440,10 +440,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           productData
         );
 
+        console.log(`[DB] Product save success. RowCount: ${r.rowCount}, ID: ${p.uid || id}`);
+        
         // Sync compatibility table for whitelist
         try {
           if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
             const uids = p.compatibleIds || p.compatibleWeapons;
+            console.log(`[DB] Syncing ${uids.length} compatibility relations for ${p.uid || id}`);
             for (const parentUid of uids) {
               await pool.query(
                 "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
@@ -455,13 +458,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.error("Compatibility sync failed:", syncErr);
         }
 
-        return res.json({ id });
+        return res.json({ ok: true, id, uid: p.uid || id });
       } catch (dbErr: any) {
         console.error("Database Insert Error:", dbErr);
         return res.status(500).json({ 
           error: "Database Insert Failed", 
           message: dbErr.message,
-          detail: dbErr.detail
+          detail: dbErr.detail,
+          payload: p // Return payload for debug
         });
       }
     }
@@ -550,14 +554,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         );
 
         if (r.rowCount === 0) {
+          console.warn(`[DB] No product found to update with ID/Slug: ${adminProd[0]}`);
           return res.status(404).json({ error: "Product not found to update" });
         }
+
+        console.log(`[DB] Update successful for ${adminProd[0]}. RowCount: ${r.rowCount}`);
 
         // Simple sync for compatibility whitelist
         const currentUid = p.uid || adminProd[0];
         try {
           if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
             const uids = p.compatibleIds || p.compatibleWeapons;
+            console.log(`[DB] Syncing ${uids.length} compatible weapons for ${currentUid}`);
             await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
             for (const parentUid of uids) {
               await pool.query(
@@ -570,13 +578,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.error("Compatibility sync failed:", syncErr);
         }
 
-        return res.json({ ok: true, id: r.rows[0].id });
+        return res.json({ ok: true, id: r.rows[0].id, updated: true });
       } catch (dbErr: any) {
         console.error("Database Update Error:", dbErr);
         return res.status(500).json({ 
           error: "Database Update Failed", 
           message: dbErr.message,
-          detail: dbErr.detail
+          detail: dbErr.detail,
+          idUsed: adminProd[0]
         });
       }
     }
