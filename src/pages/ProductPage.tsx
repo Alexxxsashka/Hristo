@@ -13,7 +13,7 @@ import { useWishlistStore } from '../store/wishlistStore';
 import { useShopStore } from '../store/shopStore';
 import { useAuthStore } from '../store/authStore';
 import { getDiscountedPrice } from '../utils/price';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -81,9 +81,9 @@ export const ProductPage: React.FC = () => {
       try {
         let data;
         if (id) {
-          data = await firebaseService.getProduct(id);
+          data = await databaseService.getProduct(id);
         } else if (slug) {
-          const products = await firebaseService.getProducts();
+          const products = await databaseService.getProducts();
           data = products?.find((p: any) => p.slug === slug);
         }
         setProduct(data as Product);

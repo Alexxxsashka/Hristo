@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth } from '../../firebase';
+import { auth } from '../../auth';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { getAuthErrorMessage } from '../../utils/authErrors';
 import { Phone, Check, RefreshCw, ArrowRight } from 'lucide-react';

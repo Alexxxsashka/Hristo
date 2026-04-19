@@ -32,7 +32,7 @@ import {
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useConfiguratorStore, SavedBuild } from '../store/configuratorStore';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { Order, Loadout, ServiceRequest, UserProfile, Address, Product } from '../types';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getAuthErrorMessage } from '../utils/authErrors';
@@ -90,11 +90,11 @@ export const UserDashboard: React.FC = () => {
     setLoading(true);
     try {
       const [userProfile, userBuilds, userOrders, userLoadouts, userServices] = await Promise.all([
-        firebaseService.getUserProfile(user.id),
-        firebaseService.getUserBuilds(user.id),
-        firebaseService.getUserOrders(user.id),
-        firebaseService.getUserLoadouts(user.id),
-        firebaseService.getUserServiceRequests(user.id)
+        databaseService.getUserProfile(user.id),
+        databaseService.getUserBuilds(user.id),
+        databaseService.getUserOrders(user.id),
+        databaseService.getUserLoadouts(user.id),
+        databaseService.getUserServiceRequests(user.id)
       ]);
 
       setProfile(userProfile as UserProfile);
@@ -418,7 +418,7 @@ const OrderHistory: React.FC<{
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         setRequestingId(orderId);
         try {
-          await firebaseService.requestOrderCancellation(orderId, user.id);
+          await databaseService.requestOrderCancellation(orderId, user.id);
         } catch (error) {
           console.error('Error requesting cancellation:', error);
         } finally {
@@ -439,7 +439,7 @@ const OrderHistory: React.FC<{
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         setCancellingId(orderId);
         try {
-          await firebaseService.cancelOrder(orderId);
+          await databaseService.cancelOrder(orderId);
         } catch (error) {
           console.error('Error cancelling order:', error);
         } finally {
@@ -693,7 +693,7 @@ const ServiceRepairs: React.FC<{ requests: ServiceRequest[]; onRefresh: () => vo
     if (!user) return;
     setLoading(true);
     try {
-      await firebaseService.createServiceRequest({
+      await databaseService.createServiceRequest({
         userId: user.id,
         weaponName,
         description,
@@ -888,9 +888,9 @@ const AddressBook: React.FC<{ profile: UserProfile | null; onRefresh: () => void
       };
 
       if (editingAddress) {
-        await firebaseService.updateAddress(user.id, { ...addressData, id: editingAddress.id });
+        await databaseService.updateAddress(user.id, { ...addressData, id: editingAddress.id });
       } else {
-        await firebaseService.addAddress(user.id, addressData);
+        await databaseService.addAddress(user.id, addressData);
       }
 
       setShowModal(false);
@@ -906,7 +906,7 @@ const AddressBook: React.FC<{ profile: UserProfile | null; onRefresh: () => void
   const handleDelete = async (id: string) => {
     if (!user || !window.confirm(t('confirm_delete_address'))) return;
     try {
-      await firebaseService.deleteAddress(user.id, id);
+      await databaseService.deleteAddress(user.id, id);
       onRefresh();
     } catch (error) {
       console.error('Error deleting address:', error);
@@ -1243,7 +1243,7 @@ const SecuritySettings: React.FC<{ profile: UserProfile | null }> = ({ profile }
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const url = await firebaseService.getFileURL('site/2d/Google__G__logo.svg.png');
+        const url = await databaseService.getFileURL('site/2d/Google__G__logo.svg.png');
         setGoogleLogo(url);
       } catch (err) {
         console.error('Failed to fetch Google logo:', err);

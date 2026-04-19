@@ -14,7 +14,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export const ContactPage: React.FC = () => {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export const ContactPage: React.FC = () => {
     setErrorMessage('');
 
     try {
-      await firebaseService.sendContactMessage(formData);
+      await databaseService.sendContactMessage(formData);
       setStatus('success');
       setFormData({
         name: '',

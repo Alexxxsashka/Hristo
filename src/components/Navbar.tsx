@@ -8,7 +8,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { CatalogMenu } from './CatalogMenu';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useCompareStore } from '../store/compareStore';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { useTranslation } from '../hooks/useTranslation';
 import { SiteSettings } from '../types';
 
@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await firebaseService.getSiteSettings();
+        const data = await databaseService.getSiteSettings();
         setSettings(data);
       } catch (err) {
         console.error('Failed to fetch site settings:', err);

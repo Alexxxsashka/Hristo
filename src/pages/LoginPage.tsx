@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, LogIn, AlertCircle, Phone, ArrowLeft, RefreshCw } from 'lucide-react';
-import { auth } from '../firebase';
+import { auth } from '../auth';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { getAuthErrorMessage } from '../utils/authErrors';
 import { SocialLogin } from '../components/auth/SocialLogin';

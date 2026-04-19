@@ -5,7 +5,7 @@ import { Shield, FileText, Truck, CreditCard, Info, Calendar } from 'lucide-reac
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '../hooks/useTranslation';
 import { PolicyPage } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { defaultPolicies } from '../data/defaultPolicies';
 
 const PAGE_ICONS: Record<string, any> = {
@@ -29,7 +29,7 @@ export const InfoPage: React.FC = () => {
     const fetchPolicy = async () => {
       setIsLoading(true);
       try {
-        const data = await firebaseService.getPolicy(pathId);
+        const data = await databaseService.getPolicy(pathId);
         if (data) {
           setPolicy(data as PolicyPage);
         } else {

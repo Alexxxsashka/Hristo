@@ -14,7 +14,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { CartIcon } from '../components/CartIcon';
 import { Product } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export const ConfiguratorPageV12: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +33,7 @@ export const ConfiguratorPageV12: React.FC = () => {
     const fetchSavedBuilds = async () => {
       if (user) {
         try {
-          const userBuilds = await firebaseService.getUserBuilds(user.id);
+          const userBuilds = await databaseService.getUserBuilds(user.id);
           if (userBuilds) {
             useConfiguratorStore.setState({ savedBuilds: userBuilds as SavedBuild[] });
           }
@@ -69,7 +69,7 @@ export const ConfiguratorPageV12: React.FC = () => {
     const fetchWeapons = async () => {
       setLoading(true);
       try {
-        const data = await firebaseService.getProducts();
+        const data = await databaseService.getProducts();
         if (data) {
           const weaponList = data.filter((p: Product) => 
             (p.category?.toLowerCase() === 'weapons' || p.type?.toLowerCase() === 'weapon') && 
@@ -102,7 +102,7 @@ export const ConfiguratorPageV12: React.FC = () => {
     if (id) {
       if (!activeProduct || activeProduct.id !== id) {
         setLoading(true);
-        firebaseService.getProduct(id)
+        databaseService.getProduct(id)
           .then(data => {
             if (data) {
               setActiveProduct(data as Product);

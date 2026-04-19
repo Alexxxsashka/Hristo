@@ -5,3 +5,4 @@ key.json
 .idea/
 .vercel
 .env*.local
+node_modules

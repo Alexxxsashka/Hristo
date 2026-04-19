@@ -6,7 +6,7 @@ import { Search, Filter, ArrowRight, ShieldCheck, Truck, Clock, Award, Star, Zap
 import { useTranslation } from '../hooks/useTranslation';
 import { Link } from 'react-router-dom';
 const ModelViewer = React.lazy(() => import('../components/ModelViewer').then(m => ({ default: m.ModelViewer })));
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { useAuthStore } from '../store/authStore';
 import { User as UserIcon } from 'lucide-react';
 
@@ -25,8 +25,8 @@ const HomePage: React.FC = () => {
       setLoading(true);
       try {
         const [productsData, settingsData] = await Promise.all([
-          firebaseService.getProducts(),
-          firebaseService.getSiteSettings()
+          databaseService.getProducts(),
+          databaseService.getSiteSettings()
         ]);
         setProducts(productsData || []);
         setSettings(settingsData);

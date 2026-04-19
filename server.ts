@@ -91,7 +91,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy", {
 });
 
 // Load Firebase Config
-const firebaseConfigPath = path.join(__dirname, "firebase-applet-config.json");
+const firebaseConfigPath = path.join(__dirname, "auth-config.json");
 let firebaseConfig: any = {};
 if (fs.existsSync(firebaseConfigPath)) {
   firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf-8"));

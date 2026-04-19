@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Save, Link as LinkIcon, Mail, Phone, MapPin, Globe, Facebook, Instagram, Youtube, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { firebaseService } from '../../services/firebaseService';
+import { databaseService } from '../../services/databaseService';
 import { SiteSettings } from '../../types';
 
 export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type?: 'success' | 'error') => void }) => {
@@ -15,7 +15,7 @@ export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await firebaseService.getSiteSettings();
+        const data = await databaseService.getSiteSettings();
         setSettings(data);
       } catch (err) {
         console.error('Failed to load settings', err);
@@ -37,10 +37,10 @@ export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type
         
         // Delete old logo if it exists
         if (settings.logoUrl) {
-          await firebaseService.deleteFile(settings.logoUrl);
+          await databaseService.deleteFile(settings.logoUrl);
         }
         
-        const url = await firebaseService.uploadFile(logoFile, path, (p) => setUploadProgress(p));
+        const url = await databaseService.uploadFile(logoFile, path, (p) => setUploadProgress(p));
         finalSettings.logoUrl = url;
         setLogoFile(null);
       }
@@ -52,15 +52,15 @@ export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type
         
         // Delete old hero if it exists
         if (settings.heroImageUrl) {
-          await firebaseService.deleteFile(settings.heroImageUrl);
+          await databaseService.deleteFile(settings.heroImageUrl);
         }
 
-        const url = await firebaseService.uploadFile(heroFile, path, (p) => setUploadProgress(p));
+        const url = await databaseService.uploadFile(heroFile, path, (p) => setUploadProgress(p));
         finalSettings.heroImageUrl = url;
         setHeroFile(null);
       }
 
-      await firebaseService.updateSiteSettings(finalSettings);
+      await databaseService.updateSiteSettings(finalSettings);
       setSettings(finalSettings);
       onNotify('Site settings updated successfully!');
     } catch (err) {

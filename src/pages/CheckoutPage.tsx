@@ -4,7 +4,7 @@ import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 import { Order, OrderItem } from '../types';
 import { 
   ArrowLeft, 
@@ -134,10 +134,10 @@ export const CheckoutPage: React.FC = () => {
     const fetchLogos = async () => {
       try {
         const [applePay, maestro, visa, google] = await Promise.all([
-          firebaseService.getFileURL('site/2d/5968630.png'),
-          firebaseService.getFileURL('site/2d/Maestro_logo.png'),
-          firebaseService.getFileURL('site/2d/Visa-Brandmark-Blue-RGB-800x800-16353.png'),
-          firebaseService.getFileURL('site/2d/Google__G__logo.svg.png')
+          databaseService.getFileURL('site/2d/5968630.png'),
+          databaseService.getFileURL('site/2d/Maestro_logo.png'),
+          databaseService.getFileURL('site/2d/Visa-Brandmark-Blue-RGB-800x800-16353.png'),
+          databaseService.getFileURL('site/2d/Google__G__logo.svg.png')
         ]);
         setPaymentLogos({ applePay, maestro, visa, google });
       } catch (err) {
@@ -157,7 +157,7 @@ export const CheckoutPage: React.FC = () => {
     if (step === 2 && selectedPayment.id === 'stripe' && !stripeClientSecret) {
       const initStripe = async () => {
         try {
-          const { clientSecret } = await firebaseService.createPaymentIntent(total);
+          const { clientSecret } = await databaseService.createPaymentIntent(total);
           setStripeClientSecret(clientSecret);
         } catch (err: any) {
           console.error('Stripe Init Error:', err);
@@ -229,7 +229,7 @@ export const CheckoutPage: React.FC = () => {
         }
       };
 
-      await firebaseService.createOrder(orderData);
+      await databaseService.createOrder(orderData);
       
       setIsProcessing(false);
       setStep(4); // Success step

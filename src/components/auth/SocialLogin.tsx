@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth } from '../../firebase';
+import { auth } from '../../auth';
 import { GoogleAuthProvider, OAuthProvider, signInWithPopup, multiFactor } from 'firebase/auth';
 import { useAuthStore } from '../../store/authStore';
 import { getAuthErrorMessage } from '../../utils/authErrors';

@@ -16,7 +16,7 @@ import { BlogPost } from '../types';
 import { BLOG_CATEGORIES } from '../constants';
 
 import { SEO } from '../components/SEO';
-import { firebaseService } from '../services/firebaseService';
+import { databaseService } from '../services/databaseService';
 
 export const BlogPage: React.FC = () => {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ export const BlogPage: React.FC = () => {
   const fetchPosts = async () => {
     setIsLoading(true);
     try {
-      const data = await firebaseService.getBlogPosts(category || undefined, 100);
+      const data = await databaseService.getBlogPosts(category || undefined, 100);
       if (data) {
         let filtered = data as BlogPost[];
         if (search) {
