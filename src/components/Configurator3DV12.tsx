@@ -602,11 +602,26 @@ const ActualPartModel = ({
     }
     
     // Force scale to 1.0 to match Blender relative sizes when parented.
-    // This ensures that if weapon and part are same size in Blender, they stay same size here.
     clone.scale.set(1, 1, 1);
     
+    // Debug: Calculate bounding box size to detect "tiny" models
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    console.log(`[ActualPartModel V1.2] Computed Size for "${part.name}":`, {
+      width: size.x.toFixed(4),
+      height: size.y.toFixed(4),
+      depth: size.z.toFixed(4)
+    });
+
+    // If size is suspicious (too small), force a minimum scale
+    if (size.length() < 0.001) {
+      console.warn(`[ActualPartModel V1.2] Model "${part.name}" is too small, forcing scale 100x`);
+      clone.scale.set(100, 100, 100);
+    }
+
     return clone;
-  }, [scene, socketPoint, path, slotType]);
+  }, [scene, socketPoint, path, slotType, part.name]);
 
   React.useEffect(() => {
     if (clonedScene) {
