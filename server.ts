@@ -1300,16 +1300,16 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           id, uid, sku, barcode, slug, name, description, type, category_id, subcategory, 
           brand, model, price, stock, image_url, images, model_3d_url, has_3d, 
           characteristics, variant_attributes, variants, category_filters, slots, 
-          compatible_module_categories, socket_point, compatible_ids, mount_type
+          compatible_module_categories, socket_point, compatible_ids, mount_type, attachment_slot
         ) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)`,
         [
           id, uid, p.sku||id, p.barcode||'', finalSlug, p.name||'Unnamed Product', p.description||'', p.type||'weapon', p.category||p.category_id||null, p.subcategory||null, 
           p.brand||'', p.model||'', p.price||0, p.stock||0, imageUrl, JSON.stringify(p.images || []), model3dUrl, has3d,
           JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
           JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
           JSON.stringify(p.compatible_module_categories || []), JSON.stringify(p.socket_point || [0,0,0]),
-          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []), p.mountType || null
+          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []), p.mountType || null, p.attachmentSlot || null
         ]
       );
 
@@ -1351,8 +1351,8 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           price = $11, stock = $12, image_url = $13, images = $14, model_3d_url = $15, 
           has_3d = $16, characteristics = $17, variant_attributes = $18, variants = $19, 
           category_filters = $20, slots = $21, compatible_module_categories = $22, socket_point = $23,
-          compatible_ids = $24, mount_type = $25 
-         WHERE id = $26`,
+          compatible_ids = $24, mount_type = $25, attachment_slot = $26
+         WHERE id = $27`,
         [
           p.sku, p.barcode, p.slug, p.name, p.description, 
           p.type, p.category||p.category_id, p.subcategory, p.brand, p.model, 
@@ -1360,7 +1360,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           has3d, JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
           JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
           JSON.stringify(p.compatible_module_categories || []), JSON.stringify(p.socket_point || []),
-          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []), p.mountType || null,
+          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []), p.mountType || null, p.attachmentSlot || null,
           productId
         ]
       );

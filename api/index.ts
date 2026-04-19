@@ -363,26 +363,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const imagesArr = p.images || (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description || p.longDescription || null;
 
-      const r = await pool.query(
-        `INSERT INTO products (
-          id, uid, sku, slug, name, description, long_description, type, category_id, subcategory, brand, model, 
-          price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
-          variants, variant_attributes, category_filters, 
-          name_hr, description_hr, long_description_hr, status,
-          compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot
-        )
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,'active',$26,$27,$28,$29,$30,$31)
-         ON CONFLICT (id) DO UPDATE SET 
-          name=$5, description=$6, long_description=$7, price=$13, stock=$14, image_url=$15, images=$16, 
-          model_3d_url=$17, has_3d=$18, characteristics=$19, variants=$20, 
-          variant_attributes=$21, category_filters=$22, 
-          name_hr=$23, description_hr=$24, long_description_hr=$25,
-          brand=$11, model=$12, sku=$3, type=$8, category_id=$9, subcategory=$10,
-          compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31`,
-        [
+      try {
+        const productData = [
           id, 
           p.uid || id, 
           p.sku || '', 
+          p.barcode || '',
           p.slug || id, 
           p.name || 'Unnamed Product', 
           p.description || '', 
@@ -411,22 +397,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           JSON.stringify(p.slots || []),
           p.mountType || null,
           p.attachmentSlot || null
-        ]
-      );
+        ];
 
-      // Sync compatibility table for whitelist
-      if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
-        const uids = p.compatibleIds || p.compatibleWeapons;
-        // Simple logic: this product (child) fits these weapons (parents)
-        for (const parentUid of uids) {
-          await pool.query(
-            "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            [parentUid, p.uid || id]
-          );
+        const r = await pool.query(
+          `INSERT INTO products (
+            id, uid, sku, barcode, slug, name, description, long_description, type, category_id, subcategory, brand, model, 
+            price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
+            variants, variant_attributes, category_filters, 
+            name_hr, description_hr, long_description_hr, status,
+            compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot
+          )
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'active',$27,$28,$29,$30,$31,$32)
+           ON CONFLICT (id) DO UPDATE SET 
+            name=$6, description=$7, long_description=$8, price=$14, stock=$15, image_url=$16, images=$17, 
+            model_3d_url=$18, has_3d=$19, characteristics=$20, variants=$21, 
+            variant_attributes=$22, category_filters=$23, 
+            name_hr=$24, description_hr=$25, long_description_hr=$26,
+            brand=$12, model=$13, sku=$3, barcode=$4, type=$9, category_id=$10, subcategory=$11,
+            compatible_ids=$27, compatible_module_categories=$28, socket_point=$29, slots=$30, mount_type=$31, attachment_slot=$32`,
+          productData
+        );
+
+        // Sync compatibility table for whitelist
+        try {
+          if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
+            const uids = p.compatibleIds || p.compatibleWeapons;
+            for (const parentUid of uids) {
+              await pool.query(
+                "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                [parentUid, p.uid || id]
+              );
+            }
+          }
+        } catch (syncErr) {
+          console.error("Compatibility sync failed:", syncErr);
         }
-      }
 
-      return res.json({ id });
+        return res.json({ id });
+      } catch (dbErr: any) {
+        console.error("Database Insert Error:", dbErr);
+        return res.status(500).json({ 
+          error: "Database Insert Failed", 
+          message: dbErr.message,
+          detail: dbErr.detail
+        });
+      }
     }
 
     // ── PUT /admin/products/:id ────────────────────────────────────────────────
@@ -444,18 +459,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const imagesArr = Array.isArray(p.images) ? p.images : (imageUrl ? [imageUrl] : []);
       const longDescription = p.long_description !== undefined ? p.long_description : (p.longDescription !== undefined ? p.longDescription : null);
 
-      const r = await pool.query(
-        `UPDATE products SET 
-          name=$2, description=$3, long_description=$4, price=$5, stock=$6, image_url=$7, images=$8, 
-          model_3d_url=$9, has_3d=$10, characteristics=$11, variants=$12, 
-          variant_attributes=$13, category_filters=$14, 
-          name_hr=$15, description_hr=$16, long_description_hr=$17,
-          brand=$18, model=$19, sku=$20, type=$21, status=$22,
-          category_id=$23, subcategory=$24,
-          compatible_ids=$25, compatible_module_categories=$26, socket_point=$27, slots=$28, mount_type=$29, attachment_slot=$30
-         WHERE id = $1 OR slug = $1
-         RETURNING id`,
-        [
+      try {
+        const productData = [
           adminProd[0], 
           p.name || 'Unnamed Product', 
           p.description || '', 
@@ -476,6 +481,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.brand || '', 
           p.model || '', 
           p.sku || '', 
+          p.barcode || '',
           p.type || 'weapon', 
           p.status || 'active',
           p.category_id || p.category || null,
@@ -486,29 +492,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           JSON.stringify(p.slots || []),
           p.mountType || null,
           p.attachmentSlot || null
-        ]
-      );
+        ];
 
-      // Simple sync for compatibility whitelist
-      const currentUid = p.uid || adminProd[0];
-      if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
-        const uids = p.compatibleIds || p.compatibleWeapons;
-        // Clear old ones and insert new ones
-        await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
-        for (const parentUid of uids) {
-          await pool.query(
-            "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            [parentUid, currentUid]
-          );
+        const r = await pool.query(
+          `UPDATE products SET 
+            name=$2, description=$3, long_description=$4, price=$5, stock=$6, image_url=$7, images=$8, 
+            model_3d_url=$9, has_3d=$10, characteristics=$11, variants=$12, 
+            variant_attributes=$13, category_filters=$14, 
+            name_hr=$15, description_hr=$16, long_description_hr=$17,
+            brand=$18, model=$19, sku=$20, barcode=$21, type=$22, status=$23,
+            category_id=$24, subcategory=$25,
+            compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31
+           WHERE id = $1 OR slug = $1
+           RETURNING id`,
+          productData
+        );
+
+        if (r.rowCount === 0) {
+          return res.status(404).json({ error: "Product not found to update" });
         }
-      }
 
-      if (r.rowCount === 0) {
-        return res.status(404).json({ error: "Product not found to update" });
-      }
+        // Simple sync for compatibility whitelist
+        const currentUid = p.uid || adminProd[0];
+        try {
+          if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
+            const uids = p.compatibleIds || p.compatibleWeapons;
+            await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
+            for (const parentUid of uids) {
+              await pool.query(
+                "INSERT INTO product_compatibility (parent_uid, child_uid) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+                [parentUid, currentUid]
+              );
+            }
+          }
+        } catch (syncErr) {
+          console.error("Compatibility sync failed:", syncErr);
+        }
 
-      // Возвращаем обновленные данные, чтобы фронтенд мог их проверить
-      return res.json({ ok: true, product: r.rows[0] });
+        return res.json({ ok: true, id: r.rows[0].id });
+      } catch (dbErr: any) {
+        console.error("Database Update Error:", dbErr);
+        return res.status(500).json({ 
+          error: "Database Update Failed", 
+          message: dbErr.message,
+          detail: dbErr.detail
+        });
+      }
     }
 
     // ── DELETE /admin/products/:id ─────────────────────────────────────────────
