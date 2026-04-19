@@ -152,12 +152,27 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
   
   // EFT Logic: Filter modules by category matching the slot type
   const compatibleModules = allModules.filter(m => {
+    // Synonyms for tactical slots (EFT Style)
+    const slotSynonyms: Record<string, string[]> = {
+      muzzle: ['suppressors', 'muzzle', 'compensators', 'silencers', 'muzzle_brake'],
+      scope: ['optics', 'scopes', 'sights', 'reflex_sights', 'magnifiers'],
+      tactical: ['flashlights', 'lasers', 'tactical_combos'],
+      magazine: ['magazines', 'mags'],
+      handguard: ['handguards', 'rails'],
+      stock: ['stocks', 'buttstocks']
+    };
+
     const sType = slotType.toLowerCase();
-    const category = m.category?.toLowerCase() || m.type?.toLowerCase();
+    const category = m.category?.toLowerCase() || m.type?.toLowerCase() || '';
+    
+    // Check synonyms first
+    const isSynonymMatch = slotSynonyms[sType]?.some(syn => 
+      category.toLowerCase().includes(syn) || syn.includes(category.toLowerCase())
+    );
     const fitsInSlot = m.attachmentSlot?.toLowerCase() === sType;
     const allowedInSlots = m.allowedSlots?.some(s => s.toLowerCase() === sType);
     
-    const typeMatch = category === sType || fitsInSlot || allowedInSlots;
+    let typeMatch = category === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
     
     // Check weapon compatibility if specified (Whitelisting)
     const activeProd = useConfiguratorStore.getState().activeProduct;
@@ -174,7 +189,13 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
         ))
       );
     
-    return typeMatch && weaponMatch;
+    // CRITICAL: If specifically whitelisted for this weapon, we allow it even if category/synonym check fails
+    const isExplicitlyWhitelisted = allowedWeapons.some(w => 
+      w.toLowerCase() === parentId.toLowerCase() || 
+      (activeProd && w.toLowerCase() === activeProd.id.toLowerCase())
+    );
+
+    return (typeMatch && weaponMatch) || isExplicitlyWhitelisted;
   });
 
   const fullSlotId = `${parentId}:${slotId}`;
