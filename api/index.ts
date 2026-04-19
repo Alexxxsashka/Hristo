@@ -585,15 +585,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── GET /users/:id ─────────────────────────────────────────────────────────
     const userId = match(path, "/users/:id");
     if (userId && method === "GET") {
+      const authenticatedUser = getUser(req);
+      
       try {
         const r = await pool.query("SELECT id, username, email, role, phone, address FROM users WHERE id = $1", [userId[0]]);
-        if (!r.rows.length) return res.status(404).json({ error: "Not found" });
-        return res.json(r.rows[0]);
+        
+        if (r.rows.length > 0) {
+          return res.json(r.rows[0]);
+        }
+        
+        // If not found in DB but is the current authenticated user, return skeleton
+        if (authenticatedUser && authenticatedUser.id === userId[0]) {
+          return res.json({
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            role: authenticatedUser.role || "user",
+            username: authenticatedUser.email?.split("@")[0] || "User",
+            isNewUser: true
+          });
+        }
+
+        return res.status(404).json({ error: "Not found" });
       } catch {
-        // Fallback for older schemas that do not include phone/address columns.
+        // Fallback for older schemas
         const r = await pool.query("SELECT id, username, email, role FROM users WHERE id = $1", [userId[0]]);
-        if (!r.rows.length) return res.status(404).json({ error: "Not found" });
-        return res.json(r.rows[0]);
+        if (r.rows.length > 0) return res.json(r.rows[0]);
+        
+        if (authenticatedUser && authenticatedUser.id === userId[0]) {
+          return res.json({
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            role: authenticatedUser.role || "user",
+            username: authenticatedUser.email?.split("@")[0] || "User",
+            isNewUser: true
+          });
+        }
+        
+        return res.status(404).json({ error: "Not found" });
       }
     }
 

@@ -1556,7 +1556,20 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
     try {
       const result = await pool.query('SELECT id, email, username, display_name, callsign, team_name, role, points, rank, discount_level, avatar_url, created_at FROM users WHERE id = $1', [req.params.id]);
-      if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+      
+      if (result.rows.length === 0) {
+        // If it's the current user, return a skeleton instead of 404
+        if (req.user.id === req.params.id) {
+          return res.json({
+            id: req.user.id,
+            email: req.user.email,
+            role: req.user.role,
+            username: req.user.username || req.user.email?.split('@')[0] || 'User',
+            isNewUser: true
+          });
+        }
+        return res.status(404).json({ error: 'User not found' });
+      }
       res.json(result.rows[0]);
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
