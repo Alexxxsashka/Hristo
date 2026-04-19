@@ -300,10 +300,13 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
   const addCompatibleWeapon = () => {
     if (!newCompatibleWeapon) return;
-    setFormData({
-      ...formData,
-      compatibleWeapons: [...(formData.compatibleWeapons || []), newCompatibleWeapon]
-    });
+    const current = formData.compatibleWeapons || [];
+    if (!current.includes(newCompatibleWeapon)) {
+      setFormData({
+        ...formData,
+        compatibleWeapons: [...current, newCompatibleWeapon]
+      });
+    }
     setNewCompatibleWeapon('');
   };
 
