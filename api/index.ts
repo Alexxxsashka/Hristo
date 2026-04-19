@@ -130,6 +130,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── DB Test ───────────────────────────────────────────────────────────────
     if (path === "/db-test" || path === "/diag/db-test") {
+      // Auto-migrate schema on test
+      try {
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS product_compatibility (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            parent_uid TEXT NOT NULL,
+            child_uid TEXT NOT NULL,
+            slot_name TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(parent_uid, child_uid, slot_name)
+          )
+        `);
+      } catch (e) {
+        console.error("Migration test error:", e);
+      }
+
       const r = await pool.query("SELECT NOW()");
       return res.json({ ok: true, time: r.rows[0].now });
     }
