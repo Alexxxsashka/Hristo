@@ -401,16 +401,24 @@ const ActualPartModel = ({ path, slotType, onLoad }: { path: string; slotType?: 
     });
 
     if (mountPoint) {
+      // 1. Reset root transforms
       clone.position.set(0, 0, 0);
       clone.quaternion.set(0, 0, 0, 1);
       clone.scale.set(1, 1, 1);
-      clone.updateWorldMatrix(true, true);
-      const m = new THREE.Matrix4().copy(mountPoint.matrixWorld);
-      const pos = new THREE.Vector3(), quat = new THREE.Quaternion(), scl = new THREE.Vector3();
-      m.decompose(pos, quat, scl);
-      m.compose(pos, quat, new THREE.Vector3(1, 1, 1));
-      m.invert();
-      clone.applyMatrix4(m);
+      clone.updateMatrixWorld(true);
+
+      // 2. Calculate the local matrix of mountPoint Relative to clone
+      // Since clone is at origin with identity rotation/scale, 
+      // mountPoint.matrixWorld IS the relative matrix we need.
+      const relativeMatrix = mountPoint.matrixWorld.clone();
+      
+      // 3. Invert and apply to root to bring mountPoint to (0,0,0)
+      const inverseMatrix = new THREE.Matrix4().copy(relativeMatrix).invert();
+      clone.applyMatrix4(inverseMatrix);
+      
+      // 4. Force scale to exactly 1 to avoid export errors
+      clone.scale.set(1, 1, 1);
+      
       (mountPoint as any).isMountPoint = true;
     }
     

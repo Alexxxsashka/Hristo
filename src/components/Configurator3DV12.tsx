@@ -541,29 +541,18 @@ const ActualPartModel = ({
       clone.quaternion.set(0, 0, 0, 1);
       clone.scale.set(1, 1, 1);
       clone.updateMatrix();
+      clone.updateMatrixWorld(true);
+
+      // 2. Calculate the local matrix of mountPoint Relative to clone
+      const relativeMatrix = mountPoint.matrixWorld.clone();
       
-      // Update the entire hierarchy of the clone to get accurate local-to-root matrices
-      clone.updateWorldMatrix(true, true);
-      
-      const m = new THREE.Matrix4();
-      // mountPoint.matrixWorld here is relative to clone because clone has no parent
-      m.copy(mountPoint.matrixWorld);
-      
-      // IMPORTANT: Strip scale from the matrix to prevent the attachment from being 
-      // scaled by the inverse of the mount point's inherited scale.
-      const pos = new THREE.Vector3();
-      const quat = new THREE.Quaternion();
-      const scl = new THREE.Vector3();
-      m.decompose(pos, quat, scl);
-      m.compose(pos, quat, new THREE.Vector3(1, 1, 1));
-      
-      m.invert();
-      clone.applyMatrix4(m);
+      // 3. Invert and apply to root to bring mountPoint to (0,0,0)
+      const inverseMatrix = new THREE.Matrix4().copy(relativeMatrix).invert();
+      clone.applyMatrix4(inverseMatrix);
       
       // Mark as mount point so discoverSlots ignores it
       (mountPoint as any).isMountPoint = true;
-      
-      console.log(`[ActualPartModel V1.2] Aligned via matrix inversion: ${mountPoint.name}`);
+      console.log(`[ActualPartModel V1.2] Matrix Aligned: ${mountPoint.name}`);
     } else if (socketPoint && Array.isArray(socketPoint)) {
       // Fallback to database socketPoint
       clone.position.set(-socketPoint[0], -socketPoint[1], -socketPoint[2]);
