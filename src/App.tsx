@@ -12,6 +12,8 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ defa
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const ConfiguratorPageV13 = lazy(() => import('./pages/ConfiguratorPageV13').then(m => ({ default: m.ConfiguratorPageV13 })));
+const ConfiguratorSelector = lazy(() => import('./pages/ConfiguratorSelector').then(m => ({ default: m.ConfiguratorSelector })));
 
 const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
 const ArticlePage = lazy(() => import('./pages/ArticlePage').then(m => ({ default: m.ArticlePage })));
@@ -43,10 +45,11 @@ export default function App() {
       <div className="min-h-screen bg-[#0a0a0a]">
         <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <Routes>
-            <Route path="/configurator" element={<ConfiguratorPageV12 />} />
-            <Route path="/configurator/:id" element={<ConfiguratorPageV12 />} />
+            <Route path="/configurator" element={<ConfiguratorSelector />} />
             <Route path="/configurator/v1.2" element={<ConfiguratorPageV12 />} />
             <Route path="/configurator/v1.2/:id" element={<ConfiguratorPageV12 />} />
+            <Route path="/configurator/v1.3" element={<ConfiguratorPageV13 />} />
+            <Route path="/configurator/v1.3/:id" element={<ConfiguratorPageV13 />} />
             <Route 
               path="*" 
               element={
