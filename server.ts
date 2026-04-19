@@ -267,10 +267,6 @@ const authenticateAdmin = async (req: any, res: any, next: any) => {
       console.error("Delete error:", error);
       res.status(500).json({ error: "Delete failed" });
     }
-  });
-
-,
-
   app.use(express.json());
   app.use("/models", express.static(modelsDir));
 
@@ -542,8 +538,6 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       res.status(500).send('Error generating sitemap');
     }
   });
-
-,
 
   // Public API Routes
   app.get("/api/products", async (req, res) => {
