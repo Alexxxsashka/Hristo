@@ -83,7 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const url = req.url || "/";
-  const path = "/" + (url.replace(/^\/api\/?/, "").split("?")[0]);
+  let path = "/" + (url.replace(/^\/api\/?/, "").split("?")[0]);
+  if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
   const method = req.method || "GET";
 
   try {
@@ -398,16 +399,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(204).end();
     }
 
-    // ── GET /blog  (фронтенд использует /api/blog) ─────────────────────────────
-    if ((path === "/blog" || path === "/blog-posts") && method === "GET") {
+    // ── GET /blog ─────────────────────────────────────────────────────────────
+    if ((path === "/blog" || path === "/blog-posts" || path === "/articles") && method === "GET") {
       const { category, limit = "20" } = req.query as any;
-      let q = "SELECT * FROM blog_posts WHERE status = 'published'";
+      let q = "SELECT * FROM blog_posts";
       const params: any[] = [];
-      if (category) { q += " AND category = $1"; params.push(category); }
-      q += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
+      if (category) { q += " WHERE category = $1"; params.push(category); }
+      q += ` ORDER BY published_at DESC LIMIT $${params.length + 1}`;
       params.push(Number(limit));
       const r = await pool.query(q, params);
-      // Поддерживаем оба формата: { posts: [] } и просто []
       return res.json({ posts: r.rows, total: r.rows.length });
     }
 
@@ -521,19 +521,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { items, total, address, payment_method } = req.body || {};
       const userId = user?.id || "guest";
       const id = `order-${Date.now()}`;
+      const orderNumber = `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100+Math.random()*900)}`;
+      
       await pool.query(
-        "INSERT INTO orders (id, user_id, total, status, payment_status, notes) VALUES ($1, $2, $3, 'pending', 'pending', $4)",
-        [id, userId, total, JSON.stringify({ address, payment_method })]
+        "INSERT INTO orders (id, order_number, user_id, total, subtotal, status, payment_status, notes) VALUES ($1, $2, $3, $4, $4, 'pending', 'pending', $5)",
+        [id, orderNumber, userId, total, JSON.stringify({ address, payment_method })]
       );
       if (items?.length) {
         for (const item of items) {
           await pool.query(
-            "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
-            [id, item.productId || item.id, item.quantity, item.price]
+            "INSERT INTO order_items (order_id, product_id, name, quantity, price) VALUES ($1, $2, $3, $4, $5)",
+            [id, item.productId || item.id, item.name || 'Product', item.quantity, item.price]
           );
         }
       }
-      return res.json({ id, status: "pending" });
+      return res.json({ id, order_number: orderNumber, status: "pending" });
     }
 
     // ── GET /admin/orders ──────────────────────────────────────────────────────
@@ -621,7 +623,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/messages" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      const r = await pool.query("SELECT * FROM contact_messages ORDER BY created_at DESC");
+      const r = await pool.query("SELECT * FROM contact_messages ORDER BY date DESC");
+      return res.json(r.rows);
+    }
+
+    // ── GET /saved-builds ──────────────────────────────────────────────────────
+    if (path === "/saved-builds" && method === "GET") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const r = await pool.query("SELECT * FROM saved_builds WHERE user_id = $1 ORDER BY created_at DESC", [user.id]);
+      return res.json(r.rows);
+    }
+
+    // ── POST /saved-builds ─────────────────────────────────────────────────────
+    if (path === "/saved-builds" && method === "POST") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const { name, product_id, configuration } = req.body || {};
+      const id = `build-${Date.now()}`;
+      await pool.query(
+        "INSERT INTO saved_builds (id, user_id, product_id, name, configuration) VALUES ($1, $2, $3, $4, $5)",
+        [id, user.id, product_id, name, JSON.stringify(configuration || {})]
+      );
+      return res.json({ id });
+    }
+
+    // ── GET /loadouts ──────────────────────────────────────────────────────────
+    if (path === "/loadouts" && method === "GET") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const r = await pool.query("SELECT * FROM loadouts WHERE user_id = $1", [user.id]);
+      return res.json(r.rows);
+    }
+
+    // ── POST /loadouts ─────────────────────────────────────────────────────────
+    if (path === "/loadouts" && method === "POST") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const { name, items, total_weight, is_primary } = req.body || {};
+      const id = `loadout-${Date.now()}`;
+      await pool.query(
+        "INSERT INTO loadouts (id, user_id, name, items, total_weight, is_primary) VALUES ($1, $2, $3, $4, $5, $6)",
+        [id, user.id, name, JSON.stringify(items || []), total_weight || 0, is_primary || false]
+      );
+      return res.json({ id });
+    }
+
+    // ── GET /service-requests ──────────────────────────────────────────────────
+    if (path === "/service-requests" && method === "GET") {
+      const user = getUser(req);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      const r = await pool.query("SELECT * FROM service_requests WHERE user_id = $1", [user.id]);
       return res.json(r.rows);
     }
 

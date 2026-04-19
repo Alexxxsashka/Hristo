@@ -2319,7 +2319,7 @@ app.post("/api/create-payment-intent", async (req, res) => {
 
 app.delete("/api/admin/warehouses/:id", authenticateAdmin, async (req, res) => {
   try {
-    await db.collection("warehouses").doc(req.params.id).delete();
+    await pool.query('DELETE FROM warehouses WHERE id = $1', [req.params.id]);
     res.sendStatus(204);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -2328,7 +2328,7 @@ app.delete("/api/admin/warehouses/:id", authenticateAdmin, async (req, res) => {
 
 app.delete("/api/admin/suppliers/:id", authenticateAdmin, async (req, res) => {
   try {
-    await db.collection("suppliers").doc(req.params.id).delete();
+    await pool.query('DELETE FROM suppliers WHERE id = $1', [req.params.id]);
     res.sendStatus(204);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -2337,7 +2337,7 @@ app.delete("/api/admin/suppliers/:id", authenticateAdmin, async (req, res) => {
 
 app.delete("/api/saved-builds/:id", authenticateToken, async (req: any, res) => {
   try {
-    await db.collection("saved_builds").doc(req.params.id).delete();
+    await pool.query('DELETE FROM saved_builds WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
     res.sendStatus(204);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
