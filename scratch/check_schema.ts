@@ -11,10 +11,10 @@ const pool = new pg.Pool({
 async function main() {
   try {
     const res = await pool.query(`
-      SELECT column_name, data_type, is_nullable
+      SELECT table_name, column_name, data_type, is_nullable
       FROM information_schema.columns
-      WHERE table_name = 'orders'
-      ORDER BY ordinal_position;
+      WHERE table_name IN ('orders', 'users', 'order_items')
+      ORDER BY table_name, ordinal_position;
     `);
     console.log(JSON.stringify(res.rows, null, 2));
   } catch (err) {
