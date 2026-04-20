@@ -11,6 +11,10 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const validateField = (field: string, value: any) => {
