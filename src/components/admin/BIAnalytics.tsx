@@ -83,10 +83,10 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   const totalNewUsers = chartData.reduce((acc, curr) => acc + curr.users, 0);
 
   const categoryData = [
-    { name: 'Rifles', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('rifle'))).length || 5 },
-    { name: 'Pistols', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('pistol'))).length || 3 },
-    { name: 'Gear', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('gear'))).length || 2 },
-    { name: 'Other', value: 1 },
+    { name: 'Rifles', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('rifle'))).length },
+    { name: 'Pistols', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('pistol'))).length },
+    { name: 'Gear', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('gear'))).length },
+    { name: 'Other', value: orders.filter(o => o.items.every(i => !i.category || !['rifle', 'pistol', 'gear'].some(cat => i.category?.toLowerCase().includes(cat)))).length },
   ];
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
@@ -229,41 +229,6 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activity / Orders Status */}
-        <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
-          <h4 className="text-xl font-black uppercase tracking-tighter mb-8">Order Status Distribution</h4>
-          <div className="grid grid-cols-2 gap-4">
-            <StatusBox 
-              title="Pending" 
-              count={pendingOrders} 
-              icon={<Clock className="text-amber-500" />} 
-              bgColor="bg-amber-50" 
-              borderColor="border-amber-100"
-            />
-            <StatusBox 
-              title="Completed" 
-              count={completedOrders} 
-              icon={<CheckCircle className="text-emerald-500" />} 
-              bgColor="bg-emerald-50" 
-              borderColor="border-emerald-100"
-            />
-            <StatusBox 
-              title="Processing" 
-              count={orders.filter(o => o.status === 'processing').length} 
-              icon={<Activity className="text-blue-500" />} 
-              bgColor="bg-blue-50" 
-              borderColor="border-blue-100"
-            />
-            <StatusBox 
-              title="Cancelled" 
-              count={orders.filter(o => o.status === 'cancelled').length} 
-              icon={<AlertCircle className="text-red-500" />} 
-              bgColor="bg-red-50" 
-              borderColor="border-red-100"
-            />
-          </div>
-        </div>
-
         {/* Customer Growth Real Data */}
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <div className="flex items-center justify-between mb-8">

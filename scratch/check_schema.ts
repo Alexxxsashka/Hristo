@@ -1,27 +1,26 @@
 
 import pg from 'pg';
-import dotenv from 'dotenv';
-dotenv.config();
+const { Pool } = pg;
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL || "postgres://postgres:postgres@34.29.209.72:5432/postgres",
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-async function main() {
+async function checkSchema() {
   try {
     const res = await pool.query(`
-      SELECT table_name, column_name, data_type, is_nullable
-      FROM information_schema.columns
-      WHERE table_name IN ('orders', 'users', 'order_items')
-      ORDER BY table_name, ordinal_position;
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'orders'
     `);
+    console.log("Orders table schema:");
     console.log(JSON.stringify(res.rows, null, 2));
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error("Error checking schema:", e);
   } finally {
     await pool.end();
   }
 }
 
-main();
+checkSchema();

@@ -289,6 +289,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        
+        // Orders & Tracking
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted BOOLEAN DEFAULT false");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
+        
+        // Inventory Logs
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS inventory_logs (
+            id SERIAL PRIMARY KEY,
+            product_id TEXT NOT NULL,
+            change_amount INTEGER NOT NULL,
+            reason TEXT,
+            reference_id TEXT,
+            user_id TEXT,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+          )
+        `);
+
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -434,33 +452,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       const r = await pool.query(q, params);
 
-      return res.json(r.rows.map((p: any) => ({
-        ...p,
-        id: p.id,
-        image: p.image_url,
-        images: Array.isArray(p.images) ? p.images : (p.image_url ? [p.image_url] : []),
-        longDescription: p.long_description,
-        nameHr: p.name_hr,
-        descriptionHr: p.description_hr,
-        longDescriptionHr: p.long_description_hr,
-        category: p.parent_cat_id || p.category_id,
-        subcategory: p.parent_cat_id ? p.category_id : null,
-        price: parseFloat(p.price) || 0,
-        landing_cost: p.landing_cost ? parseFloat(p.landing_cost) : null,
-        msrp: p.msrp ? parseFloat(p.msrp) : null,
-        stock: parseInt(p.stock) || 0,
-        discount: p.discount ? parseInt(p.discount) : 0,
-        model3D: p.model_3d_url,
-        model3DName: p.model3d_name, // Optional: if added to DB
-        has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
-        socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
-        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
-        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
-        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : (typeof p.compatible_module_categories === 'string' ? JSON.parse(p.compatible_module_categories) : []),
-        slots: Array.isArray(p.slots) ? p.slots : (typeof p.slots === 'string' ? JSON.parse(p.slots) : []),
-        attachmentSlot: p.attachment_slot,
-        mountType: p.mount_type
-      })));
+      return res.json(r.rows.map((p: any) => {
+        const parseJson = (val: any, fallback: any = []) => {
+          if (Array.isArray(val)) return val;
+          if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return fallback; }
+          }
+          return val || fallback;
+        };
+
+        return {
+          ...p,
+          id: p.id,
+          image: p.image_url,
+          images: Array.isArray(p.images) ? p.images : (p.image_url ? [p.image_url] : []),
+          longDescription: p.long_description,
+          nameHr: p.name_hr,
+          descriptionHr: p.description_hr,
+          longDescriptionHr: p.long_description_hr,
+          category: p.parent_cat_id || p.category_id,
+          subcategory: p.parent_cat_id ? p.category_id : null,
+          price: parseFloat(p.price) || 0,
+          landing_cost: p.landing_cost ? parseFloat(p.landing_cost) : null,
+          msrp: p.msrp ? parseFloat(p.msrp) : null,
+          stock: parseInt(p.stock) || 0,
+          discount: p.discount ? parseInt(p.discount) : 0,
+          model3D: p.model_3d_url,
+          model3DName: p.model3d_name, 
+          has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
+          characteristics: parseJson(p.characteristics),
+          variants: parseJson(p.variants),
+          variant_attributes: parseJson(p.variant_attributes),
+          category_filters: parseJson(p.category_filters, {}),
+          socketPoint: parseJson(p.socket_point, [0,0,0]),
+          compatibleIds: parseJson(p.compatible_ids),
+          compatibleWeapons: parseJson(p.compatible_ids),
+          compatibleModuleCategories: parseJson(p.compatible_module_categories),
+          slots: parseJson(p.slots),
+          attachmentSlot: p.attachment_slot,
+          mountType: p.mount_type
+        };
+      }));
     }
 
     // ── GET /products/:id ──────────────────────────────────────────────────────
@@ -476,6 +508,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
       if (!r.rows.length) return res.status(404).json({ error: "Not found" });
       const p = r.rows[0];
+      const parseJson = (val: any, fallback: any = []) => {
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+          try { return JSON.parse(val); } catch (e) { return fallback; }
+        }
+        return val || fallback;
+      };
+
       return res.json({
         ...p,
         id: p.id,
@@ -495,11 +535,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model3D: p.model_3d_url,
         model3DName: p.model3d_name, 
         has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
-        socketPoint: Array.isArray(p.socket_point) ? p.socket_point : [],
-        compatibleIds: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
-        compatibleWeapons: Array.isArray(p.compatible_ids) ? p.compatible_ids : (typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : []),
-        compatibleModuleCategories: Array.isArray(p.compatible_module_categories) ? p.compatible_module_categories : (typeof p.compatible_module_categories === 'string' ? JSON.parse(p.compatible_module_categories) : []),
-        slots: Array.isArray(p.slots) ? p.slots : (typeof p.slots === 'string' ? JSON.parse(p.slots) : []),
+        characteristics: parseJson(p.characteristics),
+        variants: parseJson(p.variants),
+        variant_attributes: parseJson(p.variant_attributes),
+        category_filters: parseJson(p.category_filters, {}),
+        socketPoint: parseJson(p.socket_point, [0,0,0]),
+        compatibleIds: parseJson(p.compatible_ids),
+        compatibleWeapons: parseJson(p.compatible_ids),
+        compatibleModuleCategories: parseJson(p.compatible_module_categories),
+        slots: parseJson(p.slots),
         attachmentSlot: p.attachment_slot,
         mountType: p.mount_type
       });
@@ -985,8 +1029,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
         for (const item of items) {
           await pool.query(
-            "INSERT INTO order_items (order_id, product_id, name, quantity, price) VALUES ($1, $2, $3, $4, $5)",
-            [id, item.productId || item.id, item.name || 'Product', item.quantity, Number(item.price || 0)]
+            "INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            [
+              id, 
+              item.productId || item.id, 
+              item.name || 'Product', 
+              item.quantity, 
+              Number(item.price || 0),
+              item.image || null,
+              item.sku || null,
+              item.configuration ? JSON.stringify(item.configuration) : (item.selectedVariant ? JSON.stringify(item.selectedVariant) : (item.variant_info ? (typeof item.variant_info === 'string' ? item.variant_info : JSON.stringify(item.variant_info)) : null))
+            ]
           );
         }
       }
@@ -1018,10 +1071,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const orderId = orderStatusMatch[0];
       
       try {
-        // Check for stock_deducted column first (auto-migration)
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted BOOLEAN DEFAULT false");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
-
         // Fetch current order info to see if stock needs updating
         const orderRes = await pool.query("SELECT status, stock_deducted FROM orders WHERE id = $1", [orderId]);
         

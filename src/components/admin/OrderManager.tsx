@@ -256,7 +256,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Qty: {item.quantity}</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">SKU: {item.sku || 'N/A'}</span>
                               </div>
-                              {item.configuration && (
+                              {item.configuration && typeof item.configuration === 'object' && (
                                 <div className="mt-2 flex flex-wrap gap-1">
                                   {Object.entries(item.configuration).map(([key, val]) => (
                                     <span key={key} className="px-2 py-0.5 bg-zinc-100 rounded text-[8px] font-bold uppercase text-zinc-500">

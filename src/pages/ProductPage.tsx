@@ -214,18 +214,18 @@ export const ProductPage: React.FC = () => {
             )}
 
             {/* Feature Icons */}
-            <div className="grid grid-cols-3 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-3 gap-3 md:gap-6">
               {(product.characteristics && product.characteristics.length > 0 
-                ? product.characteristics.slice(0, 3) 
+                ? product.characteristics 
                 : [
                     { emoji: "🛡️", label: t('durability'), value: t('high') },
                     { emoji: "⚡", label: t('handling'), value: t('medium') },
                     { emoji: "🎯", label: t('precision'), value: t('elite') }
                   ]
               ).map((feature, i) => (
-                <div key={i} className="p-3 sm:p-4 md:p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl sm:rounded-2xl md:rounded-3xl flex flex-col items-center text-center group hover:border-red-600/50 transition-all duration-500">
+                <div key={i} className="p-3 sm:p-4 md:p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl sm:rounded-2xl md:rounded-3xl flex flex-col items-center text-center group hover:border-red-600/50 transition-all duration-500 min-w-[80px]">
                   <div className="mb-2 md:mb-4 group-hover:scale-110 transition-transform">
-                    <RedIcon emoji={'emoji' in feature ? feature.emoji : ''} size={window.innerWidth < 640 ? 16 : 20} />
+                    <RedIcon emoji={feature.emoji || ''} size={window.innerWidth < 640 ? 16 : 20} />
                   </div>
                   <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">{feature.label}</p>
                   <p className="text-[10px] sm:text-xs md:text-sm font-black uppercase text-white truncate w-full">{feature.value}</p>
@@ -403,7 +403,8 @@ export const ProductPage: React.FC = () => {
                   { label: t('model'), value: product.model },
                   { label: t('category_label'), value: categoryName },
                   ...(product.subcategory ? [{ label: t('sub_label'), value: subcategoryName }] : []),
-                  ...(product.mountType ? [{ label: t('mount_type'), value: product.mountType }] : [])
+                  ...(product.mountType ? [{ label: t('mount_type'), value: product.mountType }] : []),
+                  ...(product.characteristics || []).map(c => ({ label: c.label, value: c.value }))
                 ].map((spec, i) => (
                   <div key={i} className="flex flex-col gap-0.5 sm:gap-1">
                     <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">{spec.label}</span>

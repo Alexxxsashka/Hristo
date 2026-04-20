@@ -245,6 +245,7 @@ export const CheckoutPage: React.FC = () => {
               quantity: item.quantity,
               image: item.image,
               sku: item.sku,
+              category: item.category,
               landingCost: item.landingCost || (item.price * 0.6)
             }));
 
@@ -331,6 +332,7 @@ export const CheckoutPage: React.FC = () => {
         quantity: item.quantity,
         image: item.image,
         sku: item.sku,
+        category: item.category,
         landingCost: item.landingCost || (item.price * 0.6), // Fallback for demo
         selectedVariant: item.selectedVariant ? {
           id: item.selectedVariant.id,
