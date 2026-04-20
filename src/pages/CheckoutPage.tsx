@@ -23,7 +23,11 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { StripePaymentForm } from '../components/checkout/StripePaymentForm';
 
-const stripePromise = loadStripe((import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+const stripePublishableKey = (import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY || (process as any).env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+if (!stripePublishableKey) {
+  console.warn('VITE_STRIPE_PUBLISHABLE_KEY is missing from environment variables.');
+}
+const stripePromise = loadStripe(stripePublishableKey);
 
 interface ShippingMethod {
   id: 'hp_shipping' | 'gls_express' | 'boxnow_locker' | 'pickup' | 'courier';
