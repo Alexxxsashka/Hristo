@@ -195,6 +195,7 @@ export interface OrderItem {
   productId: string;
   sku?: string;
   name: string;
+  category?: string;
   price: number;
   landingCost?: number; // For actual margin calculation
   quantity: number;
@@ -217,7 +218,7 @@ export interface Order {
   shippingCost: number;
   total: number;
   profit: number; // Calculated as total - (sum of landingCosts) - shipping - fees
-  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'awaiting_payment';
   cancelRequested?: boolean;
   cancelRequestedAt?: string;
   cancelReason?: string;

@@ -41,6 +41,8 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   // Real conversion rate: (orders / total visitors/users)
   // For now we use orders / users as a proxy or just orders relative to user count
   const conversionRate = users.length > 0 ? (orders.length / users.length) * 100 : 0;
+  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+  const completedOrders = orders.filter(o => o.status === 'delivered').length;
 
   // Prepare real chart data (last 7 days)
   const getDailyData = () => {

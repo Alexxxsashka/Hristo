@@ -421,7 +421,7 @@ export const databaseService = {
 
   async getInventoryLogs() {
     const res = await fetch('/api/admin/inventory-logs', {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
     return res.ok ? await res.json() : [];
   },
