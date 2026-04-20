@@ -19,6 +19,7 @@ import {
   Calendar, 
   User, 
   CreditCard, 
+  Wallet,
   X 
 } from 'lucide-react';
 import { Order } from '../../types';
