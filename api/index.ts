@@ -1010,22 +1010,62 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── PUT /admin/orders/:id/status ───────────────────────────────────────────
-    const orderStatus = match(path, "/admin/orders/:id/status");
-    if (orderStatus && method === "PUT") {
+    const orderStatusMatch = match(path, "/admin/orders/:id/status");
+    if (orderStatusMatch && method === "PUT") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      const { status, tracking_number } = req.body || {};
+      const { status: newStatus, tracking_number } = req.body || {};
+      const orderId = orderStatusMatch[0];
       
       try {
-        await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
-      } catch (err: any) {
-        // If column doesn't exist, try to add it and retry
-        if (err.message.includes('tracking_number') || err.code === '42703') {
-          await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
-          await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
-        } else {
-          throw err;
+        // Check for stock_deducted column first (auto-migration)
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted BOOLEAN DEFAULT false");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
+
+        // Fetch current order info to see if stock needs updating
+        const orderRes = await pool.query("SELECT status, stock_deducted FROM orders WHERE id = $1", [orderId]);
+        
+        if (orderRes.rows.length > 0) {
+          const { stock_deducted } = orderRes.rows[0];
+          
+          // Logic: Deduct stock when moving TO 'processing', 'paid', 'shipped', or 'delivered'
+          // BUT only if stock hasn't been deducted yet.
+          const fulfilledStatuses = ['processing', 'paid', 'shipped', 'delivered'];
+          const shouldDeduct = fulfilledStatuses.includes(newStatus) && !stock_deducted;
+          
+          // Logic: Return stock when moving FROM a fulfilled status TO 'cancelled' or 'refunded'
+          const shouldReturn = (newStatus === 'cancelled' || newStatus === 'refunded') && stock_deducted;
+
+          if (shouldDeduct || shouldReturn) {
+            const itemsRes = await pool.query("SELECT product_id, quantity FROM order_items WHERE order_id = $1", [orderId]);
+            for (const item of itemsRes.rows) {
+              const modifier = shouldDeduct ? -item.quantity : item.quantity;
+              // Update main stock
+              await pool.query("UPDATE products SET stock = stock + $1 WHERE id = $2", [modifier, item.product_id]);
+              
+              // Note: Ideally we'd also update the 'stock' table if using multi-warehouse, 
+              // but for now the 'products' table is the source of truth for the frontend gallery.
+              
+              // Add to inventory log
+              try {
+                await pool.query(
+                  "INSERT INTO inventory_logs (product_id, change_amount, reason, reference_id, user_id) VALUES ($1, $2, $3, $4, $5)",
+                  [item.product_id, modifier, shouldDeduct ? 'sale' : 'return', orderId, user.id]
+                );
+              } catch (logErr) {
+                console.error("Failed to write inventory log:", logErr);
+              }
+            }
+            // Mark as deducted (or not if returned)
+            await pool.query("UPDATE orders SET stock_deducted = $1 WHERE id = $2", [shouldDeduct, orderId]);
+          }
         }
+
+        await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderId, newStatus, tracking_number]);
+      } catch (err: any) {
+        console.error("Order status update error:", err);
+        // Fallback simple update if everything above fails
+        await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderId, newStatus, tracking_number || null]);
       }
       return res.json({ ok: true });
     }
