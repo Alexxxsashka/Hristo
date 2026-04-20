@@ -438,7 +438,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       animate={{ opacity: 1, x: 0 }}
       className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 max-w-4xl mx-auto"
     >
-      <form onSubmit={handleSubmit} noValidate className="space-y-8">
+      <form 
+        onSubmit={handleSubmit} 
+        noValidate 
+        onInvalid={(e) => e.preventDefault()}
+        className="space-y-8"
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Name</label>
@@ -452,9 +457,19 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               }`}
               maxLength={255}
             />
-            {fieldErrors.name && (
-              <p className="text-red-500 text-xs">{fieldErrors.name}</p>
-            )}
+            <AnimatePresence>
+              {fieldErrors.name && (
+                <motion.p 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-red-500 text-[11px] font-medium flex items-center gap-1"
+                >
+                  <X size={12} />
+                  {fieldErrors.name}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Brand</label>
