@@ -27,21 +27,34 @@ import { formatEnum } from '../../utils/format';
 
 
 
-export const OrderManager = ({ orders, onNotify, onConfirm }: { 
+export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, externalSearch }: { 
   orders: Order[],
   onNotify: (msg: string, type?: 'success' | 'error') => void,
-  onConfirm: (msg: string, action: () => void) => void
+  onConfirm: (msg: string, action: () => void) => void,
+  onUpdate: () => void,
+  externalFilter?: string,
+  externalSearch?: string
 }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const filteredOrders = orders.filter(order => {
+    // Еквівалент BindingSource.Filter
+    const activeStatus = externalFilter && externalFilter !== 'all' ? externalFilter : statusFilter;
+    const matchesStatus = activeStatus === 'all' || order.status === activeStatus;
+
+    // Еквівалент BindingSource.Find: пошук за проіндексованим ID замовлення
+    if (externalSearch) {
+       return order.id.toLowerCase() === externalSearch.toLowerCase() ||
+              order.id.toLowerCase().includes(externalSearch.toLowerCase());
+    }
+
     const matchesSearch = 
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.shipping.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.shipping.fullName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      
     return matchesSearch && matchesStatus;
   });
 

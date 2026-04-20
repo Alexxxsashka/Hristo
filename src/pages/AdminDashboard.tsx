@@ -81,7 +81,11 @@ export const AdminDashboard: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
+  const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'shipped'>('all');
+  const [indexedSearch, setIndexedSearch] = useState('');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
@@ -102,6 +106,7 @@ export const AdminDashboard: React.FC = () => {
         fetchCategories(),
         fetchBlogPosts(),
         fetchPolicies(),
+        fetchOrdersInternal(),
         databaseService.getMessages().then(m => setMessages(m || []))
       ]);
       setIsLoading(false);
@@ -155,6 +160,15 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchOrdersInternal = async () => {
+    try {
+      const o = await databaseService.getAllOrders();
+      setOrders(o || []);
+    } catch (err) {
+      console.error('Failed to fetch orders', err);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -199,20 +213,32 @@ export const AdminDashboard: React.FC = () => {
     });
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (productFilter === 'out_of_stock') return matchesSearch && p.stock <= 0;
+    if (productFilter === 'premium') return matchesSearch && p.price > 500;
+    
+    if (indexedSearch) return p.sku?.toLowerCase() === indexedSearch.toLowerCase();
+    
+    return matchesSearch;
+  });
 
   const filteredBlogPosts = blogPosts.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const fetchOrders = async () => {
+    try {
+      const o = await databaseService.getAllOrders();
+      return o;
+    } catch { return []; }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 flex text-zinc-900">
-      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-zinc-200 flex flex-col">
         <div className="p-6 border-b border-zinc-100">
           <div className="flex items-center gap-3">
@@ -326,7 +352,6 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         <header className="bg-white border-b border-zinc-200 px-8 py-6 sticky top-0 z-10 flex items-center justify-between">
           <div className="flex flex-col">
@@ -347,16 +372,41 @@ export const AdminDashboard: React.FC = () => {
             )}
           </div>
 
-          {(activeTab === 'products' || activeTab === 'blog') && (
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-              <input 
-                type="text"
-                placeholder={`Search ${activeTab}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm"
-              />
+          {(activeTab === 'products' || activeTab === 'orders' || activeTab === 'blog') && (
+            <div className="flex items-center gap-4">
+              {(activeTab === 'products' || activeTab === 'orders') && (
+                <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
+                  <button 
+                    onClick={() => { setProductFilter('all'); setOrderFilter('all'); }}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg transition-all ${
+                      (activeTab === 'products' ? productFilter : orderFilter) === 'all' ? 'bg-white shadow-sm' : 'text-zinc-400'
+                    }`}
+                  >All</button>
+                  <button 
+                    onClick={() => activeTab === 'products' ? setProductFilter('out_of_stock') : setOrderFilter('pending')}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg transition-all ${
+                      (activeTab === 'products' ? productFilter === 'out_of_stock' : orderFilter === 'pending') ? 'bg-white shadow-sm' : 'text-zinc-400'
+                    }`}
+                  >
+                    {activeTab === 'products' ? 'Out of Stock' : 'Pending'}
+                  </button>
+                </div>
+              )}
+              
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                <input 
+                  type="text"
+                  placeholder={
+                    activeTab === 'products' ? "Find by SKU (Indexed)..." : 
+                    activeTab === 'orders' ? "Find by OrderID..." : 
+                    "Search blog..."
+                  }
+                  value={activeTab === 'blog' ? searchQuery : indexedSearch}
+                  onChange={(e) => activeTab === 'blog' ? setSearchQuery(e.target.value) : setIndexedSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-medium"
+                />
+              </div>
             </div>
           )}
         </header>
@@ -406,7 +456,14 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <OrderManager />
+                <OrderManager 
+                   orders={orders}
+                   externalFilter={orderFilter}
+                   externalSearch={indexedSearch}
+                   onNotify={showNotification}
+                   onConfirm={confirmAction}
+                   onUpdate={fetchOrdersInternal}
+                />
               </motion.div>
             )}
 
@@ -582,7 +639,6 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </main>
 
-      {/* Notification Toast */}
       <AnimatePresence>
         {notification && (
           <motion.div
@@ -601,7 +657,6 @@ export const AdminDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Confirmation Dialog */}
       <AnimatePresence>
         {confirmDialog && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -674,7 +729,6 @@ const BIAnalytics = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header with Filters */}
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
           <Activity className="text-red-600" size={24} />
@@ -695,7 +749,6 @@ const BIAnalytics = () => {
         </div>
       </div>
 
-      {/* Primary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard 
           label="Total Revenue" 
@@ -723,9 +776,7 @@ const BIAnalytics = () => {
         />
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sales Velocity Chart */}
         <div className="lg:col-span-2 bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h4 className="text-sm font-black uppercase tracking-tighter">Sales Performance</h4>
@@ -770,7 +821,6 @@ const BIAnalytics = () => {
           </div>
         </div>
 
-        {/* Top Sellers Pie */}
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <h4 className="text-sm font-black uppercase tracking-tighter mb-8">Top Sellers</h4>
           <div className="h-[250px]">
@@ -807,7 +857,6 @@ const BIAnalytics = () => {
         </div>
       </div>
 
-      {/* Alerts & Inventory */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
@@ -843,7 +892,6 @@ const BIAnalytics = () => {
         <div className="bg-zinc-900 text-white p-8 rounded-[32px] shadow-xl">
           <h4 className="text-sm font-black uppercase tracking-tighter mb-6">Recent Activity</h4>
           <div className="space-y-6">
-            {/* Mock recent activity for demo */}
             <ActivityItem 
               icon={<ShoppingCart size={16} className="text-emerald-500" />}
               title="New Order #ORD-8821"
@@ -897,863 +945,6 @@ const ActivityItem = ({ icon, title, time, desc }: { icon: React.ReactNode, titl
     </div>
   </div>
 );
-
-const MediaManager = ({ onNotify, onConfirm }: { onNotify: any, onConfirm: any }) => {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  const folders = [
-    { id: 'products/2d', label: 'Product Images (2D)' },
-    { id: 'products/3d', label: 'Product Models (3D)' },
-    { id: 'site/2d', label: 'Site Assets (2D)' },
-    { id: 'site/3d', label: 'Site Assets (3D)' },
-    { id: 'site/videos', label: 'Site Videos' },
-    { id: 'blog/images', label: 'Blog Images' },
-    { id: 'blog/videos', label: 'Blog Videos' },
-  ];
-
-  const initializeFolders = async () => {
-    onConfirm('This will create placeholder files in all necessary storage folders. Continue?', async () => {
-      setUploading(true);
-      setProgress(0);
-      
-      try {
-        const placeholder = new Blob(['placeholder'], { type: 'text/plain' });
-        const fileToUpload = new File([placeholder], '.keep', { type: 'text/plain' });
-        
-        for (let i = 0; i < folders.length; i++) {
-          const folder = folders[i];
-          const path = `${folder.id}/.keep`;
-          await databaseService.uploadFile(fileToUpload, path);
-          setProgress(((i + 1) / folders.length) * 100);
-        }
-        
-        onNotify('All folders initialized successfully!');
-      } catch (err) {
-        console.error('Initialization failed', err);
-        onNotify('Initialization failed: ' + (err instanceof Error ? err.message : String(err)), 'error');
-      } finally {
-        setUploading(false);
-        setProgress(0);
-      }
-    });
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
-      <div className="bg-white p-12 rounded-[48px] border border-zinc-200 shadow-sm text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="w-20 h-20 bg-zinc-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <Database size={40} className="text-zinc-900" />
-          </div>
-          <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 mb-4">Storage Management</h3>
-          <p className="text-zinc-500 font-medium mb-12 leading-relaxed">
-            Manual file uploading has been disabled as requested. Use this tool to initialize the required folder structure in Firebase Storage. This ensures all features of the site (Products, Blog, etc.) have the necessary directory structure to function correctly.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {folders.map(folder => (
-              <div key={folder.id} className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Folder</div>
-                <div className="text-xs font-bold text-zinc-900 truncate">{folder.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            {uploading && (
-              <div className="w-full max-w-md mx-auto space-y-2">
-                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                  <span>Initializing folders...</span>
-                  <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-zinc-900 transition-all duration-300" 
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={initializeFolders}
-              disabled={uploading}
-              className="px-12 py-5 bg-zinc-900 text-white rounded-[24px] font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-2xl shadow-zinc-900/20 disabled:opacity-50"
-            >
-              {uploading ? 'Processing...' : 'Initialize Folder Structure'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-const DataMigrationTool = ({ onNotify }: { 
-  onNotify: (msg: string, type?: 'success' | 'error') => void
-}) => {
-
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [logs, setLogs] = useState<string[]>([]);
-  const [progress, setProgress] = useState(0);
-
-  const addLog = (msg: string) => {
-    setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
-  };
-
-  const seedDefaultData = async () => {
-    if (status === 'loading') return;
-    
-    // Check if data already exists to avoid duplicates
-    if (products.length > 0 || categories.length > 0) {
-      confirmAction('Data already exists in the database. Are you sure you want to seed default data again? This may create duplicates.', async () => {
-        await performSeeding();
-      });
-    } else {
-      await performSeeding();
-    }
-  };
-
-  const performSeeding = async () => {
-    setStatus('loading');
-    setLogs([]);
-    setProgress(0);
-    addLog('Starting seeding process...');
-
-    try {
-      const defaultCategories = [
-        { id: 'airsoft_weapons', name: 'Airsoft Weapons', slug: 'airsoft-weapons', parent: null, filters: [
-          { id: 'brand', label: 'Brand', type: 'select', options: ['CYMA', 'Specna Arms', 'Tokyo Marui', 'G&G', 'Krytac', 'LCT', 'E&L'] },
-          { id: 'velocity_fps', label: 'Velocity (FPS)', type: 'range' },
-          { id: 'power_source', label: 'Power Source', type: 'select', options: ['Electric', 'Gas', 'CO2', 'Spring', 'HPA'] },
-          { id: 'body_material', label: 'Body Material', type: 'select', options: ['Full Metal', 'Polymer', 'Steel'] }
-        ]},
-        { id: 'assault_rifles', name: 'Assault Rifles', slug: 'assault-rifles', parent: 'airsoft_weapons' },
-        { id: 'pistols', name: 'Pistols', slug: 'pistols', parent: 'airsoft_weapons' },
-        { id: 'sniper_rifles', name: 'Sniper Rifles', slug: 'sniper-rifles', parent: 'airsoft_weapons' },
-        { id: 'tactical_gear', name: 'Tactical Gear', slug: 'tactical-gear', parent: null, filters: [
-          { id: 'color', label: 'Color', type: 'select', options: ['Black', 'Tan', 'Olive', 'Multicam', 'A-TACS'] },
-          { id: 'size', label: 'Size', type: 'select', options: ['S', 'M', 'L', 'XL', 'XXL'] }
-        ]},
-        { id: 'plate_carriers', name: 'Plate Carriers', slug: 'plate-carriers', parent: 'tactical_gear' },
-        { id: 'helmets', name: 'Helmets', slug: 'helmets', parent: 'tactical_gear' },
-        { id: 'accessories', name: 'Accessories', slug: 'accessories', parent: null },
-        { id: 'optics', name: 'Optics', slug: 'optics', parent: 'accessories' },
-        { id: 'consumables', name: 'Consumables', slug: 'consumables', parent: null },
-        { id: 'bbs', name: 'BBs', slug: 'bbs', parent: 'consumables' },
-        { id: 'gas', name: 'Gas & CO2', slug: 'gas-co2', parent: 'consumables' }
-      ];
-
-      const defaultProducts = [
-        {
-          id: 'm4-carbine-pro',
-          sku: 'SA-E01-PRO',
-          name: 'M4 Carbine Pro',
-          description: 'High-performance electric assault rifle with full metal body and reinforced gearbox. Features a quick spring change system and precision inner barrel.',
-          type: 'weapon',
-          category: 'airsoft_weapons',
-          subcategory: 'assault_rifles',
-          brand: 'Specna Arms',
-          model: 'E01',
-          price: 350,
-          landingCost: 210,
-          msrp: 380,
-          currency: 'EUR',
-          stock: 10,
-          minStockLevel: 5,
-          image: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800',
-          model3D: '',
-          model3DName: '',
-          categoryFilters: { brand: 'Specna Arms', velocity_fps: 400, power_source: 'Electric', body_material: 'Full Metal' },
-          tags: ['m4', 'rifle', 'electric', 'specna']
-        },
-        {
-          id: 'ak74-tactical',
-          sku: 'LCT-AK74-TAC',
-          name: 'AK-74 Tactical',
-          description: 'Modernized AK platform with rail systems for optics and accessories. Steel construction for ultimate durability.',
-          type: 'weapon',
-          category: 'airsoft_weapons',
-          subcategory: 'assault_rifles',
-          brand: 'LCT',
-          model: 'AK74',
-          price: 420,
-          landingCost: 280,
-          msrp: 450,
-          currency: 'EUR',
-          stock: 8,
-          minStockLevel: 3,
-          image: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800',
-          model3D: '',
-          model3DName: '',
-          categoryFilters: { brand: 'LCT', velocity_fps: 410, power_source: 'Electric', body_material: 'Steel' },
-          tags: ['ak', 'ak74', 'steel', 'lct']
-        }
-      ];
-
-      const defaultWarehouses = [
-        { id: 'wh-main', name: 'Main Warehouse', location: 'Kyiv, Central St 1', type: 'distribution' },
-        { id: 'wh-retail', name: 'Retail Store', location: 'Kyiv, Khreshchatyk 22', type: 'retail' }
-      ];
-
-      const defaultSuppliers = [
-        { id: 'sup-specna', name: 'Specna Arms Europe', contactName: 'Marek Nowak', email: 'sales@specna.pl', phone: '+48 123 456 789', leadTimeDays: 14, brands: ['Specna Arms'] },
-        { id: 'sup-lct', name: 'LCT Airsoft Taiwan', contactName: 'Chen Wei', email: 'export@lctairsoft.com', phone: '+886 2 2233 4455', leadTimeDays: 45, brands: ['LCT'] }
-      ];
-
-      const defaultStock = [
-        { id: 'st-1', productId: 'm4-carbine-pro', warehouseId: 'wh-main', serialNumber: 'SA-2024-001', status: 'available', quantity: 7, reservedQuantity: 1 },
-        { id: 'st-2', productId: 'm4-carbine-pro', warehouseId: 'wh-retail', serialNumber: 'SA-2024-002', status: 'available', quantity: 3, reservedQuantity: 0 },
-        { id: 'st-3', productId: 'ak74-tactical', warehouseId: 'wh-main', serialNumber: 'LCT-AK-998', status: 'available', quantity: 8, reservedQuantity: 2 }
-      ];
-
-      const defaultRates = [
-        { code: 'USD', rate: 1.08 },
-        { code: 'PLN', rate: 4.32 },
-        { code: 'UAH', rate: 42.50 }
-      ];
-
-      const defaultBlogPosts = [
-        {
-          id: 'welcome-to-hristo',
-          title: 'Welcome to Hristo Airsoft',
-          excerpt: 'Discover the best airsoft gear and community in the region.',
-          content: 'We are excited to launch our new online store and ERP system to better serve the airsoft community...',
-          author: 'Admin',
-          date: new Date().toISOString(),
-          image: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800',
-          tags: ['news', 'welcome'],
-          published: true
-        },
-        {
-          id: 'm4-vs-ak',
-          title: 'M4 vs AK: The Eternal Debate',
-          excerpt: 'Which platform is right for you? We break down the pros and cons.',
-          content: 'The debate between M4 and AK platforms has been ongoing since the dawn of airsoft...',
-          author: 'Expert',
-          date: new Date().toISOString(),
-          image: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800',
-          tags: ['guide', 'rifles'],
-          published: true
-        }
-      ];
-
-      const defaultMessages = [
-        {
-          id: 'msg-1',
-          name: 'John Doe',
-          email: 'john@example.com',
-          subject: 'Wholesale Inquiry',
-          message: 'I am interested in ordering 50 units of the M4 Carbine Pro. Do you offer bulk discounts?',
-          timestamp: new Date().toISOString(),
-          read: false
-        }
-      ];
-
-      const total = defaultCategories.length + defaultProducts.length + defaultWarehouses.length + defaultSuppliers.length + defaultStock.length + defaultRates.length + defaultBlogPosts.length + defaultMessages.length;
-      let current = 0;
-
-      addLog('Seeding categories...');
-      for (const cat of defaultCategories) {
-        await databaseService.saveCategory(cat);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added category: ${cat.name}`);
-      }
-
-      addLog('Seeding products...');
-      for (const prod of defaultProducts) {
-        await databaseService.saveProduct(prod as any);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added product: ${prod.name}`);
-      }
-
-      addLog('Seeding warehouses...');
-      for (const wh of defaultWarehouses) {
-        await databaseService.saveWarehouse(wh);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added warehouse: ${wh.name}`);
-      }
-
-      addLog('Seeding suppliers...');
-      for (const sup of defaultSuppliers) {
-        await databaseService.saveSupplier(sup);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added supplier: ${sup.name}`);
-      }
-
-      addLog('Seeding stock...');
-      for (const st of defaultStock) {
-        await databaseService.saveStockItem(st);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added stock item for product ${st.productId}`);
-      }
-
-      addLog('Seeding blog posts...');
-      for (const post of defaultBlogPosts) {
-        await databaseService.saveBlogPost(post as any);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added blog post: ${post.title}`);
-      }
-
-      addLog('Seeding messages...');
-      for (const msg of defaultMessages) {
-        await databaseService.saveMessage(msg);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added message from: ${msg.name}`);
-      }
-
-      addLog('Seeding completed successfully!');
-      setStatus('success');
-      onNotify('Database seeded successfully');
-      window.location.reload();
-    } catch (err) {
-      addLog(`Seeding failed: ${err instanceof Error ? err.message : String(err)}`);
-      setStatus('error');
-    }
-  };
-
-  const seedConfiguratorTestData = async () => {
-    setStatus('loading');
-    setLogs([]);
-    setProgress(0);
-    addLog('Starting configurator test data seeding...');
-
-    try {
-      const testCategories = [
-        { id: 'weapons', name: 'Weapons', slug: 'weapons', parent: null },
-        { id: 'modules', name: 'Modules', slug: 'modules', parent: null },
-        { id: 'red_dots', name: 'Red Dot Sights', slug: 'red-dots', parent: 'modules', slots: ['optic'] },
-        { id: 'scopes', name: 'Scopes', slug: 'scopes', parent: 'modules', slots: ['optic'] },
-        { id: 'suppressors', name: 'Suppressors', slug: 'suppressors', parent: 'modules', slots: ['muzzle'] },
-        { id: 'magazines', name: 'Magazines', slug: 'magazines', parent: 'modules', slots: ['magazine'] },
-        { id: 'stocks', name: 'Stocks', slug: 'stocks', parent: 'modules', slots: ['stock'] },
-        { id: 'grips', name: 'Pistol Grips', slug: 'grips', parent: 'modules', slots: ['pistol_grip'] },
-        { id: 'lasers', name: 'Lasers', slug: 'lasers', parent: 'modules', slots: ['laser'] }
-      ];
-
-      const testProducts = [
-        {
-          id: 'm4a1-test',
-          uid: 'm4a1-test-uid',
-          name: 'M4A1 Test Rifle',
-          description: 'A test assault rifle for 3D configurator testing. Uses a Box as a placeholder model.',
-          type: 'weapon',
-          category: 'weapons',
-          subcategory: 'assault_rifles',
-          brand: 'TestBrand',
-          model: 'M4A1',
-          price: 500,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/m4a1/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb',
-          model3DName: 'Box.glb',
-          longDescription: "The M4A1 carbine is a fully automatic variant of the basic M4 carbine intended for special operations use. The M4A1 is used by almost all US special operations units including, but not limited to, Marine Force Recon, Army Rangers, Army Special Forces, Navy SEALs, United States Air Force Pararescue and Air Force Combat Control Teams.\n\nIt has a S-1-F (safe/semi-automatic/fully automatic) trigger group, while the M4 has a S-1-3 (safe/semi-automatic/3-round burst) trigger group. The M4A1 is used by almost all U.S. special operations units.",
-          slots: ['optic', 'muzzle', 'magazine', 'stock', 'pistol_grip'],
-          compatibleModuleCategories: ['red_dots', 'scopes', 'suppressors', 'magazines', 'stocks', 'grips'],
-          tags: ['test', 'm4a1', 'rifle']
-        },
-        {
-          id: 'glock17-test',
-          uid: 'glock17-test-uid',
-          name: 'Glock 17 Test Pistol',
-          description: 'A test pistol for 3D configurator testing. Uses a Box as a placeholder model.',
-          type: 'weapon',
-          category: 'weapons',
-          subcategory: 'pistols',
-          brand: 'TestBrand',
-          model: 'Glock 17',
-          price: 250,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/glock17/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb',
-          model3DName: 'Box.glb',
-          slots: ['optic', 'muzzle', 'magazine', 'laser'],
-          compatibleModuleCategories: ['red_dots', 'suppressors', 'magazines', 'lasers'],
-          tags: ['test', 'glock', 'pistol']
-        },
-        {
-          id: 'eotech-test',
-          uid: 'eotech-test-uid',
-          name: 'EOTech Holographic Sight',
-          description: 'High-precision holographic sight. Uses a Box as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'red_dots',
-          brand: 'EOTech',
-          model: 'EXPS3',
-          price: 150,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/eotech/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb',
-          model3DName: 'Box.glb',
-          allowedSlots: ['optic'],
-          tags: ['test', 'optic', 'eotech']
-        },
-        {
-          id: 'acog-test',
-          uid: 'acog-test-uid',
-          name: 'ACOG 4x Scope',
-          description: 'Fixed 4x magnification scope. Uses a Cylinder as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'scopes',
-          brand: 'Trijicon',
-          model: 'ACOG',
-          price: 200,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/acog/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Cylinder/glTF-Binary/Cylinder.glb',
-          model3DName: 'Cylinder.glb',
-          allowedSlots: ['optic'],
-          tags: ['test', 'optic', 'acog']
-        },
-        {
-          id: 'suppressor-test',
-          uid: 'suppressor-test-uid',
-          name: 'Tactical Suppressor',
-          description: 'Reduces muzzle flash and sound signature. Uses a Cylinder as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'suppressors',
-          brand: 'Surefire',
-          model: 'SOCOM',
-          price: 120,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/suppressor/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Cylinder/glTF-Binary/Cylinder.glb',
-          model3DName: 'Cylinder.glb',
-          allowedSlots: ['muzzle'],
-          tags: ['test', 'muzzle', 'suppressor']
-        },
-        {
-          id: 'pmag-test',
-          uid: 'pmag-test-uid',
-          name: 'PMAG 30rd Magazine',
-          description: 'Polymer high-capacity magazine. Uses a Box as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'magazines',
-          brand: 'Magpul',
-          model: 'PMAG',
-          price: 30,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/pmag/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb',
-          model3DName: 'Box.glb',
-          allowedSlots: ['magazine'],
-          tags: ['test', 'magazine', 'pmag']
-        },
-        {
-          id: 'ctr-stock-test',
-          uid: 'ctr-stock-test-uid',
-          name: 'CTR Stock',
-          description: 'Adjustable stock for improved ergonomics. Uses a Box as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'stocks',
-          brand: 'Magpul',
-          model: 'CTR',
-          price: 80,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/stock/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Box/glTF-Binary/Box.glb',
-          model3DName: 'Box.glb',
-          allowedSlots: ['stock'],
-          tags: ['test', 'stock', 'ctr']
-        },
-        {
-          id: 'moe-grip-test',
-          uid: 'moe-grip-test-uid',
-          name: 'MOE Pistol Grip',
-          description: 'Ergonomic pistol grip. Uses a Cylinder as a placeholder model.',
-          type: 'module',
-          category: 'modules',
-          subcategory: 'grips',
-          brand: 'Magpul',
-          model: 'MOE',
-          price: 25,
-          stock: 99,
-          has3D: true,
-          image: 'https://picsum.photos/seed/grip/800/600',
-          model3D: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Cylinder/glTF-Binary/Cylinder.glb',
-          model3DName: 'Cylinder.glb',
-          allowedSlots: ['pistol_grip'],
-          tags: ['test', 'grip', 'moe']
-        }
-      ];
-
-      const total = testCategories.length + testProducts.length;
-      let current = 0;
-
-      addLog('Seeding test categories...');
-      for (const cat of testCategories) {
-        await databaseService.saveCategory(cat as any);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added test category: ${cat.name}`);
-      }
-
-      addLog('Seeding test products...');
-      for (const prod of testProducts) {
-        await databaseService.saveProduct(prod as any);
-        current++;
-        setProgress(Math.round((current / total) * 100));
-        addLog(`Added test product: ${prod.name}`);
-      }
-
-      addLog('Test data seeding completed successfully!');
-      setStatus('success');
-    } catch (err) {
-      addLog(`Test data seeding failed: ${err instanceof Error ? err.message : String(err)}`);
-      setStatus('error');
-    }
-  };
-
-  const seedClothingProduct = async () => {
-    setStatus('loading');
-    setLogs([]);
-    setProgress(0);
-    addLog('Seeding tactical apparel category and product...');
-    try {
-      // 1. Create the subcategory first
-      const apparelCategory = {
-        id: "tactical_apparel",
-        name: "Apparel",
-        slug: "apparel",
-        parent: "tactical_gear",
-        filters: [
-          { id: 'color', label: 'Color', type: 'select', options: ['Black', 'Tan', 'Olive', 'Multicam', 'A-TACS'] },
-          { id: 'size', label: 'Size', type: 'select', options: ['S', 'M', 'L', 'XL', 'XXL'] }
-        ]
-      };
-      await databaseService.saveCategory(apparelCategory);
-      addLog('Created "Apparel" subcategory.');
-
-      // 2. Create the product assigned to that subcategory
-      const clothingProduct = {
-        name: "Tactical Combat Shirt G3",
-        description: "High-performance combat shirt designed for maximum comfort and durability under body armor. Features moisture-wicking torso and ripstop sleeves with integrated elbow pad slots.",
-        price: 85.00,
-        category: "tactical_gear",
-        subcategory: "tactical_apparel",
-        type: "Apparel",
-        brand: "Crye Precision",
-        image: "https://picsum.photos/seed/combat-shirt/800/800",
-        sku: "TCS-G3-BASE",
-        stock: 100,
-        longDescription: "The G3 Combat Shirt is a combat-proven garment designed specifically to be worn under body armor. It keeps you cool with wicking, lightweight, high-performance, flame-resistant DRIFIRE® torso fabric and reinforced Mil-Spec 50/50 NYCO ripstop sleeves. Designed for use with our patented removable AirFlex™ Combat Elbow Pads (sold separately). The G3 Combat Shirt features a zip collar that allows easy donning and doffing while keeping slings, straps, and brass off your neck.\n\nHistory:\nOriginally developed for US Special Operations forces, the G3 series has become the industry standard for tactical apparel. Its unique design allows for maximum mobility and protection in the most demanding environments.",
-        variantAttributes: [
-          {
-            name: "Color",
-            options: ["Black", "Olive Drab", "Coyote Brown", "Multicam"]
-          },
-          {
-            name: "Size",
-            options: ["S", "M", "L", "XL", "XXL"]
-          }
-        ],
-        variants: [
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-BLK-S",
-            name: "Tactical Combat Shirt G3 - Black - S",
-            attributes: { "Color": "Black", "Size": "S" },
-            price: 85.00,
-            stock: 10
-          },
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-BLK-M",
-            name: "Tactical Combat Shirt G3 - Black - M",
-            attributes: { "Color": "Black", "Size": "M" },
-            price: 85.00,
-            stock: 15
-          },
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-BLK-L",
-            name: "Tactical Combat Shirt G3 - Black - L",
-            attributes: { "Color": "Black", "Size": "L" },
-            price: 85.00,
-            stock: 20
-          },
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-OD-M",
-            name: "Tactical Combat Shirt G3 - Olive Drab - M",
-            attributes: { "Color": "Olive Drab", "Size": "M" },
-            price: 85.00,
-            stock: 12
-          },
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-OD-L",
-            name: "Tactical Combat Shirt G3 - Olive Drab - L",
-            attributes: { "Color": "Olive Drab", "Size": "L" },
-            price: 85.00,
-            stock: 18
-          },
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            sku: "TCS-G3-MC-L",
-            name: "Tactical Combat Shirt G3 - Multicam - L",
-            attributes: { "Color": "Multicam", "Size": "L" },
-            price: 95.00,
-            stock: 5
-          }
-        ],
-        characteristics: [
-          { emoji: "🛡️", label: "Material", value: "Ripstop / Moisture-wicking" },
-          { emoji: "💪", label: "Durability", value: "Reinforced elbows" },
-          { emoji: "🌬️", label: "Breathability", value: "High" }
-        ],
-        tags: ["tactical", "combat", "apparel", "shirt"],
-      };
-      await databaseService.saveProduct(clothingProduct);
-      addLog('Successfully seeded clothing product!');
-      setStatus('success');
-      onNotify('Test clothing product and category added!');
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-      addLog(`Error: ${err instanceof Error ? err.message : String(err)}`);
-      setStatus('error');
-      onNotify('Failed to seed clothing product', 'error');
-    }
-  };
-
-  const runMigration = async () => {
-    console.log('Run Migration clicked');
-    setStatus('loading');
-    setLogs([]);
-    setProgress(0);
-    addLog('Starting migration process...');
-
-    try {
-      // 1. Fetch local data from server
-      addLog('Fetching local data from server...');
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/migration/export', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch local data');
-      const data = await response.json();
-      addLog(`Data fetched successfully: ${Object.keys(data).length} collections found.`);
-
-      const collections = [
-        { name: 'categories', data: data.categories },
-        { name: 'products', data: data.products },
-        { name: 'blog_posts', data: data.blog_posts },
-        { name: 'contact_messages', data: data.contact_messages },
-        { name: 'policies', data: data.policies },
-        { name: 'users', data: data.users }
-      ];
-
-      let totalItems = collections.reduce((acc, c) => acc + (c.data?.length || 0), 0);
-      let processedItems = 0;
-
-      for (const collection of collections) {
-        if (!collection.data || collection.data.length === 0) {
-          addLog(`Skipping empty collection: ${collection.name}`);
-          continue;
-        }
-
-        addLog(`Migrating collection: ${collection.name} (${collection.data.length} items)...`);
-        
-        for (const item of collection.data) {
-          try {
-            // Use appropriate service method based on collection
-            switch (collection.name) {
-              case 'categories':
-                await databaseService.saveCategory(item);
-                break;
-              case 'products':
-                await databaseService.saveProduct(item);
-                break;
-              case 'blog_posts':
-                await databaseService.saveBlogPost(item);
-                break;
-              case 'contact_messages':
-                await databaseService.saveMessage(item);
-                break;
-              case 'policies':
-                await databaseService.savePolicy(item);
-                break;
-              case 'users':
-                // For users, we might need a special handling if we want to migrate auth too
-                // For now, just save the profile
-                await databaseService.saveUserProfile(item.id, item);
-                break;
-            }
-            processedItems++;
-            setProgress(Math.round((processedItems / totalItems) * 100));
-          } catch (err) {
-            addLog(`Error migrating item ${item.id} in ${collection.name}: ${err instanceof Error ? err.message : String(err)}`);
-          }
-        }
-        addLog(`Finished collection: ${collection.name}`);
-      }
-
-      addLog('Migration completed successfully!');
-      setStatus('success');
-    } catch (err) {
-      addLog(`Migration failed: ${err instanceof Error ? err.message : String(err)}`);
-      setStatus('error');
-    }
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm max-w-4xl mx-auto"
-    >
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-white">
-          <Database size={24} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-zinc-900 uppercase tracking-tighter">Data Migration Tool</h3>
-          <p className="text-sm text-zinc-500">Move your local JSON data to the Cloud Firestore database.</p>
-        </div>
-      </div>
-
-      <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 mb-8">
-        <h4 className="font-bold text-zinc-900 mb-4 flex items-center gap-2">
-          <Shield size={16} className="text-zinc-400" />
-          Important Information
-        </h4>
-        <ul className="space-y-3 text-sm text-zinc-600">
-          <li className="flex gap-3">
-            <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full mt-1.5 shrink-0" />
-            This tool will read all data from the local server files and upload them to Firestore.
-          </li>
-          <li className="flex gap-3">
-            <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full mt-1.5 shrink-0" />
-            Existing documents with the same IDs in Firestore will be updated.
-          </li>
-          <li className="flex gap-3">
-            <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full mt-1.5 shrink-0" />
-            Make sure your Firestore Security Rules allow these operations.
-          </li>
-        </ul>
-      </div>
-
-      {status === 'idle' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button 
-            onClick={runMigration}
-            className="py-4 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20 flex items-center justify-center gap-3"
-          >
-            <Database size={20} />
-            Migrate Local Files
-          </button>
-          <button 
-            onClick={seedDefaultData}
-            className="py-4 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-3"
-          >
-            <Plus size={20} />
-            Seed Default Data
-          </button>
-          <button 
-            onClick={seedConfiguratorTestData}
-            className="py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-3"
-          >
-            <Crosshair size={20} />
-            Seed Configurator Test Data
-          </button>
-          <button 
-            onClick={seedClothingProduct}
-            className="py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-3"
-          >
-            <Plus size={20} />
-            Seed Test Clothing
-          </button>
-        </div>
-      )}
-
-      {status !== 'idle' && (
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm font-bold uppercase tracking-widest text-zinc-400">
-              <span>Migration Progress</span>
-              <span>{progress}%</span>
-            </div>
-            <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-zinc-900"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-xl p-4 font-mono text-xs text-zinc-400 h-64 overflow-y-auto space-y-1">
-            {logs.map((log, i) => (
-              <div key={i} className={log.includes('Error') || log.includes('failed') ? 'text-red-400' : log.includes('successfully') ? 'text-green-400' : ''}>
-                {log}
-              </div>
-            ))}
-            {status === 'loading' && (
-              <div className="flex items-center gap-2 text-white animate-pulse">
-                <div className="w-1 h-1 bg-white rounded-full" />
-                Processing...
-              </div>
-            )}
-          </div>
-
-          {status === 'success' && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 font-bold">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white">
-                <Shield size={16} />
-              </div>
-              Migration completed successfully! You can now use the Cloud database.
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 font-bold">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white">
-                <X size={16} />
-              </div>
-              Migration failed. Check the logs above for details.
-            </div>
-          )}
-
-          {status !== 'loading' && (
-            <button 
-              onClick={() => setStatus('idle')}
-              className="w-full py-3 border border-zinc-200 text-zinc-600 rounded-xl font-bold hover:bg-zinc-50 transition-all"
-            >
-              Reset Tool
-            </button>
-          )}
-        </div>
-      )}
-    </motion.div>
-  );
-};
 
 const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
   policies: PolicyPage[], 
@@ -2698,32 +1889,35 @@ const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onConfirm }
   );
 };
 
-const OrderManager = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, externalSearch }: { 
+  orders: Order[],
+  onNotify: (msg: string, type?: 'success' | 'error') => void,
+  onConfirm: (msg: string, action: () => void) => void,
+  onUpdate: () => void,
+  externalFilter?: string,
+  externalSearch?: string
+}) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  const filteredOrders = orders.filter(order => {
+    // Еквівалент BindingSource.Filter
+    const matchesStatus = externalFilter === 'all' || !externalFilter || order.status === externalFilter;
 
-  const loadOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await databaseService.getAllOrders();
-      setOrders(data);
-    } catch (error) {
-      console.error('Failed to load orders', error);
-    } finally {
-      setLoading(false);
+    // Еквівалент BindingSource.Find: пошук за проіндексованим ID замовлення
+    if (externalSearch) {
+       return order.id.toLowerCase() === externalSearch.toLowerCase() ||
+              order.id.toLowerCase().includes(externalSearch.toLowerCase());
     }
-  };
+    
+    return matchesStatus;
+  });
 
   const handleStatusChange = async (orderId: string, status: Order['status'], reason?: string) => {
     try {
       await databaseService.updateOrderStatus(orderId, status, undefined);
-      loadOrders(); // Refresh after update
+      onUpdate(); // Refresh parent state
     } catch (error) {
       console.error(error);
     }
@@ -2795,10 +1989,10 @@ const OrderManager = () => {
         <h2 className="text-2xl font-black uppercase tracking-tighter">Order Management</h2>
         <div className="flex gap-2">
           <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold">
-            Total: {orders.length}
+            Total: {filteredOrders.length}
           </span>
           <span className="px-3 py-1 bg-amber-100 text-amber-600 rounded-full text-xs font-bold">
-            New: {orders.filter(o => o.status === 'pending').length}
+            New: {filteredOrders.filter(o => o.status === 'pending').length}
           </span>
         </div>
       </div>
@@ -2815,7 +2009,7 @@ const OrderManager = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map(order => (
+            {filteredOrders.map(order => (
               <tr key={order.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-all group">
                 <td className="p-4">
                   <div className="font-bold text-zinc-900">{order.orderNumber}</div>
