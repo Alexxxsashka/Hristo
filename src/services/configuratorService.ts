@@ -28,7 +28,6 @@ export class CompatibilityEngine {
     }
 
     // 3. Check if parent explicitly allows this category
-    if (parent.compatibleModuleCategories && !parent.compatibleModuleCategories.includes(attachment.subcategory || attachment.category)) {
     if (parent.compatibleModuleCategories && parent.compatibleModuleCategories.length > 0) {
       if (!parent.compatibleModuleCategories.includes(attachment.subcategory || attachment.category)) {
         console.log(`CompatibilityEngine: ${parent.name} does not support category ${attachment.subcategory || attachment.category}`);
