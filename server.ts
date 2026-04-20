@@ -1585,22 +1585,46 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       return res.status(403).json({ error: "Forbidden" });
     }
     try {
-      const result = await pool.query('SELECT id, email, username, display_name, callsign, team_name, role, points, rank, discount_level, avatar_url, created_at FROM users WHERE id = $1', [req.params.id]);
+      const result = await pool.query('SELECT id, email, username, display_name as "displayName", callsign, team_name as "teamName", role, points, rank, discount_level as "discountLevel", avatar_url as "avatarUrl", created_at FROM users WHERE id = $1', [req.params.id]);
       
       if (result.rows.length === 0) {
         // If it's the current user, return a skeleton instead of 404
         if (req.user.id === req.params.id) {
+          // Trigger a background recalculation/creation
+          await recalculateUserPointsAndRank(req.user.id);
+          
+          // Re-fetch now that they should be created
+          const retry = await pool.query('SELECT id, email, username, display_name as "displayName", callsign, team_name as "teamName", role, points, rank, discount_level as "discountLevel", avatar_url as "avatarUrl", created_at FROM users WHERE id = $1', [req.user.id]);
+          
+          if (retry.rows.length > 0) {
+            const u = retry.rows[0];
+            return res.json({
+              ...u,
+              points: Number(u.points || 0),
+              discountLevel: Number(u.discountLevel || 0)
+            });
+          }
+
           return res.json({
             id: req.user.id,
             email: req.user.email,
             role: req.user.role,
             username: req.user.username || req.user.email?.split('@')[0] || 'User',
+            points: 0,
+            rank: 'recruit',
+            discountLevel: 0,
             isNewUser: true
           });
         }
         return res.status(404).json({ error: 'User not found' });
       }
-      res.json(result.rows[0]);
+      
+      const u = result.rows[0];
+      res.json({
+        ...u,
+        points: Number(u.points || 0),
+        discountLevel: Number(u.discountLevel || 0)
+      });
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
     }
@@ -1861,71 +1885,68 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const authoritativeTotal = authoritativeSubtotal + shippingCost;
       const tax = authoritativeTotal * 0.25; // Example tax rate
 
-      // 3. Update User Rank & Points
-      const pointsEarned = Math.floor(authoritativeTotal * 0.1);
-      const newPoints = (parseInt(userProfile.points) || 0) + pointsEarned;
-      
-      const RANK_THRESHOLDS = [
-        { rank: 'Recruit', threshold: 0, discount: 0 },
-        { rank: 'Private', threshold: 500, discount: 3 },
-        { rank: 'Sergeant', threshold: 1500, discount: 5 },
-        { rank: 'Special Forces', threshold: 3000, discount: 10 },
-        { rank: 'Operator', threshold: 5000, discount: 15 },
-        { rank: 'Commander', threshold: 10000, discount: 20 }
-      ];
-
-      let newRank = userProfile.rank || 'Recruit';
-      let newDiscountLevel = userProfile.discount_level || 0;
-      for (let i = RANK_THRESHOLDS.length - 1; i >= 0; i--) {
-        if (newPoints >= RANK_THRESHOLDS[i].threshold) {
-          newRank = RANK_THRESHOLDS[i].rank;
-          newDiscountLevel = RANK_THRESHOLDS[i].discount;
-          break;
-        }
-      }
-
-      await client.query(
-        'UPDATE users SET points = $1, rank = $2, discount_level = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
-        [newPoints, newRank, newDiscountLevel, req.user.id]
-      );
-
-      // 4. Create Order (Upsert for idempotency)
-      await client.query(
-        `INSERT INTO orders (
-          id, order_number, user_id, subtotal, tax, shipping_cost, total, profit, status, 
-          payment_method, shipping_address, shipping_method
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        ON CONFLICT (id) DO UPDATE SET
-          status = EXCLUDED.status,
-          total = EXCLUDED.total,
-          updated_at = CURRENT_TIMESTAMP`,
-        [
-          orderId, orderNumber, req.user.id, authoritativeSubtotal, tax, shippingCost, 
-          authoritativeTotal, authoritativeProfit, orderData.status || 'pending', 
-          orderData.payment_method || orderData.payment?.method, 
-          JSON.stringify(orderData.shipping_address || orderData.shipping),
-          orderData.shipping?.method || 'Standard'
-        ]
-      );
-
-      // 5. Create Order Items
-      for (const item of orderItems) {
-        await client.query(
-          'INSERT INTO order_items (order_id, product_id, name, price, quantity) VALUES ($1, $2, $3, $4, $5)',
-          [orderId, item.product_id, item.name, item.price, item.quantity]
-        );
-      }
+      // 3. Trigger robust recalculation instead of naive addition
+      await recalculateUserPointsAndRank(req.user.id);
 
       await client.query('COMMIT');
       res.status(201).json({ id: orderId, orderNumber, status: 'pending' });
     } catch (error: any) {
-      await client.query('ROLLBACK');
+      if (client) await client.query('ROLLBACK');
       console.error('Order creation error:', error);
       res.status(500).json({ error: error.message || 'Database error' });
     } finally {
-      client.release();
+      if (client) client.release();
     }
   });
+
+  async function recalculateUserPointsAndRank(userId: string) {
+    console.log(`🔄 Recalculating loyalty for user: ${userId}`);
+    try {
+      // Sum total of all paid/delivered/shipped/processing orders
+      const ordersRes = await pool.query(
+        "SELECT SUM(total) as spent FROM orders WHERE user_id = $1 AND status IN ('paid', 'processing', 'shipped', 'delivered')",
+        [userId]
+      );
+      const totalSpent = parseFloat(ordersRes.rows[0]?.spent || 0);
+      const points = Math.floor(totalSpent); // 1 EUR = 1 PT
+
+      const RANK_THRESHOLDS = [
+        { rank: 'recruit', threshold: 0, discount: 0 },
+        { rank: 'private', threshold: 500, discount: 3 },
+        { rank: 'sergeant', threshold: 1500, discount: 5 },
+        { rank: 'special_forces', threshold: 3000, discount: 10 },
+        { rank: 'operator', threshold: 5000, discount: 15 },
+        { rank: 'commander', threshold: 10000, discount: 20 }
+      ];
+
+      let rank = 'recruit';
+      let discount = 0;
+      for (const r of RANK_THRESHOLDS) {
+        if (points >= r.threshold) {
+          rank = r.rank;
+          discount = r.discount;
+        }
+      }
+
+      // 3. Ensure user exists (Upsert)
+      const userRes = await pool.query("SELECT id FROM users WHERE id = $1", [userId]);
+      if (userRes.rows.length === 0) {
+        await pool.query(
+          "INSERT INTO users (id, role, points, rank, discount_level) VALUES ($1, $2, $3, $4, $5)",
+          [userId, 'user', points, rank, discount]
+        );
+      } else {
+        await pool.query(
+          "UPDATE users SET points = $1, rank = $2, discount_level = $3 WHERE id = $4",
+          [points, rank, discount, userId]
+        );
+      }
+
+      console.log(`✅ Success: ${points} pts, rank: ${rank}`);
+    } catch (error) {
+      console.error("❌ Recalculation failed:", error);
+    }
+  }
 
   app.put("/api/admin/orders/:id/status", authenticateAdmin, async (req, res) => {
     const { status, tracking_number } = req.body;
@@ -1936,15 +1957,21 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       );
       
       if (status === 'cancelled') {
-        // Release stock logic
         const orderResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [req.params.id]);
         for (const item of orderResult.rows) {
           await pool.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [item.quantity, item.product_id]);
         }
       }
 
+      // Trigger loyalty recalculation
+      const orderRes = await pool.query('SELECT user_id FROM orders WHERE id = $1', [req.params.id]);
+      if (orderRes.rows.length > 0) {
+        await recalculateUserPointsAndRank(orderRes.rows[0].user_id);
+      }
+
       res.json({ success: true });
     } catch (error) {
+      console.error('Order status update error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
@@ -2446,6 +2473,12 @@ app.post("/api/webhooks/stripe", express.raw({type: 'application/json'}), async 
           "UPDATE orders SET status = 'processing', payment_status = 'paid', stripe_payment_intent_id = $1 WHERE id = $2",
           [paymentIntent.id, paymentIntent.metadata.orderId]
         );
+        
+        // Recalculate loyalty points immediately after payment
+        const orderRes = await pool.query('SELECT user_id FROM orders WHERE id = $1', [paymentIntent.metadata.orderId]);
+        if (orderRes.rows.length > 0) {
+          await recalculateUserPointsAndRank(orderRes.rows[0].user_id);
+        }
       }
       break;
     default:
