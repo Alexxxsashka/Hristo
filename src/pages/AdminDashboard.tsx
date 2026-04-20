@@ -372,43 +372,6 @@ export const AdminDashboard: React.FC = () => {
             )}
           </div>
 
-          {(activeTab === 'products' || activeTab === 'orders' || activeTab === 'blog') && (
-            <div className="flex items-center gap-4">
-              {(activeTab === 'products' || activeTab === 'orders') && (
-                <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                  <button 
-                    onClick={() => { setProductFilter('all'); setOrderFilter('all'); }}
-                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg transition-all ${
-                      (activeTab === 'products' ? productFilter : orderFilter) === 'all' ? 'bg-white shadow-sm' : 'text-zinc-400'
-                    }`}
-                  >All</button>
-                  <button 
-                    onClick={() => activeTab === 'products' ? setProductFilter('out_of_stock') : setOrderFilter('pending')}
-                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg transition-all ${
-                      (activeTab === 'products' ? productFilter === 'out_of_stock' : orderFilter === 'pending') ? 'bg-white shadow-sm' : 'text-zinc-400'
-                    }`}
-                  >
-                    {activeTab === 'products' ? 'Out of Stock' : 'Pending'}
-                  </button>
-                </div>
-              )}
-              
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                <input 
-                  type="text"
-                  placeholder={
-                    activeTab === 'products' ? "Find by SKU (Indexed)..." : 
-                    activeTab === 'orders' ? "Find by OrderID..." : 
-                    "Search blog..."
-                  }
-                  value={activeTab === 'blog' ? searchQuery : indexedSearch}
-                  onChange={(e) => activeTab === 'blog' ? setSearchQuery(e.target.value) : setIndexedSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-medium"
-                />
-              </div>
-            </div>
-          )}
         </header>
 
         <div className="p-8">
@@ -456,6 +419,34 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
+                <div className="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
+                  <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
+                    <button 
+                      onClick={() => setOrderFilter('all')}
+                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                        orderFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
+                      }`}
+                    >All</button>
+                    <button 
+                      onClick={() => setOrderFilter('pending')}
+                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                        orderFilter === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400'
+                      }`}
+                    >Pending</button>
+                  </div>
+                  
+                  <div className="relative w-80">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <input 
+                      type="text"
+                      placeholder="BindingSource.Find: Enter Order ID..."
+                      value={indexedSearch}
+                      onChange={(e) => setIndexedSearch(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
+                    />
+                  </div>
+                </div>
+
                 <OrderManager 
                    orders={orders}
                    externalFilter={orderFilter}
@@ -474,13 +465,41 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex justify-end mb-4">
+                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
+                      <button 
+                        onClick={() => setProductFilter('all')}
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                          productFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
+                        }`}
+                      >All</button>
+                      <button 
+                        onClick={() => setProductFilter('out_of_stock')}
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                          productFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400'
+                        }`}
+                      >Out of Stock</button>
+                    </div>
+                    
+                    <div className="relative w-80">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <input 
+                        type="text"
+                        placeholder="BindingSource.Find: Enter SKU..."
+                        value={indexedSearch}
+                        onChange={(e) => setIndexedSearch(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
+                      />
+                    </div>
+                  </div>
+
                   <button 
                     onClick={() => {
                       setEditingProduct(null);
                       setActiveTab('add');
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-zinc-800 transition-all"
+                    className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
                   >
                     <Plus size={18} />
                     ADD PRODUCT
@@ -596,12 +615,32 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {activeTab === 'blog' && (
-              <BlogManager 
-                posts={filteredBlogPosts} 
-                onUpdate={fetchBlogPosts} 
-                onNotify={showNotification}
-                onConfirm={confirmAction}
-              />
+              <motion.div 
+                key="blog"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
+                  <div className="relative w-80">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <input 
+                      type="text"
+                      placeholder="Search articles..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
+                    />
+                  </div>
+                </div>
+
+                <BlogManager 
+                  posts={filteredBlogPosts} 
+                  onUpdate={fetchBlogPosts} 
+                  onNotify={showNotification}
+                  onConfirm={confirmAction}
+                />
+              </motion.div>
             )}
 
             {activeTab === 'messages' && (
