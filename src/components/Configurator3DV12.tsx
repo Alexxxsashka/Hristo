@@ -602,25 +602,17 @@ const ActualPartModel = ({
       clone.updateMatrixWorld(true);
 
       const relativeMatrix = mountPoint.matrixWorld.clone();
-      
-      // DECOUPLE POSITION/ROTATION FROM SCALE
-      // We want to bring the mountPoint to (0,0,0) position and identity rotation,
-      // but we do NOT want to multiply the model's scale by the inverse of the point's scale.
       const position = new THREE.Vector3();
       const quaternion = new THREE.Quaternion();
       const scale = new THREE.Vector3();
       relativeMatrix.decompose(position, quaternion, scale);
 
-      // Reset clone locally
       clone.position.copy(position).multiplyScalar(-1);
       clone.quaternion.copy(quaternion).invert();
       clone.scale.set(1, 1, 1);
-      
-      // Apply the rotation to the position offset to make it relative to the root
       clone.position.applyQuaternion(clone.quaternion);
 
       (mountPoint as any).isMountPoint = true;
-      console.log(`[ActualPartModel V1.2] Matrix Aligned (Scale Isolated): ${mountPoint.name}`);
     } else if (socketPoint && Array.isArray(socketPoint)) {
       clone.position.set(-socketPoint[0], -socketPoint[1], -socketPoint[2]);
     } else {
@@ -637,13 +629,6 @@ const ActualPartModel = ({
     const size = new THREE.Vector3();
     FinalBox.getSize(size);
     
-    console.log(`[ActualPartModel V1.2] Computed Size for "${partName}":`, {
-      width: size.x.toFixed(4),
-      height: size.y.toFixed(4),
-      depth: size.z.toFixed(4),
-      totalLength: size.length().toFixed(4)
-    });
-
     if (size.length() < 0.0001) {
       console.warn(`[ActualPartModel V1.2] Model is EMPTY or too small to be visible`);
     }
