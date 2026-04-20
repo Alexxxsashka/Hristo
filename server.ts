@@ -184,7 +184,22 @@ const uploadMemory = multer({ storage: memoryStorage });
 export const app = express();
 const PORT = parseInt(process.env.PORT || "3000");
 
+// Middleware
+// NOTE: express.json() is NOT used globally here to avoid breaking the stripe webhook raw body requirement.
+// We will apply it to routes or after the webhook.
+
+
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Use express.json() for all routes EXCEPT the stripe webhook which needs raw body
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/webhooks/stripe") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
+
 
 // Auth Middleware
 const authenticateToken = async (req: any, res: any, next: any) => {
@@ -1736,8 +1751,15 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
       for (const item of items) {
         // Fetch product to verify price
-        const productResult = await pool.query('SELECT price, discount, category_id FROM products WHERE id = $1', [item.product_id || item.productId]);
-        if (productResult.rows.length === 0) continue;
+        // Normalize product_id / productId
+        const pid = item.product_id || item.productId || item.id;
+        if (!pid) continue;
+
+        const productResult = await pool.query('SELECT price, discount, category_id FROM products WHERE id = $1', [pid]);
+        if (productResult.rows.length === 0) {
+           console.warn(`Product not found for ID: ${pid}`);
+           continue;
+        }
         
         const product = productResult.rows[0];
         
@@ -1809,8 +1831,9 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const orderItems = [];
 
       for (const item of orderData.items) {
-        const productResult = await client.query('SELECT * FROM products WHERE id = $1', [item.product_id || item.productId]);
-        if (productResult.rows.length === 0) throw new Error(`Product ${item.name} not found`);
+        const pid = item.product_id || item.productId || item.id;
+        const productResult = await client.query('SELECT * FROM products WHERE id = $1', [pid]);
+        if (productResult.rows.length === 0) throw new Error(`Product ${item.name || pid} not found`);
         const product = productResult.rows[0];
 
         if (parseInt(product.stock) < item.quantity) {
@@ -2506,3 +2529,10 @@ app.post("/api/admin/stock/seed", authenticateAdmin, async (req, res) => {
   }
 
 export default app;
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}`);
+  });
+}
+
