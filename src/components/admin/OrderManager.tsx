@@ -25,7 +25,7 @@ import {
 import { Order } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
-import { generateOrdersReport } from '../../utils/reportGenerator';
+import { generateOrdersReport, generateSingleOrderInvoice } from '../../utils/reportGenerator';
 
 
 
@@ -186,10 +186,26 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                     >
                       <Eye size={18} />
                     </button>
-                    <button className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all" title="Print Invoice">
+                    <button 
+                      onClick={() => generateSingleOrderInvoice(order)}
+                      className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all" 
+                      title="Print Local Invoice"
+                    >
                       <FileText size={18} />
                     </button>
-                    <button className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all">
+                    {order.payment?.method === 'stripe' && order.payment?.transactionId && (
+                      <button 
+                        onClick={() => window.open(`https://dashboard.stripe.com/payments/${order.payment.transactionId}`, '_blank')}
+                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" 
+                        title="View Stripe Payment"
+                      >
+                        <CreditCard size={18} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => onNotify('Additional actions coming soon')}
+                      className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all"
+                    >
                       <MoreVertical size={18} />
                     </button>
                   </div>
