@@ -155,15 +155,20 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[ProductForm Debug] Form submit triggered');
     
     // Validate all fields
     const errors: Record<string, string> = {};
     Object.keys(formData).forEach(key => {
       const error = validateField(key, formData[key as keyof Product]);
-      if (error) errors[key] = error;
+      if (error) {
+        console.log(`[ProductForm Debug] Validation failed for field "${key}": ${error}`);
+        errors[key] = error;
+      }
     });
     
     if (Object.keys(errors).length > 0) {
+      console.log('[ProductForm Debug] Submission blocked by custom validation errors');
       setFieldErrors(errors);
       onNotify('Please fix the validation errors before submitting', 'error');
       return;
@@ -441,8 +446,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       <form 
         onSubmit={handleSubmit} 
         noValidate 
-        onInvalid={(e) => e.preventDefault()}
+        onInvalid={(e) => {
+          console.log('[ProductForm Debug] Native browser validation BLOCKED:', e.target);
+          e.preventDefault();
+        }}
         className="space-y-8"
+        data-antigravity-debug="active"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
