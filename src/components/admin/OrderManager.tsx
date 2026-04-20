@@ -71,9 +71,11 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'processing': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'paid': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'awaiting_payment': return 'bg-zinc-100 text-zinc-500 border-zinc-200';
       case 'shipped': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
       case 'delivered': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
       case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
@@ -363,9 +365,12 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                           <span className="text-3xl font-black text-emerald-400">€{selectedOrder.total.toFixed(2)}</span>
                         </div>
                         <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl border border-zinc-700">
-                          <CreditCard size={14} className="text-zinc-500" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Paid via Stripe</span>
-                          <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500" />
+                          {selectedOrder.payment.method === 'stripe' ? <CreditCard size={14} className="text-emerald-500" /> : <Wallet size={14} className="text-amber-500" />}
+                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            {selectedOrder.payment.status === 'paid' ? 'Verified Payment' : 'Payment Outstanding'}
+                            {' via ' + (selectedOrder.payment.method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment.method.toUpperCase())}
+                          </span>
+                          <div className={`ml-auto w-2 h-2 rounded-full ${selectedOrder.payment.status === 'paid' ? 'bg-emerald-500' : 'bg-amber-500 pulse'}`} />
                         </div>
                       </div>
                     </div>

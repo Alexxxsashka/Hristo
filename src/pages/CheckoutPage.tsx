@@ -339,7 +339,19 @@ export const CheckoutPage: React.FC = () => {
         } : undefined
       }));
 
-      const isPaid = isStripePaid || (selectedPayment.id !== 'cod' && selectedPayment.id !== 'bank_transfer');
+      let orderStatus: Order['status'] = 'pending';
+      let paymentStatus: Order['payment']['status'] = 'pending';
+
+      if (isStripePaid) {
+        orderStatus = 'paid';
+        paymentStatus = 'paid';
+      } else if (selectedPayment.id === 'bank_transfer') {
+        orderStatus = 'awaiting_payment';
+        paymentStatus = 'pending';
+      } else if (selectedPayment.id === 'cod') {
+        orderStatus = 'pending';
+        paymentStatus = 'pending';
+      }
 
       const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string } = {
         id: currentOrderId || undefined,
@@ -350,13 +362,13 @@ export const CheckoutPage: React.FC = () => {
         shippingCost: selectedShipping.price,
         total,
         profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
-        status: isPaid ? 'paid' : 'pending',
+        status: orderStatus,
         payment: {
           method: selectedPayment.id,
-          status: isPaid ? 'paid' : 'pending',
+          status: paymentStatus,
           amount: total,
           currency: 'EUR',
-          paidAt: isPaid ? new Date().toISOString() : null
+          paidAt: paymentStatus === 'paid' ? new Date().toISOString() : null
         },
         shipping: {
           method: selectedShipping.id,

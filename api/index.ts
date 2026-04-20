@@ -953,10 +953,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
            subtotal = EXCLUDED.subtotal,
            shipping_cost = EXCLUDED.shipping_cost,
            status = EXCLUDED.status,
+           payment_method = EXCLUDED.payment_method,
            payment_status = EXCLUDED.payment_status,
            shipping_address = EXCLUDED.shipping_address,
            notes = EXCLUDED.notes,
-           profit = EXCLUDED.profit
+           profit = EXCLUDED.profit,
+           user_id = EXCLUDED.user_id,
+           updated_at = CURRENT_TIMESTAMP
          RETURNING order_number`,
         [
           id, 
