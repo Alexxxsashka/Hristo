@@ -25,6 +25,7 @@ import {
 import { Order } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
+import { generateOrdersReport } from '../../utils/reportGenerator';
 
 
 
@@ -126,6 +127,13 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => generateOrdersReport(filteredOrders, { status: statusFilter, search: searchQuery })}
+            className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-zinc-900/20"
+          >
+            <FileText size={16} />
+            Generate Report (PDF)
+          </button>
           <button className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all">
             Export CSV
           </button>
