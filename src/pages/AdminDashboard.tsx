@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Plus, 
-  LogOut, 
-  Trash2, 
-  Edit, 
-  Save, 
-  X, 
+import {
+  LayoutDashboard,
+  Package,
+  Plus,
+  LogOut,
+  Trash2,
+  Edit,
+  Save,
+  X,
   Upload,
   ChevronRight,
   Settings,
@@ -21,7 +21,7 @@ import {
   Mail,
   Shield,
   Database,
-  ShoppingCart, 
+  ShoppingCart,
   Activity,
   TrendingUp,
   TrendingDown,
@@ -50,17 +50,17 @@ import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
 import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
 import { databaseService } from '../services/databaseService';
 import { formatEnum, formatModelName } from '../utils/format';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  LineChart, 
-  Line, 
-  AreaChart, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
   Area,
   PieChart,
   Pie,
@@ -71,9 +71,11 @@ import {
 
 import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
 import { StatisticTest } from '../components/admin/StatisticTest';
+import { CategoryManager } from '../components/admin/CategoryManager';
+import { CategoryForm } from '../components/admin/CategoryForm';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,13 +85,14 @@ export const AdminDashboard: React.FC = () => {
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'shipped'>('all');
   const [indexedSearch, setIndexedSearch] = useState('');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
-  const [confirmDialog, setConfirmDialog] = useState<{message: string, onConfirm: () => void} | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
@@ -98,7 +101,7 @@ export const AdminDashboard: React.FC = () => {
       navigate('/login');
       return;
     }
-    
+
     const loadAllData = async () => {
       setIsLoading(true);
       await Promise.all([
@@ -214,21 +217,21 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         p.brand.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+
     if (productFilter === 'out_of_stock') return matchesSearch && p.stock <= 0;
     if (productFilter === 'premium') return matchesSearch && p.price > 500;
-    
+
     if (indexedSearch) {
-      return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) || 
-             p.id.toLowerCase().includes(indexedSearch.toLowerCase());
+      return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) ||
+        p.id.toLowerCase().includes(indexedSearch.toLowerCase());
     }
-    
+
     return matchesSearch;
   });
 
-  const filteredBlogPosts = blogPosts.filter(p => 
+  const filteredBlogPosts = blogPosts.filter(p =>
     p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -256,87 +259,86 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
-          <SidebarItem 
-            icon={<LayoutDashboard size={20} />} 
-            label="Dashboard" 
+          <SidebarItem
+            icon={<LayoutDashboard size={20} />}
+            label="Dashboard"
             description="Overview of your store stats"
             showHelp={showHelp}
-            active={activeTab === 'dashboard'} 
-            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); }} 
+            active={activeTab === 'dashboard'}
+            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<ShoppingBag size={20} />} 
-            label="Orders" 
+          <SidebarItem
+            icon={<ShoppingBag size={20} />}
+            label="Orders"
             description="Fulfillment & Invoices"
             showHelp={showHelp}
-            active={activeTab === 'orders'} 
-            onClick={() => { setActiveTab('orders'); setSearchQuery(''); }} 
+            active={activeTab === 'orders'}
+            onClick={() => { setActiveTab('orders'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<Package size={20} />} 
-            label="Products" 
+          <SidebarItem
+            icon={<Package size={20} />}
+            label="Products"
             description="Manage your inventory"
             showHelp={showHelp}
-            active={activeTab === 'products'} 
-            onClick={() => { setActiveTab('products'); setSearchQuery(''); }} 
+            active={activeTab === 'products'}
+            onClick={() => { setActiveTab('products'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<Layers size={20} />} 
-            label="Categories" 
+          <SidebarItem
+            icon={<Layers size={20} />}
+            label="Categories"
             description="Organize your shop"
             showHelp={showHelp}
-            active={activeTab === 'categories'} 
-            onClick={() => { setActiveTab('categories'); setSearchQuery(''); }} 
+            active={activeTab === 'categories'}
+            onClick={() => { setActiveTab('categories'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<FileText size={20} />} 
-            label="Blog" 
+          <SidebarItem
+            icon={<FileText size={20} />}
+            label="Blog"
             description="Write news & articles"
             showHelp={showHelp}
-            active={activeTab === 'blog'} 
-            onClick={() => { setActiveTab('blog'); setSearchQuery(''); }} 
+            active={activeTab === 'blog'}
+            onClick={() => { setActiveTab('blog'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<MessageSquare size={20} />} 
-            label="Messages" 
+          <SidebarItem
+            icon={<MessageSquare size={20} />}
+            label="Messages"
             description="Customer inquiries"
             showHelp={showHelp}
-            active={activeTab === 'messages'} 
-            onClick={() => { setActiveTab('messages'); setSearchQuery(''); }} 
+            active={activeTab === 'messages'}
+            onClick={() => { setActiveTab('messages'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<Shield size={20} />} 
-            label="Policies" 
+          <SidebarItem
+            icon={<Shield size={20} />}
+            label="Policies"
             description="Legal & info pages"
             showHelp={showHelp}
-            active={activeTab === 'policies'} 
-            onClick={() => { setActiveTab('policies'); setSearchQuery(''); }} 
+            active={activeTab === 'policies'}
+            onClick={() => { setActiveTab('policies'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<Database size={20} />} 
-            label="ERP / IMS" 
+          <SidebarItem
+            icon={<Database size={20} />}
+            label="ERP / IMS"
             description="Inventory & Procurement"
             showHelp={showHelp}
-            active={activeTab === 'erp'} 
-            onClick={() => { setActiveTab('erp'); setSearchQuery(''); }} 
+            active={activeTab === 'erp'}
+            onClick={() => { setActiveTab('erp'); setSearchQuery(''); }}
           />
-          <SidebarItem 
-            icon={<Globe size={20} />} 
-            label="Website" 
+          <SidebarItem
+            icon={<Globe size={20} />}
+            label="Website"
             description="Site branding & configuration"
             showHelp={showHelp}
-            active={activeTab === 'settings'} 
-            onClick={() => { setActiveTab('settings'); setSearchQuery(''); }} 
+            active={activeTab === 'settings'}
+            onClick={() => { setActiveTab('settings'); setSearchQuery(''); }}
           />
 
         </nav>
 
         <div className="p-4 border-t border-zinc-100 space-y-2">
-          <button 
+          <button
             onClick={() => setShowHelp(!showHelp)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest ${
-              showHelp ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-            }`}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest ${showHelp ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              }`}
           >
             <div className="flex items-center gap-3">
               <Settings size={16} />
@@ -345,7 +347,7 @@ export const AdminDashboard: React.FC = () => {
             {showHelp && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />}
           </button>
 
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-xs uppercase tracking-widest"
           >
@@ -380,7 +382,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="p-8">
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && (
-              <motion.div 
+              <motion.div
                 key="dashboard"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -396,15 +398,15 @@ export const AdminDashboard: React.FC = () => {
                       This is where you manage your entire store. If you're new, we recommend turning on <b>Help Mode</b> in the sidebar to see explanations for each section.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <QuickLink 
-                        title="Add New Product" 
-                        desc="Start selling something new" 
+                      <QuickLink
+                        title="Add New Product"
+                        desc="Start selling something new"
                         onClick={() => setActiveTab('add')}
                         icon={<Plus size={18} />}
                       />
-                      <QuickLink 
-                        title="Check Messages" 
-                        desc="See what customers are asking" 
+                      <QuickLink
+                        title="Check Messages"
+                        desc="See what customers are asking"
                         onClick={() => setActiveTab('messages')}
                         icon={<MessageSquare size={18} />}
                       />
@@ -424,23 +426,21 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div className="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
                   <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                    <button 
+                    <button
                       onClick={() => setOrderFilter('all')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                        orderFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
-                      }`}
+                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
+                        }`}
                     >All</button>
-                    <button 
+                    <button
                       onClick={() => setOrderFilter('pending')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                        orderFilter === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400'
-                      }`}
+                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400'
+                        }`}
                     >Pending</button>
                   </div>
-                  
+
                   <div className="relative w-80">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input 
+                    <input
                       type="text"
                       placeholder="BindingSource.Find: Enter Order ID..."
                       value={indexedSearch}
@@ -450,19 +450,19 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <OrderManager 
-                   orders={orders}
-                   externalFilter={orderFilter}
-                   externalSearch={indexedSearch}
-                   onNotify={showNotification}
-                   onConfirm={confirmAction}
-                   onUpdate={fetchOrdersInternal}
+                <OrderManager
+                  orders={orders}
+                  externalFilter={orderFilter}
+                  externalSearch={indexedSearch}
+                  onNotify={showNotification}
+                  onConfirm={confirmAction}
+                  onUpdate={fetchOrdersInternal}
                 />
               </motion.div>
             )}
 
             {activeTab === 'products' && (
-              <motion.div 
+              <motion.div
                 key="products"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -471,23 +471,21 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                      <button 
+                      <button
                         onClick={() => setProductFilter('all')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                          productFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
+                          }`}
                       >All</button>
-                      <button 
+                      <button
                         onClick={() => setProductFilter('out_of_stock')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                          productFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
+                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400'
+                          }`}
                       >Out of Stock</button>
                     </div>
-                    
+
                     <div className="relative w-80">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                      <input 
+                      <input
                         type="text"
                         placeholder="BindingSource.Find: Enter SKU..."
                         value={indexedSearch}
@@ -497,7 +495,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingProduct(null);
                       setActiveTab('add');
@@ -556,7 +554,7 @@ export const AdminDashboard: React.FC = () => {
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
 
-                              <button 
+                              <button
                                 onClick={() => {
                                   setEditingProduct(product);
                                   setActiveTab('add');
@@ -565,7 +563,7 @@ export const AdminDashboard: React.FC = () => {
                               >
                                 <Edit size={18} />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => deleteProduct(product.id)}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
                               >
@@ -589,8 +587,8 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {activeTab === 'add' && (
-              <ProductForm 
-                initialData={editingProduct} 
+              <ProductForm
+                initialData={editingProduct}
                 categories={categories}
                 weapons={products.filter(p => p.type === 'weapon')}
                 showHelp={showHelp}
@@ -608,17 +606,42 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {activeTab === 'categories' && (
-              <CategoryManager 
-                categories={categories} 
-                showHelp={showHelp}
-                onUpdate={fetchCategories} 
+              <CategoryManager
+                categories={categories}
+                onUpdate={fetchCategories}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
+                onAddCategory={() => {
+                  setEditingCategory(null);
+                  setActiveTab('add-category');
+                }}
+                onEditCategory={(cat) => {
+                  setEditingCategory(cat);
+                  setActiveTab('add-category');
+                }}
+              />
+            )}
+
+            {activeTab === 'add-category' && (
+              <CategoryForm
+                initialData={editingCategory}
+                categories={categories}
+                showHelp={showHelp}
+                onNotify={showNotification}
+                onSuccess={() => {
+                  fetchCategories();
+                  setActiveTab('categories');
+                  setEditingCategory(null);
+                }}
+                onCancel={() => {
+                  setActiveTab('categories');
+                  setEditingCategory(null);
+                }}
               />
             )}
 
             {activeTab === 'blog' && (
-              <motion.div 
+              <motion.div
                 key="blog"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -627,7 +650,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
                   <div className="relative w-80">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input 
+                    <input
                       type="text"
                       placeholder="Search articles..."
                       value={searchQuery}
@@ -637,9 +660,9 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <BlogManager 
-                  posts={filteredBlogPosts} 
-                  onUpdate={fetchBlogPosts} 
+                <BlogManager
+                  posts={filteredBlogPosts}
+                  onUpdate={fetchBlogPosts}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
                 />
@@ -647,23 +670,23 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {activeTab === 'messages' && (
-              <MessageManager 
-                messages={messages} 
-                onDelete={deleteMessage} 
+              <MessageManager
+                messages={messages}
+                onDelete={deleteMessage}
               />
             )}
 
             {activeTab === 'policies' && (
-              <PolicyManager 
-                policies={policies} 
-                onUpdate={fetchPolicies} 
+              <PolicyManager
+                policies={policies}
+                onUpdate={fetchPolicies}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
               />
             )}
 
             {activeTab === 'erp' && (
-              <ERPManager 
+              <ERPManager
                 products={products}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
@@ -687,11 +710,10 @@ export const AdminDashboard: React.FC = () => {
             initial={{ opacity: 0, y: 50, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: 50, x: '-50%' }}
-            className={`fixed bottom-8 left-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border ${
-              notification.type === 'success' 
-                ? 'bg-emerald-600 border-emerald-500 text-white' 
-                : 'bg-red-600 border-red-500 text-white'
-            }`}
+            className={`fixed bottom-8 left-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border ${notification.type === 'success'
+              ? 'bg-emerald-600 border-emerald-500 text-white'
+              : 'bg-red-600 border-red-500 text-white'
+              }`}
           >
             {notification.type === 'success' ? <Check size={20} /> : <X size={20} />}
             <span className="font-bold text-sm tracking-wide">{notification.message}</span>
@@ -781,9 +803,8 @@ const BIAnalytics = () => {
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${
-                timeRange === range ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-50'
-              }`}
+              className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${timeRange === range ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-50'
+                }`}
             >
               {range}
             </button>
@@ -792,29 +813,29 @@ const BIAnalytics = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard 
-          label="Total Revenue" 
-          value={`€${data.revenue.toLocaleString()}`} 
-          trend={+12.5} 
-          icon={<DollarSign className="text-emerald-600" />} 
+        <MetricCard
+          label="Total Revenue"
+          value={`€${data.revenue.toLocaleString()}`}
+          trend={+12.5}
+          icon={<DollarSign className="text-emerald-600" />}
         />
-        <MetricCard 
-          label="Net Profit" 
-          value={`€${data.profit.toLocaleString()}`} 
-          trend={+8.2} 
-          icon={<TrendingUp className="text-blue-600" />} 
+        <MetricCard
+          label="Net Profit"
+          value={`€${data.profit.toLocaleString()}`}
+          trend={+8.2}
+          icon={<TrendingUp className="text-blue-600" />}
         />
-        <MetricCard 
-          label="Conversion Rate" 
-          value={`${data.conversionRate.toFixed(2)}%`} 
-          trend={-1.4} 
-          icon={<Activity className="text-purple-600" />} 
+        <MetricCard
+          label="Conversion Rate"
+          value={`${data.conversionRate.toFixed(2)}%`}
+          trend={-1.4}
+          icon={<Activity className="text-purple-600" />}
         />
-        <MetricCard 
-          label="Avg. Order Value" 
-          value={`€${data.avgOrderValue.toFixed(2)}`} 
-          trend={+5.1} 
-          icon={<ShoppingCart className="text-orange-600" />} 
+        <MetricCard
+          label="Avg. Order Value"
+          value={`€${data.avgOrderValue.toFixed(2)}`}
+          trend={+5.1}
+          icon={<ShoppingCart className="text-orange-600" />}
         />
       </div>
 
@@ -836,23 +857,23 @@ const BIAnalytics = () => {
               <AreaChart data={data.salesVelocity}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false} 
-                  tickLine={false} 
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 10, fontWeight: 600, fill: '#a1a1aa' }}
                 />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 10, fontWeight: 600, fill: '#a1a1aa' }}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '12px', color: '#fff' }}
                   itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
                 />
@@ -934,19 +955,19 @@ const BIAnalytics = () => {
         <div className="bg-zinc-900 text-white p-8 rounded-[32px] shadow-xl">
           <h4 className="text-sm font-black uppercase tracking-tighter mb-6">Recent Activity</h4>
           <div className="space-y-6">
-            <ActivityItem 
+            <ActivityItem
               icon={<ShoppingCart size={16} className="text-emerald-500" />}
               title="New Order #ORD-8821"
               time="2 mins ago"
               desc="Customer purchased M4 Carbine Pro"
             />
-            <ActivityItem 
+            <ActivityItem
               icon={<RefreshCw size={16} className="text-blue-500" />}
               title="Stock Sync Complete"
               time="15 mins ago"
               desc="ERP synchronized with Main Warehouse"
             />
-            <ActivityItem 
+            <ActivityItem
               icon={<Users size={16} className="text-purple-500" />}
               title="New Customer Profile"
               time="1 hour ago"
@@ -988,8 +1009,8 @@ const ActivityItem = ({ icon, title, time, desc }: { icon: React.ReactNode, titl
   </div>
 );
 
-const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
-  policies: PolicyPage[], 
+const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
+  policies: PolicyPage[],
   onUpdate: () => void,
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void
@@ -1084,7 +1105,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
 
   if (editingPolicy) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm"
@@ -1100,8 +1121,8 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
           {isNew && (
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Policy ID (slug, e.g. privacy-policy)</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={editingPolicy.id || ''}
                 onChange={e => setEditingPolicy({ ...editingPolicy, id: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1113,8 +1134,8 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-zinc-700">Title</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={editingPolicy.title || ''}
               onChange={e => setEditingPolicy({ ...editingPolicy, title: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1124,7 +1145,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-zinc-700">Content (Markdown supported)</label>
-            <textarea 
+            <textarea
               value={editingPolicy.content || ''}
               onChange={e => setEditingPolicy({ ...editingPolicy, content: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-[400px] resize-none font-mono text-sm"
@@ -1133,15 +1154,15 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t border-zinc-100">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setEditingPolicy(null)}
               className="px-8 py-3 text-zinc-600 font-bold hover:bg-zinc-100 rounded-xl transition-all"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="px-12 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20"
             >
               Save Policy
@@ -1156,7 +1177,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={seedDefaultPolicies}
             disabled={isSeeding}
             className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/20 disabled:opacity-50"
@@ -1165,7 +1186,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
             {isSeeding ? 'Seeding...' : 'Seed Default Policies'}
           </button>
         </div>
-        <button 
+        <button
           onClick={() => {
             setEditingPolicy({ title: '', content: '' });
             setIsNew(true);
@@ -1184,7 +1205,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                 <Shield size={24} />
               </div>
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={() => {
                     setEditingPolicy(policy);
                     setIsNew(false);
@@ -1193,7 +1214,7 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
                 >
                   <Edit size={20} />
                 </button>
-                <button 
+                <button
                   onClick={() => handleDelete(policy.id)}
                   className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                 >
@@ -1213,9 +1234,9 @@ const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
   );
 };
 
-const MessageManager: React.FC<{ 
-  messages: any[], 
-  onDelete: (id: string) => void 
+const MessageManager: React.FC<{
+  messages: any[],
+  onDelete: (id: string) => void
 }> = ({ messages, onDelete }) => {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
 
@@ -1235,11 +1256,10 @@ const MessageManager: React.FC<{
               <button
                 key={msg.id}
                 onClick={() => setSelectedMessage(msg)}
-                className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                  selectedMessage?.id === msg.id 
-                    ? 'bg-red-50 border-red-200 shadow-sm' 
-                    : 'bg-white border-zinc-200 hover:border-zinc-300'
-                }`}
+                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedMessage?.id === msg.id
+                  ? 'bg-red-50 border-red-200 shadow-sm'
+                  : 'bg-white border-zinc-200 hover:border-zinc-300'
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-red-600">{msg.subject}</span>
@@ -1273,7 +1293,7 @@ const MessageManager: React.FC<{
                   <h3 className="text-2xl font-black text-zinc-900">{selectedMessage.name}</h3>
                   <p className="text-zinc-500 font-medium">{selectedMessage.email}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => { onDelete(selectedMessage.id); setSelectedMessage(null); }}
                   className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
                 >
@@ -1286,7 +1306,7 @@ const MessageManager: React.FC<{
               </div>
 
               <div className="flex gap-4">
-                <a 
+                <a
                   href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
                   className="px-6 py-3 bg-zinc-900 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all text-xs flex items-center gap-2"
                 >
@@ -1312,8 +1332,8 @@ const MessageManager: React.FC<{
   );
 };
 
-const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: { 
-  posts: BlogPost[], 
+const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
+  posts: BlogPost[],
   onUpdate: () => void,
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void
@@ -1366,7 +1386,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
   if (isEditing) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm"
@@ -1382,8 +1402,8 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Title</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={editingPost?.title || ''}
                 onChange={e => setEditingPost({ ...editingPost, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1392,8 +1412,8 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Slug</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={editingPost?.slug || ''}
                 onChange={e => setEditingPost({ ...editingPost, slug: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1405,7 +1425,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Category</label>
-              <select 
+              <select
                 value={editingPost?.category || ''}
                 onChange={e => setEditingPost({ ...editingPost, category: e.target.value as any })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1419,8 +1439,8 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-700">Author</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={editingPost?.author || ''}
                 onChange={e => setEditingPost({ ...editingPost, author: e.target.value })}
                 className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
@@ -1431,7 +1451,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-zinc-700">Excerpt</label>
-            <textarea 
+            <textarea
               value={editingPost?.excerpt || ''}
               onChange={e => setEditingPost({ ...editingPost, excerpt: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-20 resize-none"
@@ -1441,7 +1461,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-zinc-700">Content (Markdown supported)</label>
-            <textarea 
+            <textarea
               value={editingPost?.content || ''}
               onChange={e => setEditingPost({ ...editingPost, content: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-64 resize-none"
@@ -1457,10 +1477,10 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 <span className="text-zinc-500 font-medium">
                   {imageFile ? imageFile.name : (editingPost?.image || 'Click to upload cover image')}
                 </span>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
                   onChange={e => setImageFile(e.target.files?.[0] || null)}
                 />
               </label>
@@ -1468,15 +1488,15 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t border-zinc-100">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setIsEditing(false)}
               className="px-8 py-3 text-zinc-600 font-bold hover:bg-zinc-100 rounded-xl transition-all"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="px-12 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20"
             >
               Save Post
@@ -1490,7 +1510,7 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <button 
+        <button
           onClick={() => {
             setEditingPost({ title: '', slug: '', excerpt: '', content: '', category: 'News', author: 'Admin' });
             setIsEditing(true);
@@ -1538,11 +1558,11 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                 <td className="px-6 py-4 text-zinc-500 text-sm">{post.date}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button 
+                    <button
                       onClick={() => {
                         setEditingPost(post);
                         setIsEditing(true);
-                      }} 
+                      }}
                       className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg"
                     >
                       <Edit size={18} />
@@ -1561,377 +1581,9 @@ const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   );
 };
 
-const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onConfirm }: { 
-  categories: Category[], 
-  showHelp?: boolean, 
-  onUpdate: () => void,
-  onNotify: (msg: string, type?: 'success' | 'error') => void,
-  onConfirm: (msg: string, action: () => void) => void
-}) => {
-  const [newCat, setNewCat] = useState<Partial<Category>>({ 
-    name: '', 
-    parent: '', 
-    slots: [], 
-    compatibleModuleCategories: [],
-    filters: []
-  });
-  const [editingCat, setEditingCat] = useState<Category | null>(null);
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const categoryToSave = {
-        ...newCat,
-        id: editingCat ? editingCat.id : newCat.name?.toLowerCase().replace(/\s+/g, '_')
-      };
-      
-      await databaseService.saveCategory(categoryToSave);
-      setNewCat({ name: '', parent: '', slots: [], compatibleModuleCategories: [], filters: [] });
-      setEditingCat(null);
-      onUpdate();
-    } catch (err) {
-      console.error('Failed to save category', err);
-    }
-  };
 
-  const addFilter = () => {
-    const filters = [...(newCat.filters || [])];
-    filters.push({ id: `filter_${Date.now()}`, label: '', type: 'select', options: [] });
-    setNewCat({ ...newCat, filters });
-  };
-
-  const removeFilter = (index: number) => {
-    const filters = [...(newCat.filters || [])];
-    filters.splice(index, 1);
-    setNewCat({ ...newCat, filters });
-  };
-
-  const updateFilter = (index: number, field: string, value: any) => {
-    const filters = [...(newCat.filters || [])];
-    filters[index] = { ...filters[index], [field]: value };
-    setNewCat({ ...newCat, filters });
-  };
-
-  const addOption = (filterIndex: number) => {
-    const filters = [...(newCat.filters || [])];
-    const options = [...(filters[filterIndex].options || [])];
-    options.push('');
-    filters[filterIndex] = { ...filters[filterIndex], options };
-    setNewCat({ ...newCat, filters });
-  };
-
-  const updateOption = (filterIndex: number, optionIndex: number, value: string) => {
-    const filters = [...(newCat.filters || [])];
-    const options = [...(filters[filterIndex].options || [])];
-    options[optionIndex] = value;
-    filters[filterIndex] = { ...filters[filterIndex], options };
-    setNewCat({ ...newCat, filters });
-  };
-
-  const removeOption = (filterIndex: number, optionIndex: number) => {
-    const filters = [...(newCat.filters || [])];
-    const options = [...(filters[filterIndex].options || [])];
-    options.splice(optionIndex, 1);
-    filters[filterIndex] = { ...filters[filterIndex], options };
-    setNewCat({ ...newCat, filters });
-  };
-
-  const toggleSlot = (slot: string) => {
-    const currentSlots = newCat.slots || [];
-    const newSlots = currentSlots.includes(slot)
-      ? currentSlots.filter(s => s !== slot)
-      : [...currentSlots, slot];
-    setNewCat({ ...newCat, slots: newSlots });
-  };
-
-  const toggleModuleCat = (cat: string) => {
-    const currentCats = newCat.compatibleModuleCategories || [];
-    const newCats = currentCats.includes(cat)
-      ? currentCats.filter(c => c !== cat)
-      : [...currentCats, cat];
-    setNewCat({ ...newCat, compatibleModuleCategories: newCats });
-  };
-
-  const startEdit = (cat: Category) => {
-    setEditingCat(cat);
-    setNewCat(cat);
-  };
-
-  const handleDelete = async (id: string) => {
-    onConfirm('Delete this category?', async () => {
-      try {
-        await databaseService.deleteCategory(id);
-        onUpdate();
-        onNotify('Category deleted successfully');
-      } catch (err) {
-        console.error('Failed to delete category', err);
-        onNotify('Failed to delete category', 'error');
-      }
-    });
-  };
-
-  return (
-    <div className="space-y-8">
-      <div className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold">{editingCat ? 'Edit Category' : 'Add New Category'}</h3>
-          {showHelp && (
-            <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-bold uppercase tracking-widest">
-              Categories help organize your products and define 3D behavior
-            </div>
-          )}
-        </div>
-        <form onSubmit={handleAdd} className="space-y-6">
-          <div className="flex gap-4">
-            <div className="flex-1 space-y-1">
-              <input
-                type="text"
-                placeholder="Category Name"
-                value={newCat.name}
-                onChange={e => setNewCat({ ...newCat, name: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
-                required
-              />
-              {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
-            </div>
-            <div className="w-48 space-y-1">
-              <select
-                value={newCat.parent || ''}
-                onChange={e => setNewCat({ ...newCat, parent: e.target.value || null })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
-              >
-                <option value="">No Parent</option>
-                {categories.filter(c => !c.parent && c.id !== editingCat?.id).map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Main category (optional).</p>}
-            </div>
-            <div className="w-32 space-y-1">
-              <input
-                type="number"
-                placeholder="Disc %"
-                value={newCat.discount || 0}
-                onChange={e => setNewCat({ ...newCat, discount: Number(e.target.value) })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
-                min="0"
-                max="100"
-              />
-              {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Category discount.</p>}
-            </div>
-          </div>
-
-          {/* Weapon Specific Settings */}
-          {(newCat.id === 'weapons' || 
-            newCat.parent === 'weapons' || 
-            newCat.name?.toLowerCase().includes('weapon') ||
-            categories.find(c => c.id === newCat.parent)?.name.toLowerCase().includes('weapon')
-          ) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-              <div className="space-y-4">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Weapon Slots</label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-white rounded-xl border border-zinc-200">
-                  {WEAPON_SLOTS.map(slot => (
-                    <button
-                      key={slot}
-                      type="button"
-                      onClick={() => toggleSlot(slot)}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                        newCat.slots?.includes(slot)
-                          ? 'bg-zinc-900 text-white'
-                          : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
-                      }`}
-                    >
-                      {formatEnum(slot)}
-                      {newCat.slots?.includes(slot) && <Check size={12} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Compatible Module Categories</label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-white rounded-xl border border-zinc-200">
-                  {MODULE_CATEGORIES.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => toggleModuleCat(cat)}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                        newCat.compatibleModuleCategories?.includes(cat)
-                          ? 'bg-zinc-900 text-white'
-                          : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
-                      }`}
-                    >
-                      {formatEnum(cat)}
-                      {newCat.compatibleModuleCategories?.includes(cat) && <Check size={12} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Category Filters */}
-          <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Category-Specific Filters</label>
-              <button 
-                type="button" 
-                onClick={addFilter}
-                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-zinc-800 transition-all"
-              >
-                <Plus size={14} />
-                Add Filter
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {newCat.filters?.map((filter, fIndex) => (
-                <div key={filter.id} className="p-4 bg-white border border-zinc-200 rounded-xl space-y-4">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Filter Label (e.g. Color)"
-                        value={filter.label}
-                        onChange={e => updateFilter(fIndex, 'label', e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
-                      />
-                    </div>
-                    <div className="w-32">
-                      <select
-                        value={filter.type}
-                        onChange={e => updateFilter(fIndex, 'type', e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
-                      >
-                        <option value="select">Select</option>
-                        <option value="range">Range</option>
-                        <option value="boolean">Boolean</option>
-                      </select>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => removeFilter(fIndex)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
-                  {filter.type === 'select' && (
-                    <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Options</span>
-                        <button 
-                          type="button" 
-                          onClick={() => addOption(fIndex)}
-                          className="text-[10px] font-bold text-blue-600 hover:underline"
-                        >
-                          + Add Option
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {filter.options?.map((opt, oIndex) => (
-                          <div key={oIndex} className="flex gap-2">
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={e => updateOption(fIndex, oIndex, e.target.value)}
-                              className="flex-1 px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
-                              placeholder="Option value"
-                            />
-                            <button 
-                              type="button" 
-                              onClick={() => removeOption(fIndex, oIndex)}
-                              className="p-1.5 text-zinc-400 hover:text-red-600"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(!newCat.filters || newCat.filters.length === 0) && (
-                <p className="text-center py-4 text-xs text-zinc-400 italic">No custom filters defined for this category.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-3 justify-end">
-            {editingCat && (
-              <button 
-                type="button" 
-                onClick={() => {
-                  setEditingCat(null);
-                  setNewCat({ name: '', parent: '', slots: [], compatibleModuleCategories: [] });
-                }}
-                className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-xl font-bold"
-              >
-                Cancel
-              </button>
-            )}
-            <button type="submit" className="px-8 py-3 bg-zinc-900 text-white rounded-xl font-bold shadow-lg shadow-zinc-900/20">
-              {editingCat ? 'Update Category' : 'Add Category'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
-        <table className="w-full text-left">
-          <thead className="bg-zinc-50 border-b border-zinc-200">
-            <tr>
-              <th className="px-6 py-4 font-semibold">Name</th>
-              <th className="px-6 py-4 font-semibold">Parent</th>
-              <th className="px-6 py-4 font-semibold">Discount</th>
-              <th className="px-6 py-4 font-semibold">Slots / Modules</th>
-              <th className="px-6 py-4 font-semibold text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {categories.map(cat => (
-              <tr key={cat.id} className="hover:bg-zinc-50/50 transition-colors">
-                <td className="px-6 py-4 font-medium">{cat.name}</td>
-                <td className="px-6 py-4 text-zinc-500">{cat.parent || '-'}</td>
-                <td className="px-6 py-4">
-                  {cat.discount ? (
-                    <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-bold">
-                      -{cat.discount}%
-                    </span>
-                  ) : (
-                    <span className="text-zinc-400 text-xs">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase">Slots: {cat.slots?.length || 0}</span>
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase">Modules: {cat.compatibleModuleCategories?.length || 0}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => startEdit(cat)} className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg">
-                      <Edit size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(cat.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, externalSearch }: { 
+const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, externalSearch }: {
   orders: Order[],
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void,
@@ -1949,9 +1601,9 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
 
     // Еквівалент BindingSource.Find: пошук за проіндексованим ID замовлення
     if (externalSearch) {
-       return order.id.toLowerCase().includes(externalSearch.toLowerCase());
+      return order.id.toLowerCase().includes(externalSearch.toLowerCase());
     }
-    
+
     return matchesStatus;
   });
 
@@ -1990,7 +1642,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
   const confirmCancellation = async () => {
     const finalReason = selectedReason === 'Other' ? customReason : selectedReason;
     if (!finalReason) return;
-    
+
     await handleStatusChange(cancelModal.orderId, 'cancelled', finalReason);
     setCancelModal({ isOpen: false, orderId: '' });
     setSelectedReason('');
@@ -2066,13 +1718,12 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                 </td>
                 <td className="p-4">
                   <div className="flex flex-col gap-1">
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                      order.status === 'pending' ? 'bg-amber-100 text-amber-600' :
+                    <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${order.status === 'pending' ? 'bg-amber-100 text-amber-600' :
                       order.status === 'processing' ? 'bg-blue-100 text-blue-600' :
-                      order.status === 'shipped' ? 'bg-indigo-100 text-indigo-600' :
-                      order.status === 'delivered' ? 'bg-emerald-100 text-emerald-600' :
-                      'bg-zinc-100 text-zinc-600'
-                    }`}>
+                        order.status === 'shipped' ? 'bg-indigo-100 text-indigo-600' :
+                          order.status === 'delivered' ? 'bg-emerald-100 text-emerald-600' :
+                            'bg-zinc-100 text-zinc-600'
+                      }`}>
                       {formatEnum(order.status)}
                     </span>
                     {order.cancelRequested && (
@@ -2084,14 +1735,14 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button 
+                    <button
                       onClick={() => setSelectedOrder(order)}
                       className="p-2 hover:bg-zinc-200 rounded-lg text-zinc-600 transition-all"
                       title="View Details"
                     >
                       <Eye size={16} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handlePrintInvoice(order.id!)}
                       className="p-2 hover:bg-zinc-200 rounded-lg text-zinc-600 transition-all"
                       title="Print Invoice"
@@ -2099,7 +1750,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                       <FileText size={16} />
                     </button>
                     {order.status === 'processing' && (
-                      <button 
+                      <button
                         onClick={() => handleSyncCourier(order.id!)}
                         disabled={isProcessing}
                         className="p-2 hover:bg-zinc-200 rounded-lg text-emerald-600 transition-all"
@@ -2119,7 +1770,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
       <AnimatePresence>
         {cancelModal.isOpen && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -2138,11 +1789,10 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                     <button
                       key={reason}
                       onClick={() => setSelectedReason(reason)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        selectedReason === reason 
-                          ? 'border-red-600 bg-red-50 text-red-600' 
-                          : 'border-zinc-100 hover:border-zinc-200 text-zinc-600'
-                      }`}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${selectedReason === reason
+                        ? 'border-red-600 bg-red-50 text-red-600'
+                        : 'border-zinc-100 hover:border-zinc-200 text-zinc-600'
+                        }`}
                     >
                       <span className="text-sm font-bold uppercase tracking-widest">{reason}</span>
                     </button>
@@ -2180,7 +1830,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
       <AnimatePresence>
         {selectedOrder && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -2206,7 +1856,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                         <p className="text-[10px] font-medium">Customer requested to cancel this order on {new Date(selectedOrder.cancelRequestedAt!).toLocaleString()}</p>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => handleApproveCancel(selectedOrder.id!)}
                       className="px-6 py-2 bg-red-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
                     >
@@ -2296,7 +1946,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
               <div className="p-8 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
                 <div className="flex gap-2">
                   {selectedOrder.status === 'pending' && (
-                    <button 
+                    <button
                       onClick={() => handleStatusChange(selectedOrder.id!, 'processing')}
                       className="px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all"
                     >
@@ -2304,7 +1954,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                     </button>
                   )}
                   {selectedOrder.status === 'processing' && (
-                    <button 
+                    <button
                       onClick={() => handleSyncCourier(selectedOrder.id!)}
                       disabled={isProcessing}
                       className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2"
@@ -2314,7 +1964,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
                     </button>
                   )}
                   {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
-                    <button 
+                    <button
                       onClick={() => handleApproveCancel(selectedOrder.id!)}
                       className="px-6 py-3 bg-white text-red-600 border border-red-100 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-50 transition-all"
                     >
@@ -2336,13 +1986,12 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
 };
 
 const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { icon: any, label: string, description?: string, showHelp?: boolean, active: boolean, onClick: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`w-full flex flex-col gap-1 px-4 py-3 rounded-xl transition-all group ${
-      active 
-        ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20' 
-        : 'text-zinc-500 hover:bg-zinc-100'
-    }`}
+    className={`w-full flex flex-col gap-1 px-4 py-3 rounded-xl transition-all group ${active
+      ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'
+      : 'text-zinc-500 hover:bg-zinc-100'
+      }`}
   >
     <div className="flex items-center gap-3 w-full">
       {icon}
@@ -2358,7 +2007,7 @@ const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { 
 );
 
 const QuickLink = ({ title, desc, onClick, icon }: { title: string, desc: string, onClick: () => void, icon: any }) => (
-  <button 
+  <button
     onClick={onClick}
     className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition-all text-left group"
   >
@@ -2372,7 +2021,7 @@ const QuickLink = ({ title, desc, onClick, icon }: { title: string, desc: string
   </button>
 );
 
-const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: { 
+const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   products: Product[],
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void,
@@ -2429,7 +2078,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       setStock(st || []);
       setLogs(l || []);
       setRates(r || []);
-      
+
       if (w && w.length > 0 && !quickWarehouse) {
         setQuickWarehouse(w[0].id);
       }
@@ -2564,35 +2213,31 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4 mb-8 overflow-x-auto pb-2">
-        <button 
+        <button
           onClick={() => setSubTab('inventory')}
-          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
-            subTab === 'inventory' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
-          }`}
+          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${subTab === 'inventory' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
+            }`}
         >
           Inventory & Stock
         </button>
-        <button 
+        <button
           onClick={() => setSubTab('procurement')}
-          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
-            subTab === 'procurement' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
-          }`}
+          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${subTab === 'procurement' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
+            }`}
         >
           Procurement
         </button>
-        <button 
+        <button
           onClick={() => setSubTab('financials')}
-          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
-            subTab === 'financials' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
-          }`}
+          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${subTab === 'financials' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
+            }`}
         >
           Financials
         </button>
-        <button 
+        <button
           onClick={() => setSubTab('logs')}
-          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
-            subTab === 'logs' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
-          }`}
+          className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${subTab === 'logs' ? 'bg-zinc-900 text-white shadow-xl' : 'bg-white text-zinc-500 hover:bg-zinc-100'
+            }`}
         >
           Audit Logs
         </button>
@@ -2600,7 +2245,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
 
       <AnimatePresence mode="wait">
         {subTab === 'inventory' && (
-          <motion.div 
+          <motion.div
             key="inventory"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2629,8 +2274,8 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">SKU / Barcode</label>
                     <div className="relative">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={quickCode}
                         onChange={e => setQuickCode(e.target.value)}
                         className="w-full px-4 py-4 bg-zinc-800 border border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-lg"
@@ -2642,15 +2287,15 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Quantity (+/-)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={quickQty}
                       onChange={e => setQuickQty(Number(e.target.value))}
                       className="w-full px-4 py-4 bg-zinc-800 border border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-lg font-bold"
                     />
                   </div>
                   <div className="flex items-end">
-                    <button 
+                    <button
                       type="submit"
                       disabled={isUpdatingStock}
                       className="w-full py-4 bg-emerald-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
@@ -2667,7 +2312,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Warehouse</label>
-                    <select 
+                    <select
                       value={quickWarehouse}
                       onChange={e => setQuickWarehouse(e.target.value)}
                       className="w-full px-4 py-4 bg-zinc-800 border border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
@@ -2679,8 +2324,8 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Reason / Note</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={quickReason}
                       onChange={e => setQuickReason(e.target.value)}
                       className="w-full px-4 py-4 bg-zinc-800 border border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
@@ -2700,9 +2345,8 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                 <div className="flex-1 space-y-4 overflow-y-auto max-h-[280px] pr-2 custom-scrollbar">
                   {logs.slice(0, 10).map(log => (
                     <div key={log.id} className="flex items-start gap-3 p-3 bg-zinc-50 rounded-2xl border border-zinc-100">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                        log.quantityChange > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
-                      }`}>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${log.quantityChange > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                        }`}>
                         {log.quantityChange > 0 ? <Plus size={14} /> : <Minus size={14} />}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -2733,7 +2377,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                   <h4 className="font-black uppercase tracking-tighter text-lg">Warehouses</h4>
-                  <button 
+                  <button
                     onClick={() => setShowWarehouseModal(true)}
                     className="p-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-all"
                   >
@@ -2828,16 +2472,15 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            item.status === 'available' ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-700'
-                          }`}>
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.status === 'available' ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-700'
+                            }`}>
                             {formatEnum(item.status)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {product && (
-                              <button 
+                              <button
                                 onClick={() => onEditProduct(product)}
                                 className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
                                 title="Edit Product"
@@ -2867,7 +2510,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
         )}
 
         {subTab === 'procurement' && (
-          <motion.div 
+          <motion.div
             key="procurement"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2878,7 +2521,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm md:col-span-1">
                 <div className="flex items-center justify-between mb-6">
                   <h4 className="font-black uppercase tracking-tighter text-lg">Suppliers</h4>
-                  <button 
+                  <button
                     onClick={() => setShowSupplierModal(true)}
                     className="p-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-all"
                   >
@@ -2904,7 +2547,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm md:col-span-2">
                 <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
                   <h4 className="font-black uppercase tracking-tighter text-lg">Purchase Orders</h4>
-                  <button 
+                  <button
                     onClick={() => setShowPOModal(true)}
                     className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all"
                   >
@@ -2930,18 +2573,17 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                           <td className="px-6 py-4 text-sm font-bold text-zinc-900">{supplier?.name || 'Unknown'}</td>
                           <td className="px-6 py-4 text-sm font-medium text-zinc-600">{po.currency} {po.totalCost}</td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              po.status === 'received' ? 'bg-emerald-100 text-emerald-700' : 
-                              po.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
-                              po.status === 'ordered' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-700'
-                            }`}>
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${po.status === 'received' ? 'bg-emerald-100 text-emerald-700' :
+                              po.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                                po.status === 'ordered' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-700'
+                              }`}>
                               {formatEnum(po.status)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               {po.status === 'ordered' && (
-                                <button 
+                                <button
                                   onClick={() => handleReceivePO(po.id, po.warehouseId || warehouses[0]?.id)}
                                   className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                                   title="Receive Inventory"
@@ -2949,7 +2591,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                                   <CheckCircle size={16} />
                                 </button>
                               )}
-                              <button 
+                              <button
                                 onClick={() => setSelectedPO(po)}
                                 className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
                                 title="View Details"
@@ -2976,7 +2618,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
         )}
 
         {subTab === 'financials' && (
-          <motion.div 
+          <motion.div
             key="financials"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2993,7 +2635,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                       <div className="font-black text-zinc-900">{r.rate}</div>
                     </div>
                   ))}
-                  <button 
+                  <button
                     onClick={() => handleUpdateRate('USD')}
                     className="w-full py-3 border-2 border-dashed border-zinc-200 rounded-xl text-zinc-400 font-bold text-[10px] uppercase tracking-widest hover:border-zinc-900 hover:text-zinc-900 transition-all"
                   >
@@ -3035,11 +2677,13 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                     </span>
                   </div>
                   <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 w-full" style={{ width: `${(() => {
-                      const totalMSRP = products.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
-                      const totalCost = products.reduce((acc, p) => acc + ((p.landingCost || p.price * 0.7) * (p.stock || 0)), 0);
-                      return totalMSRP > 0 ? ((totalMSRP - totalCost) / totalMSRP) * 100 : 0;
-                    })()}%` }} />
+                    <div className="h-full bg-emerald-500 w-full" style={{
+                      width: `${(() => {
+                        const totalMSRP = products.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+                        const totalCost = products.reduce((acc, p) => acc + ((p.landingCost || p.price * 0.7) * (p.stock || 0)), 0);
+                        return totalMSRP > 0 ? ((totalMSRP - totalCost) / totalMSRP) * 100 : 0;
+                      })()}%`
+                    }} />
                   </div>
                 </div>
               </div>
@@ -3048,7 +2692,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
         )}
 
         {subTab === 'logs' && (
-          <motion.div 
+          <motion.div
             key="logs"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -3060,7 +2704,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
-                  <input 
+                  <input
                     type="text"
                     placeholder="Search SKU/Product..."
                     value={logSearch}
@@ -3068,7 +2712,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                     className="pl-9 pr-4 py-2 bg-zinc-100 border-none rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-zinc-900 w-full sm:w-48"
                   />
                 </div>
-                <select 
+                <select
                   value={logTypeFilter}
                   onChange={e => setLogTypeFilter(e.target.value as any)}
                   className="px-4 py-2 bg-zinc-100 border-none rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-zinc-900"
@@ -3083,40 +2727,39 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
             <div className="divide-y divide-zinc-100">
               {logs
                 .filter(log => {
-                  const matchesSearch = !logSearch || 
+                  const matchesSearch = !logSearch ||
                     (log.sku?.toLowerCase().includes(logSearch.toLowerCase())) ||
                     (products.find(p => p.id === log.productId)?.name.toLowerCase().includes(logSearch.toLowerCase()));
                   const matchesType = logTypeFilter === 'all' || log.changeType === logTypeFilter;
                   return matchesSearch && matchesType;
                 })
                 .map(log => (
-                <div key={log.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      log.changeType === 'in' ? 'bg-emerald-100 text-emerald-600' : 
-                      log.changeType === 'out' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                    }`}>
-                      {log.changeType === 'in' ? <Plus size={20} /> : <X size={20} />}
+                  <div key={log.id} className="p-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${log.changeType === 'in' ? 'bg-emerald-100 text-emerald-600' :
+                        log.changeType === 'out' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                        }`}>
+                        {log.changeType === 'in' ? <Plus size={20} /> : <X size={20} />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-zinc-900">
+                          {formatEnum(log.changeType)}: {products.find(p => p.id === log.productId)?.name || 'Unknown'}
+                        </div>
+                        <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                          {new Date(log.timestamp).toLocaleString()} • User: {log.userId}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-bold text-zinc-900">
-                        {formatEnum(log.changeType)}: {products.find(p => p.id === log.productId)?.name || 'Unknown'}
+                    <div className="text-right">
+                      <div className={`font-black ${log.quantityChange > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {log.quantityChange > 0 ? '+' : ''}{log.quantityChange}
                       </div>
                       <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                        {new Date(log.timestamp).toLocaleString()} • User: {log.userId}
+                        New: {log.newQuantity}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`font-black ${log.quantityChange > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {log.quantityChange > 0 ? '+' : ''}{log.quantityChange}
-                    </div>
-                    <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                      New: {log.newQuantity}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
               {logs.length === 0 && <div className="text-center py-12 text-zinc-400 font-medium">No audit logs found.</div>}
             </div>
           </motion.div>
@@ -3126,7 +2769,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       {/* Warehouse Modal */}
       {showWarehouseModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl w-full max-w-md overflow-hidden"
@@ -3140,10 +2783,10 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
             <form onSubmit={handleAddWarehouse} className="p-8 space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newWarehouse.name}
-                  onChange={e => setNewWarehouse({...newWarehouse, name: e.target.value})}
+                  onChange={e => setNewWarehouse({ ...newWarehouse, name: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                   placeholder="Main Warehouse"
                   required
@@ -3151,19 +2794,19 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Location</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newWarehouse.location}
-                  onChange={e => setNewWarehouse({...newWarehouse, location: e.target.value})}
+                  onChange={e => setNewWarehouse({ ...newWarehouse, location: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                   placeholder="Address or City"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Type</label>
-                <select 
+                <select
                   value={newWarehouse.type}
-                  onChange={e => setNewWarehouse({...newWarehouse, type: e.target.value})}
+                  onChange={e => setNewWarehouse({ ...newWarehouse, type: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                 >
                   <option value="distribution">Distribution Center</option>
@@ -3182,7 +2825,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       {/* Supplier Modal */}
       {showSupplierModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl w-full max-w-lg overflow-hidden"
@@ -3197,20 +2840,20 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Company Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newSupplier.name}
-                    onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
+                    onChange={e => setNewSupplier({ ...newSupplier, name: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Contact Person</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newSupplier.contactName}
-                    onChange={e => setNewSupplier({...newSupplier, contactName: e.target.value})}
+                    onChange={e => setNewSupplier({ ...newSupplier, contactName: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                   />
                 </div>
@@ -3218,29 +2861,29 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Email</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     value={newSupplier.email}
-                    onChange={e => setNewSupplier({...newSupplier, email: e.target.value})}
+                    onChange={e => setNewSupplier({ ...newSupplier, email: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Phone</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newSupplier.phone}
-                    onChange={e => setNewSupplier({...newSupplier, phone: e.target.value})}
+                    onChange={e => setNewSupplier({ ...newSupplier, phone: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Lead Time (Days)</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={newSupplier.leadTimeDays}
-                  onChange={e => setNewSupplier({...newSupplier, leadTimeDays: Number(e.target.value)})}
+                  onChange={e => setNewSupplier({ ...newSupplier, leadTimeDays: Number(e.target.value) })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                 />
               </div>
@@ -3255,7 +2898,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       {/* PO Modal */}
       {showPOModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
@@ -3270,9 +2913,9 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Supplier</label>
-                  <select 
+                  <select
                     value={newPO.supplierId}
-                    onChange={e => setNewPO({...newPO, supplierId: e.target.value})}
+                    onChange={e => setNewPO({ ...newPO, supplierId: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                     required
                   >
@@ -3284,9 +2927,9 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Warehouse</label>
-                  <select 
+                  <select
                     value={newPO.warehouseId}
-                    onChange={e => setNewPO({...newPO, warehouseId: e.target.value})}
+                    onChange={e => setNewPO({ ...newPO, warehouseId: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
                     required
                   >
@@ -3301,9 +2944,9 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Items</label>
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => setNewPO({...newPO, items: [...newPO.items, { productId: '', quantity: 1, unitCost: 0 }]})}
+                    onClick={() => setNewPO({ ...newPO, items: [...newPO.items, { productId: '', quantity: 1, unitCost: 0 }] })}
                     className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700"
                   >
                     + Add Item
@@ -3314,12 +2957,12 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                     <div key={idx} className="grid grid-cols-12 gap-3 items-end p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                       <div className="col-span-6 space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Product</label>
-                        <select 
+                        <select
                           value={item.productId}
                           onChange={e => {
                             const updated = [...newPO.items];
                             updated[idx].productId = e.target.value;
-                            setNewPO({...newPO, items: updated});
+                            setNewPO({ ...newPO, items: updated });
                           }}
                           className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-zinc-900"
                           required
@@ -3332,13 +2975,13 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                       </div>
                       <div className="col-span-2 space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Qty</label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           value={item.quantity}
                           onChange={e => {
                             const updated = [...newPO.items];
                             updated[idx].quantity = Number(e.target.value);
-                            setNewPO({...newPO, items: updated});
+                            setNewPO({ ...newPO, items: updated });
                           }}
                           className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-zinc-900"
                           required
@@ -3346,24 +2989,24 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                       </div>
                       <div className="col-span-3 space-y-1">
                         <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Unit Cost</label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           value={item.unitCost}
                           onChange={e => {
                             const updated = [...newPO.items];
                             updated[idx].unitCost = Number(e.target.value);
-                            setNewPO({...newPO, items: updated});
+                            setNewPO({ ...newPO, items: updated });
                           }}
                           className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-zinc-900"
                           required
                         />
                       </div>
                       <div className="col-span-1">
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
                             const updated = newPO.items.filter((_, i) => i !== idx);
-                            setNewPO({...newPO, items: updated});
+                            setNewPO({ ...newPO, items: updated });
                           }}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                         >
@@ -3377,9 +3020,9 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Notes</label>
-                <textarea 
+                <textarea
                   value={newPO.notes}
-                  onChange={e => setNewPO({...newPO, notes: e.target.value})}
+                  onChange={e => setNewPO({ ...newPO, notes: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none"
                   placeholder="Additional instructions..."
                 />
@@ -3389,7 +3032,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                 <div className="text-sm font-bold">
                   Total Cost: <span className="text-lg font-black">{newPO.currency} {newPO.items.reduce((acc, item) => acc + (item.quantity * item.unitCost), 0).toLocaleString()}</span>
                 </div>
-                <button 
+                <button
                   type="submit"
                   className="px-8 py-4 bg-zinc-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all"
                 >
@@ -3404,7 +3047,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       {/* PO Details Modal */}
       {selectedPO && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden"
@@ -3427,11 +3070,10 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Status</label>
                   <div className="mt-1">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      selectedPO.status === 'received' ? 'bg-emerald-100 text-emerald-700' : 
-                      selectedPO.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
-                      selectedPO.status === 'ordered' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-700'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${selectedPO.status === 'received' ? 'bg-emerald-100 text-emerald-700' :
+                      selectedPO.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                        selectedPO.status === 'ordered' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-700'
+                      }`}>
                       {selectedPO.status}
                     </span>
                   </div>
@@ -3486,10 +3128,10 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
 
               <div className="flex gap-4">
                 {selectedPO.status === 'pending' && (
-                  <button 
+                  <button
                     onClick={async () => {
                       try {
-                        await databaseService.savePurchaseOrder({...selectedPO, status: 'ordered'});
+                        await databaseService.savePurchaseOrder({ ...selectedPO, status: 'ordered' });
                         onNotify('PO status updated to Ordered');
                         setSelectedPO(null);
                         loadERPData();
@@ -3503,7 +3145,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                   </button>
                 )}
                 {selectedPO.status === 'ordered' && (
-                  <button 
+                  <button
                     onClick={() => {
                       handleReceivePO(selectedPO.id, selectedPO.warehouseId || warehouses[0]?.id);
                       setSelectedPO(null);
@@ -3513,7 +3155,7 @@ const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
                     Receive Inventory
                   </button>
                 )}
-                <button 
+                <button
                   onClick={() => setSelectedPO(null)}
                   className="px-8 py-4 bg-zinc-100 text-zinc-600 font-black uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-all"
                 >
@@ -3540,8 +3182,8 @@ const StatsCard = ({ label, value, icon }: { label: string, value: any, icon: an
   </div>
 );
 
-const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify }: { 
-  initialData: Product | null, 
+const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify }: {
+  initialData: Product | null,
   categories: Category[],
   weapons: Product[],
   showHelp?: boolean,
@@ -3775,7 +3417,7 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 max-w-4xl mx-auto"
@@ -3785,10 +3427,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Name</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">The name of the item as it will appear in the shop.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             />
@@ -3796,10 +3438,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Brand</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Manufacturer or brand name (e.g. Tokyo Marui).</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.brand}
-              onChange={e => setFormData({...formData, brand: e.target.value})}
+              onChange={e => setFormData({ ...formData, brand: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             />
@@ -3807,10 +3449,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Price (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Selling price in Euros.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.price}
-              onChange={e => setFormData({...formData, price: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             />
@@ -3818,10 +3460,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Discount (%)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Percentage discount (0-100).</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.discount || 0}
-              onChange={e => setFormData({...formData, discount: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, discount: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               min="0"
               max="100"
@@ -3833,9 +3475,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Type</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Determines how the item is handled in the 3D configurator.</p>}
-            <select 
+            <select
               value={formData.type}
-              onChange={e => setFormData({...formData, type: e.target.value as any})}
+              onChange={e => setFormData({ ...formData, type: e.target.value as any })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             >
@@ -3871,10 +3513,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">SKU / Article</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Unique inventory identifier.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.sku || ''}
-              onChange={e => setFormData({...formData, sku: e.target.value})}
+              onChange={e => setFormData({ ...formData, sku: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
               placeholder="e.g. SA-E01-PRO"
             />
@@ -3882,10 +3524,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Barcode</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">EAN-13 or other barcode for scanning.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.barcode || ''}
-              onChange={e => setFormData({...formData, barcode: e.target.value})}
+              onChange={e => setFormData({ ...formData, barcode: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
               placeholder="e.g. 5901234567890"
             />
@@ -3893,20 +3535,20 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Landing Cost (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Actual cost including shipping/customs.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.landingCost || 0}
-              onChange={e => setFormData({...formData, landingCost: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, landingCost: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">MSRP (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Manufacturer's Suggested Retail Price.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.msrp || 0}
-              onChange={e => setFormData({...formData, msrp: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, msrp: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
@@ -3916,10 +3558,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Total Stock</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Aggregated stock across all warehouses.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.stock}
-              onChange={e => setFormData({...formData, stock: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             />
@@ -3927,10 +3569,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Min. Stock Level</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Threshold for low stock alerts.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.minStockLevel || 0}
-              onChange={e => setFormData({...formData, minStockLevel: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, minStockLevel: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
@@ -3939,9 +3581,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Category</label>
-            <select 
+            <select
               value={formData.category}
-              onChange={e => setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}})}
+              onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', categoryFilters: {} })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             >
@@ -3953,9 +3595,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Subcategory</label>
-            <select 
+            <select
               value={formData.subcategory}
-              onChange={e => setFormData({...formData, subcategory: e.target.value})}
+              onChange={e => setFormData({ ...formData, subcategory: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               required
             >
@@ -4021,9 +3663,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         <div className="space-y-2">
           <label className="text-sm font-semibold text-zinc-700">Description</label>
           {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Detailed information about the product.</p>}
-          <textarea 
+          <textarea
             value={formData.description}
-            onChange={e => setFormData({...formData, description: e.target.value})}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
             className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none"
             required
           />
@@ -4032,8 +3674,8 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         <div className="space-y-4">
           <label className="text-sm font-semibold text-zinc-700">Tags</label>
           <div className="flex gap-2">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={newTag}
               onChange={e => setNewTag(e.target.value)}
               placeholder="Add tag..."
@@ -4058,31 +3700,31 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         <div className="space-y-4">
           <label className="text-sm font-semibold text-zinc-700">Characteristics</label>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <select 
+            <select
               value={newChar.emoji}
-              onChange={e => setNewChar({...newChar, emoji: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, emoji: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             >
               {['🎯', '🔫', '🛡️', '🔋', '📦', '⚖️', '📏', '💨', '🔊', '🔦', '🔭', '🧤', '🪖', '🎒', '🛠️', '⚙️', '⚡', '🌡️', '💧'].map(e => (
                 <option key={e} value={e}>{e}</option>
               ))}
             </select>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Label (e.g. Weight)"
               value={newChar.label}
-              onChange={e => setNewChar({...newChar, label: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, label: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Value (e.g. 2.5kg)"
               value={newChar.value}
-              onChange={e => setNewChar({...newChar, value: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, value: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={addCharacteristic}
               className="px-4 py-2 bg-zinc-900 text-white rounded-xl font-bold"
             >
@@ -4112,15 +3754,15 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {combinedImages.map((item, index) => (
               <div key={index} className="relative group aspect-square bg-zinc-50 border border-zinc-200 rounded-2xl overflow-hidden">
-                <img 
-                  src={typeof item === 'string' ? item : URL.createObjectURL(item)} 
-                  alt={`Preview ${index}`} 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={typeof item === 'string' ? item : URL.createObjectURL(item)}
+                  alt={`Preview ${index}`}
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   {index > 0 && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         const newImages = [...combinedImages];
                         [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
@@ -4132,8 +3774,8 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
                     </button>
                   )}
                   {index < combinedImages.length - 1 && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         const newImages = [...combinedImages];
                         [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]];
@@ -4144,8 +3786,8 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
                       <ArrowDown size={14} />
                     </button>
                   )}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       const newImages = combinedImages.filter((_, i) => i !== index);
                       setCombinedImages(newImages);
@@ -4165,11 +3807,11 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
             <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-200 rounded-2xl hover:border-zinc-400 transition-all cursor-pointer bg-zinc-50">
               <Plus size={24} className="text-zinc-400" />
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Add Image</span>
-              <input 
-                type="file" 
-                accept="image/*" 
+              <input
+                type="file"
+                accept="image/*"
                 multiple
-                className="hidden" 
+                className="hidden"
                 onChange={e => {
                   const files = Array.from(e.target.files || []);
                   setCombinedImages([...combinedImages, ...files]);
@@ -4189,10 +3831,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
                   <span className="text-zinc-500 font-medium">
                     {modelFile ? modelFile.name : formatModelName(formData.model3DName || formData.model3D)}
                   </span>
-                  <input 
-                    type="file" 
-                    accept=".glb" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept=".glb"
+                    className="hidden"
                     onChange={e => setModelFile(e.target.files?.[0] || null)}
                   />
                 </label>
@@ -4208,10 +3850,10 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Unique ID (UID)</label>
                 {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Tarkov-style ID for compatibility logic (e.g. mount_picatinny_01).</p>}
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.uid || ''}
-                  onChange={e => setFormData({...formData, uid: e.target.value})}
+                  onChange={e => setFormData({ ...formData, uid: e.target.value })}
                   placeholder="e.g. sight_reflex_01"
                   className="w-full px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
                 />
@@ -4230,9 +3872,9 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
           <div className="space-y-6 p-6 bg-zinc-50 rounded-2xl border border-zinc-200">
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Attachment Slot</label>
-              <select 
+              <select
                 value={formData.attachmentSlot}
-                onChange={e => setFormData({...formData, attachmentSlot: e.target.value})}
+                onChange={e => setFormData({ ...formData, attachmentSlot: e.target.value })}
                 className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl outline-none"
               >
                 <option value="">Select Slot Type</option>
@@ -4246,7 +3888,7 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
             <div className="space-y-4">
               <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Compatible Weapons</label>
               <div className="flex gap-2">
-                <select 
+                <select
                   value={newCompatibleWeapon}
                   onChange={e => setNewCompatibleWeapon(e.target.value)}
                   className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none"
@@ -4259,8 +3901,8 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
                     ))
                   }
                 </select>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={addCompatibleWeapon}
                   disabled={!newCompatibleWeapon}
                   className="px-4 py-2 bg-zinc-900 text-white rounded-xl font-bold disabled:opacity-50"
@@ -4286,21 +3928,21 @@ const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, on
         )}
 
         <div className="flex items-center justify-end gap-4 pt-8 border-t border-zinc-100">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={onCancel}
             className="px-8 py-4 text-zinc-600 font-bold hover:bg-zinc-100 rounded-xl transition-all"
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSubmitting}
             className="flex items-center gap-2 px-12 py-4 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20 disabled:opacity-50 relative overflow-hidden"
           >
             {isSubmitting && (
-              <div 
-                className="absolute bottom-0 left-0 h-1 bg-white/30 transition-all duration-300" 
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-white/30 transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             )}
