@@ -76,7 +76,6 @@ import { ProductForm } from '../components/admin/ProductForm';
 import { PolicyManager } from '../components/admin/PolicyManager';
 import { ERPManager } from '../components/admin/ERPManager';
 import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
-import { StatisticTest } from '../components/admin/StatisticTest';
 import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
