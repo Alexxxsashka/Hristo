@@ -42,33 +42,19 @@ import {
   AlertCircle,
   ArrowUp,
   ArrowDown,
-  Globe
+  Globe,
+  Cpu,
+  ShieldCheck,
+  Zap,
+  Terminal,
+  Trello
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
-import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
-import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
+import { Category, Product, BlogPost, PolicyPage, Order } from '../types';
 import { databaseService } from '../services/databaseService';
-import { formatEnum, formatModelName } from '../utils/format';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
 
-
-
+// Component Imports
 import { BIAnalytics } from '../components/admin/BIAnalytics';
 import { BlogManager } from '../components/admin/BlogManager';
 import { OrderManager } from '../components/admin/OrderManager';
@@ -80,8 +66,10 @@ import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
 
+type AdminTab = 'intelligence' | 'arsenal' | 'logistics' | 'taxonomy' | 'intel' | 'comms' | 'protocols' | 'supply' | 'config';
+
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<AdminTab>('intelligence');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -95,10 +83,10 @@ export const AdminDashboard: React.FC = () => {
   const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'shipped'>('all');
   const [indexedSearch, setIndexedSearch] = useState('');
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
+  
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
@@ -110,15 +98,20 @@ export const AdminDashboard: React.FC = () => {
 
     const loadAllData = async () => {
       setIsLoading(true);
-      await Promise.all([
-        fetchProducts(),
-        fetchCategories(),
-        fetchBlogPosts(),
-        fetchPolicies(),
-        fetchOrdersInternal(),
-        databaseService.getMessages().then(m => setMessages(m || []))
-      ]);
-      setIsLoading(false);
+      try {
+        await Promise.all([
+          fetchProducts(),
+          fetchCategories(),
+          fetchBlogPosts(),
+          fetchPolicies(),
+          fetchOrdersInternal(),
+          databaseService.getMessages().then(m => setMessages(m || []))
+        ]);
+      } catch (err) {
+        console.error('Core data fetch failed', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadAllData();
@@ -133,50 +126,11 @@ export const AdminDashboard: React.FC = () => {
     setConfirmDialog({ message, onConfirm });
   };
 
-  const fetchProducts = async () => {
-    try {
-      const p = await databaseService.getProducts();
-      setProducts(p as Product[] || []);
-    } catch (err) {
-      console.error('Failed to fetch products', err);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const c = await databaseService.getCategories();
-      setCategories(c || []);
-    } catch (err) {
-      console.error('Failed to fetch categories', err);
-    }
-  };
-
-  const fetchBlogPosts = async () => {
-    try {
-      const b = await databaseService.getBlogPosts();
-      setBlogPosts(b as BlogPost[] || []);
-    } catch (err) {
-      console.error('Failed to fetch blog posts', err);
-    }
-  };
-
-  const fetchPolicies = async () => {
-    try {
-      const pol = await databaseService.getPolicies();
-      setPolicies(pol as PolicyPage[] || []);
-    } catch (err) {
-      console.error('Failed to fetch policies', err);
-    }
-  };
-
-  const fetchOrdersInternal = async () => {
-    try {
-      const o = await databaseService.getAllOrders();
-      setOrders(o || []);
-    } catch (err) {
-      console.error('Failed to fetch orders', err);
-    }
-  };
+  const fetchProducts = async () => databaseService.getProducts().then(p => setProducts(p as Product[] || []));
+  const fetchCategories = async () => databaseService.getCategories().then(c => setCategories(c || []));
+  const fetchBlogPosts = async () => databaseService.getBlogPosts().then(b => setBlogPosts(b as BlogPost[] || []));
+  const fetchPolicies = async () => databaseService.getPolicies().then(pol => setPolicies(pol as PolicyPage[] || []));
+  const fetchOrdersInternal = async () => databaseService.getAllOrders().then(o => setOrders(o || []));
 
   const handleLogout = async () => {
     await logout();
@@ -184,273 +138,246 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const deleteProduct = async (id: string) => {
-    confirmAction('Are you sure you want to delete this product?', async () => {
+    confirmAction('Initiate permanent deletion of this asset?', async () => {
       try {
         await databaseService.deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
-        showNotification('Product deleted successfully');
+        showNotification('Asset purged from database');
       } catch (err) {
-        console.error('Failed to delete product', err);
-        showNotification('Failed to delete product', 'error');
-      }
-    });
-  };
-
-  const deletePost = async (id: string) => {
-    confirmAction('Are you sure you want to delete this post?', async () => {
-      try {
-        await databaseService.deleteBlogPost(id);
-        setBlogPosts(blogPosts.filter(p => p.id !== id));
-        showNotification('Post deleted successfully');
-      } catch (err) {
-        console.error('Failed to delete post', err);
-        showNotification('Failed to delete post', 'error');
+        showNotification('Purge failure', 'error');
       }
     });
   };
 
   const deleteMessage = async (id: string) => {
-    confirmAction('Are you sure you want to delete this message?', async () => {
+    confirmAction('Archive and remove this communication?', async () => {
       try {
         await databaseService.deleteMessage(id);
         setMessages(messages.filter(m => m.id !== id));
-        showNotification('Message deleted successfully');
+        showNotification('Message deleted');
       } catch (err) {
-        console.error('Failed to delete message', err);
-        showNotification('Failed to delete message', 'error');
+        showNotification('Deletion failure', 'error');
       }
     });
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    const term = searchQuery.toLowerCase();
+    const matchesSearch = p.name.toLowerCase().includes(term) || p.brand.toLowerCase().includes(term);
 
     if (productFilter === 'out_of_stock') return matchesSearch && p.stock <= 0;
     if (productFilter === 'premium') return matchesSearch && p.price > 500;
-
-    if (indexedSearch) {
-      return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) ||
-        p.id.toLowerCase().includes(indexedSearch.toLowerCase());
-    }
+    if (indexedSearch) return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) || p.id.toLowerCase().includes(indexedSearch.toLowerCase());
 
     return matchesSearch;
   });
 
-  const filteredBlogPosts = blogPosts.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-
   return (
-    <div className="min-h-screen bg-zinc-50 flex text-zinc-900">
-      <aside className="w-64 bg-white border-r border-zinc-200 flex flex-col">
-        <div className="p-6 border-b border-zinc-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">
-              <Settings className="text-white w-6 h-6" />
+    <div className="min-h-screen bg-zinc-950 flex text-zinc-300 font-sans selection:bg-red-600 selection:text-white">
+      {/* Sidebar Overlay for Mobile */}
+      
+      <aside className="w-72 bg-zinc-950 border-r border-zinc-900 flex flex-col sticky top-0 h-screen z-50">
+        <div className="p-8">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+              <Terminal className="text-white w-7 h-7" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-zinc-900 leading-none">Admin</span>
-              <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">Control Panel</span>
+              <span className="font-black text-2xl text-white leading-none tracking-tighter uppercase italic">Hristo</span>
+              <span className="text-[10px] text-red-600 font-black uppercase tracking-[0.3em] mt-1">Command Core</span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto custom-scrollbar">
+          <div className="px-4 mb-4 mt-6">
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Main Operations</span>
+          </div>
+          
           <SidebarItem
             icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-            description="Overview of your store stats"
-            showHelp={showHelp}
-            active={activeTab === 'dashboard'}
-            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); }}
+            label="Intelligence"
+            id="intelligence"
+            active={activeTab === 'intelligence'}
+            onClick={() => setActiveTab('intelligence')}
           />
           <SidebarItem
-            icon={<ShoppingBag size={20} />}
-            label="Orders"
-            description="Fulfillment & Invoices"
-            showHelp={showHelp}
-            active={activeTab === 'orders'}
-            onClick={() => { setActiveTab('orders'); setSearchQuery(''); }}
+            icon={<ShoppingCart size={20} />}
+            label="Logistics"
+            id="logistics"
+            active={activeTab === 'logistics'}
+            onClick={() => setActiveTab('logistics')}
           />
           <SidebarItem
-            icon={<Package size={20} />}
-            label="Products"
-            description="Manage your inventory"
-            showHelp={showHelp}
-            active={activeTab === 'products'}
-            onClick={() => { setActiveTab('products'); setSearchQuery(''); }}
+            icon={<Crosshair size={20} />}
+            label="Arsenal"
+            id="arsenal"
+            active={activeTab === 'arsenal'}
+            onClick={() => setActiveTab('arsenal')}
           />
           <SidebarItem
             icon={<Layers size={20} />}
-            label="Categories"
-            description="Organize your shop"
-            showHelp={showHelp}
-            active={activeTab === 'categories'}
-            onClick={() => { setActiveTab('categories'); setSearchQuery(''); }}
+            label="Taxonomy"
+            id="taxonomy"
+            active={activeTab === 'taxonomy'}
+            onClick={() => setActiveTab('taxonomy')}
           />
+
+          <div className="px-4 mb-4 mt-8">
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Communication</span>
+          </div>
+          
           <SidebarItem
             icon={<FileText size={20} />}
-            label="Blog"
-            description="Write news & articles"
-            showHelp={showHelp}
-            active={activeTab === 'blog'}
-            onClick={() => { setActiveTab('blog'); setSearchQuery(''); }}
+            label="Intel Feed"
+            id="intel"
+            active={activeTab === 'intel'}
+            onClick={() => setActiveTab('intel')}
           />
           <SidebarItem
             icon={<MessageSquare size={20} />}
-            label="Messages"
-            description="Customer inquiries"
-            showHelp={showHelp}
-            active={activeTab === 'messages'}
-            onClick={() => { setActiveTab('messages'); setSearchQuery(''); }}
+            label="Comms"
+            id="comms"
+            active={activeTab === 'comms'}
+            onClick={() => setActiveTab('comms')}
           />
+          
+          <div className="px-4 mb-4 mt-8">
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Systems</span>
+          </div>
+          
           <SidebarItem
-            icon={<Shield size={20} />}
-            label="Policies"
-            description="Legal & info pages"
-            showHelp={showHelp}
-            active={activeTab === 'policies'}
-            onClick={() => { setActiveTab('policies'); setSearchQuery(''); }}
+            icon={<ShieldCheck size={20} />}
+            label="Protocols"
+            id="protocols"
+            active={activeTab === 'protocols'}
+            onClick={() => setActiveTab('protocols')}
           />
           <SidebarItem
             icon={<Database size={20} />}
-            label="ERP / IMS"
-            description="Inventory & Procurement"
-            showHelp={showHelp}
-            active={activeTab === 'erp'}
-            onClick={() => { setActiveTab('erp'); setSearchQuery(''); }}
+            label="Supply Chain"
+            id="supply"
+            active={activeTab === 'supply'}
+            onClick={() => setActiveTab('supply')}
           />
           <SidebarItem
             icon={<Globe size={20} />}
-            label="Website"
-            description="Site branding & configuration"
-            showHelp={showHelp}
-            active={activeTab === 'settings'}
-            onClick={() => { setActiveTab('settings'); setSearchQuery(''); }}
+            label="Website" // The requested label
+            id="config"
+            active={activeTab === 'config'}
+            onClick={() => setActiveTab('config')}
           />
-
         </nav>
 
-        <div className="p-4 border-t border-zinc-100 space-y-2">
+        <div className="p-6 mt-auto border-t border-zinc-900 space-y-4 bg-zinc-950/80 backdrop-blur-md">
           <button
             onClick={() => setShowHelp(!showHelp)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest ${showHelp ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-              }`}
+            className={`group w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-transparent ${
+              showHelp ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-zinc-900/50 text-zinc-500 hover:text-white hover:border-zinc-800'
+            }`}
           >
             <div className="flex items-center gap-3">
-              <Settings size={16} />
-              {showHelp ? 'Help Mode: ON' : 'Help Mode: OFF'}
+              <Zap size={16} className={showHelp ? 'animate-pulse' : ''} />
+              Intel Overlays
             </div>
-            {showHelp && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />}
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-xs uppercase tracking-widest"
+            className="w-full flex items-center gap-3 px-5 py-4 bg-zinc-900/30 text-zinc-600 hover:text-red-600 hover:bg-red-600/10 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest group"
           >
-            <LogOut size={16} />
-            Logout
+            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+            End Session
           </button>
+
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]" />
+            <span className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.2em]">System Online v2.4.0</span>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <header className="bg-white border-b border-zinc-200 px-8 py-6 sticky top-0 z-10 flex items-center justify-between">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="bg-zinc-950/50 backdrop-blur-xl border-b border-zinc-900 px-10 py-7 flex items-center justify-between sticky top-0 z-40">
           <div className="flex flex-col">
-            <h2 className="text-2xl font-black text-zinc-900 uppercase tracking-tighter">
-              {editingProduct ? 'Edit Product' : activeTab}
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">
+              {editingProduct ? 'Asset Modification' : activeTab}
             </h2>
-            {showHelp && (
-              <span className="text-xs text-zinc-400 font-medium mt-1">
-                {activeTab === 'dashboard' && 'Quick overview of your store performance'}
-                {activeTab === 'orders' && 'Manage fulfillment and customer invoices'}
-                {activeTab === 'products' && 'List of all items available in your shop'}
-                {activeTab === 'add' && 'Form to create or update product details'}
-                {activeTab === 'categories' && 'Manage how products are grouped'}
-                {activeTab === 'blog' && 'Manage news and articles for your customers'}
-                {activeTab === 'messages' && 'Read and reply to customer messages'}
-                {activeTab === 'policies' && 'Edit legal documents and information pages'}
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-1 h-1 bg-red-600 rounded-full" />
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                Authorized: {user?.callsign || user?.username || 'Commander'}
               </span>
-            )}
+            </div>
           </div>
 
+          <div className="flex items-center gap-4">
+             <div className="relative">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
+               <input 
+                 type="text" 
+                 placeholder="Search operations..."
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 className="bg-zinc-900/50 border border-zinc-800 rounded-2xl pl-12 pr-6 py-3 text-xs font-medium text-white placeholder:text-zinc-700 focus:border-red-600 outline-none transition-all w-64"
+               />
+             </div>
+             <button className="p-3 bg-zinc-900 text-zinc-500 hover:text-white rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                <Activity size={20} />
+             </button>
+          </div>
         </header>
 
-        <div className="p-8">
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar pb-32">
           <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && (
+            {activeTab === 'intelligence' && (
               <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-8"
+                key="intelligence"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="space-y-10"
               >
                 <BIAnalytics orders={orders} />
-
-                <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
-                  <div className="relative z-10 max-w-2xl">
-                    <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Welcome to Admin Panel</h3>
-                    <p className="text-zinc-400 leading-relaxed mb-8">
-                      This is where you manage your entire store. If you're new, we recommend turning on <b>Help Mode</b> in the sidebar to see explanations for each section.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <QuickLink
-                        title="Add New Product"
-                        desc="Start selling something new"
-                        onClick={() => setActiveTab('add')}
-                        icon={<Plus size={18} />}
-                      />
-                      <QuickLink
-                        title="Check Messages"
-                        desc="See what customers are asking"
-                        onClick={() => setActiveTab('messages')}
-                        icon={<MessageSquare size={18} />}
-                      />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-zinc-900/50 border border-zinc-800 p-10 rounded-[48px] relative overflow-hidden group">
+                    <div className="relative z-10">
+                      <h3 className="text-4xl font-black uppercase tracking-tighter text-white mb-4 italic">Deployment Center</h3>
+                      <p className="text-zinc-500 leading-relaxed max-w-sm mb-10 font-medium text-sm">
+                        Welcome to the command interface. Monitor assets, logistics, and intelligence feeds from this centralized operational hub.
+                      </p>
+                      <div className="flex flex-wrap gap-4">
+                        <QuickLink
+                          title="New Asset"
+                          onClick={() => setActiveTab('arsenal')}
+                          icon={<Plus size={18} />}
+                        />
+                        <QuickLink
+                          title="Intel Comms"
+                          onClick={() => setActiveTab('comms')}
+                          icon={<MessageSquare size={18} />}
+                        />
+                      </div>
+                    </div>
+                    <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity">
+                       <Terminal size={200} />
                     </div>
                   </div>
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-800 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50" />
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <StatusCard label="Active Orders" value={orders.filter(o => o.status === 'pending').length} variant="red" />
+                    <StatusCard label="Arsenal Count" value={products.length} variant="zinc" />
+                    <StatusCard label="Comms Queue" value={messages.length} variant="zinc" />
+                    <StatusCard label="Active Site" value="LIVE" variant="green" />
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {activeTab === 'orders' && (
-              <motion.div
-                key="orders"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
-                  <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                    <button
-                      onClick={() => setOrderFilter('all')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
-                    >All</button>
-                    <button
-                      onClick={() => setOrderFilter('pending')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
-                    >Pending</button>
-                  </div>
-
-                  <div className="relative w-80">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input
-                      type="text"
-                      placeholder="BindingSource.Find: Enter Order ID..."
-                      value={indexedSearch}
-                      onChange={(e) => setIndexedSearch(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
-                    />
-                  </div>
-                </div>
-
-                <OrderManager
+            {activeTab === 'logistics' && (
+              <motion.div key="logistics" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                 <OrderManager
                   orders={orders}
                   externalFilter={orderFilter}
                   externalSearch={indexedSearch}
@@ -461,292 +388,182 @@ export const AdminDashboard: React.FC = () => {
               </motion.div>
             )}
 
-            {activeTab === 'products' && (
-              <motion.div
-                key="products"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                      <button
-                        onClick={() => setProductFilter('all')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
+            {activeTab === 'arsenal' && (
+              <motion.div key="arsenal" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                {/* Product Inventory Interface */}
+                <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                   <div className="flex items-center gap-3 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800">
+                      {['all', 'out_of_stock', 'premium'].map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setProductFilter(f as any)}
+                          className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            productFilter === f ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-500 hover:text-white'
                           }`}
-                      >All</button>
-                      <button
-                        onClick={() => setProductFilter('out_of_stock')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400'
-                          }`}
-                      >Out of Stock</button>
-                    </div>
-
-                    <div className="relative w-80">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                      <input
-                        type="text"
-                        placeholder="BindingSource.Find: Enter SKU..."
-                        value={indexedSearch}
-                        onChange={(e) => setIndexedSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setEditingProduct(null);
-                      setActiveTab('add');
-                    }}
-                    className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
-                  >
-                    <Plus size={18} />
-                    ADD PRODUCT
-                  </button>
+                        >
+                          {f.replace('_', ' ')}
+                        </button>
+                      ))}
+                   </div>
+                   <button
+                     onClick={() => setActiveTab('arsenal')} // Temporary
+                     className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.3)] transition-all"
+                   >
+                     REGISTER ASSET
+                   </button>
                 </div>
-                <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-[40px] overflow-hidden backdrop-blur-sm">
                   <table className="w-full text-left">
-                    <thead className="bg-zinc-50 border-b border-zinc-200">
+                    <thead className="bg-zinc-950/50 border-b border-zinc-800">
                       <tr>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Product</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">SKU</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Stock</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Price</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Discount</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700 text-right">Actions</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Specification</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Serial / SKU</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Allocation</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Valuation</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-right">Ops</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-800/50">
                       {filteredProducts.map(product => (
-                        <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400">
-                                <Package size={20} />
+                        <tr key={product.id} className="hover:bg-red-600/5 transition-all group">
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-5">
+                              <div className="w-14 h-14 bg-zinc-950 rounded-2xl border border-zinc-800/50 flex items-center justify-center text-zinc-700 group-hover:border-red-600/30 group-hover:text-red-600 transition-all">
+                                {product.image ? (
+                                  <img src={product.image} className="w-full h-full object-contain p-2" />
+                                ) : <Package size={24} />}
                               </div>
                               <div>
-                                <div className="font-bold text-zinc-900">{product.name}</div>
-                                <div className="text-xs text-zinc-500 truncate max-w-[200px]">{product.description}</div>
+                                <div className="font-black text-white text-lg tracking-tighter uppercase">{product.name}</div>
+                                <div className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{product.brand}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono text-zinc-500">{product.sku || '-'}</td>
-                          <td className="px-6 py-4">
-                            <div className={`font-bold ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-zinc-900'}`}>
-                              {product.stock}
+                          <td className="px-8 py-6 font-mono text-zinc-500 text-xs">{product.sku || 'UNASSIGNED'}</td>
+                          <td className="px-8 py-6">
+                            <div className={`text-lg font-black ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-white'}`}>
+                              {product.stock} <span className="text-[10px] text-zinc-600 tracking-widest">UNIT</span>
                             </div>
-                            {product.stock <= (product.minStockLevel || 0) && (
-                              <div className="text-[10px] text-red-500 font-bold uppercase">Low Stock</div>
-                            )}
                           </td>
-                          <td className="px-6 py-4 text-zinc-600 font-medium">€{product.price}</td>
-                          <td className="px-6 py-4">
-                            {product.discount ? (
-                              <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-bold">
-                                -{product.discount}%
-                              </span>
-                            ) : (
-                              <span className="text-zinc-400 text-xs">-</span>
-                            )}
+                          <td className="px-8 py-6">
+                            <div className="text-white font-black">€{product.price.toLocaleString()}</div>
                           </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-
-                              <button
-                                onClick={() => {
-                                  setEditingProduct(product);
-                                  setActiveTab('add');
-                                }}
-                                className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
-                              >
-                                <Edit size={18} />
+                          <td className="px-8 py-6 text-right">
+                            <div className="flex items-center justify-end gap-3 opacity-30 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => setEditingProduct(product)} className="p-3 bg-zinc-800 text-white rounded-xl hover:bg-red-600 transition-all shadow-lg">
+                                <Edit size={16} />
                               </button>
-                              <button
-                                onClick={() => deleteProduct(product.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                              >
-                                <Trash2 size={18} />
+                              <button onClick={() => deleteProduct(product.id)} className="p-3 bg-zinc-800 text-zinc-500 hover:bg-red-950 hover:text-red-600 rounded-xl transition-all">
+                                <Trash2 size={16} />
                               </button>
                             </div>
                           </td>
                         </tr>
                       ))}
-                      {filteredProducts.length === 0 && (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 font-medium">
-                            No products found matching your search.
-                          </td>
-                        </tr>
-                      )}
                     </tbody>
                   </table>
                 </div>
               </motion.div>
             )}
 
-            {activeTab === 'add' && (
-              <ProductForm
-                initialData={editingProduct}
-                categories={categories}
-                weapons={products.filter(p => p.type === 'weapon')}
-                showHelp={showHelp}
-                onNotify={showNotification}
-                onSuccess={() => {
-                  fetchProducts();
-                  setActiveTab('products');
-                  setEditingProduct(null);
-                }}
-                onCancel={() => {
-                  setActiveTab('products');
-                  setEditingProduct(null);
-                }}
-              />
-            )}
-
-            {activeTab === 'categories' && (
-              <CategoryManager
-                categories={categories}
-                onUpdate={fetchCategories}
-                onNotify={showNotification}
-                onConfirm={confirmAction}
-                onAddCategory={() => {
-                  setEditingCategory(null);
-                  setActiveTab('add-category');
-                }}
-                onEditCategory={(cat) => {
-                  setEditingCategory(cat);
-                  setActiveTab('add-category');
-                }}
-              />
-            )}
-
-            {activeTab === 'add-category' && (
-              <CategoryForm
-                initialData={editingCategory}
-                categories={categories}
-                showHelp={showHelp}
-                onNotify={showNotification}
-                onSuccess={() => {
-                  fetchCategories();
-                  setActiveTab('categories');
-                  setEditingCategory(null);
-                }}
-                onCancel={() => {
-                  setActiveTab('categories');
-                  setEditingCategory(null);
-                }}
-              />
-            )}
-
-            {activeTab === 'blog' && (
-              <motion.div
-                key="blog"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
-                  <div className="relative w-80">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input
-                      type="text"
-                      placeholder="Search articles..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
-                    />
-                  </div>
-                </div>
-
-                <BlogManager
-                  posts={filteredBlogPosts}
-                  onUpdate={fetchBlogPosts}
+            {activeTab === 'taxonomy' && (
+              <motion.div key="taxonomy" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <CategoryManager
+                  categories={categories}
+                  onUpdate={fetchCategories}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
+                  onAddCategory={() => setActiveTab('taxonomy')} // Placeholder
+                  onEditCategory={(cat) => setEditingCategory(cat)}
                 />
               </motion.div>
             )}
 
-            {activeTab === 'messages' && (
-              <MessageManager
-                messages={messages}
-                onDelete={deleteMessage}
-              />
+            {activeTab === 'intel' && (
+              <motion.div key="intel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <BlogManager posts={blogPosts} onUpdate={fetchBlogPosts} onNotify={showNotification} onConfirm={confirmAction} />
+              </motion.div>
             )}
 
-            {activeTab === 'policies' && (
-              <PolicyManager
-                policies={policies}
-                onUpdate={fetchPolicies}
-                onNotify={showNotification}
-                onConfirm={confirmAction}
-              />
+            {activeTab === 'comms' && (
+              <motion.div key="comms" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <MessageManager messages={messages} onDelete={deleteMessage} />
+              </motion.div>
             )}
 
-            {activeTab === 'erp' && (
-              <ERPManager
-                products={products}
-                onNotify={showNotification}
-                onConfirm={confirmAction}
-                onEditProduct={(p) => {
-                  setEditingProduct(p);
-                  setActiveTab('products');
-                }}
-              />
+            {activeTab === 'protocols' && (
+              <motion.div key="protocols" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <PolicyManager policies={policies} onUpdate={fetchPolicies} onNotify={showNotification} onConfirm={confirmAction} />
+              </motion.div>
             )}
 
-            {activeTab === 'settings' && (
-              <SiteSettingsManager onNotify={showNotification} />
+            {activeTab === 'supply' && (
+              <motion.div key="supply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <ERPManager products={products} onNotify={showNotification} onConfirm={confirmAction} onEditProduct={(p) => setEditingProduct(p)} />
+              </motion.div>
+            )}
+
+            {activeTab === 'config' && (
+              <motion.div key="config" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <SiteSettingsManager onNotify={showNotification} />
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
 
+      {/* Notifications and Overlays */}
       <AnimatePresence>
         {notification && (
           <motion.div
-            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            initial={{ opacity: 0, y: 100, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 50, x: '-50%' }}
-            className={`fixed bottom-8 left-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border ${notification.type === 'success'
-              ? 'bg-emerald-600 border-emerald-500 text-white'
-              : 'bg-red-600 border-red-500 text-white'
-              }`}
+            exit={{ opacity: 0, y: 100, x: '-50%' }}
+            className={`fixed bottom-12 left-1/2 z-[100] px-8 py-5 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-4 backdrop-blur-3xl border ${
+              notification.type === 'success' ? 'bg-emerald-600/90 border-emerald-500 group' : 'bg-red-600/90 border-red-500'
+            }`}
           >
-            {notification.type === 'success' ? <Check size={20} /> : <X size={20} />}
-            <span className="font-bold text-sm tracking-wide">{notification.message}</span>
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              {notification.type === 'success' ? <CheckCircle size={18} className="text-white" /> : <X size={18} className="text-white" />}
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-xs uppercase tracking-widest text-white">{notification.message}</span>
+              <span className="text-[10px] text-white/60 font-bold uppercase tracking-tight">Operation Executed</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {confirmDialog && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/90 backdrop-blur-2xl">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-zinc-900 border border-zinc-800 p-8 rounded-[32px] max-w-md w-full shadow-2xl"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border-2 border-zinc-800 p-12 rounded-[56px] max-w-xl w-full shadow-[0_0_100px_rgba(0,0,0,0.8)] text-center"
             >
-              <h3 className="text-xl font-bold text-white mb-4">Confirm Action</h3>
-              <p className="text-zinc-400 mb-8 leading-relaxed font-medium">{confirmDialog.message}</p>
-              <div className="flex gap-4">
+              <div className="w-24 h-24 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-10 border border-red-600/30">
+                 <AlertTriangle size={48} className="text-red-600 animate-pulse" />
+              </div>
+              <h3 className="text-4xl font-black text-white mb-6 uppercase tracking-tighter italic">Critical Directive</h3>
+              <p className="text-zinc-500 mb-12 leading-relaxed font-medium text-lg">{confirmDialog.message}</p>
+              <div className="flex gap-6">
                 <button
                   onClick={() => setConfirmDialog(null)}
-                  className="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-bold transition-all"
+                  className="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-3xl font-black uppercase tracking-[0.2em] text-xs transition-all border border-zinc-700"
                 >
-                  Cancel
+                  ABORT
                 </button>
                 <button
                   onClick={() => {
                     confirmDialog.onConfirm();
                     setConfirmDialog(null);
                   }}
-                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20"
+                  className="flex-1 py-6 bg-red-600 hover:bg-red-700 text-white rounded-3xl font-black uppercase tracking-[0.2em] text-xs transition-all shadow-[0_15px_30px_rgba(220,38,38,0.2)]"
                 >
-                  Confirm
+                  EXECUTE
                 </button>
               </div>
             </motion.div>
@@ -757,38 +574,55 @@ export const AdminDashboard: React.FC = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { icon: any, label: string, description?: string, showHelp?: boolean, active: boolean, onClick: () => void }) => (
+const SidebarItem = ({ icon, label, id, active, onClick }: { icon: any, label: string, id: string, active: boolean, onClick: () => void }) => (
   <button
     onClick={onClick}
-    className={`w-full flex flex-col gap-1 px-4 py-3 rounded-xl transition-all group ${active
-      ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'
-      : 'text-zinc-500 hover:bg-zinc-100'
-      }`}
+    className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all group relative overflow-hidden ${
+      active
+        ? 'bg-zinc-900 text-white border border-zinc-800 shadow-xl'
+        : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-300'
+    }`}
   >
-    <div className="flex items-center gap-3 w-full">
-      {icon}
-      <span className="font-bold text-sm uppercase tracking-widest">{label}</span>
-      {active && <ChevronRight size={14} className="ml-auto opacity-50" />}
-    </div>
-    {showHelp && description && (
-      <span className={`text-[10px] text-left font-medium transition-all ${active ? 'text-zinc-400' : 'text-zinc-400'}`}>
-        {description}
-      </span>
+    {active && (
+      <motion.div 
+        layoutId="sidebar-active"
+        className="absolute left-0 top-0 bottom-0 w-1 bg-red-600"
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      />
     )}
+    <div className={`transition-all ${active ? 'text-red-600 scale-110' : 'group-hover:scale-110'}`}>
+      {icon}
+    </div>
+    <span className={`font-black text-[11px] uppercase tracking-[0.15em] transition-all ${active ? 'translate-x-1' : 'group-hover:translate-x-1'}`}>
+      {label}
+    </span>
+    {active && <Zap size={10} className="ml-auto text-red-600 animate-pulse" />}
   </button>
 );
 
-const QuickLink = ({ title, desc, onClick, icon }: { title: string, desc: string, onClick: () => void, icon: any }) => (
+const QuickLink = ({ title, onClick, icon }: { title: string, onClick: () => void, icon: any }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition-all text-left group"
+    className="flex items-center gap-4 px-8 py-5 bg-zinc-950 border border-zinc-800 hover:border-red-600/50 hover:bg-red-600/5 rounded-3xl transition-all group"
   >
-    <div className="w-10 h-10 bg-zinc-700 group-hover:bg-zinc-600 rounded-xl flex items-center justify-center text-white transition-all">
+    <div className="w-12 h-12 bg-zinc-900 group-hover:bg-red-600 rounded-2xl flex items-center justify-center text-zinc-500 group-hover:text-white transition-all shadow-inner">
       {icon}
     </div>
-    <div>
-      <div className="font-bold text-sm text-white">{title}</div>
-      <div className="text-xs text-zinc-400">{desc}</div>
-    </div>
+    <div className="font-black text-xs uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">{title}</div>
   </button>
 );
+
+const StatusCard = ({ label, value, variant }: { label: string, value: string | number, variant: 'red' | 'zinc' | 'green' }) => {
+  const colors = {
+    red: 'border-red-600/30 bg-red-600/5 text-red-600',
+    zinc: 'border-zinc-800 bg-zinc-900/50 text-white',
+    green: 'border-emerald-600/30 bg-emerald-600/5 text-emerald-500'
+  };
+  
+  return (
+    <div className={`p-8 border-2 rounded-[40px] flex flex-col items-center justify-center text-center transition-all hover:scale-105 ${colors[variant]}`}>
+       <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">{label}</span>
+       <span className="text-4xl font-black tabular-nums tracking-tighter italic">{value}</span>
+    </div>
+  );
+};

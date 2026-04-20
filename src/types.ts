@@ -314,4 +314,7 @@ export interface SiteSettings {
   youtubeUrl?: string;
   announcement?: string;
   showAnnouncement?: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  maintenanceMode?: boolean;
 }
