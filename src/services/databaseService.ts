@@ -362,11 +362,14 @@ export const databaseService = {
     return await res.json();
   },
 
-  async createPaymentIntent(amount: number, currency: string = 'eur') {
+  async createPaymentIntent(items: any[], shipping_cost: number, orderId?: string) {
     const res = await fetch('/api/create-payment-intent', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify({ items, shipping_cost, orderId })
     });
     if (!res.ok) {
       const err = await res.json();

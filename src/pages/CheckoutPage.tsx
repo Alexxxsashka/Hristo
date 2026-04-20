@@ -119,6 +119,7 @@ export const CheckoutPage: React.FC = () => {
   const [selectedShipping, setSelectedShipping] = useState(SHIPPING_METHODS[0]);
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0]);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -230,7 +231,38 @@ export const CheckoutPage: React.FC = () => {
     if (step === 2 && selectedPayment.id === 'stripe' && !stripeClientSecret) {
       const initStripe = async () => {
         try {
-          const { clientSecret } = await databaseService.createPaymentIntent(total);
+          // 1. Create a "pending" order first if it doesn't exist
+          let orderId = currentOrderId;
+          if (!orderId) {
+            const orderItems: OrderItem[] = cartItems.map(item => ({
+              productId: item.productId,
+              name: item.productName,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+              sku: item.sku,
+              landingCost: item.landingCost || (item.price * 0.6)
+            }));
+
+            const orderData = {
+              items: orderItems,
+              shipping_address: formData,
+              shipping_cost: selectedShipping.price,
+              payment_method: 'stripe',
+              shipping: {
+                method: selectedShipping.name,
+                cost: selectedShipping.price
+              },
+              status: 'awaiting_payment'
+            };
+
+            const response = await databaseService.createOrder(orderData);
+            orderId = response.id;
+            setCurrentOrderId(orderId);
+          }
+
+          // 2. Create Payment Intent linked to this order
+          const { clientSecret } = await databaseService.createPaymentIntent(cartItems, selectedShipping.price, orderId || undefined);
           setStripeClientSecret(clientSecret);
         } catch (err: any) {
           console.error('Stripe Init Error:', err);
@@ -239,7 +271,7 @@ export const CheckoutPage: React.FC = () => {
       };
       initStripe();
     }
-  }, [step, selectedPayment, total, stripeClientSecret]);
+  }, [step, selectedPayment, total, stripeClientSecret, currentOrderId]);
 
   const handleNext = () => {
     setError(null);
@@ -287,7 +319,8 @@ export const CheckoutPage: React.FC = () => {
 
       const isPaid = isStripePaid || (selectedPayment.id !== 'cod' && selectedPayment.id !== 'bank_transfer');
 
-      const orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> = {
+      const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string } = {
+        id: currentOrderId || undefined,
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,
         subtotal: discountedSubtotal,

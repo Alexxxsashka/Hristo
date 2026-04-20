@@ -23,6 +23,21 @@ const __dirname = path.dirname(__filename);
 let dbStrategy: 'sql' | 'pglite' = 'sql';
 let pgliteInstance: PGlite | null = null;
 
+// Initialize Database Schema if needed
+const initSchema = async () => {
+  try {
+    // Add stripe columns if they don't exist
+    await pool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+    `);
+    console.log('✅ DB Schema updated for Stripe');
+  } catch (err) {
+    console.warn('⚠️ DB Schema update warning (might already exist or PGLite limitation):', err);
+  }
+};
+
 const createPool = () => {
   const connectionString = 
     process.env.DATABASE_URL || 
@@ -56,6 +71,7 @@ const testConnection = async () => {
     const res = await pool.query('SELECT NOW()');
     console.log('✅ Cloud SQL Connected at:', res.rows[0].now);
     dbStrategy = 'sql';
+    await initSchema();
   } catch (err: any) {
     console.error('❌ Cloud SQL Connection Error:', err.message);
     console.log('🔄 Switching to local PGLite fallback...');
@@ -1708,6 +1724,70 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
   });
 
+  // Stripe Payment Intent API
+  app.post("/api/create-payment-intent", authenticateToken, async (req: any, res) => {
+    try {
+      const { items, shipping_cost, orderId } = req.body;
+      
+      // Calculate total amount in cents
+      let subtotal = 0;
+      const userResult = await pool.query('SELECT discount_level, stripe_customer_id FROM users WHERE id = $1', [req.user.id]);
+      const userDiscount = userResult.rows[0]?.discount_level || 0;
+
+      for (const item of items) {
+        // Fetch product to verify price
+        const productResult = await pool.query('SELECT price, discount, category_id FROM products WHERE id = $1', [item.product_id || item.productId]);
+        if (productResult.rows.length === 0) continue;
+        
+        const product = productResult.rows[0];
+        
+        // Match the complex logic in orders API: max of (product discount, category discount, user discount)
+        const categoryResult = await pool.query('SELECT discount FROM categories WHERE id = $1', [product.category_id]);
+        const categoryDiscount = categoryResult.rows[0]?.discount || 0;
+        
+        const productDiscount = parseInt(product.discount) || 0;
+        const bestDiscount = Math.max(productDiscount, categoryDiscount, userDiscount);
+        
+        const price = parseFloat(product.price) * (1 - bestDiscount / 100);
+        subtotal += price * item.quantity;
+      }
+      
+      const totalAmount = Math.round((subtotal + (shipping_cost || 0)) * 100); // Stripe expects cents
+
+      // Get or Create Stripe Customer
+      let stripeCustomerId = userResult.rows[0]?.stripe_customer_id;
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create({
+          email: req.user.email,
+          metadata: { userId: req.user.id }
+        });
+        stripeCustomerId = customer.id;
+        await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [stripeCustomerId, req.user.id]);
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: "eur",
+        customer: stripeCustomerId,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          userId: req.user.id,
+          email: req.user.email,
+          orderId: orderId || ''
+        }
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error: any) {
+      console.error("Stripe Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Orders API
   app.post("/api/orders", authenticateToken, async (req: any, res) => {
     const orderData = req.body;
@@ -1806,15 +1886,19 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         [newPoints, newRank, newDiscountLevel, req.user.id]
       );
 
-      // 4. Create Order
+      // 4. Create Order (Upsert for idempotency)
       await client.query(
         `INSERT INTO orders (
           id, order_number, user_id, subtotal, tax, shipping_cost, total, profit, status, 
           payment_method, shipping_address, shipping_method
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ON CONFLICT (id) DO UPDATE SET
+          status = EXCLUDED.status,
+          total = EXCLUDED.total,
+          updated_at = CURRENT_TIMESTAMP`,
         [
           orderId, orderNumber, req.user.id, authoritativeSubtotal, tax, shippingCost, 
-          authoritativeTotal, authoritativeProfit, 'pending', 
+          authoritativeTotal, authoritativeProfit, orderData.status || 'pending', 
           orderData.payment_method || orderData.payment?.method, 
           JSON.stringify(orderData.shipping_address || orderData.shipping),
           orderData.shipping?.method || 'Standard'
@@ -2327,26 +2411,45 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   }
 });
 
-// Stripe Payment Intent
-app.post("/api/create-payment-intent", async (req, res) => {
-  try {
-    const { amount, currency = "eur" } = req.body;
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // amount in cents
-      currency,
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
+// Stripe Webhook Endpoint
+// IMPORTANT: This must be before express.json() if you use it globally, 
+// but here we use it inside the app definition.
+app.post("/api/webhooks/stripe", express.raw({type: 'application/json'}), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    res.send({
-      clientSecret: paymentIntent.client_secret,
-    });
-  } catch (error: any) {
-    console.error("Stripe Error:", error.message);
-    res.status(400).send({ error: error.message });
+  let event;
+
+  try {
+    if (endpointSecret && sig) {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } else {
+      event = req.body; // For testing without signature verification if secret is missing
+    }
+  } catch (err: any) {
+    console.error(`❌ Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      console.log(`✅ PaymentIntent for ${paymentIntent.amount} was successful!`);
+      
+      // Update order in database if we have a linked orderId in metadata
+      if (paymentIntent.metadata.orderId) {
+        await pool.query(
+          "UPDATE orders SET status = 'processing', payment_status = 'paid', stripe_payment_intent_id = $1 WHERE id = $2",
+          [paymentIntent.id, paymentIntent.metadata.orderId]
+        );
+      }
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({received: true});
 });
 
 app.delete("/api/admin/warehouses/:id", authenticateAdmin, async (req, res) => {
