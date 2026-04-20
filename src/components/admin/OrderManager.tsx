@@ -64,6 +64,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
     try {
       await databaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
       onNotify(`Order status updated to ${newStatus}`);
+      onUpdate(); // Refresh the main orders list automatically
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }

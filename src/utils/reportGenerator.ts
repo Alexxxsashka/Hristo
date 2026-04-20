@@ -1,14 +1,7 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Order } from '../types';
 import { formatEnum } from './format';
-
-// Add type definition for jspdf-autotable to avoid TS errors
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
 
 export const generateOrdersReport = (orders: Order[], filters: { status: string, search: string }) => {
   const doc = new jsPDF();
@@ -80,7 +73,7 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
     `EUR ${order.total.toFixed(2)}`
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [tableColumn],
     body: tableRows,
