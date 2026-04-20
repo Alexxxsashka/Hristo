@@ -299,6 +299,13 @@ export const databaseService = {
     return res.ok ? await res.json() : [];
   },
 
+  async getUsers() {
+    const res = await fetch('/api/admin/users', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return res.ok ? await res.json() : [];
+  },
+
   async saveMessage(message: any) {
     const url = message.id ? `/api/admin/messages/${message.id}` : '/api/admin/messages';
     const method = message.id ? 'PUT' : 'POST';

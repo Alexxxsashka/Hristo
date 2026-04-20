@@ -90,6 +90,7 @@ export const AdminDashboard: React.FC = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [users_list, setUsersList] = useState<any[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
@@ -116,6 +117,7 @@ export const AdminDashboard: React.FC = () => {
         fetchBlogPosts(),
         fetchPolicies(),
         fetchOrdersInternal(),
+        databaseService.getUsers().then(u => setUsersList(u || [])),
         databaseService.getMessages().then(m => setMessages(m || []))
       ]);
       setIsLoading(false);
@@ -389,7 +391,7 @@ export const AdminDashboard: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-8"
               >
-                <BIAnalytics orders={orders} />
+                <BIAnalytics orders={orders} users={users_list} />
 
                 <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
                   <div className="relative z-10 max-w-2xl">

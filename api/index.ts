@@ -1121,13 +1121,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ ok: true });
     }
 
-    // ── GET /admin/messages ────────────────────────────────────────────────────
-    if (path === "/admin/messages" && method === "GET") {
+    // ── GET /admin/users ───────────────────────────────────────────────────────
+    if (path === "/admin/users" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      const r = await pool.query("SELECT * FROM contact_messages ORDER BY date DESC");
+      const r = await pool.query("SELECT id, email, username, role, rank, points, created_at FROM users ORDER BY created_at DESC");
       return res.json(r.rows);
     }
+
+    // ── GET /admin/messages ────────────────────────────────────────────────────
 
     // ── GET /saved-builds ──────────────────────────────────────────────────────
     if (path === "/saved-builds" && method === "GET") {

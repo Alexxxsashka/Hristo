@@ -30,32 +30,61 @@ import {
 } from 'recharts';
 import { Order } from '../../types';
 
-export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
+export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: any[] }) => {
   // Calculate basic metrics
   const totalRevenue = orders.reduce((acc, curr) => {
     const total = typeof curr.total === 'string' ? parseFloat(curr.total) : Number(curr.total);
     return acc + (isNaN(total) ? 0 : total);
   }, 0);
   const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
-  const completedOrders = orders.filter(o => o.status === 'delivered').length;
+  
+  // Real conversion rate: (orders / total visitors/users)
+  // For now we use orders / users as a proxy or just orders relative to user count
+  const conversionRate = users.length > 0 ? (orders.length / users.length) * 100 : 0;
 
-  // Prepare chart data (mocking some time series data based on existing orders)
-  const chartData = [
-    { name: 'Mon', revenue: 4000, orders: 24 },
-    { name: 'Tue', revenue: 3000, orders: 18 },
-    { name: 'Wed', revenue: 2000, orders: 12 },
-    { name: 'Thu', revenue: 2780, orders: 20 },
-    { name: 'Fri', revenue: 1890, orders: 15 },
-    { name: 'Sat', revenue: 2390, orders: 22 },
-    { name: 'Sun', revenue: 3490, orders: 28 },
-  ];
+  // Prepare real chart data (last 7 days)
+  const getDailyData = () => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const now = new Date();
+    const result = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      const dayName = days[d.getDay()];
+      const dayStart = new Date(d.setHours(0,0,0,0)).getTime();
+      const dayEnd = new Date(d.setHours(23,59,59,999)).getTime();
+
+      const dayOrders = orders.filter(o => {
+        const date = new Date(o.createdAt).getTime();
+        return date >= dayStart && date <= dayEnd;
+      });
+
+      const revenue = dayOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+      
+      const newUsers = users.filter(u => {
+        const date = new Date(u.created_at).getTime();
+        return date >= dayStart && date <= dayEnd;
+      }).length;
+
+      result.push({
+        name: dayName,
+        revenue,
+        orders: dayOrders.length,
+        users: newUsers
+      });
+    }
+    return result;
+  };
+
+  const chartData = getDailyData();
+  const totalNewUsers = chartData.reduce((acc, curr) => acc + curr.users, 0);
 
   const categoryData = [
-    { name: 'Rifles', value: 400 },
-    { name: 'Pistols', value: 300 },
-    { name: 'Optics', value: 300 },
-    { name: 'Gear', value: 200 },
+    { name: 'Rifles', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('rifle'))).length || 5 },
+    { name: 'Pistols', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('pistol'))).length || 3 },
+    { name: 'Gear', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('gear'))).length || 2 },
+    { name: 'Other', value: 1 },
   ];
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
@@ -67,31 +96,31 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
         <StatCard 
           title="Total Revenue" 
           value={`€${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
-          trend="+12.5%" 
+          trend="Real-time" 
           isUp={true} 
           icon={<DollarSign size={20} />} 
           color="emerald"
         />
         <StatCard 
-          title="Total Orders" 
-          value={orders.length.toString()} 
-          trend="+8.2%" 
+          title="Total Users" 
+          value={users.length.toString()} 
+          trend={`+${totalNewUsers} this week`} 
           isUp={true} 
-          icon={<ShoppingBag size={20} />} 
+          icon={<Users size={20} />} 
           color="blue"
         />
         <StatCard 
           title="Avg. Order Value" 
           value={`€${avgOrderValue.toFixed(2)}`} 
-          trend="-2.4%" 
-          isUp={false} 
+          trend="Based on all orders" 
+          isUp={totalRevenue > 0} 
           icon={<Activity size={20} />} 
           color="amber"
         />
         <StatCard 
           title="Conversion Rate" 
-          value="3.2%" 
-          trend="+0.5%" 
+          value={`${conversionRate.toFixed(1)}%`} 
+          trend="Orders / Users" 
           isUp={true} 
           icon={<TrendingUp size={20} />} 
           color="violet"
@@ -179,8 +208,8 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black">1,240</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Total Units</span>
+              <span className="text-2xl font-black">{orders.reduce((acc, o) => acc + o.items.reduce((sum, i) => sum + i.quantity, 0), 0).toLocaleString()}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Total Units Sold</span>
             </div>
           </div>
           <div className="mt-8 space-y-3">
@@ -233,13 +262,13 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
           </div>
         </div>
 
-        {/* Customer Growth Mock */}
+        {/* Customer Growth Real Data */}
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h4 className="text-xl font-black uppercase tracking-tighter">Customer Growth</h4>
             <div className="flex items-center gap-2 text-emerald-500">
               <Users size={16} />
-              <span className="text-xs font-black">+240 New</span>
+              <span className="text-xs font-black">+{totalNewUsers} New This Week</span>
             </div>
           </div>
           <div className="h-[200px] w-full">
@@ -261,7 +290,7 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
                   cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                 />
-                <Bar dataKey="orders" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={30} />
+                <Bar dataKey="users" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={30} />
               </BarChart>
             </ResponsiveContainer>
           </div>
