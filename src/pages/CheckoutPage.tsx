@@ -245,15 +245,32 @@ export const CheckoutPage: React.FC = () => {
             }));
 
             const orderData = {
+              userId: isAuthenticated ? user!.id : 'guest',
               items: orderItems,
-              shipping_address: formData,
-              shipping_cost: selectedShipping.price,
-              payment_method: 'stripe',
-              shipping: {
-                method: selectedShipping.name,
-                cost: selectedShipping.price
+              subtotal: discountedSubtotal,
+              tax: 0,
+              shippingCost: selectedShipping.price,
+              total,
+              profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
+              status: 'awaiting_payment',
+              payment: {
+                method: 'stripe',
+                status: 'pending',
+                amount: total,
+                currency: 'EUR',
+                paidAt: null
               },
-              status: 'awaiting_payment'
+              shipping: {
+                method: selectedShipping.id,
+                fullName: `${formData.firstName} ${formData.lastName}`,
+                phone: formData.phone,
+                email: formData.email,
+                city: formData.city,
+                address: formData.address,
+                postalCode: formData.postalCode,
+                status: 'pending',
+                cost: selectedShipping.price
+              }
             };
 
             const response = await databaseService.createOrder(orderData);
