@@ -220,7 +220,10 @@ export const AdminDashboard: React.FC = () => {
     if (productFilter === 'out_of_stock') return matchesSearch && p.stock <= 0;
     if (productFilter === 'premium') return matchesSearch && p.price > 500;
     
-    if (indexedSearch) return p.sku?.toLowerCase() === indexedSearch.toLowerCase();
+    if (indexedSearch) {
+      return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) || 
+             p.id.toLowerCase().includes(indexedSearch.toLowerCase());
+    }
     
     return matchesSearch;
   });
@@ -1946,8 +1949,7 @@ const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFilter, e
 
     // Еквівалент BindingSource.Find: пошук за проіндексованим ID замовлення
     if (externalSearch) {
-       return order.id.toLowerCase() === externalSearch.toLowerCase() ||
-              order.id.toLowerCase().includes(externalSearch.toLowerCase());
+       return order.id.toLowerCase().includes(externalSearch.toLowerCase());
     }
     
     return matchesStatus;
