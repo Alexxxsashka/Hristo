@@ -103,9 +103,9 @@ function mapOrder(row: any, items: any[] = []) {
     profit: Number(row.profit || 0),
     status: row.status,
     payment: {
-      method: row.payment_method,
-      status: row.payment_status,
-      amount: Number(row.total),
+      method: row.payment_method || 'unknown',
+      status: row.payment_status || 'pending',
+      amount: Number(row.total || 0),
       currency: "EUR"
     },
     shipping: typeof row.shipping_address === 'string' ? JSON.parse(row.shipping_address) : (row.shipping_address || {}),

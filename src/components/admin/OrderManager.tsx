@@ -366,12 +366,12 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                           <span className="text-3xl font-black text-emerald-400">€{selectedOrder.total.toFixed(2)}</span>
                         </div>
                         <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl border border-zinc-700">
-                          {selectedOrder.payment.method === 'stripe' ? <CreditCard size={14} className="text-emerald-500" /> : <Wallet size={14} className="text-amber-500" />}
+                          {selectedOrder.payment?.method === 'stripe' ? <CreditCard size={14} className="text-emerald-500" /> : <Wallet size={14} className="text-amber-500" />}
                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                            {selectedOrder.payment.status === 'paid' ? 'Verified Payment' : 'Payment Outstanding'}
-                            {' via ' + (selectedOrder.payment.method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment.method.toUpperCase())}
+                            {selectedOrder.payment?.status === 'paid' ? 'Verified Payment' : 'Payment Outstanding'}
+                            {' via ' + (selectedOrder.payment?.method === 'cod' ? 'Cash on Delivery' : (selectedOrder.payment?.method?.toUpperCase() || 'UNKNOWN'))}
                           </span>
-                          <div className={`ml-auto w-2 h-2 rounded-full ${selectedOrder.payment.status === 'paid' ? 'bg-emerald-500' : 'bg-amber-500 pulse'}`} />
+                          <div className={`ml-auto w-2 h-2 rounded-full ${selectedOrder.payment?.status === 'paid' ? 'bg-emerald-500' : 'bg-amber-500 pulse'}`} />
                         </div>
                       </div>
                     </div>
