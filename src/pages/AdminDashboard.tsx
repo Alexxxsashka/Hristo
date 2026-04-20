@@ -426,36 +426,8 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
-                  <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                    <button
-                      onClick={() => setOrderFilter('all')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
-                    >All</button>
-                    <button
-                      onClick={() => setOrderFilter('pending')}
-                      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${orderFilter === 'pending' ? 'bg-amber-500 text-white shadow-lg' : 'text-zinc-400'
-                        }`}
-                    >Pending</button>
-                  </div>
-
-                  <div className="relative w-80">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input
-                      type="text"
-                      placeholder="BindingSource.Find: Enter Order ID..."
-                      value={indexedSearch}
-                      onChange={(e) => setIndexedSearch(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
-                    />
-                  </div>
-                </div>
-
                 <OrderManager
                   orders={orders}
-                  externalFilter={orderFilter}
-                  externalSearch={indexedSearch}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
                   onUpdate={fetchOrdersInternal}
@@ -470,33 +442,7 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-xl">
-                      <button
-                        onClick={() => setProductFilter('all')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'all' ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-400'
-                          }`}
-                      >All</button>
-                      <button
-                        onClick={() => setProductFilter('out_of_stock')}
-                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${productFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400'
-                          }`}
-                      >Out of Stock</button>
-                    </div>
-
-                    <div className="relative w-80">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                      <input
-                        type="text"
-                        placeholder="BindingSource.Find: Enter SKU..."
-                        value={indexedSearch}
-                        onChange={(e) => setIndexedSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
-                      />
-                    </div>
-                  </div>
-
+                <div className="flex items-center justify-end mb-6">
                   <button
                     onClick={() => {
                       setEditingProduct(null);
