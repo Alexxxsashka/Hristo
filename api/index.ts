@@ -254,6 +254,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         results.push("Added tracking_number to orders");
         
         await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT");
+        
+        // Missing Checkout / Loyalty Fields Migrations
+        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS image TEXT");
+        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS sku TEXT");
+        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS category TEXT");
+        
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT");
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT");
+        
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS first_name TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS last_name TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_phone TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_city TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_postal_code TEXT");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10,2) DEFAULT 0");
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS points_earned INTEGER DEFAULT 0");
         results.push("Added stripe_payment_intent_id to orders");
 
         return res.json({ success: true, results });
