@@ -133,6 +133,57 @@ function match(path: string, pattern: string): string[] | null {
   return keys.map((_, i) => m[i + 1]);
 }
 
+async function recalculateUserPointsAndRank(pool: any, userId: string) {
+  if (!userId || userId === 'guest') return;
+  try {
+    // Ensure user exists in users table first
+    const userCheck = await pool.query("SELECT id FROM users WHERE id = $1", [userId]);
+    if (userCheck.rows.length === 0) {
+      // Fetch email from tokens or orders if possible, or use a default
+      // For now, let's just create a shell user record
+      try {
+        await pool.query(
+          "INSERT INTO users (id, email, username, role, rank, points) VALUES ($1, $2, $3, 'user', 'recruit', 0) ON CONFLICT DO NOTHING",
+          [userId, `user_${userId}@placeholder.com`, `User_${userId.slice(-4)}`]
+        );
+      } catch (e) {
+        console.error("[Loyalty] Failed to create user shell", e);
+      }
+    }
+
+    // Points = sum of total prices of all 'paid', 'processing', 'shipped', 'delivered' orders
+    const fulfilledStatuses = ['processing', 'shipped', 'delivered', 'paid'];
+    const ordersRes = await pool.query(
+      "SELECT SUM(total) as total_spent FROM orders WHERE user_id = $1 AND status = ANY($2)",
+      [userId, fulfilledStatuses]
+    );
+    
+    const points = Math.floor(Number(ordersRes.rows[0]?.total_spent || 0));
+    
+    // Rank thresholds (matching LoyaltyRank.tsx)
+    const ranks = [
+      { name: 'recruit', threshold: 0, discount: 0 },
+      { name: 'private', threshold: 500, discount: 3 },
+      { name: 'sergeant', threshold: 1500, discount: 5 },
+      { name: 'special_forces', threshold: 3000, discount: 10 },
+      { name: 'operator', threshold: 5000, discount: 15 },
+      { name: 'commander', threshold: 10000, discount: 20 },
+    ].reverse(); // reverse to check high to low
+
+    const currentRank = ranks.find(r => points >= r.threshold) || ranks[ranks.length - 1];
+    
+    await pool.query(
+      "UPDATE users SET points = $2, rank = $3, discount_level = $4 WHERE id = $1",
+      [userId, points, currentRank.name, currentRank.discount]
+    );
+    console.log(`[Loyalty] Updated User ${userId}: Points=${points}, Rank=${currentRank.name}`);
+  } catch (err) {
+    console.error("[Loyalty] Recalculation failed for user", userId, err);
+  }
+}
+
+
+
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -208,6 +259,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // ── Loyalty Recalculate ──────────────────────────────────────────────────
+    if (path === "/admin/loyalty/recalc" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      
+      try {
+        const usersRes = await pool.query("SELECT id FROM users");
+        for (const u of usersRes.rows) {
+          await recalculateUserPointsAndRank(pool, u.id);
+        }
+        return res.json({ success: true, count: usersRes.rows.length });
+      } catch (err: any) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
     // ── Stripe Payment Intent ───────────────────────────────────────────────
     if (path === "/create-payment-intent" && method === "POST") {
       const user = getUser(req);
@@ -278,6 +345,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             "UPDATE orders SET status = 'processing', payment_status = 'paid', stripe_payment_intent_id = $1 WHERE id = $2",
             [pi.id, pi.metadata.orderId]
           );
+          // Recalculate points for the user
+          if (pi.metadata.userId) {
+            await recalculateUserPointsAndRank(pool, pi.metadata.userId);
+          }
         }
       }
       return res.json({ received: true });
@@ -1111,6 +1182,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderId, newStatus, tracking_number]);
+        
+        // Recalculate rank for the user who owns this order
+        const ownerRes = await pool.query("SELECT user_id FROM orders WHERE id = $1", [orderId]);
+        if (ownerRes.rows.length > 0) {
+          await recalculateUserPointsAndRank(pool, ownerRes.rows[0].user_id);
+        }
       } catch (err: any) {
         console.error("Order status update error:", err);
         // Fallback simple update if everything above fails
