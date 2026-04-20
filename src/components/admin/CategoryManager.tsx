@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit, X, Check } from 'lucide-react';
 import { Category } from '../../types';
 import { databaseService } from '../../services/databaseService';
@@ -43,6 +44,12 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
     const error = validateField(field, value);
     setFieldErrors(prev => ({ ...prev, [field]: error }));
   };
+
+  // SCORCHED EARTH: Forcibly remove 'required' 
+  useEffect(() => {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => input.removeAttribute('required'));
+  }, [newCat.name]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +171,12 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
             </div>
           )}
         </div>
-        <form noValidate onSubmit={handleAdd} className="space-y-6">
+        <form 
+          noValidate 
+          onSubmit={handleAdd} 
+          onInvalid={(e) => e.preventDefault()}
+          className="space-y-6"
+        >
           <div className="flex gap-4">
             <div className="flex-1 space-y-1">
               <input
@@ -177,9 +189,19 @@ export const CategoryManager = ({ categories, showHelp, onUpdate, onNotify, onCo
                 }`}
                 maxLength={100}
               />
-              {fieldErrors.name && (
-                <p className="text-red-500 text-xs">{fieldErrors.name}</p>
-              )}
+              <AnimatePresence>
+                {fieldErrors.name && (
+                  <motion.p 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="text-red-500 text-[11px] font-medium flex items-center gap-1"
+                  >
+                    <X size={12} />
+                    {fieldErrors.name}
+                  </motion.p>
+                )}
+              </AnimatePresence>
               {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
             </div>
             <div className="w-48 space-y-1">

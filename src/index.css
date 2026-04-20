@@ -35,3 +35,17 @@
     @apply bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors;
   }
 }
+
+/* FORCIBLY HIDE BROWSER VALIDATION BUBBLES */
+::-webkit-validation-bubble,
+::-webkit-validation-bubble-arrow,
+::-webkit-validation-bubble-arrow-clipper,
+::-webkit-validation-bubble-heading,
+::-webkit-validation-bubble-message,
+::-webkit-validation-bubble-icon {
+  display: none !important;
+}
+
+form {
+  -webkit-appearance: none;
+}
