@@ -194,6 +194,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           )
         `);
         results.push("Created product_compatibility table");
+        
+        // Fix orders table missing columns
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
+        results.push("Added tracking_number to orders");
+        
+        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT");
+        results.push("Added stripe_payment_intent_id to orders");
 
         return res.json({ success: true, results });
       } catch (err: any) {
@@ -927,9 +934,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const userId = user?.id || "guest";
       const id = providedId || `order-${Date.now()}`;
       
+      // Calculate profit
+      let profit = 0;
+      if (items?.length) {
+        let totalLandingCost = 0;
+        items.forEach((item: any) => {
+          const cost = Number(item.landingCost || item.price * 0.6);
+          totalLandingCost += cost * (item.quantity || 1);
+        });
+        profit = Number(total || 0) - totalLandingCost;
+      }
+
       const resOrder = await pool.query(
-        `INSERT INTO orders (id, order_number, user_id, total, subtotal, shipping_cost, status, payment_method, payment_status, shipping_address, notes) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `INSERT INTO orders (id, order_number, user_id, total, subtotal, shipping_cost, status, payment_method, payment_status, shipping_address, notes, profit) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          ON CONFLICT (id) DO UPDATE SET 
            total = EXCLUDED.total,
            subtotal = EXCLUDED.subtotal,
@@ -937,7 +955,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
            status = EXCLUDED.status,
            payment_status = EXCLUDED.payment_status,
            shipping_address = EXCLUDED.shipping_address,
-           notes = EXCLUDED.notes
+           notes = EXCLUDED.notes,
+           profit = EXCLUDED.profit
          RETURNING order_number`,
         [
           id, 
@@ -950,7 +969,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           payment?.method || 'unknown',
           payment?.status || 'pending',
           JSON.stringify(shipping || {}),
-          notes || ''
+          notes || '',
+          profit
         ]
       );
 
@@ -992,7 +1012,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const { status, tracking_number } = req.body || {};
-      await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
+      
+      try {
+        await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
+      } catch (err: any) {
+        // If column doesn't exist, try to add it and retry
+        if (err.message.includes('tracking_number') || err.code === '42703') {
+          await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
+          await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderStatus[0], status, tracking_number]);
+        } else {
+          throw err;
+        }
+      }
       return res.json({ ok: true });
     }
 
