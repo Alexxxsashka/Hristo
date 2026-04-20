@@ -315,7 +315,8 @@ export const CheckoutPage: React.FC = () => {
     
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setError('Please fix the validation errors before submitting');
+      const errorFields = Object.keys(errors).join(', ');
+      setError(`Please fix the validation errors in: ${errorFields}`);
       return;
     }
     
@@ -639,12 +640,19 @@ export const CheckoutPage: React.FC = () => {
                     {selectedPayment.id === 'stripe' ? (
                       <div className="flex-[2]">
                         {stripeClientSecret ? (
-                          <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
+                          <Elements 
+                            key={stripeClientSecret}
+                            stripe={stripePromise} 
+                            options={{ 
+                              clientSecret: stripeClientSecret,
+                              appearance: { theme: 'night' }
+                            }}
+                          >
                             <StripePaymentForm 
                               total={total} 
-                              onSuccess={() => {
+                              onSuccess={async () => {
                                 // For Stripe, we confirm payment then create order marked as paid
-                                handleSubmit(new Event('submit') as any, true);
+                                await handleSubmit(new Event('submit') as any, true);
                               }} 
                             />
                           </Elements>

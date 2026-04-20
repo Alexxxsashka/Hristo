@@ -52,8 +52,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
 
     const matchesSearch = 
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.shipping.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.shipping.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      order.shipping?.email?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
+      order.shipping?.fullName?.toLowerCase()?.includes(searchQuery.toLowerCase());
       
     return matchesSearch && matchesStatus;
   });
@@ -148,8 +148,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                   <span className="font-mono text-xs font-bold text-zinc-400">#{order.id.slice(-8).toUpperCase()}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-bold text-zinc-900">{order.shipping.fullName}</div>
-                  <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{order.shipping.email}</div>
+                  <div className="font-bold text-zinc-900">{order.shipping?.fullName || 'N/A'}</div>
+                  <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{order.shipping?.email || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-zinc-600">{new Date(order.createdAt).toLocaleDateString()}</div>
@@ -309,18 +309,18 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                             <User size={20} />
                           </div>
                           <div>
-                            <div className="font-bold text-sm">{selectedOrder.shipping.fullName}</div>
+                            <div className="font-bold text-sm">{selectedOrder.shipping?.fullName || 'Guest'}</div>
                             <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Customer ID: {selectedOrder.userId || 'Guest'}</div>
                           </div>
                         </div>
                         <div className="space-y-2 pt-4 border-t border-zinc-50">
                           <div className="flex items-center gap-3 text-zinc-600">
                             <Mail size={16} className="text-zinc-400" />
-                            <span className="text-xs font-medium">{selectedOrder.shipping.email}</span>
+                            <span className="text-xs font-medium">{selectedOrder.shipping?.email || 'No email provided'}</span>
                           </div>
                           <div className="flex items-center gap-3 text-zinc-600">
                             <Phone size={16} className="text-zinc-400" />
-                            <span className="text-xs font-medium">{selectedOrder.shipping.phone || 'No phone provided'}</span>
+                            <span className="text-xs font-medium">{selectedOrder.shipping?.phone || 'No phone provided'}</span>
                           </div>
                         </div>
                       </div>
@@ -332,11 +332,15 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                         <MapPin size={16} />
                         Shipping Address
                       </h4>
-                      <div className="text-sm text-zinc-600 space-y-1">
-                        <p className="font-bold text-zinc-900">{selectedOrder.shipping.fullName}</p>
-                        <p>{selectedOrder.shipping.address}</p>
-                        <p>{selectedOrder.shipping.city}, {selectedOrder.shipping.postalCode}</p>
-                      </div>
+                      {selectedOrder.shipping ? (
+                        <div className="text-sm text-zinc-600 space-y-1">
+                          <p className="font-bold text-zinc-900">{selectedOrder.shipping.fullName}</p>
+                          <p>{selectedOrder.shipping.address}</p>
+                          <p>{selectedOrder.shipping.city}, {selectedOrder.shipping.postalCode}</p>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-zinc-400 italic">No shipping information available</div>
+                      )}
                     </div>
 
                     {/* Payment Summary */}

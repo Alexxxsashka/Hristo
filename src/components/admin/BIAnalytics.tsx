@@ -32,7 +32,10 @@ import { Order } from '../../types';
 
 export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
   // Calculate basic metrics
-  const totalRevenue = orders.reduce((acc, curr) => acc + curr.total, 0);
+  const totalRevenue = orders.reduce((acc, curr) => {
+    const total = typeof curr.total === 'string' ? parseFloat(curr.total) : Number(curr.total);
+    return acc + (isNaN(total) ? 0 : total);
+  }, 0);
   const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const completedOrders = orders.filter(o => o.status === 'delivered').length;
@@ -63,7 +66,7 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Revenue" 
-          value={`€${totalRevenue.toLocaleString()}`} 
+          value={`€${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
           trend="+12.5%" 
           isUp={true} 
           icon={<DollarSign size={20} />} 
@@ -109,7 +112,7 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
             </div>
           </div>
           <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -157,7 +160,7 @@ export const BIAnalytics = ({ orders }: { orders: Order[] }) => {
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <h4 className="text-xl font-black uppercase tracking-tighter mb-8">Sales by Category</h4>
           <div className="h-[300px] w-full relative">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
                   data={categoryData}

@@ -89,7 +89,42 @@ function getUser(req: VercelRequest) {
   }
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// ─── Mapper ───────────────────────────────────────────────────────────────────
+function mapOrder(row: any, items: any[] = []) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    userId: row.user_id,
+    subtotal: Number(row.subtotal),
+    tax: Number(row.tax || 0),
+    shippingCost: Number(row.shipping_cost || 0),
+    total: Number(row.total),
+    profit: Number(row.profit || 0),
+    status: row.status,
+    payment: {
+      method: row.payment_method,
+      status: row.payment_status,
+      amount: Number(row.total),
+      currency: "EUR"
+    },
+    shipping: typeof row.shipping_address === 'string' ? JSON.parse(row.shipping_address) : (row.shipping_address || {}),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    notes: row.notes,
+    items: items.map(item => ({
+      productId: item.product_id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: item.quantity,
+      image: item.image,
+      sku: item.sku,
+      configuration: typeof item.variant_info === 'string' ? JSON.parse(item.variant_info) : item.variant_info
+    })),
+    stripePaymentIntentId: row.stripe_payment_intent_id
+  };
+}
+
 function match(path: string, pattern: string): string[] | null {
   const keys: string[] = [];
   const re = new RegExp("^" + pattern.replace(/:([^/]+)/g, (_, k) => { keys.push(k); return "([^/]+)"; }) + "$");
@@ -97,6 +132,7 @@ function match(path: string, pattern: string): string[] | null {
   if (!m) return null;
   return keys.map((_, i) => m[i + 1]);
 }
+
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -868,47 +904,86 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/orders" && method === "GET") {
       const user = getUser(req);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
-      const r = await pool.query(
+      const ordersRes = await pool.query(
         "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
         [user.id]
       );
-      return res.json(r.rows);
-    }
-
-    // ── POST /orders ───────────────────────────────────────────────────────────
-    if (path === "/orders" && method === "POST") {
-      const user = getUser(req);
-      const { items, total, address, payment_method } = req.body || {};
-      const userId = user?.id || "guest";
-      const id = `order-${Date.now()}`;
-      const orderNumber = `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100+Math.random()*900)}`;
-      
-      const orderTotal = parseFloat(total) || 0;
-      const orderSubtotal = orderTotal; // Simplification for now to match total
-
-      await pool.query(
-        `INSERT INTO orders (id, order_number, user_id, total, subtotal, status, payment_status, notes) 
-         VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', $6)`,
-        [id, orderNumber, userId, orderTotal, orderSubtotal, JSON.stringify({ address, payment_method })]
+      const itemsRes = await pool.query(
+        "SELECT oi.* FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.user_id = $1",
+        [user.id]
       );
 
+      const orders = ordersRes.rows.map(row => {
+        const items = itemsRes.rows.filter(item => item.order_id === row.id);
+        return mapOrder(row, items);
+      });
+
+      return res.json(orders);
+    }
+
+    if (path === "/orders" && method === "POST") {
+      const user = getUser(req);
+      const { id: providedId, items, total, subtotal, shippingCost, status, payment, shipping, notes } = req.body || {};
+      const userId = user?.id || "guest";
+      const id = providedId || `order-${Date.now()}`;
+      
+      const resOrder = await pool.query(
+        `INSERT INTO orders (id, order_number, user_id, total, subtotal, shipping_cost, status, payment_method, payment_status, shipping_address, notes) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         ON CONFLICT (id) DO UPDATE SET 
+           total = EXCLUDED.total,
+           subtotal = EXCLUDED.subtotal,
+           shipping_cost = EXCLUDED.shipping_cost,
+           status = EXCLUDED.status,
+           payment_status = EXCLUDED.payment_status,
+           shipping_address = EXCLUDED.shipping_address,
+           notes = EXCLUDED.notes
+         RETURNING order_number`,
+        [
+          id, 
+          `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100+Math.random()*900)}`, 
+          userId, 
+          Number(total || 0), 
+          Number(subtotal || total || 0),
+          Number(shippingCost || 0),
+          status || 'pending',
+          payment?.method || 'unknown',
+          payment?.status || 'pending',
+          JSON.stringify(shipping || {}),
+          notes || ''
+        ]
+      );
+
+      const orderNumber = resOrder.rows[0].order_number;
+
+      // Only insert items if this is a new order or we want to refresh them
       if (items?.length) {
+        // Clear existing items if updating
+        await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
         for (const item of items) {
           await pool.query(
             "INSERT INTO order_items (order_id, product_id, name, quantity, price) VALUES ($1, $2, $3, $4, $5)",
-            [id, item.productId || item.id, item.name || 'Product', item.quantity, item.price]
+            [id, item.productId || item.id, item.name || 'Product', item.quantity, Number(item.price || 0)]
           );
         }
       }
-      return res.json({ id, order_number: orderNumber, status: "pending" });
+      return res.json({ id, order_number: orderNumber, status: status || "pending" });
     }
 
     // ── GET /admin/orders ──────────────────────────────────────────────────────
     if (path === "/admin/orders" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      const r = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
-      return res.json(r.rows);
+      
+      const ordersRes = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+      const itemsRes = await pool.query("SELECT * FROM order_items");
+      
+      const orders = ordersRes.rows.map(row => {
+        const items = itemsRes.rows.filter(item => item.order_id === row.id);
+        return mapOrder(row, items);
+      });
+      
+      return res.json(orders);
     }
 
     // ── PUT /admin/orders/:id/status ───────────────────────────────────────────

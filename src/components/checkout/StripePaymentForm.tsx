@@ -8,7 +8,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { AlertCircle, ShieldCheck } from 'lucide-react';
 
 interface StripePaymentFormProps {
-  onSuccess: () => void;
+  onSuccess: () => Promise<void> | void;
   total: number;
 }
 
@@ -43,7 +43,13 @@ export const StripePaymentForm: React.FC<StripePaymentFormProps> = ({ onSuccess,
       setErrorMessage(error.message || 'An unexpected error occurred.');
       setIsProcessing(false);
     } else {
-      onSuccess();
+      try {
+        await onSuccess();
+      } catch (err: any) {
+        setErrorMessage(err.message || 'Payment confirmed but failed to finalize order. Please contact support.');
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -52,8 +58,7 @@ export const StripePaymentForm: React.FC<StripePaymentFormProps> = ({ onSuccess,
       <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
         <PaymentElement options={{
           layout: 'accordion',
-          theme: 'night',
-        } as any} />
+        }} />
       </div>
 
       {errorMessage && (
