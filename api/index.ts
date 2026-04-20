@@ -6,28 +6,46 @@ import { put, del } from "@vercel/blob";
 import { handleUpload } from "@vercel/blob/client";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as any,
-});
+let stripe: Stripe | null = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2023-10-16" as any,
+    });
+  }
+} catch (e) {
+  console.error("Stripe init error:", e);
+}
+
 
 
 const { Pool } = pg;
 
 // ─── DB Connection ────────────────────────────────────────────────────────────
-const connectionString =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.hrdatabase_DATABASE_URL ||
-  process.env.hrdatabase_POSTGRES_URL;
-const hasDatabaseConfig = Boolean(connectionString);
+let pool: any = null;
+function getPool() {
+  if (pool) return pool;
+  
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.hrdatabase_DATABASE_URL ||
+    process.env.hrdatabase_POSTGRES_URL;
 
-const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false },
-  max: 5,
-  idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 5000,
-});
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  pool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 5,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
+  });
+  return pool;
+}
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "hristo-secret-key";
 
@@ -94,11 +112,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const method = req.method || "GET";
 
   try {
-    if (!hasDatabaseConfig) {
-      return res.status(500).json({
-        error: "Database is not configured. Set DATABASE_URL (Neon) in Vercel project environment variables.",
-      });
-    }
+    const pool = getPool();
+
 
     if (path === "/admin/stats" && method === "GET") {
       const user = getUser(req);
@@ -154,6 +169,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/create-payment-intent" && method === "POST") {
       const user = getUser(req);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
+      if (!stripe) return res.status(500).json({ error: "Stripe is not configured on the server. Please set STRIPE_SECRET_KEY." });
+
 
       const { items, shipping_cost, orderId } = req.body || {};
       if (!items || !Array.isArray(items)) return res.status(400).json({ error: "Items are required" });
@@ -1147,6 +1164,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ error: `Route ${method} ${path} not found` });
   } catch (err: any) {
     console.error("API Error:", err);
-    return res.status(500).json({ error: err.message, conn: connectionString ? "set" : "MISSING!" });
+    return res.status(500).json({ error: err.message });
   }
+
 }
