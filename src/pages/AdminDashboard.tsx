@@ -69,6 +69,7 @@ import {
 
 
 
+import { generateOrdersReport, generateProductsReport } from '../utils/reportGenerator';
 import { BIAnalytics } from '../components/admin/BIAnalytics';
 import { BlogManager } from '../components/admin/BlogManager';
 import { OrderManager } from '../components/admin/OrderManager';
@@ -124,6 +125,14 @@ export const AdminDashboard: React.FC = () => {
     };
 
     loadAllData();
+
+    // Auto-refresh orders and products in the background every 30 seconds
+    const interval = setInterval(() => {
+      fetchOrdersInternal();
+      fetchProducts();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [user, navigate]);
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -442,7 +451,14 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex items-center justify-end mb-6">
+                <div className="flex items-center justify-end gap-3 mb-6">
+                  <button
+                    onClick={() => generateProductsReport(products, orders)}
+                    className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-900 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all border border-zinc-200"
+                  >
+                    <FileText size={16} />
+                    Product Report (PDF)
+                  </button>
                   <button
                     onClick={() => {
                       setEditingProduct(null);
@@ -451,7 +467,7 @@ export const AdminDashboard: React.FC = () => {
                     className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
                   >
                     <Plus size={18} />
-                    ADD PRODUCT
+                    Add Product
                   </button>
                 </div>
                 <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
@@ -638,6 +654,7 @@ export const AdminDashboard: React.FC = () => {
                 products={products}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
+                onUpdate={fetchProducts}
                 onEditProduct={(p) => {
                   setEditingProduct(p);
                   setActiveTab('products');
@@ -646,7 +663,7 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {activeTab === 'settings' && (
-              <SiteSettingsManager onNotify={showNotification} />
+              <SiteSettingsManager onNotify={showNotification} onUpdate={loadAllData} />
             )}
           </AnimatePresence>
         </div>

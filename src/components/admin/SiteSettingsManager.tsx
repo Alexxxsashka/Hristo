@@ -4,7 +4,10 @@ import { motion } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
 import { SiteSettings } from '../../types';
 
-export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type?: 'success' | 'error') => void }) => {
+export const SiteSettingsManager = ({ onNotify, onUpdate }: { 
+  onNotify: (msg: string, type?: 'success' | 'error') => void,
+  onUpdate?: () => void
+}) => {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,6 +66,7 @@ export const SiteSettingsManager = ({ onNotify }: { onNotify: (msg: string, type
       await databaseService.updateSiteSettings(finalSettings);
       setSettings(finalSettings);
       onNotify('Site settings updated successfully!');
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Save failed', err);
       onNotify('Failed to update settings', 'error');

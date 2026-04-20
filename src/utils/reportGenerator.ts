@@ -106,3 +106,123 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
   // Save the PDF
   doc.save(`Orders_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 };
+
+export const generateProductsReport = (products: any[], orders: Order[]) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const date = new Date().toLocaleString();
+
+  // --- Header ---
+  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HRISTO AIRSOFT STORE', 14, 22);
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('PRODUCT PERFORMANCE & INVENTORY REPORT', 14, 30);
+  
+  doc.setFontSize(8);
+  doc.text(`Generated on: ${date}`, pageWidth - 14, 30, { align: 'right' });
+
+  // --- Analytics Calculation ---
+  const salesMap = new Map<string, { qty: number, revenue: number }>();
+  orders.forEach(order => {
+    if (order.status === 'cancelled' || order.status === 'refunded') return;
+    order.items.forEach(item => {
+      const current = salesMap.get(item.productId) || { qty: 0, revenue: 0 };
+      salesMap.set(item.productId, {
+        qty: current.qty + item.quantity,
+        revenue: current.revenue + (item.price * item.quantity)
+      });
+    });
+  });
+
+  const outOfStockProducts = products.filter(p => (p.stock || 0) <= 0);
+  const totalItemsSold = Array.from(salesMap.values()).reduce((sum, s) => sum + s.qty, 0);
+  const totalStockValue = products.reduce((sum, p) => sum + ((p.price || 0) * (p.stock || 0)), 0);
+
+  // --- Summary Section ---
+  let yPos = 50;
+  doc.setTextColor(24, 24, 27);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('INVENTORY SUMMARY', 14, yPos);
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Total Unique Products: ${products.length}`, 14, yPos + 8);
+  doc.text(`Out of Stock: ${outOfStockProducts.length}`, 14, yPos + 14);
+  doc.text(`Sold Units (All Time): ${totalItemsSold}`, 14, yPos + 20);
+  
+  const summaryX = pageWidth / 2;
+  doc.setFont('helvetica', 'bold');
+  doc.text('STOCK VALUE & PERFORMANCE', summaryX, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Estimated Stock Value: EUR ${totalStockValue.toLocaleString()}`, summaryX, yPos + 8);
+  doc.text(`Top Selling Products Table Below`, summaryX, yPos + 14);
+
+  // --- Products Table ---
+  yPos += 30;
+  
+  const tableColumn = ["Product Name", "SKU", "Sold", "Revenue", "Stock", "Status"];
+  const tableRows = products
+    .map(p => {
+      const sales = salesMap.get(p.id) || { qty: 0, revenue: 0 };
+      const status = (p.stock || 0) <= 0 ? 'OUT OF STOCK' : ((p.stock || 0) < 5 ? 'LOW STOCK' : 'ACTIVE');
+      return [
+        p.name,
+        p.sku || 'N/A',
+        sales.qty,
+        `EUR ${sales.revenue.toFixed(2)}`,
+        p.stock || 0,
+        status
+      ];
+    })
+    .sort((a, b) => (b[2] as number) - (a[2] as number)); // Sort by sold quantity
+
+  autoTable(doc, {
+    startY: yPos,
+    head: [tableColumn],
+    body: tableRows,
+    theme: 'striped',
+    headStyles: {
+      fillColor: [24, 24, 27],
+      textColor: [255, 255, 255],
+      fontSize: 9,
+      fontStyle: 'bold'
+    },
+    columnStyles: {
+      0: { cellWidth: 60 },
+      2: { halign: 'center' },
+      3: { halign: 'right' },
+      4: { halign: 'center' },
+      5: { fontStyle: 'bold', halign: 'center' }
+    },
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 2.5
+    },
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 5) {
+        if (data.cell.text[0] === 'OUT OF STOCK') {
+          data.cell.styles.textColor = [220, 38, 38]; // red-600
+        } else if (data.cell.text[0] === 'LOW STOCK') {
+          data.cell.styles.textColor = [217, 119, 6]; // amber-600
+        }
+      }
+    }
+  });
+
+  // --- Footer ---
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  doc.setFontSize(8);
+  doc.setTextColor(161, 161, 170);
+  doc.text('Confidential - Inventory Analysis Report', pageWidth / 2, finalY, { align: 'center' });
+
+  // Save the PDF
+  doc.save(`Products_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+};

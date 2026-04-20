@@ -22,11 +22,12 @@ import { formatEnum } from '../../utils/format';
 
 
 
-export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: { 
+export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct, onUpdate }: { 
   products: Product[],
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void,
-  onEditProduct: (product: Product) => void
+  onEditProduct: (product: Product) => void,
+  onUpdate?: () => void
 }) => {
   const { t } = useTranslation();
   const [subTab, setSubTab] = useState<'inventory' | 'procurement' | 'financials' | 'logs'>('inventory');
@@ -87,6 +88,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       await databaseService.seedStockData();
       onNotify('Stock data seeded successfully for all products');
       loadERPData();
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to seed stock data', err);
       onNotify('Failed to seed stock data', 'error');
@@ -108,6 +110,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       setShowWarehouseModal(false);
       setNewWarehouse({ name: '', location: '', type: 'distribution' });
       await loadERPData();
+      if (onUpdate) onUpdate();
     } catch (err) {
       onNotify(t('warehouse_added_error') || 'Failed to add warehouse', 'error');
     } finally {
@@ -126,6 +129,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       setShowSupplierModal(false);
       setNewSupplier({ name: '', contactName: '', email: '', phone: '', leadTimeDays: 7, brands: [] });
       loadERPData();
+      if (onUpdate) onUpdate();
     } catch (err) {
       onNotify('Failed to add supplier', 'error');
     }
@@ -141,6 +145,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
         await databaseService.deleteWarehouse(id);
         onNotify('Warehouse deleted successfully');
         loadERPData();
+        if (onUpdate) onUpdate();
       } catch (err) {
         onNotify('Failed to delete warehouse', 'error');
       }
@@ -153,6 +158,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
         await databaseService.deleteSupplier(id);
         onNotify('Supplier deleted successfully');
         loadERPData();
+        if (onUpdate) onUpdate();
       } catch (err) {
         onNotify('Failed to delete supplier', 'error');
       }
@@ -173,6 +179,7 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct }: {
       setQuickCode('');
       setQuickQty(1);
       loadERPData(); // Refresh data
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to update stock', err);
       onNotify(`Failed to update stock: ${err instanceof Error ? err.message : String(err)}`, 'error');
