@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { X, Lightbulb, MousePointer2, Move, ZoomIn, Mouse, Eye, EyeOff, Maximize, Layout, Minimize, Sparkles, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { databaseService } from '../services/databaseService';
 
 // EFT Style Slot Metadata

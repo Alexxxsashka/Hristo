@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Save, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
 import { Product, Category, Characteristic, ProductVariant, ProductAttribute } from '../../types';
 import { WEAPON_SLOTS } from '../../constants';
@@ -140,7 +140,15 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     } else {
       setActiveCategory(null);
     }
-  }, [formData.category, categories]);
+
+    // SCORCHED EARTH: Forcibly remove 'required' from all visible inputs to block browser tooltips
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.hasAttribute('required')) {
+        input.removeAttribute('required');
+      }
+    });
+  }, [formData.category, categories, formData.name]); // Re-run when crucial fields change
 
   const handleCategoryFilterChange = (filterId: string, value: any) => {
     setFormData({
