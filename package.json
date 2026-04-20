@@ -12,7 +12,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.4.4",
     "@firebase/data-connect": "^0.6.0",
     "@google-cloud/cloud-sql-connector": "^1.9.2",
     "@google/genai": "^1.29.0",
@@ -28,7 +27,6 @@
     "@vitejs/plugin-react": "^5.0.4",
     "axios": "^1.15.0",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.4.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",

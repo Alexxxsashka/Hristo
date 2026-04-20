@@ -12,31 +12,14 @@ import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import pg from "pg";
-import { PGlite } from "@electric-sql/pglite";
 import axios from 'axios';
 import Stripe from "stripe";
 import { put, del } from "@vercel/blob";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// DB Strategy: Try Cloud SQL, fallback to PGLite for local/demo if SQL fails
-let dbStrategy: 'sql' | 'pglite' = 'sql';
-let pgliteInstance: PGlite | null = null;
-
-// Initialize Database Schema if needed
-const initSchema = async () => {
-  try {
-    // Add stripe columns if they don't exist
-    await pool.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
-      ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;
-      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
-    `);
-    console.log('✅ DB Schema updated for Stripe');
-  } catch (err) {
-    console.warn('⚠️ DB Schema update warning (might already exist or PGLite limitation):', err);
-  }
-};
+// DB Strategy: Cloud SQL only
+let dbStrategy: 'sql' = 'sql';
 
 const createPool = () => {
   const connectionString = 
@@ -48,56 +31,53 @@ const createPool = () => {
   if (connectionString) {
     return new pg.Pool({
       connectionString,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 10000,
       ssl: { rejectUnauthorized: false },
     });
   }
+  
+  // Fallback to individual env vars if no connection string
   return new pg.Pool({
     user: process.env.DB_USER || "postgres",
     password: process.env.DB_PASSWORD || "postgres",
-    host: process.env.DB_HOST || "34.29.209.72",
+    host: process.env.DB_HOST || "localhost",
     port: parseInt(process.env.DB_PORT || "5432"),
     database: process.env.DB_NAME || "postgres",
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
     ssl: { rejectUnauthorized: false },
   });
 };
 
 let pool = createPool();
 
+// Initialize Database Schema if needed
+const initSchema = async () => {
+  try {
+    // Add stripe columns if they don't exist
+    await pool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+    `);
+    console.log('✅ DB Schema verified');
+  } catch (err) {
+    console.error('❌ DB Schema update error:', err);
+  }
+};
+
 // Diagnostic DB Test
 const testConnection = async () => {
   try {
     const res = await pool.query('SELECT NOW()');
-    console.log('✅ Cloud SQL Connected at:', res.rows[0].now);
-    dbStrategy = 'sql';
+    console.log('✅ Cloud DB Connected at:', res.rows[0].now);
     await initSchema();
   } catch (err: any) {
-    console.error('❌ Cloud SQL Connection Error:', err.message);
-    console.log('🔄 Switching to local PGLite fallback...');
-    dbStrategy = 'pglite';
-    pgliteInstance = new PGlite();
-    
-    // Mimic the pool query interface for PGLite
-    const pgliteQuery = async (text: string, params?: any[]) => {
-      if (!pgliteInstance) throw new Error('PGLite not initialized');
-      const result = await pgliteInstance.query(text, params);
-      return { 
-        rows: result.rows, 
-        rowCount: result.rows.length,
-        command: result.affectedRows ? 'UPDATE' : 'SELECT' // Mock command
-      };
-    };
-
-    (pool as any).query = pgliteQuery;
-    (pool as any).connect = async () => {
-      return {
-        query: pgliteQuery,
-        release: () => {}
-      };
-    };
+    console.error('❌ Cloud DB Connection Error:', err.message);
+    console.error('FATAL: Application requires active Cloud DB connection.');
+    process.exit(1); // Exit if no cloud DB
   }
 };
+
 
 
 

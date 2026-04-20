@@ -139,12 +139,12 @@ async function recalculateUserPointsAndRank(pool: any, userId: string) {
     // Ensure user exists in users table first
     const userCheck = await pool.query("SELECT id FROM users WHERE id = $1", [userId]);
     if (userCheck.rows.length === 0) {
-      // Fetch email from tokens or orders if possible, or use a default
-      // For now, let's just create a shell user record
       try {
+        // Try to derive a better username from userId or something, but keep it minimal
+        // We'll use the slice as a fallback but allow it to be updated
         await pool.query(
-          "INSERT INTO users (id, email, username, role, rank, points) VALUES ($1, $2, $3, 'user', 'recruit', 0) ON CONFLICT DO NOTHING",
-          [userId, `user_${userId}@placeholder.com`, `User_${userId.slice(-4)}`]
+          "INSERT INTO users (id, email, username, role, rank, points, discount_level) VALUES ($1, $2, $3, 'user', 'recruit', 0, 0) ON CONFLICT DO NOTHING",
+          [userId, `user_${userId.slice(-6)}@hristo.local`, `User_${userId.slice(-4)}`]
         );
       } catch (e) {
         console.error("[Loyalty] Failed to create user shell", e);
@@ -1228,10 +1228,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const authenticatedUser = getUser(req);
       
       try {
-        const r = await pool.query("SELECT id, username, email, role, phone, address FROM users WHERE id = $1", [userId[0]]);
+        const r = await pool.query(
+          "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\" FROM users WHERE id = $1", 
+          [userId[0]]
+        );
         
         if (r.rows.length > 0) {
-          return res.json(r.rows[0]);
+          const u = r.rows[0];
+          return res.json({
+            ...u,
+            points: Number(u.points || 0),
+            discountLevel: Number(u.discountLevel || 0)
+          });
         }
         
         // If not found in DB but is the current authenticated user, return skeleton
@@ -1291,7 +1299,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/users" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      const r = await pool.query("SELECT id, email, username, role, rank, points, created_at FROM users ORDER BY created_at DESC");
+      const r = await pool.query("SELECT id, email, username, role, rank, points, discount_level as \"discountLevel\", created_at FROM users ORDER BY created_at DESC");
       return res.json(r.rows);
     }
 
