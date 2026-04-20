@@ -134,51 +134,54 @@ function match(path: string, pattern: string): string[] | null {
 }
 
 async function recalculateUserPointsAndRank(pool: any, userId: string) {
-  if (!userId || userId === 'guest') return;
+  if (!userId || userId === "guest") return;
+  console.log(`🔄 [Loyalty] Recalculating for user: ${userId}`);
   try {
-    // Ensure user exists in users table first
-    const userCheck = await pool.query("SELECT id FROM users WHERE id = $1", [userId]);
-    if (userCheck.rows.length === 0) {
-      try {
-        // Try to derive a better username from userId or something, but keep it minimal
-        // We'll use the slice as a fallback but allow it to be updated
-        await pool.query(
-          "INSERT INTO users (id, email, username, role, rank, points, discount_level) VALUES ($1, $2, $3, 'user', 'recruit', 0, 0) ON CONFLICT DO NOTHING",
-          [userId, `user_${userId.slice(-6)}@hristo.local`, `User_${userId.slice(-4)}`]
-        );
-      } catch (e) {
-        console.error("[Loyalty] Failed to create user shell", e);
+    // 1. Sum total of all paid/delivered/shipped/processing orders
+    const ordersRes = await pool.query(
+      "SELECT SUM(total) as spent FROM orders WHERE user_id = $1 AND status IN ('paid', 'processing', 'shipped', 'delivered')",
+      [userId]
+    );
+    const totalSpent = parseFloat(ordersRes.rows[0]?.spent || 0);
+    const points = Math.floor(totalSpent); // 1 EUR = 1 PT
+
+    const RANK_THRESHOLDS = [
+      { rank: 'recruit', threshold: 0, discount: 0 },
+      { rank: 'private', threshold: 500, discount: 3 },
+      { rank: 'sergeant', threshold: 1500, discount: 5 },
+      { rank: 'special_forces', threshold: 3000, discount: 10 },
+      { rank: 'operator', threshold: 5000, discount: 15 },
+      { rank: 'commander', threshold: 10000, discount: 20 }
+    ];
+
+    let rank = 'recruit';
+    let discount = 0;
+    for (const r of RANK_THRESHOLDS) {
+      if (points >= r.threshold) {
+        rank = r.rank;
+        discount = r.discount;
       }
     }
 
-    // Points = sum of total prices of all 'paid', 'processing', 'shipped', 'delivered' orders
-    const fulfilledStatuses = ['processing', 'shipped', 'delivered', 'paid'];
-    const ordersRes = await pool.query(
-      "SELECT SUM(total) as total_spent FROM orders WHERE user_id = $1 AND status = ANY($2)",
-      [userId, fulfilledStatuses]
-    );
-    
-    const points = Math.floor(Number(ordersRes.rows[0]?.total_spent || 0));
-    
-    // Rank thresholds (matching LoyaltyRank.tsx)
-    const ranks = [
-      { name: 'recruit', threshold: 0, discount: 0 },
-      { name: 'private', threshold: 500, discount: 3 },
-      { name: 'sergeant', threshold: 1500, discount: 5 },
-      { name: 'special_forces', threshold: 3000, discount: 10 },
-      { name: 'operator', threshold: 5000, discount: 15 },
-      { name: 'commander', threshold: 10000, discount: 20 },
-    ].reverse(); // reverse to check high to low
+    // 2. Ensure user exists and update
+    const userRes = await pool.query("SELECT id FROM users WHERE id = $1", [userId]);
+    if (userRes.rows.length === 0) {
+      await pool.query(
+        "INSERT INTO users (id, role, points, rank, discount_level, username) VALUES ($1, $2, $3, $4, $5, $6)",
+        [userId, 'user', points, rank, discount, `User_${userId.slice(-4)}`]
+      );
+    } else {
+      await pool.query(
+        "UPDATE users SET points = $1, rank = $2, discount_level = $3 WHERE id = $4",
+        [points, rank, discount, userId]
+      );
+    }
 
-    const currentRank = ranks.find(r => points >= r.threshold) || ranks[ranks.length - 1];
-    
-    await pool.query(
-      "UPDATE users SET points = $2, rank = $3, discount_level = $4 WHERE id = $1",
-      [userId, points, currentRank.name, currentRank.discount]
-    );
-    console.log(`[Loyalty] Updated User ${userId}: Points=${points}, Rank=${currentRank.name}`);
+    console.log(`✅ [Loyalty] Success for ${userId}: ${points} pts, rank: ${rank}`);
+    return { points, rank, discount };
   } catch (err) {
-    console.error("[Loyalty] Recalculation failed for user", userId, err);
+    console.error("❌ [Loyalty] Recalculation failed:", err);
+    throw err;
   }
 }
 
@@ -1226,11 +1229,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId = match(path, "/users/:id");
     if (userId && method === "GET") {
       const authenticatedUser = getUser(req);
+      const targetUserId = userId[0];
       
       try {
+        // Ensure loyalty data is fresh before returning
+        await recalculateUserPointsAndRank(pool, targetUserId);
+
         const r = await pool.query(
           "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\" FROM users WHERE id = $1", 
-          [userId[0]]
+          [targetUserId]
         );
         
         if (r.rows.length > 0) {
@@ -1243,33 +1250,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         
         // If not found in DB but is the current authenticated user, return skeleton
-        if (authenticatedUser && authenticatedUser.id === userId[0]) {
+        if (authenticatedUser && authenticatedUser.id === targetUserId) {
           return res.json({
             id: authenticatedUser.id,
             email: authenticatedUser.email,
             role: authenticatedUser.role || "user",
             username: authenticatedUser.email?.split("@")[0] || "User",
+            points: 0,
+            rank: 'recruit',
+            discountLevel: 0,
             isNewUser: true
           });
         }
 
         return res.status(404).json({ error: "Not found" });
-      } catch {
-        // Fallback for older schemas
-        const r = await pool.query("SELECT id, username, email, role FROM users WHERE id = $1", [userId[0]]);
-        if (r.rows.length > 0) return res.json(r.rows[0]);
-        
-        if (authenticatedUser && authenticatedUser.id === userId[0]) {
-          return res.json({
-            id: authenticatedUser.id,
-            email: authenticatedUser.email,
-            role: authenticatedUser.role || "user",
-            username: authenticatedUser.email?.split("@")[0] || "User",
-            isNewUser: true
-          });
-        }
-        
-        return res.status(404).json({ error: "Not found" });
+      } catch (err: any) {
+        console.error("User fetch error:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
       }
     }
 

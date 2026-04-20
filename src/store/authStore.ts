@@ -52,6 +52,7 @@ interface AuthState {
   reauthenticate: (password: string) => Promise<void>;
   updateEmail: (newEmail: string) => Promise<void>;
   updateProfile: (data: { callsign?: string; teamName?: string; displayName?: string }) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -67,6 +68,28 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         await signOut(auth);
         set({ token: null, user: null, isAuthenticated: false });
+      },
+      refreshProfile: async () => {
+        const { user } = get();
+        if (!user || !user.id) return;
+        try {
+          const userData = await databaseService.getUserProfile(user.id);
+          if (userData) {
+            set((state) => ({
+              user: state.user ? {
+                ...state.user,
+                points: userData.points ?? state.user.points,
+                rank: userData.rank ?? state.user.rank,
+                discountLevel: userData.discountLevel ?? state.user.discountLevel,
+                username: userData.username ?? state.user.username,
+                callsign: userData.callsign ?? state.user.callsign,
+                teamName: userData.teamName ?? state.user.teamName,
+              } : null
+            }));
+          }
+        } catch (error) {
+          console.error("AuthStore: Failed to refresh profile:", error);
+        }
       },
       initialize: () => {
         onAuthStateChanged(auth, async (firebaseUser) => {

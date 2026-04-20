@@ -78,10 +78,16 @@ const SHIPPING_METHODS: ShippingMethod[] = [
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCartStore();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, refreshProfile } = useAuthStore();
   const { t } = useTranslation();
   
   const [step, setStep] = useState(1);
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshProfile();
+    }
+  }, [isAuthenticated, refreshProfile]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentLogos, setPaymentLogos] = useState<{ [key: string]: string }>({});
