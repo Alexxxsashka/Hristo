@@ -411,9 +411,16 @@ export const databaseService = {
 
   async getInventoryLogs() {
     const res = await fetch('/api/admin/inventory-logs', {
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     return res.ok ? await res.json() : [];
+  },
+
+  async getTestStats() {
+    const res = await fetch('/api/admin/stats', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return res.ok ? await res.json() : null;
   },
 
   async findProductByCode(code: string): Promise<Product | null> {

@@ -70,9 +70,10 @@ import {
 
 
 import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
+import { StatisticTest } from '../components/admin/StatisticTest';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings' | 'statistic_test'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -297,6 +298,14 @@ export const AdminDashboard: React.FC = () => {
             showHelp={showHelp}
             active={activeTab === 'settings'} 
             onClick={() => { setActiveTab('settings'); setSearchQuery(''); }} 
+          />
+          <SidebarItem 
+            icon={<Activity size={20} />} 
+            label="Statistic_test" 
+            description="Complex DB SQL Queries"
+            showHelp={showHelp}
+            active={activeTab === 'statistic_test'} 
+            onClick={() => { setActiveTab('statistic_test'); setSearchQuery(''); }} 
           />
 
         </nav>
@@ -576,6 +585,10 @@ export const AdminDashboard: React.FC = () => {
 
             {activeTab === 'settings' && (
               <SiteSettingsManager onNotify={showNotification} />
+            )}
+
+            {activeTab === 'statistic_test' && (
+              <StatisticTest onNotify={showNotification} />
             )}
           </AnimatePresence>
         </div>

@@ -94,6 +94,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    if (path === "/admin/stats" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      
+      const stats = await pool.query(`
+        SELECT 
+          COUNT(*) as total_products,
+          COALESCE(SUM(stock), 0) as total_stock,
+          ROUND(COALESCE(AVG(price), 0), 2) as avg_price,
+          ROUND(COALESCE(SUM(stock * price), 0), 2) as total_value,
+          ROUND(COALESCE(SUM((price - landing_cost) * stock), 0), 2) as potential_profit
+        FROM products;
+      `);
+      return res.status(200).json(stats.rows[0]);
+    }
+
     // ── DB Migration ─────────────────────────────────────────────────────────
     if (path === "/admin/migrate" && method === "POST") {
       const user = getUser(req);
