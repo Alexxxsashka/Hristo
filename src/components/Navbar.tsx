@@ -59,16 +59,15 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const mainCats = categories.filter(c => !c.parent);
+  const weaponsCat = categories.find(c => c.id === 'weapons' || c.slug === 'airsoft-weapons');
   
   const navLinks = [
     { to: '/shop', label: t('shop') },
-    ...mainCats.slice(0, 3).map(cat => ({
-      to: `/shop?category=${cat.id}`,
-      label: cat.name
-    })),
+    ...(weaponsCat ? [{
+      to: `/shop?category=${weaponsCat.id}`,
+      label: weaponsCat.name
+    }] : []),
     { to: '/configurator', label: t('configurator'), highlight: true },
-    { to: '/blog', label: t('blog') },
   ];
 
   return (
