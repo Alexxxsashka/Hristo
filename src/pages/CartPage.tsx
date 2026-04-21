@@ -90,74 +90,86 @@ export const CartPage: React.FC = () => {
                     exit={{ opacity: 0, x: 20 }}
                     className="p-4 sm:p-6 bg-zinc-900/40 border border-zinc-800 rounded-xl sm:rounded-2xl group hover:border-zinc-700 transition-all"
                   >
-                    <div className="flex justify-between items-start mb-4 sm:mb-6">
-                      <div className="flex-1 min-w-0 pr-4">
-                        <h3 className="text-lg sm:text-xl font-black uppercase tracking-tighter text-white mb-1 truncate">
-                          {item.productName}
-                        </h3>
-                        {item.selectedVariant && (
-                          <div className="flex flex-wrap gap-2 mt-1 mb-2">
-                            {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
-                              <span key={key} className="px-2 py-0.5 bg-zinc-800/50 text-zinc-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest rounded border border-zinc-700/50">
-                                {key}: {value}
-                              </span>
-                            ))}
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                      {/* Product Image */}
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800 shrink-0 group-hover:border-red-600/30 transition-colors">
+                        <img 
+                          src={item.image || `https://picsum.photos/seed/${item.productId}/300/300`} 
+                          alt={item.productName}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
+                          <div className="min-w-0 pr-4">
+                            <h3 className="text-lg sm:text-xl font-black uppercase tracking-tighter text-white mb-1 group-hover:text-red-500 transition-colors truncate">
+                              {item.productName}
+                            </h3>
+                            {item.selectedVariant && (
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
+                                  <span key={key} className="px-2 py-0.5 bg-zinc-800/80 text-zinc-400 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded border border-zinc-700/50">
+                                    {key}: {value}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="mt-2 text-[8px] sm:text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">
+                              SKU: {item.sku || 'N/A'}
+                            </div>
                           </div>
-                        )}
-                        <p className="text-[9px] sm:text-xs font-mono text-zinc-500 uppercase tracking-widest truncate">ID: {item.productId}</p>
-                      </div>
-                      <button 
-                        onClick={() => removeFromCart(item.id)}
-                        className="p-1.5 sm:p-2 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                      >
-                        <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                      <div className="flex justify-between text-xs sm:text-sm">
-                        <span className="text-zinc-500">{t('price')}</span>
-                        <div className="flex flex-col items-end">
-                          {item.discount ? (
-                            <>
-                              <span className="font-mono text-zinc-300">€{item.price.toLocaleString()}</span>
-                              <span className="text-[9px] sm:text-[10px] text-zinc-500 line-through">€{item.originalPrice?.toLocaleString()}</span>
-                              <span className="text-[9px] sm:text-[10px] text-red-500 font-bold">-{item.discount}%</span>
-                            </>
-                          ) : (
-                            <span className="font-mono text-zinc-300">€{item.price.toLocaleString()}</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-xl p-2 h-12">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-2">
-                          {t('quantity')}
-                        </span>
-                        <div className="flex items-center gap-1">
                           <button 
-                            onClick={() => updateQuantity(item.id, -1)}
-                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                            onClick={() => removeFromCart(item.id)}
+                            className="p-2 sm:p-2.5 bg-zinc-950/50 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl border border-zinc-800 hover:border-red-500/30 transition-all shrink-0"
                           >
-                            <Minus size={14} />
-                          </button>
-                          <span className="w-8 text-center font-mono font-bold text-white text-xs">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            onClick={() => updateQuantity(item.id, 1)}
-                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
-                          >
-                            <Plus size={14} />
+                            <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                           </button>
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="pt-3 sm:pt-4 border-t border-zinc-800 flex justify-between items-center">
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-500">{t('total')}</span>
-                      <span className="text-xl sm:text-2xl font-black text-white font-mono">€{item.totalPrice.toLocaleString()}</span>
+                        <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+                          <div className="flex flex-col gap-3">
+                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{t('price')}</span>
+                            <div className="flex items-baseline gap-2">
+                              {item.discount ? (
+                                <>
+                                  <span className="text-lg sm:text-xl font-black text-white font-mono">€{item.price.toLocaleString()}</span>
+                                  <span className="text-xs text-zinc-600 line-through font-bold">€{item.originalPrice?.toLocaleString()}</span>
+                                </>
+                              ) : (
+                                <span className="text-lg sm:text-xl font-black text-white font-mono">€{item.price.toLocaleString()}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 w-32 sm:w-40">
+                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{t('quantity')}</span>
+                            <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl p-1 h-10 shadow-inner">
+                              <button 
+                                onClick={() => updateQuantity(item.id, -1)}
+                                className="w-8 h-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <div className="flex-1 text-center font-mono font-black text-white text-sm">
+                                {item.quantity}
+                              </div>
+                              <button 
+                                onClick={() => updateQuantity(item.id, 1)}
+                                className="w-8 h-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-3">
+                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{t('total')}</span>
+                            <span className="text-xl sm:text-2xl font-black text-red-600 font-mono tracking-tighter">€{item.totalPrice.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -165,31 +177,37 @@ export const CartPage: React.FC = () => {
 
               {/* Order Summary */}
               <div className="lg:col-span-1">
-                <div className="lg:sticky lg:top-32 p-6 sm:p-8 bg-zinc-950 border border-zinc-800 rounded-2xl sm:rounded-3xl shadow-2xl shadow-red-900/5">
-                  <h2 className="text-base sm:text-lg font-black uppercase tracking-tighter mb-6 sm:mb-8 flex items-center gap-3">
-                    <CreditCard className="text-red-600 sm:w-5 sm:h-5" size={18} />
+                <div className="lg:sticky lg:top-32 p-8 sm:p-10 bg-zinc-900 border border-zinc-800 rounded-[32px] sm:rounded-[40px] shadow-2xl shadow-red-900/10 relative overflow-hidden group">
+                  {/* Decorative background gradient */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 blur-[60px] rounded-full group-hover:bg-red-600/10 transition-colors" />
+                  
+                  <h2 className="text-lg sm:text-xl font-black uppercase tracking-tighter mb-8 flex items-center gap-3 relative z-10">
+                    <CreditCard className="text-red-600 sm:w-6 sm:h-6" size={20} />
                     {t('order_summary')}
                   </h2>
 
-                  <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                  <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-10 relative z-10">
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span className="text-zinc-500">{t('total_price')}</span>
-                      <span className="text-zinc-300 font-mono">€{totalAmount.toLocaleString()}</span>
+                      <span className="text-zinc-500 font-bold uppercase tracking-widest">{t('total_price')}</span>
+                      <span className="text-zinc-100 font-mono font-black">€{totalAmount.toLocaleString()}</span>
                     </div>
                     {userDiscount > 0 && (
-                      <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
-                        <span>{t('dashboard_discount')} ({user?.rank}) -{userDiscount}%</span>
-                        <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
+                      <div className="flex justify-between text-xs sm:text-sm text-emerald-500 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/20">
+                        <div className="flex flex-col">
+                          <span className="font-black uppercase tracking-widest text-[10px]">{t('dashboard_discount')} ({user?.rank})</span>
+                          <span className="text-[9px] opacity-70">LOYALTY PROGRAM</span>
+                        </div>
+                        <span className="font-mono font-black text-lg">-{userDiscount}%</span>
                       </div>
                     )}
-                    <div className="h-px bg-zinc-800 my-3 sm:my-4" />
-                    <div className="space-y-1">
+                    <div className="h-px bg-zinc-800/50 my-4 sm:my-6" />
+                    <div className="space-y-2">
                       <div className="flex justify-between items-baseline">
-                        <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
-                        <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{finalTotal.toLocaleString()}</span>
+                        <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-white">{t('final_total')}</span>
+                        <span className="text-3xl sm:text-5xl font-black text-red-600 font-mono tracking-tighter drop-shadow-lg shadow-red-900/50">€{finalTotal.toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
-                        <span>{t('vat_included')}</span>
+                      <div className="flex justify-between text-[9px] sm:text-[10px] text-zinc-600 font-black uppercase tracking-[0.3em]">
+                        <span>INC. {t('vat_included')}</span>
                         <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
@@ -198,10 +216,10 @@ export const CartPage: React.FC = () => {
                   <button 
                     onClick={handleCheckout}
                     disabled={isCheckingOut}
-                    className="w-full py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 flex items-center justify-center gap-2 sm:gap-3 group disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                    className="w-full py-5 sm:py-6 bg-red-600 hover:bg-red-700 text-white rounded-[20px] sm:rounded-[24px] font-black uppercase tracking-widest transition-all shadow-2xl shadow-red-900/30 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm relative z-10 active:scale-[0.98]"
                   >
                     {isCheckingOut ? (
-                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         {t('proceed_to_checkout')}
@@ -209,13 +227,13 @@ export const CartPage: React.FC = () => {
                           animate={{ x: [0, 5, 0] }}
                           transition={{ repeat: Infinity, duration: 1.5 }}
                         >
-                          <ArrowLeft size={18} className="rotate-180 sm:w-5 sm:h-5" />
+                          <ArrowLeft size={20} className="rotate-180 sm:w-6 sm:h-6" />
                         </motion.div>
                       </>
                     )}
                   </button>
 
-                  <p className="mt-4 sm:mt-6 text-[9px] sm:text-[10px] text-zinc-600 text-center uppercase tracking-widest leading-relaxed">
+                  <p className="mt-8 text-[8px] sm:text-[10px] text-zinc-600 text-center uppercase tracking-[0.2em] leading-relaxed font-bold relative z-10 border-t border-zinc-800/50 pt-8">
                     {t('secure_checkout_desc')}
                   </p>
                 </div>
