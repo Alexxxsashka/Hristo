@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { Category } from '../../types';
 import { databaseService } from '../../services/databaseService';
-import { WEAPON_SLOTS, MODULE_CATEGORIES } from '../../constants';
 import { formatEnum } from '../../utils/format';
 
 export const CategoryForm = ({ 
@@ -325,56 +324,6 @@ export const CategoryForm = ({
           </div>
         </div>
 
-        {/* Weapon Specific Settings */}
-        {(newCat.id === 'weapons' || 
-          newCat.parent === 'weapons' || 
-          newCat.name?.toLowerCase().includes('weapon') ||
-          categories.find(c => c.id === newCat.parent)?.name.toLowerCase().includes('weapon')
-        ) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-            <div className="space-y-4">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Weapon Slots</label>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-white rounded-xl border border-zinc-200">
-                {WEAPON_SLOTS.map(slot => (
-                  <button
-                    key={slot}
-                    type="button"
-                    onClick={() => toggleSlot(slot)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                      newCat.slots?.includes(slot)
-                        ? 'bg-zinc-900 text-white'
-                        : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
-                    }`}
-                  >
-                    {formatEnum(slot)}
-                    {newCat.slots?.includes(slot) && <Check size={12} />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Compatible Module Categories</label>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-white rounded-xl border border-zinc-200">
-                {MODULE_CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => toggleModuleCat(cat)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                      newCat.compatibleModuleCategories?.includes(cat)
-                        ? 'bg-zinc-900 text-white'
-                        : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
-                    }`}
-                  >
-                    {formatEnum(cat)}
-                    {newCat.compatibleModuleCategories?.includes(cat) && <Check size={12} />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Category Filters */}
         <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">

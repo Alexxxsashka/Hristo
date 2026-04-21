@@ -89,20 +89,6 @@ export const CategoryManager = ({
           <span className="text-zinc-400 text-xs">-</span>
         )}
       </td>
-      <td className="px-6 py-4">
-        <div className="flex flex-col gap-1">
-          {cat.slots && cat.slots.length > 0 && (
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider bg-zinc-100 px-2 py-0.5 rounded-lg w-fit">
-              Slots: {cat.slots?.length}
-            </span>
-          )}
-          {cat.compatibleModuleCategories && cat.compatibleModuleCategories.length > 0 && (
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg w-fit">
-              Modules: {cat.compatibleModuleCategories?.length}
-            </span>
-          )}
-        </div>
-      </td>
       <td className="px-6 py-4 text-right">
         <div className="flex items-center justify-end gap-2">
           <button 
@@ -145,7 +131,6 @@ export const CategoryManager = ({
               <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Structural Units</th>
               <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Parentage</th>
               <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Margin Disc.</th>
-              <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Logic Caps</th>
               <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">Ops</th>
             </tr>
           </thead>
