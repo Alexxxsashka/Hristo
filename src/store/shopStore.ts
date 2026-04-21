@@ -57,7 +57,6 @@ export const useShopStore = create<ShopState>((set, get) => ({
   },
 
   fetchCategories: async () => {
-    if (get().categories.length > 0) return;
     try {
       const data = await databaseService.getCategories();
       set({ categories: data as Category[] });

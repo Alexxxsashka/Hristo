@@ -22,17 +22,22 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        const data = await databaseService.getSiteSettings();
-        setSettings(data);
+        const [settingsData, categoriesData] = await Promise.all([
+          databaseService.getSiteSettings(),
+          databaseService.getCategories()
+        ]);
+        setSettings(settingsData);
+        setCategories(categoriesData || []);
       } catch (err) {
-        console.error('Failed to fetch site settings:', err);
+        console.error('Failed to fetch navbar data:', err);
       }
     };
-    fetchSettings();
+    fetchData();
   }, []);
 
   const isHomePage = location.pathname === '/';
@@ -54,10 +59,14 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const mainCats = categories.filter(c => !c.parent);
+  
   const navLinks = [
     { to: '/shop', label: t('shop') },
-    { to: '/shop/airsoft-weapons', label: t('weapons') },
-    { to: '/shop/tactical-gear', label: t('gear') },
+    ...mainCats.slice(0, 3).map(cat => ({
+      to: `/shop?category=${cat.id}`,
+      label: cat.name
+    })),
     { to: '/configurator', label: t('configurator'), highlight: true },
     { to: '/blog', label: t('blog') },
   ];
