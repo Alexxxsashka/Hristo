@@ -1065,13 +1065,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (path === "/orders" && method === "POST") {
       const user = getUser(req);
-      const { id: providedId, items, total, subtotal, shippingCost, status, payment, shipping, notes } = req.body || {};
+      const { 
+        id: providedId, 
+        items, 
+        total, 
+        subtotal, 
+        tax,
+        discountAmount,
+        shippingCost, 
+        status, 
+        payment, 
+        shipping, 
+        notes,
+        pointsEarned 
+      } = req.body || {};
       const userId = user?.id || "guest";
       const id = providedId || `order-${Date.now()}`;
       
-      // Calculate profit
-      let profit = 0;
-      if (items?.length) {
+      // Calculate profit if not provided
+      let profit = req.body.profit;
+      if (profit === undefined && items?.length) {
         let totalLandingCost = 0;
         items.forEach((item: any) => {
           const cost = Number(item.landingCost || item.price * 0.6);
@@ -1081,34 +1094,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const resOrder = await pool.query(
-        `INSERT INTO orders (id, order_number, user_id, total, subtotal, shipping_cost, status, payment_method, payment_status, shipping_address, notes, profit) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         ON CONFLICT (id) DO UPDATE SET 
-           total = EXCLUDED.total,
-           subtotal = EXCLUDED.subtotal,
-           shipping_cost = EXCLUDED.shipping_cost,
-           status = EXCLUDED.status,
-           payment_method = EXCLUDED.payment_method,
-           payment_status = EXCLUDED.payment_status,
-           shipping_address = EXCLUDED.shipping_address,
-           notes = EXCLUDED.notes,
-           profit = EXCLUDED.profit,
-           user_id = EXCLUDED.user_id,
-           updated_at = CURRENT_TIMESTAMP
-         RETURNING order_number`,
+        `INSERT INTO orders (
+          id, order_number, user_id, total, subtotal, tax, discount_amount, shipping_cost, 
+          status, payment_method, payment_status, shipping_address, 
+          first_name, last_name, email, shipping_city, shipping_phone, shipping_postal_code,
+          notes, profit, points_earned
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+        ON CONFLICT (id) DO UPDATE SET 
+          total = EXCLUDED.total,
+          subtotal = EXCLUDED.subtotal,
+          tax = EXCLUDED.tax,
+          discount_amount = EXCLUDED.discount_amount,
+          shipping_cost = EXCLUDED.shipping_cost,
+          status = EXCLUDED.status,
+          payment_method = EXCLUDED.payment_method,
+          payment_status = EXCLUDED.payment_status,
+          shipping_address = EXCLUDED.shipping_address,
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          email = EXCLUDED.email,
+          shipping_city = EXCLUDED.shipping_city,
+          shipping_phone = EXCLUDED.shipping_phone,
+          shipping_postal_code = EXCLUDED.shipping_postal_code,
+          notes = EXCLUDED.notes,
+          profit = EXCLUDED.profit,
+          user_id = EXCLUDED.user_id,
+          points_earned = EXCLUDED.points_earned,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING order_number`,
         [
           id, 
           `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100+Math.random()*900)}`, 
           userId, 
           Number(total || 0), 
           Number(subtotal || total || 0),
+          Number(tax || 0),
+          Number(discountAmount || 0),
           Number(shippingCost || 0),
           status || 'pending',
           payment?.method || 'unknown',
           payment?.status || 'pending',
           JSON.stringify(shipping || {}),
+          shipping?.firstName || (shipping?.fullName ? shipping.fullName.split(' ')[0] : ''),
+          shipping?.lastName || (shipping?.fullName ? shipping.fullName.split(' ').slice(1).join(' ') : ''),
+          shipping?.email || '',
+          shipping?.city || '',
+          shipping?.phone || '',
+          shipping?.postalCode || '',
           notes || '',
-          profit
+          profit || 0,
+          Number(pointsEarned || 0)
         ]
       );
 
@@ -1120,7 +1156,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
         for (const item of items) {
           await pool.query(
-            "INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            "INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
             [
               id, 
               item.productId || item.id, 
@@ -1129,7 +1165,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               Number(item.price || 0),
               item.image || null,
               item.sku || null,
-              item.configuration ? JSON.stringify(item.configuration) : (item.selectedVariant ? JSON.stringify(item.selectedVariant) : (item.variant_info ? (typeof item.variant_info === 'string' ? item.variant_info : JSON.stringify(item.variant_info)) : null))
+              item.configuration ? JSON.stringify(item.configuration) : (item.selectedVariant ? JSON.stringify(item.selectedVariant) : (item.variant_info ? (typeof item.variant_info === 'string' ? item.variant_info : JSON.stringify(item.variant_info)) : null)),
+              item.category || null
             ]
           );
         }
@@ -1143,10 +1180,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       
       const ordersRes = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
-      const itemsRes = await pool.query("SELECT * FROM order_items");
+      // Use a subquery or separate call, but let's make it fetch all matching items once
+      const itemsRes = await pool.query("SELECT * FROM order_items WHERE order_id IN (SELECT id FROM orders)");
       
       const orders = ordersRes.rows.map(row => {
-        const items = itemsRes.rows.filter(item => item.order_id === row.id);
+        const items = itemsRes.rows.filter(item => String(item.order_id) === String(row.id));
         return mapOrder(row, items);
       });
       
@@ -1246,14 +1284,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId = match(path, "/users/:id");
     if (userId && method === "GET") {
       const authenticatedUser = getUser(req);
-      const targetUserId = userId[0];
+      const targetUserId = userId[0]; // match() returns groups starting at index 0
       
       try {
         // Ensure loyalty data is fresh before returning
         await recalculateUserPointsAndRank(pool, targetUserId);
 
         const r = await pool.query(
-          "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\" FROM users WHERE id = $1", 
+          "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\", callsign, team_name as \"teamName\" FROM users WHERE id = $1", 
           [targetUserId]
         );
         

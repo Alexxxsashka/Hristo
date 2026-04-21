@@ -9,6 +9,7 @@ const ModelViewer = React.lazy(() => import('../components/ModelViewer').then(m 
 import { databaseService } from '../services/databaseService';
 import { useAuthStore } from '../store/authStore';
 import { User as UserIcon } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 
 import { SEO } from '../components/SEO';
 import { SiteSettings } from '../types';
@@ -19,6 +20,8 @@ const HomePage: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const { t } = useTranslation();
   const { user } = useAuthStore();
+
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +42,17 @@ const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
+  const activeSlides = (settings?.heroSlides || []).filter(s => s.active);
+
+  useEffect(() => {
+    if (activeSlides.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentSlideIndex(prev => (prev + 1) % activeSlides.length);
+      }, 6000);
+      return () => clearInterval(timer);
+    }
+  }, [activeSlides.length]);
+
   const featuredProducts = products.slice(0, 4);
   const bestsellers = products.slice(4, 8);
 
@@ -51,28 +65,47 @@ const HomePage: React.FC = () => {
 
       {settings?.showAnnouncement && settings?.announcement && (
         <div className="fixed top-0 left-0 w-full z-[60] bg-red-600 py-2.5 px-4 text-center">
-          <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3">
+          <Link 
+            to={settings.announcementLink || "#"} 
+            className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 hover:opacity-80 transition-opacity"
+          >
             <Zap size={14} className="fill-white animate-pulse" />
             {settings.announcement}
             <Zap size={14} className="fill-white animate-pulse" />
-          </p>
+          </Link>
         </div>
       )}
       
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center px-4 sm:px-8 overflow-hidden pt-20 lg:pt-0">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute inset-0 bg-[#0a0a0a]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#dc262615,transparent_50%)]" />
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
-        </div>
-
-        <div className="max-w-7xl mx-auto relative w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center py-12 lg:py-0">
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 lg:pt-0">
+        <AnimatePresence mode="wait">
           <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            key={currentSlideIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0"
+          >
+            <div className="absolute inset-0 bg-[#0a0a0a]/60 z-10" />
+            <img 
+              src={activeSlides[currentSlideIndex]?.image || settings?.heroImageUrl || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
+              className="w-full h-full object-cover"
+              alt="Hero Background"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent z-20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,#dc262610,transparent_60%)] z-20" />
+
+        <div className="max-w-7xl mx-auto relative w-full z-30 px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center py-12 lg:py-0">
+          <motion.div 
+            key={`content-${currentSlideIndex}`}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="z-10 text-center lg:text-left"
+            className="text-center lg:text-left"
           >
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-6">
               <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg">
@@ -80,13 +113,19 @@ const HomePage: React.FC = () => {
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-                <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                <span className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">
                   {t('live_3d_configurator_active')}
                 </span>
               </div>
             </div>
+
             <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.85] mb-8">
-              {settings?.heroTitle ? (
+              {activeSlides[currentSlideIndex] ? (
+                <>
+                  {activeSlides[currentSlideIndex].title.split(' ').slice(0, -1).join(' ')} <br />
+                  <span className="text-red-600">{activeSlides[currentSlideIndex].title.split(' ').slice(-1)}</span>
+                </>
+              ) : settings?.heroTitle ? (
                 <>
                   {settings.heroTitle.split(' ').slice(0, -1).join(' ')} <br />
                   <span className="text-red-600">{settings.heroTitle.split(' ').slice(-1)}</span>
@@ -99,77 +138,59 @@ const HomePage: React.FC = () => {
                 </>
               )}
             </h1>
-            <p className="text-zinc-400 text-sm sm:text-base md:text-xl leading-relaxed mb-10 max-w-xl font-medium mx-auto lg:mx-0">
-              {settings?.heroSubtitle || t('hero_desc')}
+
+            <p className="text-zinc-300 text-sm sm:text-base md:text-xl leading-relaxed mb-10 max-w-xl font-medium mx-auto lg:mx-0 drop-shadow-lg">
+              {activeSlides[currentSlideIndex]?.subtitle || settings?.heroSubtitle || t('hero_desc')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
               <Link 
-                to="/configurator"
+                to={activeSlides[currentSlideIndex]?.ctaLink || "/configurator"}
                 className="px-8 py-5 lg:px-10 lg:py-6 bg-red-600 hover:bg-red-700 text-white font-black tracking-widest uppercase text-xs lg:text-sm rounded-2xl transition-all shadow-[0_0_40px_rgba(220,38,38,0.3)] flex items-center justify-center gap-3 group lg:scale-105"
               >
-                {t('start_3d_config')}
+                {activeSlides[currentSlideIndex]?.ctaText || t('start_3d_config')}
                 <Zap size={20} className="fill-white" />
               </Link>
             </div>
 
-            <div className="mt-12 flex items-center justify-center lg:justify-start gap-6 sm:gap-8 border-t border-zinc-900 pt-8">
-              <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl font-black text-white">500+</span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('3d_modules')}</span>
+            {/* Slide Indicators */}
+            {activeSlides.length > 1 && (
+              <div className="mt-12 flex justify-center lg:justify-start gap-3">
+                {activeSlides.map((_, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => setCurrentSlideIndex(i)}
+                    className={`h-1 rounded-full transition-all duration-500 ${i === currentSlideIndex ? 'w-12 bg-red-600' : 'w-4 bg-zinc-700 hover:bg-zinc-500'}`}
+                  />
+                ))}
               </div>
-              <div className="w-px h-8 bg-zinc-900" />
-              <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl font-black text-white">100%</span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('compatibility')}</span>
-              </div>
-              <div className="w-px h-8 bg-zinc-900" />
-              <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl font-black text-white">4K</span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('visuals')}</span>
-              </div>
-            </div>
+            )}
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-            transition={{ duration: 1.2, delay: 0.2 }}
-            className="relative aspect-square sm:aspect-video lg:aspect-auto lg:h-[700px] group"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2 }}
+            className="hidden lg:block relative aspect-square group"
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-red-600/20 to-transparent rounded-full blur-[120px] opacity-50 group-hover:opacity-80 transition-opacity" />
-            <div className="w-full h-full relative z-10">
-              <img 
-                src={settings?.heroImageUrl || "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=1200&auto=format&fit=crop"} 
-                className="w-full h-full object-contain filter drop-shadow-[0_0_50px_rgba(220,38,38,0.2)]"
-                alt="3D Weapon Preview"
-                referrerPolicy="no-referrer"
-              />
-              
-              {/* Floating UI Elements */}
-              <div className="absolute top-1/4 right-0 p-3 sm:p-4 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-xl sm:rounded-2xl shadow-2xl animate-bounce-slow">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-600/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <Settings size={16} className="text-red-600 animate-spin-slow sm:w-5 sm:h-5" />
+            <div className="absolute inset-0 bg-red-600/10 rounded-full blur-[120px] opacity-30" />
+            {/* Contextual Graphics */}
+            <div className="relative z-10 w-full h-full border border-white/5 bg-white/5 backdrop-blur-3xl rounded-[64px] p-12 flex items-center justify-center overflow-hidden">
+               <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
+                  <div className="absolute top-10 left-10 w-20 h-px bg-white" />
+                  <div className="absolute top-10 left-10 w-px h-20 bg-white" />
+                  <div className="absolute bottom-10 right-10 w-20 h-px bg-white" />
+                  <div className="absolute bottom-10 right-10 w-px h-20 bg-white" />
+               </div>
+               <div className="text-center space-y-6">
+                  <div className="w-24 h-24 bg-red-600 rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+                    <Maximize2 size={40} className="text-white" />
                   </div>
-                  <div>
-                    <p className="text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('active_slot')}</p>
-                    <p className="text-[10px] sm:text-xs font-black text-white uppercase">{t('picatinny_top')}</p>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter">Next-Gen Interface</h3>
+                    <p className="text-zinc-400 font-medium text-sm">Industrial grade tactile response <br /> & modular engineering</p>
                   </div>
-                </div>
-              </div>
-
-              <div className="absolute bottom-1/4 left-0 p-3 sm:p-4 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-xl sm:rounded-2xl shadow-2xl animate-bounce-slow delay-700">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-600/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <ShieldCheck size={16} className="text-emerald-500 sm:w-5 sm:h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('compatibility')}</p>
-                    <p className="text-[10px] sm:text-xs font-black text-white uppercase">{t('verified')}</p>
-                  </div>
-                </div>
-              </div>
+               </div>
             </div>
           </motion.div>
         </div>
@@ -335,22 +356,26 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { id: 'weapons', name: 'Weapons', img: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop' },
-            { id: 'attachments', name: 'Optics & Attach', img: 'https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop' },
-            { id: 'gear', name: 'Tactical Gear', img: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop' },
-            { id: 'internal_parts', name: 'Internal Parts', img: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop' },
-          ].map((cat) => {
-            const count = products.filter(p => p.category === cat.id).length;
+          {(settings?.featuredCategoriesList && settings.featuredCategoriesList.filter(c => c.active).length > 0
+            ? settings.featuredCategoriesList.filter(c => c.active)
+            : [
+                { id: 'weapons', categoryId: 'weapons', customName: 'Weapons', customImage: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop' },
+                { id: 'attachments', categoryId: 'attachments', customName: 'Optics & Attach', customImage: 'https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop' },
+                { id: 'gear', categoryId: 'gear', customName: 'Tactical Gear', customImage: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200&auto=format&fit=crop' },
+                { id: 'internal_parts', categoryId: 'internal_parts', customName: 'Internal Parts', customImage: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop' },
+              ]
+          ).map((cat) => {
+            const categoryName = cat.customName || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+            const count = products.filter(p => p.category === cat.categoryId).length;
             return (
               <Link 
                 key={cat.id}
-                to={`/shop/${cat.id}`}
+                to={`/shop/${cat.categoryId}`}
                 className="group relative aspect-[3/4] rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900"
               >
                 <img 
-                  src={cat.img} 
-                  alt={cat.name}
+                  src={cat.customImage || 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800'} 
+                  alt={categoryName}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-40 group-hover:opacity-60"
                   referrerPolicy="no-referrer"
                 />
@@ -359,7 +384,7 @@ const HomePage: React.FC = () => {
                   <span className="text-[10px] font-black text-red-600 tracking-widest uppercase mb-2 block">
                     {count} {count === 1 ? t('product') : t('products')}
                   </span>
-                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">{cat.name}</h3>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">{categoryName}</h3>
                   <div className="w-10 h-1 bg-red-600 group-hover:w-full transition-all duration-500" />
                 </div>
               </Link>
@@ -427,36 +452,102 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 pb-20 md:pb-32">
-        <div className="relative rounded-[32px] md:rounded-[40px] overflow-hidden bg-red-600 p-8 sm:p-12 md:p-24">
-          <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
-            <img 
-              src="https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop" 
-              className="w-full h-full object-cover opacity-50 mix-blend-overlay"
-              referrerPolicy="no-referrer"
-            />
+      {/* About Us Dynamic Section */}
+      {(settings?.aboutUsTitle || settings?.aboutUsText) && (
+        <section className="bg-zinc-900/30 py-20 md:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="relative aspect-video rounded-[40px] overflow-hidden group shadow-2xl"
+              >
+                <img 
+                  src={settings.aboutUsImage || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                  alt="About Section"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent opacity-60" />
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <span className="text-red-600 text-xs font-black tracking-[0.3em] uppercase mb-4 block">Hristo Identity</span>
+                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 leading-none">
+                  {settings.aboutUsTitle?.split(' ').slice(0, -1).join(' ')} <br />
+                  <span className="text-red-600">{settings.aboutUsTitle?.split(' ').slice(-1)}</span>
+                </h2>
+                <p className="text-zinc-400 text-lg font-medium leading-relaxed mb-12">
+                  {settings.aboutUsText}
+                </p>
+                {settings.aboutUsLink && (
+                  <Link 
+                    to={settings.aboutUsLink}
+                    className="inline-flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs border-b-2 border-red-600 pb-2 hover:text-red-600 transition-colors"
+                  >
+                    Learn our mission <ArrowRight size={16} />
+                  </Link>
+                )}
+              </motion.div>
+            </div>
           </div>
-          <div className="relative z-10 max-w-2xl">
-            <span className="px-4 py-2 bg-white text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6 md:mb-8 inline-block">
-              {t('limited_time_offer')}
-            </span>
-            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-6 md:mb-8">
-              {t('get_20_off')} <br />
-              {t('your_first_order')}
-            </h2>
-            <p className="text-white/80 text-base md:text-lg font-medium mb-8 md:mb-12 max-w-md">
-              {t('promo_desc')}
-            </p>
-            <Link 
-              to="/register"
-              className="w-full sm:w-fit px-10 py-5 bg-white text-red-600 font-black tracking-widest uppercase text-sm rounded-2xl transition-all hover:scale-105 shadow-2xl inline-block text-center"
-            >
-              {t('claim_discount')}
-            </Link>
+        </section>
+      )}
+
+      {/* Promo Banners */}
+      {(settings?.promoBanners && settings.promoBanners.filter(b => b.active).length > 0
+        ? settings.promoBanners.filter(b => b.active)
+        : [
+            {
+              id: 'default-promo',
+              image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop",
+              title: t('get_20_off') || "Get 20% OFF",
+              subtitle: t('promo_desc') || "Your first order of professional equipment.",
+              ctaText: t('claim_discount') || "Claim Discount",
+              ctaLink: "/register",
+              bgColor: "#dc2626",
+              active: true
+            }
+          ]
+      ).map((banner) => (
+        <section key={banner.id} className="max-w-7xl mx-auto px-4 sm:px-8 pb-20 md:pb-32">
+          <div 
+            className="relative rounded-[32px] md:rounded-[40px] overflow-hidden p-8 sm:p-12 md:p-24 shadow-2xl"
+            style={{ backgroundColor: banner.bgColor }}
+          >
+            <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
+              <img 
+                src={banner.image} 
+                className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+                referrerPolicy="no-referrer"
+                alt=""
+              />
+            </div>
+            <div className="relative z-10 max-w-2xl">
+              <span className="px-4 py-2 bg-white text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6 md:mb-8 inline-block shadow-lg">
+                {t('limited_time_offer')}
+              </span>
+              <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-6 md:mb-8">
+                {banner.title}
+              </h2>
+              <p className="text-white/80 text-base md:text-lg font-medium mb-8 md:mb-12 max-w-md">
+                {banner.subtitle}
+              </p>
+              <Link 
+                to={banner.ctaLink}
+                className="w-full sm:w-fit px-10 py-5 bg-white font-black tracking-widest uppercase text-sm rounded-2xl transition-all hover:scale-105 shadow-2xl inline-block text-center hover:bg-zinc-100"
+                style={{ color: banner.bgColor }}
+              >
+                {banner.ctaText}
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ))}
 
       {/* Newsletter */}
       <section className="bg-zinc-950 py-20 md:py-32 border-t border-zinc-900">

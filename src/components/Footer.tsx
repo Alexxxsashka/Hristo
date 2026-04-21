@@ -55,8 +55,17 @@ export const Footer: React.FC = () => {
               )}
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
-              Professional airsoft equipment and advanced 3D weapon customization. We provide the highest quality gear for enthusiasts and professionals alike.
+              {settings?.footerDescription || "Professional airsoft equipment and advanced 3D weapon customization. We provide the highest quality gear for enthusiasts and professionals alike."}
             </p>
+            {settings?.footerTags && settings.footerTags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {settings.footerTags.map((tag, i) => (
+                  <span key={i} className="text-[8px] font-black uppercase tracking-widest text-zinc-600 border border-zinc-800 px-2 py-1 rounded-md">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center gap-4">
               <a href={settings?.facebookUrl || "https://www.facebook.com/HristoAirsoftTrgovina/"} target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all duration-500 border border-zinc-800 hover:border-red-500">
                 <Facebook size={20} />

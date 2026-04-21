@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit, X, FileText, Database } from 'lucide-react';
+import { Plus, Trash2, Edit, X, FileText } from 'lucide-react';
 import { PolicyPage } from '../../types';
 import { databaseService } from '../../services/databaseService';
-import { defaultPolicies } from '../../data/defaultPolicies';
 
 export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: { 
   policies: PolicyPage[], 
@@ -13,27 +12,8 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
 }) => {
   const [editingPolicy, setEditingPolicy] = useState<Partial<PolicyPage> | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const seedDefaultPolicies = async () => {
-    setIsSeeding(true);
-    try {
-      for (const policy of defaultPolicies) {
-        await databaseService.savePolicy({
-          ...policy,
-          lastUpdated: new Date().toISOString()
-        } as PolicyPage);
-      }
-      onNotify('Default policies seeded successfully');
-      onUpdate();
-    } catch (err) {
-      console.error('Failed to seed policies', err);
-      onNotify('Failed to seed policies', 'error');
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,14 +166,6 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
           >
             <Plus size={20} />
             New Policy
-          </button>
-          <button 
-            onClick={seedDefaultPolicies}
-            disabled={isSeeding}
-            className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-600 rounded-xl font-bold hover:bg-zinc-200 transition-all disabled:opacity-50"
-          >
-            <Database size={20} />
-            {isSeeding ? 'Seeding...' : 'Seed Default Policies'}
           </button>
         </div>
       </div>

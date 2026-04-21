@@ -215,9 +215,11 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   tax: number;
+  discountAmount?: number;
   shippingCost: number;
   total: number;
-  profit: number; // Calculated as total - (sum of landingCosts) - shipping - fees
+  profit: number;
+  pointsEarned?: number;
   status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'awaiting_payment';
   cancelRequested?: boolean;
   cancelRequestedAt?: string;
@@ -301,12 +303,44 @@ export interface ServiceRequest {
   updates: { date: string; message: string }[];
 }
 
+export interface HeroSlide {
+  id: string;
+  image: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  active: boolean;
+}
+
+export interface PromoBanner {
+  id: string;
+  image: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  bgColor: string;
+  active: boolean;
+}
+
+export interface FeaturedCategory {
+  id: string;
+  categoryId: string;
+  customName?: string;
+  customImage?: string;
+  active: boolean;
+}
+
 export interface SiteSettings {
   id: string;
   logoUrl?: string;
-  heroImageUrl?: string;
-  heroTitle?: string;
-  heroSubtitle?: string;
+  heroImageUrl?: string; // Legacy
+  heroTitle?: string; // Legacy
+  heroSubtitle?: string; // Legacy
+  heroSlides?: HeroSlide[];
+  promoBanners?: PromoBanner[];
+  featuredCategoriesList?: FeaturedCategory[];
   contactEmail?: string;
   contactPhone?: string;
   address?: string;
@@ -315,4 +349,14 @@ export interface SiteSettings {
   youtubeUrl?: string;
   announcement?: string;
   showAnnouncement?: boolean;
+  announcementLink?: string;
+  
+  // New CMS Sections
+  aboutUsTitle?: string;
+  aboutUsText?: string;
+  aboutUsImage?: string;
+  aboutUsLink?: string;
+  
+  footerTags?: string[];
+  footerDescription?: string;
 }

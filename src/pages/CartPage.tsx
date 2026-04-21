@@ -5,13 +5,19 @@ import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus } from 'lucide-react';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useAuthStore } from '../store/authStore';
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, clearCart } = useCartStore();
+  const { user } = useAuthStore();
   const { t } = useTranslation();
 
+  const userDiscount = user?.discountLevel || 0;
   const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const discountAmount = totalAmount * (userDiscount / 100);
+  const finalTotal = totalAmount - discountAmount;
+  const vatAmount = finalTotal * 0.2;
 
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
 
@@ -146,14 +152,22 @@ export const CartPage: React.FC = () => {
                       <span className="text-zinc-500">{t('total_price')}</span>
                       <span className="text-zinc-300 font-mono">€{totalAmount.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-xs sm:text-sm">
-                      <span className="text-zinc-500">VAT (25%)</span>
-                      <span className="text-zinc-300 font-mono">Included</span>
-                    </div>
+                    {userDiscount > 0 && (
+                      <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
+                        <span>{t('dashboard_discount')} ({user?.rank}) -{userDiscount}%</span>
+                        <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="h-px bg-zinc-800 my-3 sm:my-4" />
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
-                      <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{totalAmount.toLocaleString()}</span>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
+                        <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{finalTotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                        <span>{t('vat_included')}</span>
+                        <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
                     </div>
                   </div>
 

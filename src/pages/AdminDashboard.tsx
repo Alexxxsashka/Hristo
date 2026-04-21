@@ -75,14 +75,14 @@ import { BlogManager } from '../components/admin/BlogManager';
 import { OrderManager } from '../components/admin/OrderManager';
 import { ProductForm } from '../components/admin/ProductForm';
 import { PolicyManager } from '../components/admin/PolicyManager';
-import { ERPManager } from '../components/admin/ERPManager';
+
 import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
 import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'erp' | 'orders' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'settings'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,27 +104,28 @@ export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
+  const loadAllData = async () => {
+    setIsLoading(true);
+    await Promise.all([
+      fetchProducts(),
+      fetchCategories(),
+      fetchBlogPosts(),
+      fetchPolicies(),
+      fetchOrdersInternal(),
+      databaseService.getUsers().then(u => setUsersList(u || [])),
+      databaseService.getMessages().then(m => setMessages(m || []))
+    ]);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     if (user?.role !== 'admin') {
       navigate('/login');
       return;
     }
 
-    const loadAllData = async () => {
-      setIsLoading(true);
-      await Promise.all([
-        fetchProducts(),
-        fetchCategories(),
-        fetchBlogPosts(),
-        fetchPolicies(),
-        fetchOrdersInternal(),
-        databaseService.getUsers().then(u => setUsersList(u || [])),
-        databaseService.getMessages().then(m => setMessages(m || []))
-      ]);
-      setIsLoading(false);
-    };
-
     loadAllData();
+
 
     // Auto-refresh orders and products in the background every 30 seconds
     const interval = setInterval(() => {
@@ -234,18 +235,20 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      p.name.toLowerCase().includes(searchLower) ||
+      p.brand.toLowerCase().includes(searchLower) ||
+      p.sku?.toLowerCase().includes(searchLower) ||
+      p.category?.toLowerCase().includes(searchLower) ||
+      p.id.toLowerCase().includes(searchLower);
 
-    if (productFilter === 'out_of_stock') return matchesSearch && p.stock <= 0;
-    if (productFilter === 'premium') return matchesSearch && p.price > 500;
+    const matchesFilter = 
+      productFilter === 'all' ||
+      (productFilter === 'out_of_stock' && p.stock <= (p.minStockLevel || 0)) ||
+      (productFilter === 'premium' && p.price > 500);
 
-    if (indexedSearch) {
-      return p.sku?.toLowerCase().includes(indexedSearch.toLowerCase()) ||
-        p.id.toLowerCase().includes(indexedSearch.toLowerCase());
-    }
-
-    return matchesSearch;
+    return matchesSearch && matchesFilter;
   });
 
   const filteredBlogPosts = blogPosts.filter(p =>
@@ -326,14 +329,7 @@ export const AdminDashboard: React.FC = () => {
             active={activeTab === 'policies'}
             onClick={() => { setActiveTab('policies'); setSearchQuery(''); }}
           />
-          <SidebarItem
-            icon={<Database size={20} />}
-            label="ERP / IMS"
-            description="Inventory & Procurement"
-            showHelp={showHelp}
-            active={activeTab === 'erp'}
-            onClick={() => { setActiveTab('erp'); setSearchQuery(''); }}
-          />
+
           <SidebarItem
             icon={<Globe size={20} />}
             label="Website"
@@ -451,24 +447,65 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex items-center justify-end gap-3 mb-6">
-                  <button
-                    onClick={() => generateProductsReport(products, orders)}
-                    className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-900 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all border border-zinc-200"
-                  >
-                    <FileText size={16} />
-                    Product Report (PDF)
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingProduct(null);
-                      setActiveTab('add');
-                    }}
-                    className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
-                  >
-                    <Plus size={18} />
-                    Add Product
-                  </button>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm mb-8">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="relative flex-1 max-w-md">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Search products, brand, or SKU..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <select
+                        value={productFilter}
+                        onChange={e => setProductFilter(e.target.value as any)}
+                        className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
+                      >
+                        <option value="all">All Products</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                        <option value="premium">Premium ({'>'}€500)</option>
+                      </select>
+                    </div>
+                    <div className="relative">
+                      <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <select
+                        onChange={e => {
+                          const categoryName = e.target.value;
+                          setSearchQuery(categoryName === 'all' ? '' : categoryName);
+                        }}
+                        className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
+                      >
+                        <option value="all">All Categories</option>
+                        {categories.map(cat => (
+                          <option key={cat.id} value={cat.name}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => generateProductsReport(products, orders)}
+                      className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all border border-zinc-200"
+                    >
+                      <FileText size={16} />
+                      Report (PDF)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingProduct(null);
+                        setActiveTab('add');
+                      }}
+                      className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
+                    >
+                      <Plus size={18} />
+                      Add Product
+                    </button>
+                  </div>
                 </div>
                 <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
                   <table className="w-full text-left">
@@ -539,8 +576,11 @@ export const AdminDashboard: React.FC = () => {
                       ))}
                       {filteredProducts.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 font-medium">
-                            No products found matching your search.
+                          <td colSpan={6} className="px-6 py-20 text-center">
+                            <div className="flex flex-col items-center justify-center text-zinc-400">
+                              <Package size={48} className="mb-4 opacity-20" />
+                              <p className="font-black uppercase tracking-widest text-xs">No products found</p>
+                            </div>
                           </td>
                         </tr>
                       )}
@@ -649,18 +689,7 @@ export const AdminDashboard: React.FC = () => {
               />
             )}
 
-            {activeTab === 'erp' && (
-              <ERPManager
-                products={products}
-                onNotify={showNotification}
-                onConfirm={confirmAction}
-                onUpdate={fetchProducts}
-                onEditProduct={(p) => {
-                  setEditingProduct(p);
-                  setActiveTab('products');
-                }}
-              />
-            )}
+
 
             {activeTab === 'settings' && (
               <SiteSettingsManager onNotify={showNotification} onUpdate={loadAllData} />

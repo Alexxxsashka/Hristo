@@ -236,6 +236,7 @@ export const CheckoutPage: React.FC = () => {
   const discountAmount = subtotal * (userDiscount / 100);
   const discountedSubtotal = subtotal - discountAmount;
   const total = discountedSubtotal + selectedShipping.price;
+  const vatAmount = total * 0.2; // 25% VAT included in the final price (Base * 1.25 = Total => VAT = Total - Total/1.25 = Total * 0.2)
 
   useEffect(() => {
     if (step === 2 && selectedPayment.id === 'stripe' && !stripeClientSecret) {
@@ -259,7 +260,8 @@ export const CheckoutPage: React.FC = () => {
               userId: isAuthenticated ? user!.id : 'guest',
               items: orderItems,
               subtotal: discountedSubtotal,
-              tax: 0,
+              tax: vatAmount,
+              discountAmount: discountAmount,
               shippingCost: selectedShipping.price,
               total,
               profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
@@ -366,7 +368,8 @@ export const CheckoutPage: React.FC = () => {
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,
         subtotal: discountedSubtotal,
-        tax: 0,
+        tax: vatAmount,
+        discountAmount: discountAmount,
         shippingCost: selectedShipping.price,
         total,
         profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
@@ -817,7 +820,7 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                   {userDiscount > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
-                      <span>{t('rank_discount')} ({user?.rank}) -{userDiscount}%</span>
+                      <span>{t('dashboard_discount')} ({user?.rank}) -{userDiscount}%</span>
                       <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
                     </div>
                   )}
@@ -826,9 +829,15 @@ export const CheckoutPage: React.FC = () => {
                     <span className="text-zinc-300 font-mono">€{selectedShipping.price.toFixed(2)}</span>
                   </div>
                   <div className="h-px bg-zinc-800 my-3 sm:my-4" />
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
-                    <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{total.toLocaleString()}</span>
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
+                      <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                      <span>{t('vat_included')}</span>
+                      <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
                   </div>
                 </div>
                 

@@ -13,6 +13,7 @@ export interface CartItem {
   quantity: number;
   image?: string;
   sku?: string;
+  category?: string;
   landingCost?: number;
   selectedVariant?: {
     id: string;
@@ -64,6 +65,7 @@ export const useCartStore = create<CartStore>()(
                 quantity: 1,
                 image: product.image,
                 sku: variant?.sku || product.sku,
+                category: product.category,
                 landingCost: product.landingCost,
                 selectedVariant: variant ? {
                   id: variant.id,
