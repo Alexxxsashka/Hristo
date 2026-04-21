@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 async function main() {
-  const res = await pool.query('SELECT id, name, slug, parent_id FROM categories ORDER BY name');
+  const res = await pool.query('SELECT id, name, category_id, subcategory, category_filters FROM products LIMIT 10');
   console.log(JSON.stringify(res.rows, null, 2));
   await pool.end();
 }

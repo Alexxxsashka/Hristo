@@ -127,7 +127,9 @@ function mapOrder(row: any, items: any[] = []) {
 
 function match(path: string, pattern: string): string[] | null {
   const keys: string[] = [];
-  const re = new RegExp("^" + pattern.replace(/:([^/]+)/g, (_, k) => { keys.push(k); return "([^/]+)"; }) + "$");
+  // Ensure we handle trailing slashes by making them optional in the regex
+  const cleanPattern = pattern.endsWith('/') ? pattern.slice(0, -1) : pattern;
+  const re = new RegExp("^" + cleanPattern.replace(/:([^/]+)/g, (_, k) => { keys.push(k); return "([^/]+)"; }) + "/?$");
   const m = path.match(re);
   if (!m) return null;
   return keys.map((_, i) => m[i + 1]);
@@ -425,14 +427,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(r.rows);
     }
 
-    // ── POST /admin/categories ─────────────────────────────────────────────────
-    if (path === "/admin/categories" && method === "POST") {
+    // ── POST/PUT /admin/categories ──────────────────────────────────────────────
+    const catUpdateMatch = match(path, "/admin/categories/:id");
+    const isCatUpdate = (path === "/admin/categories" || catUpdateMatch) && (method === "POST" || method === "PUT");
+    
+    if (isCatUpdate) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      
+      const categoryIdFromPath = catUpdateMatch ? catUpdateMatch[0] : null;
       const { id, name, slug, image_url, parent_id, filters } = req.body || {};
+      const finalId = id || categoryIdFromPath || slug;
+
+      if (!finalId) return res.status(400).json({ error: "Category ID is required" });
+
       await pool.query(
-        "INSERT INTO categories (id, name, slug, image_url, parent_id, filters) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO UPDATE SET name=$2, slug=$3, image_url=$4, parent_id=$5, filters=$6",
-        [id || slug, name, slug, image_url, parent_id || null, JSON.stringify(filters || [])]
+        `INSERT INTO categories (id, name, slug, image_url, parent_id, filters) 
+         VALUES ($1,$2,$3,$4,$5,$6) 
+         ON CONFLICT (id) DO UPDATE SET 
+           name = EXCLUDED.name, 
+           slug = EXCLUDED.slug, 
+           image_url = EXCLUDED.image_url, 
+           parent_id = EXCLUDED.parent_id, 
+           filters = EXCLUDED.filters`,
+        [finalId, name, slug, image_url, parent_id || null, JSON.stringify(filters || [])]
       );
       return res.json({ ok: true });
     }

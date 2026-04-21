@@ -61,8 +61,13 @@ export const ShopPage: React.FC = () => {
     });
   }, [category, subcategory, categories, setFilters]);
 
+  const activeSubcategoryId = filters.subcategories[0];
+  const activeCategoryId = filters.categories[0];
+  
+  const activeCategory = categories.find(c => c.id === activeSubcategoryId) || 
+                         categories.find(c => c.id === activeCategoryId);
+
   const filteredProducts = getFilteredProducts();
-  const activeCategory = categories.find(c => c.id === category);
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -79,8 +84,8 @@ export const ShopPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] pt-24 md:pt-32 pb-24">
       <SEO 
-        title={category ? `${category} Catalog` : "Product Catalog"}
-        description="Browse our extensive collection of airsoft weapons, attachments, and tactical gear. Filter by brand, price, and category."
+        title={activeCategory ? `${activeCategory.name} | Hristo` : t('shop_title')}
+        description={activeCategory ? `Browse our ${activeCategory.name} collection. ${activeCategory.name} high-quality products.` : "Browse our extensive collection of airsoft weapons, attachments, and tactical gear."}
       />
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Category Banner */}
@@ -140,7 +145,7 @@ export const ShopPage: React.FC = () => {
                   className="absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-zinc-950 border-r border-zinc-800 p-6 sm:p-8 overflow-y-auto"
                 >
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-black uppercase tracking-tighter">{t('filters')}</h2>
+                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">{activeCategory ? activeCategory.name : t('filters')}</h3>
                     <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-zinc-500 hover:text-white">
                       <SlidersHorizontal size={20} />
                     </button>

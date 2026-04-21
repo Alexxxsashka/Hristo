@@ -8,121 +8,121 @@ async function populateFilters() {
     {
       slug: 'airsoft-weapons',
       filters: [
-        { id: 'fire_mode', name: 'Fire Mode', options: ['Semi', 'Full Auto', '3-Round Burst', 'Single/Bolt'] },
-        { id: 'material', name: 'Body Material', options: ['Full Metal', 'Polymer', 'Nylon Fiber', 'Steel', 'Real Wood'] },
-        { id: 'power_source', name: 'Power Source', options: ['AEG (Electric)', 'GBB (Gas)', 'CO2', 'Spring', 'HPA'] }
+        { id: 'fire_mode', label: 'Fire Mode', options: ['Semi', 'Full Auto', '3-Round Burst', 'Single/Bolt'] },
+        { id: 'material', label: 'Body Material', options: ['Full Metal', 'Polymer', 'Nylon Fiber', 'Steel', 'Real Wood'] },
+        { id: 'power_source', label: 'Power Source', options: ['AEG (Electric)', 'GBB (Gas)', 'CO2', 'Spring', 'HPA'] }
       ]
     },
     {
       slug: 'aeg-rifles',
       filters: [
-        { id: 'gearbox', name: 'Gearbox Version', options: ['V2', 'V3', 'V6', 'V7'] },
-        { id: 'battery_type', name: 'Optimal Battery', options: ['LiPo 7.4V', 'LiPo 11.1V', 'NiMH 9.6V'] },
-        { id: 'connector', name: 'Connector Type', options: ['Mini Tamiya', 'Deans (T-Plug)'] },
-        { id: 'mosfet', name: 'MOSFET/ETU', options: ['Built-in MOSFET', 'Electronic Trigger Unit', 'No MOSFET'] }
+        { id: 'gearbox', label: 'Gearbox Version', options: ['V2', 'V3', 'V6', 'V7'] },
+        { id: 'battery_type', label: 'Optimal Battery', options: ['LiPo 7.4V', 'LiPo 11.1V', 'NiMH 9.6V'] },
+        { id: 'connector', label: 'Connector Type', options: ['Mini Tamiya', 'Deans (T-Plug)'] },
+        { id: 'mosfet', label: 'MOSFET/ETU', options: ['Built-in MOSFET', 'Electronic Trigger Unit', 'No MOSFET'] }
       ]
     },
     {
       slug: 'gbb-rifles',
       filters: [
-        { id: 'gas_type', name: 'Gas Compatibility', options: ['Green Gas', 'CO2', 'Black Gas (High Pressure)'] },
-        { id: 'platform', name: 'Platform', options: ['M4/AR-15', 'AK', 'MCX', 'G36'] }
+        { id: 'gas_type', label: 'Gas Compatibility', options: ['Green Gas', 'CO2', 'Black Gas (High Pressure)'] },
+        { id: 'platform', label: 'Platform', options: ['M4/AR-15', 'AK', 'MCX', 'G36'] }
       ]
     },
     {
       slug: 'sniper-rifles',
       filters: [
-        { id: 'action', name: 'Action', options: ['Bolt Action', 'Semi-Auto (DMR)', 'Gas Operated'] },
-        { id: 'spring_rating', name: 'Spring Tension', options: ['M130', 'M150', 'M170', 'M190'] }
+        { id: 'action', label: 'Action', options: ['Bolt Action', 'Semi-Auto (DMR)', 'Gas Operated'] },
+        { id: 'spring_rating', label: 'Spring Tension', options: ['M130', 'M150', 'M170', 'M190'] }
       ]
     },
     {
       slug: 'pistols',
       filters: [
-        { id: 'action', name: 'Action', options: ['Blowback (GBB)', 'Non-Blowback (NBB)', 'CO2 Driven'] },
-        { id: 'optics_ready', name: 'Optics Ready', options: ['Yes (RMR Cut)', 'No'] }
+        { id: 'action', label: 'Action', options: ['Blowback (GBB)', 'Non-Blowback (NBB)', 'CO2 Driven'] },
+        { id: 'optics_ready', label: 'Optics Ready', options: ['Yes (RMR Cut)', 'No'] }
       ]
     },
     {
       slug: 'bbs',
       filters: [
-        { id: 'weight', name: 'BB Weight', options: ['0.20g', '0.23g', '0.25g', '0.28g', '0.30g', '0.32g', '0.36g', '0.40g', '0.45g+'] },
-        { id: 'type', name: 'Material Type', options: ['BIO-Degradable', 'Standard Polymer'] },
-        { id: 'tracer_type', name: 'Tracer Type', options: ['Non-Tracer', 'Tracer Green', 'Tracer Red'] }
+        { id: 'weight', label: 'BB Weight', options: ['0.20g', '0.23g', '0.25g', '0.28g', '0.30g', '0.32g', '0.36g', '0.40g', '0.45g+'] },
+        { id: 'type', label: 'Material Type', options: ['BIO-Degradable', 'Standard Polymer'] },
+        { id: 'tracer_type', label: 'Tracer Type', options: ['Non-Tracer', 'Tracer Green', 'Tracer Red'] }
       ]
     },
     {
       slug: 'batteries-chargers',
       filters: [
-        { id: 'chemistry', name: 'Chemistry', options: ['LiPo', 'Li-Ion', 'NiMH'] },
-        { id: 'cells', name: 'Voltage', options: ['7.4V', '11.1V', '9.6V'] }
+        { id: 'chemistry', label: 'Chemistry', options: ['LiPo', 'Li-Ion', 'NiMH'] },
+        { id: 'cells', label: 'Voltage', options: ['7.4V', '11.1V', '9.6V'] }
       ]
     },
     {
       slug: 'clothing-apparel',
       filters: [
-        { id: 'size', name: 'Size', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'] },
-        { id: 'camo', name: 'Camo/Color', options: ['Multicam', 'Woodland', 'Flecktarn', 'Black', 'Tan', 'Grey'] }
+        { id: 'size', label: 'Size', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'] },
+        { id: 'camo', label: 'Camo/Color', options: ['Multicam', 'Woodland', 'Flecktarn', 'Black', 'Tan', 'Grey'] }
       ]
     },
     {
       slug: 'uniforms',
       filters: [
-        { id: 'size', name: 'Size', options: ['S', 'M', 'L', 'XL', 'XXL'] },
-        { id: 'camo', name: 'Camouflage', options: ['Multicam', 'Woodland', 'Digital Desert', 'Olive Drab'] }
+        { id: 'size', label: 'Size', options: ['S', 'M', 'L', 'XL', 'XXL'] },
+        { id: 'camo', label: 'Camouflage', options: ['Multicam', 'Woodland', 'Digital Desert', 'Olive Drab'] }
       ]
     },
     {
       slug: 'tactical-pants',
       filters: [
-        { id: 'waist', name: 'Waist Size', options: ['28', '30', '32', '34', '36', '38', '40'] },
-        { id: 'length', name: 'Length', options: ['Regular', 'Long', 'Short'] }
+        { id: 'waist', label: 'Waist Size', options: ['28', '30', '32', '34', '36', '38', '40'] },
+        { id: 'length', label: 'Length', options: ['Regular', 'Long', 'Short'] }
       ]
     },
     {
       slug: 'weapon-accessories',
       filters: [
-        { id: 'rail', name: 'Mount Type', options: ['Picatinny', 'M-LOK', 'KeyMod'] }
+        { id: 'rail', label: 'Mount Type', options: ['Picatinny', 'M-LOK', 'KeyMod'] }
       ]
     },
     {
       slug: 'optics-sights',
       filters: [
-        { id: 'type', name: 'Optic Type', options: ['Red Dot', 'LPVO', 'Sniper Scope', 'Holographic'] }
+        { id: 'type', label: 'Optic Type', options: ['Red Dot', 'LPVO', 'Sniper Scope', 'Holographic'] }
       ]
     },
     {
       slug: 'magazines',
       filters: [
-        { id: 'mag_type', name: 'Magazine Type', options: ['Low-Cap', 'Mid-Cap', 'Hi-Cap', 'Drum'] },
-        { id: 'capacity', name: 'Capacity (Rounds)', options: ['15-30', '100-140', '300-500', '1000+'] }
+        { id: 'mag_type', label: 'Magazine Type', options: ['Low-Cap', 'Mid-Cap', 'Hi-Cap', 'Drum'] },
+        { id: 'capacity', label: 'Capacity (Rounds)', options: ['15-30', '100-140', '300-500', '1000+'] }
       ]
     },
     {
       slug: 'internal-parts',
       filters: [
-        { id: 'part_category', name: 'Part Group', options: ['Hop-Up/Bucking', 'Inner Barrel', 'Gearset', 'Piston/Head', 'Motor'] }
+        { id: 'part_category', label: 'Part Group', options: ['Hop-Up/Bucking', 'Inner Barrel', 'Gearset', 'Piston/Head', 'Motor'] }
       ]
     },
     {
       slug: 'suppressors-tracers',
       filters: [
-        { id: 'threading', name: 'Threading', options: ['14mm CCW (Standard)', '14mm CW', '24mm CW'] },
-        { id: 'tracer_module', name: 'Tracer Module', options: ['Built-in', 'Housing Only (Dummy)', 'Simulated Muzzle Flash'] }
+        { id: 'threading', label: 'Threading', options: ['14mm CCW (Standard)', '14mm CW', '24mm CW'] },
+        { id: 'tracer_module', label: 'Tracer Module', options: ['Built-in', 'Housing Only (Dummy)', 'Simulated Muzzle Flash'] }
       ]
     },
     {
       slug: 'tents-sleeping-bags',
       filters: [
-        { id: 'season', name: 'Season Rating', options: ['1 Season (Summer)', '3 Season', '4 Season (Winter)'] },
-        { id: 'capacity', name: 'Capacity (Persons)', options: ['1 Person', '2 Persons', '3-4 Persons'] }
+        { id: 'season', label: 'Season Rating', options: ['1 Season (Summer)', '3 Season', '4 Season (Winter)'] },
+        { id: 'capacity', label: 'Capacity (Persons)', options: ['1 Person', '2 Persons', '3-4 Persons'] }
       ]
     },
     {
       slug: 'gloves',
       filters: [
-        { id: 'size', name: 'Size', options: ['S', 'M', 'L', 'XL'] },
-        { id: 'protection', name: 'Knuckle Protection', options: ['Hard Shell', 'Soft Padding', 'No Padding'] }
+        { id: 'size', label: 'Size', options: ['S', 'M', 'L', 'XL'] },
+        { id: 'protection', label: 'Knuckle Protection', options: ['Hard Shell', 'Soft Padding', 'No Padding'] }
       ]
     }
   ];

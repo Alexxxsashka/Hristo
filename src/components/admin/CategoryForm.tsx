@@ -347,7 +347,7 @@ export const CategoryForm = ({
                     <input
                       type="text"
                       placeholder="Filter Label (e.g. Color)"
-                      value={filter.label}
+                      value={filter.label || (filter as any).name || ''}
                       onChange={e => updateFilter(fIndex, 'label', e.target.value)}
                       className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
                     />
