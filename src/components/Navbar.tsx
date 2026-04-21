@@ -168,33 +168,32 @@ export const Navbar: React.FC = () => {
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center lg:w-[480px] xl:w-[520px] shrink-0">
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8 mx-4 xl:mx-8">
             {navLinks.map(link => (
-              <div key={link.to} className="flex-1 flex justify-center">
-                <Link 
-                  to={link.to} 
-                  className={`text-[11px] font-black tracking-widest transition-colors uppercase flex items-center gap-2 whitespace-nowrap ${
-                    link.highlight ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                  {link.highlight && (
-                    <span className="px-1.5 py-0.5 bg-red-600 text-white text-[8px] rounded-sm animate-pulse">
-                      {t('live')}
-                    </span>
-                  )}
-                </Link>
-              </div>
+              <Link 
+                key={link.to}
+                to={link.to} 
+                className={`text-[11px] font-black tracking-widest transition-colors uppercase flex items-center gap-2 whitespace-nowrap ${
+                  link.highlight ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                {link.label}
+                {link.highlight && (
+                  <span className="px-1.5 py-0.5 bg-red-600 text-white text-[8px] rounded-sm animate-pulse">
+                    {t('live')}
+                  </span>
+                )}
+              </Link>
             ))}
           </div>
 
-          {/* Spacer/Search Bar Area */}
-          <div className="hidden md:flex flex-1 justify-center px-4">
+          {/* Search Bar Area */}
+          <div className="hidden md:flex flex-1 justify-end px-4">
             {!isHomePage && (
               <motion.div 
                 initial={false}
-                animate={{ width: isSearchOpen || searchQuery ? '100%' : '160px' }}
-                className="relative max-w-md w-full"
+                animate={{ width: isSearchOpen || searchQuery ? '280px' : '180px' }}
+                className="relative"
               >
                 <form onSubmit={handleSearch} className="w-full">
                   <input 
@@ -204,15 +203,15 @@ export const Navbar: React.FC = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchOpen(true)}
                     onBlur={() => setIsSearchOpen(false)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-zinc-200 focus:outline-none focus:border-red-600 transition-all duration-300"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 h-9 pl-10 pr-4 text-xs text-zinc-200 focus:outline-none focus:border-red-600 transition-all duration-300"
                   />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
                 </form>
               </motion.div>
             )}
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0 w-auto md:w-[280px] lg:w-[320px] justify-end">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 justify-end ml-4">
             <div className="flex items-center gap-2 sm:gap-4">
               {!isHomePage && (
                 <button className="p-2 text-zinc-400 hover:text-white transition-colors md:hidden">
