@@ -223,18 +223,56 @@ export const CategoryForm = ({
             </AnimatePresence>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
           </div>
-          <div className="w-36 space-y-1">
-            <select
-              value={newCat.parent || ''}
-              onChange={e => setNewCat({ ...newCat, parent: e.target.value || null })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
-            >
-              <option value="">No Parent</option>
-              {categories.filter(c => !c.parent && c.id !== editingCat?.id).map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+          <div className="w-1/3 space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Structural Role</label>
+            <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-200">
+               <button 
+                type="button" 
+                onClick={() => handleFieldChange('parent', null)}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                  !newCat.parent ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+                }`}
+               >
+                 Main
+               </button>
+               <button 
+                type="button" 
+                onClick={() => {
+                  if (!newCat.parent) {
+                    const firstParent = categories.find(c => !c.parent && c.id !== editingCat?.id);
+                    handleFieldChange('parent', firstParent?.id || '');
+                  }
+                }}
+                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                  newCat.parent ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+                }`}
+               >
+                 Sub
+               </button>
+            </div>
           </div>
+
+          <AnimatePresence>
+            {newCat.parent !== null && (
+              <motion.div 
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="w-48 space-y-1 overflow-hidden"
+              >
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Parent Category</label>
+                <select
+                  value={newCat.parent}
+                  onChange={e => setNewCat({ ...newCat, parent: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
+                >
+                  {categories.filter(c => !c.parent && c.id !== editingCat?.id).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="w-24 space-y-1">
             <input
               type="number"
