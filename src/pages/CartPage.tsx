@@ -3,13 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus } from 'lucide-react';
+import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useAuthStore } from '../store/authStore';
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, clearCart } = useCartStore();
+  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCartStore();
   const { user } = useAuthStore();
   const { t } = useTranslation();
 
@@ -127,6 +127,30 @@ export const CartPage: React.FC = () => {
                           ) : (
                             <span className="font-mono text-zinc-300">€{item.price.toLocaleString()}</span>
                           )}
+                        </div>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-xl p-2 h-12">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-2">
+                          {t('quantity')}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button 
+                            onClick={() => updateQuantity(item.id, -1)}
+                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="w-8 text-center font-mono font-bold text-white text-xs">
+                            {item.quantity}
+                          </span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, 1)}
+                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                          >
+                            <Plus size={14} />
+                          </button>
                         </div>
                       </div>
                     </div>

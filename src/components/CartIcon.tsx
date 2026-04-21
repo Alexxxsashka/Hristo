@@ -7,7 +7,7 @@ import { useTranslation } from '../hooks/useTranslation';
 export const CartIcon: React.FC = () => {
   const cartItems = useCartStore((state) => state.cartItems);
   const { t } = useTranslation();
-  const itemCount = cartItems.length;
+  const itemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <Link 

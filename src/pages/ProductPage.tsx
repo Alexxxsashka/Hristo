@@ -59,6 +59,7 @@ export const ProductPage: React.FC = () => {
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (product?.variants && product.variants.length > 0) {
@@ -344,12 +345,45 @@ export const ProductPage: React.FC = () => {
                   ))}
                 </div>
               )}
+              {/* Quantity Selector */}
+              <div className="pt-6 border-t border-zinc-900">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('quantity') || 'Quantity'}</label>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('total_price') || 'Total'}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-xl p-1 shadow-inner h-14 w-40">
+                    <button 
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      className="w-12 h-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                    >
+                      <Wind size={16} className="rotate-180" />
+                    </button>
+                    <div className="flex-1 text-center font-mono font-black text-lg text-white">
+                      {quantity}
+                    </div>
+                    <button 
+                      onClick={() => setQuantity(q => q + 1)}
+                      className="w-12 h-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+                    >
+                      <Wind size={16} />
+                    </button>
+                  </div>
+                  <div className="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-6 flex items-center justify-end h-14">
+                     <span className="text-xl font-black text-white font-mono">
+                       €{(getDiscountedPrice(currentPrice, product.discount) * quantity).toLocaleString()}
+                     </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
               <button 
-                onClick={() => addItem(product, selectedVariant || undefined)}
+                onClick={() => {
+                  addItem(product, selectedVariant || undefined, quantity);
+                }}
                 disabled={currentStock <= 0 || !isSelectionComplete}
                 className="flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 bg-red-600 hover:bg-red-700 disabled:bg-zinc-900 disabled:text-zinc-700 disabled:border-zinc-800 border border-red-500 text-white rounded-xl md:rounded-2xl transition-all shadow-2xl shadow-red-900/20 text-xs sm:text-sm font-black uppercase tracking-widest group"
               >
