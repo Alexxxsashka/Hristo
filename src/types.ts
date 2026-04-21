@@ -328,7 +328,6 @@ export interface FeaturedCategory {
   id: string;
   categoryId: string;
   customName?: string;
-  customImage?: string;
   active: boolean;
 }
 

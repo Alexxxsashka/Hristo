@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
+import { X, Check, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { Category } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { WEAPON_SLOTS, MODULE_CATEGORIES } from '../../constants';
@@ -58,6 +58,32 @@ export const CategoryForm = ({
     setNewCat(prev => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      if (newCat.image) await databaseService.deleteFile(newCat.image);
+      const extension = file.name.split('.').pop();
+      const path = `categories/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${extension}`;
+      const url = await databaseService.uploadFile(file, path);
+      handleFieldChange('image', url);
+      onNotify('Image uploaded successfully');
+    } catch (err) {
+      console.error('Upload failed:', err);
+      onNotify('Failed to upload image', 'error');
+    }
+  };
+
+  const handleFileDelete = async () => {
+    if (!newCat.image) return;
+    try {
+      await databaseService.deleteFile(newCat.image);
+      handleFieldChange('image', '');
+      onNotify('Image removed successfully');
+    } catch (err) {
+      console.error('Delete failed:', err);
+      onNotify('Failed to remove image', 'error');
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -197,30 +223,67 @@ export const CategoryForm = ({
             </AnimatePresence>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
           </div>
-          <div className="w-48 space-y-1">
+          <div className="w-36 space-y-1">
             <select
               value={newCat.parent || ''}
               onChange={e => setNewCat({ ...newCat, parent: e.target.value || null })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
             >
               <option value="">No Parent</option>
               {categories.filter(c => !c.parent && c.id !== editingCat?.id).map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-            {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Main category (optional).</p>}
           </div>
-          <div className="w-32 space-y-1">
+          <div className="w-24 space-y-1">
             <input
               type="number"
               placeholder="Disc %"
               value={newCat.discount || 0}
               onChange={e => setNewCat({ ...newCat, discount: Number(e.target.value) })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
               min="0"
               max="100"
             />
-            {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Category discount.</p>}
+          </div>
+          <div className="w-1/4 space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Category Backdrop</label>
+            <div className="relative group h-[52px] bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden transition-all hover:border-zinc-900">
+              {newCat.image ? (
+                <img 
+                  src={newCat.image} 
+                  alt="Category" 
+                  className="w-full h-full object-cover opacity-80" 
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-zinc-300">
+                  <ImageIcon size={20} />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <label className="p-1.5 bg-white text-zinc-900 rounded-lg cursor-pointer hover:scale-110 transition-transform">
+                  <Upload size={14} />
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file);
+                    }} 
+                  />
+                </label>
+                {newCat.image && (
+                  <button 
+                    type="button"
+                    onClick={handleFileDelete}
+                    className="p-1.5 bg-red-600 text-white rounded-lg hover:scale-110 transition-transform"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

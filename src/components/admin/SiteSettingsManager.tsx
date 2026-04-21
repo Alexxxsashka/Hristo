@@ -512,25 +512,10 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                           featuredCategoriesList: (settings.featuredCategoriesList || []).map(item => item.id === fc.id ? { ...item, ...updates } : item)
                         });
                       }}
-                      onDelete={async () => {
-                        if (fc.customImage) await handleFileDelete(fc.customImage);
+                      onDelete={() => {
                         setSettings({
                           ...settings,
                           featuredCategoriesList: (settings.featuredCategoriesList || []).filter(item => item.id !== fc.id)
-                        });
-                      }}
-                      onUploadImage={async (file) => {
-                        const url = await handleFileUpload(file, 'categories', fc.customImage);
-                        setSettings({
-                          ...settings,
-                          featuredCategoriesList: (settings.featuredCategoriesList || []).map(item => item.id === fc.id ? { ...item, customImage: url } : item)
-                        });
-                      }}
-                      onRemoveImage={async () => {
-                        if (fc.customImage) await handleFileDelete(fc.customImage);
-                        setSettings({
-                          ...settings,
-                          featuredCategoriesList: (settings.featuredCategoriesList || []).map(item => item.id === fc.id ? { ...item, customImage: '' } : item)
                         });
                       }}
                     />
@@ -873,13 +858,11 @@ const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadImage, onRe
   );
 };
 
-const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete, onUploadImage, onRemoveImage }: {
+const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete }: {
   fc: FeaturedCategory,
   index: number,
   onUpdate: (updates: Partial<FeaturedCategory>) => void,
-  onDelete: () => void,
-  onUploadImage: (file: File) => void,
-  onRemoveImage: () => void
+  onDelete: () => void
 }) => {
   return (
     <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-6 space-y-6 relative overflow-hidden group">
@@ -927,30 +910,12 @@ const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete, onUploadImage, 
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Categorical Backdrop</label>
-          <div className="relative aspect-video rounded-2xl overflow-hidden border border-zinc-200 bg-white group">
-            <img 
-              src={fc.customImage || "https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800"} 
-              className="w-full h-full object-cover opacity-60" 
-              alt=""
-            />
-            <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900/40 backdrop-blur-sm">
-              <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
-                <Upload size={18} />
-                <input type="file" className="hidden" accept="image/*" onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) onUploadImage(file);
-                }} />
-              </label>
-              {fc.customImage && (
-                <button 
-                  onClick={onRemoveImage}
-                  className="p-3 bg-red-600 text-white rounded-xl hover:scale-110 transition-transform"
-                >
-                  <Trash2 size={18} />
-                </button>
-              )}
-            </div>
+          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Section Status</label>
+          <div className="flex items-center gap-2 p-3 bg-white border border-zinc-200 rounded-xl">
+             <div className={`w-2 h-2 rounded-full ${fc.active ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-300'}`} />
+             <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+               {fc.active ? 'Active on Landing' : 'Hidden from Landing'}
+             </span>
           </div>
         </div>
       </div>

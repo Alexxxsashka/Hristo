@@ -63,8 +63,21 @@ export const CategoryManager = ({
             {categories.map(cat => (
               <tr key={cat.id} className="hover:bg-zinc-50/50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="font-bold text-zinc-900">{cat.name}</div>
-                  <div className="text-[10px] font-mono text-zinc-400">{cat.id}</div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden flex-shrink-0">
+                      {cat.image ? (
+                        <img src={cat.image} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-zinc-300 bg-zinc-50">
+                          <Plus size={14} className="opacity-20" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-zinc-900">{cat.name}</div>
+                      <div className="text-[10px] font-mono text-zinc-400">{cat.id}</div>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-zinc-500 font-medium">{cat.parent || '-'}</td>
                 <td className="px-6 py-4">

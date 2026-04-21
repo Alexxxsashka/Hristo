@@ -20,6 +20,7 @@ const HomePage: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const { t } = useTranslation();
   const { user } = useAuthStore();
+  const [categories, setCategories] = useState<any[]>([]);
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -27,12 +28,14 @@ const HomePage: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [productsData, settingsData] = await Promise.all([
+        const [productsData, settingsData, categoriesData] = await Promise.all([
           databaseService.getProducts(),
-          databaseService.getSiteSettings()
+          databaseService.getSiteSettings(),
+          databaseService.getCategories()
         ]);
         setProducts(productsData || []);
         setSettings(settingsData);
+        setCategories(categoriesData || []);
       } catch (err) {
         console.error('Failed to fetch data', err);
       } finally {
@@ -365,7 +368,9 @@ const HomePage: React.FC = () => {
                 { id: 'internal_parts', categoryId: 'internal_parts', customName: 'Internal Parts', customImage: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop' },
               ]
           ).map((cat) => {
-            const categoryName = cat.customName || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+            const actualCategory = categories.find(c => c.id === cat.categoryId);
+            const categoryName = cat.customName || actualCategory?.name || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+            const categoryImage = actualCategory?.image || (cat as any).customImage || 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800';
             const count = products.filter(p => p.category === cat.categoryId).length;
             return (
               <Link 
@@ -374,7 +379,7 @@ const HomePage: React.FC = () => {
                 className="group relative aspect-[3/4] rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900"
               >
                 <img 
-                  src={cat.customImage || 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800'} 
+                  src={categoryImage} 
                   alt={categoryName}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-40 group-hover:opacity-60"
                   referrerPolicy="no-referrer"
