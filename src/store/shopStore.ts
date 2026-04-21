@@ -46,7 +46,6 @@ export const useShopStore = create<ShopState>((set, get) => ({
   itemsPerPage: 20,
 
   fetchProducts: async () => {
-    if (get().products.length > 0) return;
     set({ isLoading: true });
     try {
       const data = await databaseService.getProducts();

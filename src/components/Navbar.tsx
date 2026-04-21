@@ -11,6 +11,7 @@ import { useCompareStore } from '../store/compareStore';
 import { databaseService } from '../services/databaseService';
 import { useTranslation } from '../hooks/useTranslation';
 import { SiteSettings } from '../types';
+import { useSettingsStore } from '../store/settingsStore';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -21,24 +22,23 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const { settings, fetchSettings } = useSettingsStore();
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [settingsData, categoriesData] = await Promise.all([
-          databaseService.getSiteSettings(),
+        const [categoriesData] = await Promise.all([
           databaseService.getCategories()
         ]);
-        setSettings(settingsData);
         setCategories(categoriesData || []);
+        if (!settings) fetchSettings();
       } catch (err) {
         console.error('Failed to fetch navbar data:', err);
       }
     };
     fetchData();
-  }, []);
+  }, [fetchSettings]);
 
   const isHomePage = location.pathname === '/';
 

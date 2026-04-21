@@ -11,13 +11,12 @@ import { useAuthStore } from '../store/authStore';
 import { User as UserIcon } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
-import { SEO } from '../components/SEO';
-import { SiteSettings } from '../types';
+import { useSettingsStore } from '../store/settingsStore';
 
 const HomePage: React.FC = () => {
+  const { settings, fetchSettings } = useSettingsStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [categories, setCategories] = useState<any[]>([]);
@@ -28,14 +27,13 @@ const HomePage: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [productsData, settingsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData] = await Promise.all([
           databaseService.getProducts(),
-          databaseService.getSiteSettings(),
           databaseService.getCategories()
         ]);
         setProducts(productsData || []);
-        setSettings(settingsData);
         setCategories(categoriesData || []);
+        if (!settings) fetchSettings();
       } catch (err) {
         console.error('Failed to fetch data', err);
       } finally {
@@ -43,7 +41,7 @@ const HomePage: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [fetchSettings]);
 
   const activeSlides = (settings?.heroSlides || []).filter(s => s.active);
 

@@ -29,6 +29,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
 import { SiteSettings, HeroSlide, PromoBanner, FeaturedCategory } from '../../types';
+import { useSettingsStore } from '../../store/settingsStore';
 
 type SettingsTab = 'general' | 'hero' | 'homepage' | 'social' | 'footer';
 
@@ -102,6 +103,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
       }
 
       await databaseService.updateSiteSettings(finalSettings);
+      useSettingsStore.getState().updateSettings(finalSettings);
       setSettings(finalSettings);
       onNotify('Site configuration updated successfully!', 'success');
       if (onUpdate) onUpdate();
