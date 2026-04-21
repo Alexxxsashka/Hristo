@@ -11,6 +11,8 @@ import { useAuthStore } from '../store/authStore';
 import { User as UserIcon } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
+import { SEO } from '../components/SEO';
+import { SiteSettings } from '../types';
 import { useSettingsStore } from '../store/settingsStore';
 
 const HomePage: React.FC = () => {
