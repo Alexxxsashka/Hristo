@@ -3,6 +3,7 @@ import { useShopStore } from '../store/shopStore';
 import { ChevronDown, ChevronRight, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
+import { formatLabel } from '../utils/formatText';
 
 export const CategorySidebar: React.FC = () => {
   const { t } = useTranslation();
@@ -131,7 +132,7 @@ export const CategorySidebar: React.FC = () => {
           
           {activeCategory.filters.map(filter => (
             <div key={filter.id} className="space-y-4">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">{filter.label}</label>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">{formatLabel(filter.label)}</label>
               
               {filter.type === 'select' && filter.options && (
                 <div className="relative">
@@ -140,9 +141,9 @@ export const CategorySidebar: React.FC = () => {
                     onChange={(e) => handleCategoryFilterChange(filter.id, e.target.value)}
                     className="w-full pl-4 pr-10 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[10px] font-bold text-zinc-300 focus:outline-none focus:border-red-600 appearance-none cursor-pointer"
                   >
-                    <option value="">{t('all')} {filter.label}</option>
+                    <option value="">{t('all')} {formatLabel(filter.label)}</option>
                     {filter.options.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
+                      <option key={opt} value={opt}>{formatLabel(opt)}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 pointer-events-none" />
@@ -165,7 +166,7 @@ export const CategorySidebar: React.FC = () => {
                     </div>
                   </div>
                   <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">
-                    {filter.label}
+                    {formatLabel(filter.label)}
                   </span>
                 </label>
               )}

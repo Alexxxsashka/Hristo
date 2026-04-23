@@ -17,34 +17,53 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   onNotify: (msg: string, type?: 'success' | 'error') => void
 }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<Partial<Product>>(initialData || {
-    name: '',
-    description: '',
-    type: 'weapon',
-    category: '',
-    subcategory: '',
-    brand: '',
-    model: '',
-    sku: '',
-    barcode: '',
-    price: 0,
-    landingCost: 0,
-    msrp: 0,
-    currency: 'EUR',
-    stock: 0,
-    minStockLevel: 0,
-    tags: [],
-    uid: '',
-    model3D: '',
-    model3DName: '',
-    has3D: false,
-    meshName: '',
-    socketPoint: [0, 0, 0],
-    slots: [],
-    compatibleModuleCategories: [],
-    attachmentSlot: '',
-    compatibleWeapons: [],
-    characteristics: []
+  const [formData, setFormData] = useState<Partial<Product>>(() => {
+    const baseDefaults: Partial<Product> = {
+      name: '',
+      description: '',
+      type: 'weapon',
+      category: '',
+      subcategory: '',
+      brand: '',
+      model: '',
+      sku: '',
+      barcode: '',
+      price: 0,
+      landingCost: 0,
+      msrp: 0,
+      currency: 'EUR',
+      stock: 0,
+      minStockLevel: 0,
+      tags: [],
+      uid: '',
+      model3D: '',
+      model3DName: '',
+      has3D: false,
+      meshName: '',
+      socketPoint: [0, 0, 0],
+      slots: [],
+      compatibleModuleCategories: [],
+      attachmentSlot: '',
+      compatibleWeapons: [],
+      characteristics: [
+        { emoji: '🛡️', label: 'durability', value: 'high' },
+        { emoji: '⚡', label: 'handling', value: 'medium' },
+        { emoji: '🎯', label: 'precision', value: 'elite' }
+      ]
+    };
+
+    if (!initialData) return baseDefaults;
+
+    // If initialData exists but characteristics are empty, provide defaults
+    const data = { ...initialData };
+    if (!data.characteristics || data.characteristics.length === 0) {
+      data.characteristics = [
+        { emoji: '🛡️', label: 'durability', value: 'high' },
+        { emoji: '⚡', label: 'handling', value: 'medium' },
+        { emoji: '🎯', label: 'precision', value: 'elite' }
+      ];
+    }
+    return data;
   });
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [combinedImages, setCombinedImages] = useState<(string | File)[]>(() => {
@@ -181,6 +200,13 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       onNotify('Please fix the validation errors before submitting', 'error');
       return;
     }
+
+    // Auto-add pending characteristic if user forgot to click "Add"
+    let finalCharacteristics = [...(formData.characteristics || [])];
+    if (newChar.label.trim() && newChar.value.trim()) {
+      console.log('[ProductForm Debug] Auto-adding pending characteristic');
+      finalCharacteristics.push(newChar);
+    }
     
     setIsSubmitting(true);
     console.log('Starting product save process...');
@@ -250,7 +276,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         images: finalImageUrls,
         image_url: finalImageUrls[0] || '', // Явно передаем и image_url и image для бэкенда
         image: finalImageUrls[0] || '',
-        has3D: !!modelUrl || formData.has3D
+        has3D: !!modelUrl || formData.has3D,
+        characteristics: finalCharacteristics
       };
 
       console.log('Saving product to database...', productToSave);

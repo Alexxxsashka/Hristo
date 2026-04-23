@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { formatLabel } from '../utils/formatText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { databaseService } from '../services/databaseService';
@@ -820,7 +821,7 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                   {userDiscount > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
-                      <span>{t('dashboard_discount')} ({user?.rank}) -{userDiscount}%</span>
+                      <span>{t('dashboard_discount')} ({formatLabel(user?.rank || '')}) -{userDiscount}%</span>
                       <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
                     </div>
                   )}

@@ -7,6 +7,7 @@ import { useCartStore } from '../store/cartStore';
 import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/price';
 import { useTranslation } from '../hooks/useTranslation';
+import { formatLabel } from '../utils/formatText';
 
 const RedIcon = ({ emoji, size = 20 }: { emoji: string; size?: number }) => {
   const iconMap: Record<string, any> = {
@@ -43,7 +44,7 @@ interface QuickPreviewModalProps {
 
 export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, isOpen, onClose }) => {
   const { addItem } = useCartStore();
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
 
   if (!product) return null;
 
@@ -144,19 +145,24 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               </div>
 
               {/* Dynamic Characteristics */}
-              {product.characteristics && product.characteristics.length > 0 && (
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                  {product.characteristics.slice(0, 3).map((char, i) => (
-                    <div key={i} className="p-4 bg-zinc-50 border border-zinc-100 rounded-2xl flex flex-col items-center text-center">
-                      <div className="mb-2">
-                        <RedIcon emoji={char.emoji} size={18} />
-                      </div>
-                      <p className="text-[8px] font-black uppercase text-zinc-400 tracking-widest mb-1">{char.label}</p>
-                      <p className="text-[10px] font-black uppercase text-zinc-900">{char.value}</p>
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {(product.characteristics && product.characteristics.length > 0 
+                  ? product.characteristics 
+                  : [
+                      { emoji: "🛡️", label: 'durability', value: 'high' },
+                      { emoji: "⚡", label: 'handling', value: 'medium' },
+                      { emoji: "🎯", label: 'precision', value: 'elite' }
+                    ]
+                ).slice(0, 3).map((char, i) => (
+                  <div key={i} className="p-4 bg-zinc-50 border border-zinc-100 rounded-2xl flex flex-col items-center text-center">
+                    <div className="mb-2">
+                      <RedIcon emoji={char.emoji} size={18} />
                     </div>
-                  ))}
-                </div>
-              )}
+                    <p className="text-[8px] font-black uppercase text-zinc-400 tracking-widest mb-1">{t(char.label.toLowerCase())}</p>
+                    <p className="text-[10px] font-black uppercase text-zinc-900">{t(char.value.toLowerCase())}</p>
+                  </div>
+                ))}
+              </div>
 
               <div className="space-y-4 mb-10">
                 {product.description && (

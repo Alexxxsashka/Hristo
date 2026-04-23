@@ -14,6 +14,7 @@ import { useShopStore } from '../store/shopStore';
 import { useAuthStore } from '../store/authStore';
 import { getDiscountedPrice } from '../utils/price';
 import { databaseService } from '../services/databaseService';
+import { formatLabel } from '../utils/formatText';
 
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -219,17 +220,17 @@ export const ProductPage: React.FC = () => {
               {(product.characteristics && product.characteristics.length > 0 
                 ? product.characteristics 
                 : [
-                    { emoji: "🛡️", label: t('durability'), value: t('high') },
-                    { emoji: "⚡", label: t('handling'), value: t('medium') },
-                    { emoji: "🎯", label: t('precision'), value: t('elite') }
+                    { emoji: "🛡️", label: 'durability', value: 'high' },
+                    { emoji: "⚡", label: 'handling', value: 'medium' },
+                    { emoji: "🎯", label: 'precision', value: 'elite' }
                   ]
               ).map((feature, i) => (
                 <div key={i} className="p-3 sm:p-4 md:p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl sm:rounded-2xl md:rounded-3xl flex flex-col items-center text-center group hover:border-red-600/50 transition-all duration-500 min-w-[80px]">
                   <div className="mb-2 md:mb-4 group-hover:scale-110 transition-transform">
                     <RedIcon emoji={feature.emoji || ''} size={window.innerWidth < 640 ? 16 : 20} />
                   </div>
-                  <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">{feature.label}</p>
-                  <p className="text-[10px] sm:text-xs md:text-sm font-black uppercase text-white truncate w-full">{feature.value}</p>
+                  <p className="text-[7px] sm:text-[8px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">{t(feature.label.toLowerCase())}</p>
+                  <p className="text-[10px] sm:text-xs md:text-sm font-black uppercase text-white truncate w-full">{t(feature.value.toLowerCase())}</p>
                 </div>
               ))}
             </div>
@@ -441,8 +442,8 @@ export const ProductPage: React.FC = () => {
                   ...(product.characteristics || []).map(c => ({ label: c.label, value: c.value }))
                 ].map((spec, i) => (
                   <div key={i} className="flex flex-col gap-0.5 sm:gap-1">
-                    <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">{spec.label}</span>
-                    <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-zinc-300 uppercase tracking-widest truncate">{spec.value}</span>
+                    <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest">{formatLabel(spec.label)}</span>
+                    <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-zinc-300 uppercase tracking-widest truncate">{formatLabel(spec.value)}</span>
                   </div>
                 ))}
               </div>

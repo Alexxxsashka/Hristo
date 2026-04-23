@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useAuthStore } from '../store/authStore';
+import { formatLabel } from '../utils/formatText';
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ export const CartPage: React.FC = () => {
                               <div className="flex flex-wrap gap-2 mt-1">
                                 {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
                                   <span key={key} className="px-2 py-0.5 bg-zinc-800/80 text-zinc-400 text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded border border-zinc-700/50">
-                                    {key}: {value}
+                                    {formatLabel(key)}: {value}
                                   </span>
                                 ))}
                               </div>
@@ -194,7 +195,7 @@ export const CartPage: React.FC = () => {
                     {userDiscount > 0 && (
                       <div className="flex justify-between text-xs sm:text-sm text-emerald-500 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/20">
                         <div className="flex flex-col">
-                          <span className="font-black uppercase tracking-widest text-[10px]">{t('dashboard_discount')} ({user?.rank})</span>
+                          <span className="font-black uppercase tracking-widest text-[10px]">{t('dashboard_discount')} ({formatLabel(user?.rank || '')})</span>
                           <span className="text-[9px] opacity-70">LOYALTY PROGRAM</span>
                         </div>
                         <span className="font-mono font-black text-lg">-{userDiscount}%</span>
