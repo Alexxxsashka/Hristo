@@ -127,22 +127,23 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
       ctaLink: '/shop',
       active: true
     };
-    setSettings({ ...settings, heroSlides: [...(settings.heroSlides || []), newSlide] });
+    setSettings({ ...settings, heroSlides: [...(Array.isArray(settings.heroSlides) ? settings.heroSlides : []), newSlide] });
   };
 
   const updateHeroSlide = (id: string, updates: Partial<HeroSlide>) => {
     setSettings({
       ...settings,
-      heroSlides: (settings.heroSlides || []).map(s => s.id === id ? { ...s, ...updates } : s)
+      heroSlides: (Array.isArray(settings.heroSlides) ? settings.heroSlides : []).map(s => s.id === id ? { ...s, ...updates } : s)
     });
   };
 
   const deleteHeroSlide = async (id: string) => {
-    const slide = settings.heroSlides?.find(s => s.id === id);
+    const slides = Array.isArray(settings.heroSlides) ? settings.heroSlides : [];
+    const slide = slides.find(s => s.id === id);
     if (slide?.image) await handleFileDelete(slide.image);
     setSettings({
       ...settings,
-      heroSlides: (settings.heroSlides || []).filter(s => s.id !== id)
+      heroSlides: (Array.isArray(settings.heroSlides) ? settings.heroSlides : []).filter(s => s.id !== id)
     });
   };
 
@@ -305,7 +306,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
               </div>
 
               <div className="space-y-6">
-                {(settings.heroSlides || []).map((slide, index) => (
+                {(Array.isArray(settings.heroSlides) ? settings.heroSlides : []).map((slide, index) => (
                   <HeroSlideEditor 
                     key={slide.id}
                     slide={slide}
@@ -335,7 +336,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                   />
                 ))}
 
-                {(settings.heroSlides || []).length === 0 && (
+                {(Array.isArray(settings.heroSlides) ? settings.heroSlides : []).length === 0 && (
                   <div className="p-20 text-center bg-white border border-zinc-200 border-dashed rounded-[32px]">
                     <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Monitor size={32} className="text-zinc-200" />
@@ -447,7 +448,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                         bgColor: '#dc2626',
                         active: true
                       };
-                      setSettings({ ...settings, promoBanners: [...(settings.promoBanners || []), newBanner] });
+                      setSettings({ ...settings, promoBanners: [...(Array.isArray(settings.promoBanners) ? settings.promoBanners : []), newBanner] });
                     }}
                     className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest"
                   >
@@ -456,7 +457,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                 </div>
 
                 <div className="space-y-6">
-                  {(settings.promoBanners || []).map((banner, index) => (
+                  {(Array.isArray(settings.promoBanners) ? settings.promoBanners : []).map((banner, index) => (
                     <PromoBannerEditor 
                       key={banner.id}
                       banner={banner}
@@ -464,7 +465,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                       onUpdate={(updates) => {
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, ...updates } : b)
+                          promoBanners: (Array.isArray(settings.promoBanners) ? settings.promoBanners : []).map(b => b.id === banner.id ? { ...b, ...updates } : b)
                         });
                       }}
                       onDelete={async () => {
@@ -472,7 +473,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                         if (banner.videoUrl) await handleFileDelete(banner.videoUrl);
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).filter(b => b.id !== banner.id)
+                          promoBanners: (Array.isArray(settings.promoBanners) ? settings.promoBanners : []).filter(b => b.id !== banner.id)
                         });
                       }}
                       onUploadMedia={async (file) => {
@@ -481,7 +482,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                         const url = await handleFileUpload(file, 'banners', currentUrl);
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: url } : b)
+                          promoBanners: (Array.isArray(settings.promoBanners) ? settings.promoBanners : []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: url } : b)
                         });
                       }}
                       onRemoveMedia={async () => {
@@ -490,7 +491,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                         if (currentUrl) await handleFileDelete(currentUrl);
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: '' } : b)
+                          promoBanners: (Array.isArray(settings.promoBanners) ? settings.promoBanners : []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: '' } : b)
                         });
                       }}
                     />
@@ -512,7 +513,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                         categoryId: 'weapons',
                         active: true
                       };
-                      setSettings({ ...settings, featuredCategoriesList: [...(settings.featuredCategoriesList || []), newCat] });
+                      setSettings({ ...settings, featuredCategoriesList: [...(Array.isArray(settings.featuredCategoriesList) ? settings.featuredCategoriesList : []), newCat] });
                     }}
                     className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest"
                   >
@@ -521,7 +522,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {(settings.featuredCategoriesList || []).map((fc, index) => (
+                  {(Array.isArray(settings.featuredCategoriesList) ? settings.featuredCategoriesList : []).map((fc, index) => (
                     <FeaturedCategoryEditor 
                       key={fc.id}
                       fc={fc}
@@ -529,13 +530,13 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                       onUpdate={(updates) => {
                         setSettings({
                           ...settings,
-                          featuredCategoriesList: (settings.featuredCategoriesList || []).map(item => item.id === fc.id ? { ...item, ...updates } : item)
+                          featuredCategoriesList: (Array.isArray(settings.featuredCategoriesList) ? settings.featuredCategoriesList : []).map(item => item.id === fc.id ? { ...item, ...updates } : item)
                         });
                       }}
                       onDelete={() => {
                         setSettings({
                           ...settings,
-                          featuredCategoriesList: (settings.featuredCategoriesList || []).filter(item => item.id !== fc.id)
+                          featuredCategoriesList: (Array.isArray(settings.featuredCategoriesList) ? settings.featuredCategoriesList : []).filter(item => item.id !== fc.id)
                         });
                       }}
                     />
@@ -642,7 +643,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                     <Tag size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400" />
                     <input 
                       type="text" 
-                      value={(settings.footerTags || []).join(', ')}
+                      value={(Array.isArray(settings.footerTags) ? settings.footerTags : []).join(', ')}
                       onChange={e => setSettings({ ...settings, footerTags: e.target.value.split(',').map(s => s.trim()) })}
                       className="w-full pl-14 pr-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
                       placeholder="airsoft, tactical gear, custom builds, CROATIA..."

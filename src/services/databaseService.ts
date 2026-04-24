@@ -472,9 +472,29 @@ export const databaseService = {
 
   // Site Settings
   async getSiteSettings(): Promise<SiteSettings> {
-    const res = await fetch('/api/site-settings');
-    if (res.ok) return await res.json();
-    return { id: 'default' };
+    try {
+      const res = await fetch('/api/site-settings');
+      if (res.ok) {
+        const data = await res.json();
+        // Ensure critical array fields are actually arrays to prevent UI crashes
+        return {
+          ...data,
+          heroSlides: Array.isArray(data?.heroSlides) ? data.heroSlides : [],
+          promoBanners: Array.isArray(data?.promoBanners) ? data.promoBanners : [],
+          featuredCategoriesList: Array.isArray(data?.featuredCategoriesList) ? data.featuredCategoriesList : [],
+          footerTags: Array.isArray(data?.footerTags) ? data.footerTags : []
+        };
+      }
+    } catch (err) {
+      console.error('Failed to fetch site settings:', err);
+    }
+    return { 
+      id: 'default',
+      heroSlides: [],
+      promoBanners: [],
+      featuredCategoriesList: [],
+      footerTags: []
+    };
   },
 
   async updateSiteSettings(settings: Partial<SiteSettings>) {
