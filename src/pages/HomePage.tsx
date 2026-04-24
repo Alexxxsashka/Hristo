@@ -45,7 +45,7 @@ const HomePage: React.FC = () => {
     fetchData();
   }, [fetchSettings]);
 
-  const activeSlides = (settings?.heroSlides || []).filter(s => s.active);
+  const activeSlides = Array.isArray(settings?.heroSlides) ? settings.heroSlides.filter(s => s.active) : [];
 
   useEffect(() => {
     if (activeSlides.length > 1) {
@@ -370,7 +370,7 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {(settings?.featuredCategoriesList && settings.featuredCategoriesList.filter(c => c.active).length > 0
+          {(Array.isArray(settings?.featuredCategoriesList) && settings.featuredCategoriesList.filter(c => c.active).length > 0
             ? settings.featuredCategoriesList.filter(c => c.active)
             : [
                 { id: 'weapons', categoryId: 'weapons', customName: 'Weapons', customImage: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop' },
@@ -515,7 +515,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Promo Banners */}
-      {(settings?.promoBanners && settings.promoBanners.filter(b => b.active).length > 0
+      {(Array.isArray(settings?.promoBanners) && settings.promoBanners.filter(b => b.active).length > 0
         ? settings.promoBanners.filter(b => b.active)
         : [
             {

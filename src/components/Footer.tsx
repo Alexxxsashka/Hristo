@@ -57,7 +57,7 @@ export const Footer: React.FC = () => {
             <p className="text-zinc-500 text-sm leading-relaxed max-w-sm font-medium">
               {settings?.footerDescription || "Professional airsoft equipment and advanced 3D weapon customization. We provide the highest quality gear for enthusiasts and professionals alike."}
             </p>
-            {settings?.footerTags && settings.footerTags.length > 0 && (
+            {Array.isArray(settings?.footerTags) && settings.footerTags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {settings.footerTags.map((tag, i) => (
                   <span key={i} className="text-[8px] font-black uppercase tracking-widest text-zinc-600 border border-zinc-800 px-2 py-1 rounded-md">

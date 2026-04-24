@@ -32,18 +32,19 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Error Boundary for the whole app
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: any; errorInfo: any }> {
   constructor(props: any) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: any, errorInfo: any) {
     console.error("Critical App Error:", error, errorInfo);
+    this.setState({ error, errorInfo });
   }
 
   render() {
@@ -52,6 +53,20 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
         <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4 text-center">
           <h1 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Something went wrong</h1>
           <p className="text-zinc-500 mb-8 max-w-md">The application crashed during initialization. Please try refreshing the page.</p>
+          
+          {this.state.error && (
+            <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-left max-w-2xl mx-auto overflow-auto max-h-64">
+              <p className="text-red-500 font-mono text-sm whitespace-pre-wrap">
+                {this.state.error.toString()}
+              </p>
+              {this.state.errorInfo && (
+                <p className="text-zinc-600 font-mono text-[10px] mt-4 whitespace-pre-wrap">
+                  {this.state.errorInfo.componentStack}
+                </p>
+              )}
+            </div>
+          )}
+
           <button 
             onClick={() => window.location.reload()}
             className="px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all"
