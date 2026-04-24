@@ -115,8 +115,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         }
         break;
       case 'barcode':
-        if (value && !/^[0-9]{8,18}$/.test(value)) {
-          error = 'Barcode must be 8-18 digits';
+        if (value && !/^[a-zA-Z0-9\-_]{3,50}$/.test(value)) {
+          error = 'Barcode must be 3-50 characters (alphanumeric)';
         }
         break;
       case 'price':
@@ -200,6 +200,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       onNotify('Please fix the validation errors before submitting', 'error');
       return;
     }
+
+    console.log('[ProductForm Debug] Validation passed, starting submission...');
 
     // Auto-add pending characteristic if user forgot to click "Add"
     let finalCharacteristics = [...(formData.characteristics || [])];
