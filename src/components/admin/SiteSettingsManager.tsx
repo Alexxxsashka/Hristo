@@ -24,7 +24,8 @@ import {
   Eye,
   CheckCircle2,
   Zap,
-  Tag
+  Tag,
+  Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
@@ -311,13 +312,25 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                     index={index}
                     onUpdate={(updates) => updateHeroSlide(slide.id, updates)}
                     onDelete={() => deleteHeroSlide(slide.id)}
-                    onUploadImage={async (file) => {
-                      const url = await handleFileUpload(file, 'hero-banners', slide.image);
-                      updateHeroSlide(slide.id, { image: url });
+                    onUploadMedia={async (file) => {
+                      const isVideo = slide.mediaType === 'video';
+                      const currentUrl = isVideo ? slide.videoUrl : slide.image;
+                      const url = await handleFileUpload(file, 'hero-banners', currentUrl);
+                      if (isVideo) {
+                        updateHeroSlide(slide.id, { videoUrl: url });
+                      } else {
+                        updateHeroSlide(slide.id, { image: url });
+                      }
                     }}
-                    onRemoveImage={async () => {
-                      if (slide.image) await handleFileDelete(slide.image);
-                      updateHeroSlide(slide.id, { image: '' });
+                    onRemoveMedia={async () => {
+                      const isVideo = slide.mediaType === 'video';
+                      const currentUrl = isVideo ? slide.videoUrl : slide.image;
+                      if (currentUrl) await handleFileDelete(currentUrl);
+                      if (isVideo) {
+                        updateHeroSlide(slide.id, { videoUrl: '' });
+                      } else {
+                        updateHeroSlide(slide.id, { image: '' });
+                      }
                     }}
                   />
                 ))}
@@ -456,23 +469,28 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                       }}
                       onDelete={async () => {
                         if (banner.image) await handleFileDelete(banner.image);
+                        if (banner.videoUrl) await handleFileDelete(banner.videoUrl);
                         setSettings({
                           ...settings,
                           promoBanners: (settings.promoBanners || []).filter(b => b.id !== banner.id)
                         });
                       }}
-                      onUploadImage={async (file) => {
-                        const url = await handleFileUpload(file, 'banners', banner.image);
+                      onUploadMedia={async (file) => {
+                        const isVideo = banner.mediaType === 'video';
+                        const currentUrl = isVideo ? banner.videoUrl : banner.image;
+                        const url = await handleFileUpload(file, 'banners', currentUrl);
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, image: url } : b)
+                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: url } : b)
                         });
                       }}
-                      onRemoveImage={async () => {
-                        if (banner.image) await handleFileDelete(banner.image);
+                      onRemoveMedia={async () => {
+                        const isVideo = banner.mediaType === 'video';
+                        const currentUrl = isVideo ? banner.videoUrl : banner.image;
+                        if (currentUrl) await handleFileDelete(currentUrl);
                         setSettings({
                           ...settings,
-                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, image: '' } : b)
+                          promoBanners: (settings.promoBanners || []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: '' } : b)
                         });
                       }}
                     />
@@ -723,13 +741,13 @@ const SocialInput = ({ icon, label, value, onChange }: { icon: any, label: strin
   </div>
 );
 
-const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadImage, onRemoveImage }: { 
+const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadMedia, onRemoveMedia }: { 
   slide: HeroSlide, 
   index: number, 
   onUpdate: (updates: Partial<HeroSlide>) => void, 
   onDelete: () => void,
-  onUploadImage: (file: File) => void,
-  onRemoveImage: () => void
+  onUploadMedia: (file: File) => void,
+  onRemoveMedia: () => void
 }) => {
   const [isExpanded, setIsExpanded] = useState(index === 0);
 
@@ -740,8 +758,12 @@ const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadImage, onRe
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-zinc-100 rounded-xl overflow-hidden border border-zinc-200">
-            <img src={slide.image} alt="" className="w-full h-full object-cover" />
+          <div className="w-12 h-12 bg-zinc-100 rounded-xl overflow-hidden border border-zinc-200 flex items-center justify-center">
+            {slide.mediaType === 'video' && slide.videoUrl ? (
+              <Video size={20} className="text-zinc-400" />
+            ) : (
+              <img src={slide.image} alt="" className="w-full h-full object-cover" />
+            )}
           </div>
           <div>
             <h4 className="font-black uppercase tracking-tighter text-zinc-900">Slide #{index + 1}</h4>
@@ -827,26 +849,62 @@ const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadImage, onRe
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Background Visual</label>
+                <div className="flex items-center gap-4 mb-4">
+                  <button 
+                    onClick={() => onUpdate({ mediaType: 'image' })}
+                    className={`flex-1 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${slide.mediaType !== 'video' ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}`}
+                  >
+                    Image
+                  </button>
+                  <button 
+                    onClick={() => onUpdate({ mediaType: 'video' })}
+                    className={`flex-1 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${slide.mediaType === 'video' ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}`}
+                  >
+                    Video
+                  </button>
+                </div>
+
                 <div className="relative group aspect-video rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-50">
-                  <img src={slide.image} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
-                    <label className="flex flex-col items-center gap-2 cursor-pointer bg-white px-6 py-3 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform">
-                      <Upload size={18} />
-                      Replace Asset
-                      <input type="file" className="hidden" accept="image/*" onChangeCapture={e => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) onUploadImage(file);
-                      }} />
-                    </label>
-                    {slide.image && (
-                      <button 
-                        onClick={onRemoveImage}
-                        className="flex flex-col items-center gap-2 bg-red-600 px-6 py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform"
-                      >
-                        <Trash2 size={18} />
-                        Remove
-                      </button>
+                  {slide.mediaType === 'video' && slide.videoUrl ? (
+                    <video 
+                      src={slide.videoUrl} 
+                      className="w-full h-full object-cover"
+                      muted 
+                      loop 
+                      autoPlay 
+                      playsInline
+                    />
+                  ) : (
+                    <img src={slide.image} alt="" className="w-full h-full object-cover" />
+                  )}
+                  
+                  <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
+                    <div className="flex gap-4">
+                      <label className="flex flex-col items-center gap-2 cursor-pointer bg-white px-6 py-3 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform">
+                        <Upload size={18} />
+                        {slide.mediaType === 'video' ? 'Upload Video' : 'Upload Image'}
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept={slide.mediaType === 'video' ? 'video/*' : 'image/*'} 
+                          onChangeCapture={async e => {
+                            const file = (e.target as HTMLInputElement).files?.[0];
+                            if (file) onUploadMedia(file);
+                          }} 
+                        />
+                      </label>
+                      {(slide.mediaType === 'video' ? slide.videoUrl : slide.image) && (
+                        <button 
+                          onClick={onRemoveMedia}
+                          className="flex flex-col items-center gap-2 bg-red-600 px-6 py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform"
+                        >
+                          <Trash2 size={18} />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    {slide.mediaType === 'video' && (
+                       <span className="text-[10px] text-white/60 font-medium">MP4/WebM recommended</span>
                     )}
                   </div>
                 </div>
@@ -925,13 +983,13 @@ const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete }: {
   );
 };
 
-const PromoBannerEditor = ({ banner, index, onUpdate, onDelete, onUploadImage, onRemoveImage }: {
+const PromoBannerEditor = ({ banner, index, onUpdate, onDelete, onUploadMedia, onRemoveMedia }: {
   banner: PromoBanner,
   index: number,
   onUpdate: (updates: Partial<PromoBanner>) => void,
   onDelete: () => void,
-  onUploadImage: (file: File) => void,
-  onRemoveImage: () => void
+  onUploadMedia: (file: File) => void,
+  onRemoveMedia: () => void
 }) => {
   return (
     <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-8 relative">
@@ -1017,26 +1075,59 @@ const PromoBannerEditor = ({ banner, index, onUpdate, onDelete, onUploadImage, o
           </div>
 
           <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Banner Background</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Banner Visual</label>
+              
+              <div className="flex items-center gap-4 mb-4">
+                <button 
+                  onClick={() => onUpdate({ mediaType: 'image' })}
+                  className={`flex-1 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${banner.mediaType !== 'video' ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}`}
+                >
+                  Image
+                </button>
+                <button 
+                  onClick={() => onUpdate({ mediaType: 'video' })}
+                  className={`flex-1 py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${banner.mediaType === 'video' ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400'}`}
+                >
+                  Video
+                </button>
+              </div>
+
               <div className="relative aspect-video rounded-3xl overflow-hidden border border-zinc-200 bg-white group">
-                <img src={banner.image} className="w-full h-full object-cover" alt="" />
-                <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900/60 backdrop-blur-sm">
-                  <label className="flex flex-col items-center gap-3 bg-white px-6 py-3 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform">
-                    <Upload size={18} />
-                    Sync with Blob
-                    <input type="file" className="hidden" accept="image/*" onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (file) onUploadImage(file);
-                    }} />
-                  </label>
-                  {banner.image && (
-                    <button 
-                      onClick={onRemoveImage}
-                      className="flex flex-col items-center gap-3 bg-red-600 px-6 py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform"
-                    >
-                      <Trash2 size={18} />
-                      Remove
-                    </button>
+                {banner.mediaType === 'video' && banner.videoUrl ? (
+                  <video 
+                    src={banner.videoUrl} 
+                    className="w-full h-full object-cover"
+                    muted 
+                    loop 
+                    autoPlay 
+                    playsInline
+                  />
+                ) : (
+                  <img src={banner.image} className="w-full h-full object-cover" alt="" />
+                )}
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900/60 backdrop-blur-sm">
+                  <div className="flex gap-4">
+                    <label className="flex flex-col items-center gap-3 bg-white px-6 py-3 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform">
+                      <Upload size={18} />
+                      {banner.mediaType === 'video' ? 'Upload Video' : 'Sync with Blob'}
+                      <input type="file" className="hidden" accept={banner.mediaType === 'video' ? 'video/*' : 'image/*'} onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) onUploadMedia(file);
+                      }} />
+                    </label>
+                    {(banner.mediaType === 'video' ? banner.videoUrl : banner.image) && (
+                      <button 
+                        onClick={onRemoveMedia}
+                        className="flex flex-col items-center gap-3 bg-red-600 px-6 py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform"
+                      >
+                        <Trash2 size={18} />
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {banner.mediaType === 'video' && (
+                    <span className="text-[10px] text-white/60 font-medium">MP4/WebM recommended</span>
                   )}
                 </div>
               </div>

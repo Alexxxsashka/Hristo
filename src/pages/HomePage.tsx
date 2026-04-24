@@ -91,11 +91,22 @@ const HomePage: React.FC = () => {
             className="absolute inset-0"
           >
             <div className="absolute inset-0 bg-[#0a0a0a]/60 z-10" />
-            <img 
-              src={activeSlides[currentSlideIndex]?.image || settings?.heroImageUrl || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
-              className="w-full h-full object-cover"
-              alt="Hero Background"
-            />
+            {activeSlides[currentSlideIndex]?.mediaType === 'video' && activeSlides[currentSlideIndex]?.videoUrl ? (
+              <video 
+                src={activeSlides[currentSlideIndex].videoUrl}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img 
+                src={activeSlides[currentSlideIndex]?.image || settings?.heroImageUrl || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
+                className="w-full h-full object-cover"
+                alt="Hero Background"
+              />
+            )}
           </motion.div>
         </AnimatePresence>
 
@@ -525,12 +536,23 @@ const HomePage: React.FC = () => {
             style={{ backgroundColor: banner.bgColor }}
           >
             <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
-              <img 
-                src={banner.image} 
-                className="w-full h-full object-cover opacity-50 mix-blend-overlay"
-                referrerPolicy="no-referrer"
-                alt=""
-              />
+              {banner.mediaType === 'video' && banner.videoUrl ? (
+                <video 
+                  src={banner.videoUrl}
+                  className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img 
+                  src={banner.image} 
+                  className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+                  referrerPolicy="no-referrer"
+                  alt=""
+                />
+              )}
             </div>
             <div className="relative z-10 max-w-2xl">
               <span className="px-4 py-2 bg-white text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6 md:mb-8 inline-block shadow-lg">

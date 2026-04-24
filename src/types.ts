@@ -306,6 +306,8 @@ export interface ServiceRequest {
 export interface HeroSlide {
   id: string;
   image: string;
+  videoUrl?: string;
+  mediaType?: 'image' | 'video';
   title: string;
   subtitle: string;
   ctaText: string;
@@ -316,6 +318,8 @@ export interface HeroSlide {
 export interface PromoBanner {
   id: string;
   image: string;
+  videoUrl?: string;
+  mediaType?: 'image' | 'video';
   title: string;
   subtitle: string;
   ctaText: string;
