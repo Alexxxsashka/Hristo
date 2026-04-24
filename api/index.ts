@@ -207,6 +207,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const pool = getPool();
 
+    // 🔍 Debug logging for routing
+    console.log(`[API] ${method} ${url} -> processed path: ${path}`);
+
 
     if (path === "/admin/stats" && method === "GET") {
       const user = getUser(req);
@@ -1375,6 +1378,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── GET /admin/messages ────────────────────────────────────────────────────
+    if (path === "/admin/messages" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const r = await pool.query("SELECT * FROM contact_messages ORDER BY created_at DESC");
+      return res.json(r.rows);
+    }
+
+    const messageMatch = match(path, "/admin/messages/:id");
+    if (messageMatch && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      await pool.query("DELETE FROM contact_messages WHERE id = $1", [messageMatch[0]]);
+      return res.status(204).end();
+    }
 
     // ── GET /saved-builds ──────────────────────────────────────────────────────
     if (path === "/saved-builds" && method === "GET") {
@@ -1480,21 +1497,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
       
       if (exists.rows.length > 0) {
-        const keys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_'));
-        if (keys.length === 0) return res.json({ success: true });
-        
+        // Get table columns first to avoid 500 on unknown fields
+        const columnQuery = await pool.query(`
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_name = 'site_settings'
+        `);
+        const validColumns = new Set(columnQuery.rows.map(r => r.column_name.toLowerCase()));
+
+        const keys = Object.keys(settings).filter(k => {
+          const lowerK = k.toLowerCase();
+          return k !== 'id' && 
+                 !k.startsWith('_') && 
+                 validColumns.has(lowerK);
+        });
+
+        if (keys.length === 0) return res.json({ success: true, message: "No valid fields to update" });
+
         const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
-        const values = keys.map(k => settings[k]);
-        
+        const values = keys.map(k => {
+          const val = settings[k];
+          return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+        });
+
         await pool.query(
-          `UPDATE site_settings SET ${setClause} WHERE id = $1`,
+          `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
           [id, ...values]
         );
       } else {
-        const keys = Object.keys(settings);
+        // Get table columns first for insert too
+        const columnQuery = await pool.query(`
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_name = 'site_settings'
+        `);
+        const validColumns = new Set(columnQuery.rows.map(r => r.column_name.toLowerCase()));
+
+        const keys = Object.keys(settings).filter(k => validColumns.has(k.toLowerCase()));
+        if (!keys.includes('id')) {
+          keys.push('id');
+          settings.id = id;
+        }
+
         const columns = keys.map(k => `"${k}"`).join(', ');
         const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-        const values = keys.map(k => settings[k]);
+        const values = keys.map(k => {
+          const val = settings[k];
+          return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+        });
         
         await pool.query(
           `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,

@@ -107,13 +107,13 @@ export const AdminDashboard: React.FC = () => {
   const loadAllData = async () => {
     setIsLoading(true);
     await Promise.all([
-      fetchProducts(),
-      fetchCategories(),
-      fetchBlogPosts(),
-      fetchPolicies(),
-      fetchOrdersInternal(),
-      databaseService.getUsers().then(u => setUsersList(u || [])),
-      databaseService.getMessages().then(m => setMessages(m || []))
+      fetchProducts().catch(e => console.error('Failed to fetch products:', e)),
+      fetchCategories().catch(e => console.error('Failed to fetch categories:', e)),
+      fetchBlogPosts().catch(e => console.error('Failed to fetch blog posts:', e)),
+      fetchPolicies().catch(e => console.error('Failed to fetch policies:', e)),
+      fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
+      databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
+      databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e))
     ]);
     setIsLoading(false);
   };

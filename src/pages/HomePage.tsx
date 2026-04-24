@@ -134,10 +134,10 @@ const HomePage: React.FC = () => {
             </div>
 
             <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.85] mb-8">
-              {activeSlides[currentSlideIndex] ? (
+              {activeSlides[currentSlideIndex] && activeSlides[currentSlideIndex].title ? (
                 <>
-                  {activeSlides[currentSlideIndex].title.split(' ').slice(0, -1).join(' ')} <br />
-                  <span className="text-red-600">{activeSlides[currentSlideIndex].title.split(' ').slice(-1)}</span>
+                  {(activeSlides[currentSlideIndex].title || '').split(' ').slice(0, -1).join(' ')} <br />
+                  <span className="text-red-600">{(activeSlides[currentSlideIndex].title || '').split(' ').slice(-1)}</span>
                 </>
               ) : settings?.heroTitle ? (
                 <>
@@ -403,7 +403,7 @@ const HomePage: React.FC = () => {
             const actualCategory = categories.find(c => c.id === cat.categoryId);
             const categoryName = cat.customName || actualCategory?.name || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
             const categoryImage = actualCategory?.image || (cat as any).customImage || 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800';
-            const count = products.filter(p => p.category === cat.categoryId).length;
+            const count = (Array.isArray(products) ? products : []).filter(p => p.category === cat.categoryId).length;
             return (
               <Link 
                 key={cat.id}
