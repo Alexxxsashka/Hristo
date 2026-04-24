@@ -362,4 +362,9 @@ export interface SiteSettings {
   
   footerTags?: string[];
   footerDescription?: string;
+
+  // Hero Feature Graphic
+  heroFeatureImage?: string;
+  heroFeatureVideo?: string;
+  heroFeatureMediaType?: 'image' | 'video';
 }

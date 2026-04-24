@@ -189,22 +189,43 @@ const HomePage: React.FC = () => {
           >
             <div className="absolute inset-0 bg-red-600/10 rounded-full blur-[120px] opacity-30" />
             {/* Contextual Graphics */}
-            <div className="relative z-10 w-full h-full border border-white/5 bg-white/5 backdrop-blur-3xl rounded-[64px] p-12 flex items-center justify-center overflow-hidden">
+            <div className={`relative z-10 w-full h-full border border-white/5 bg-white/5 backdrop-blur-3xl rounded-[64px] p-8 md:p-12 flex flex-col md:flex-row items-center ${(settings?.heroFeatureImage || settings?.heroFeatureVideo) ? 'justify-between gap-8 md:gap-12' : 'justify-center'} overflow-hidden`}>
                <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                   <div className="absolute top-10 left-10 w-20 h-px bg-white" />
                   <div className="absolute top-10 left-10 w-px h-20 bg-white" />
                   <div className="absolute bottom-10 right-10 w-20 h-px bg-white" />
                   <div className="absolute bottom-10 right-10 w-px h-20 bg-white" />
                </div>
-               <div className="text-center space-y-6">
-                  <div className="w-24 h-24 bg-red-600 rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
+               <div className={`${(settings?.heroFeatureImage || settings?.heroFeatureVideo) ? 'text-left' : 'text-center'} space-y-6 shrink-0`}>
+                  <div className={`${(settings?.heroFeatureImage || settings?.heroFeatureVideo) ? 'mx-0' : 'mx-auto'} w-20 h-20 md:w-24 md:h-24 bg-red-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-2xl`}>
                     <Maximize2 size={40} className="text-white" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black uppercase tracking-tighter">Next-Gen Interface</h3>
-                    <p className="text-zinc-400 font-medium text-sm">Industrial grade tactile response <br /> & modular engineering</p>
+                    <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Next-Gen Interface</h3>
+                    <p className="text-zinc-400 font-medium text-xs md:text-sm">Industrial grade tactile response <br /> & modular engineering</p>
                   </div>
                </div>
+
+               {(settings?.heroFeatureImage || settings?.heroFeatureVideo) && (
+                 <div className="relative w-full h-full flex items-center justify-center">
+                   {settings.heroFeatureMediaType === 'video' && settings.heroFeatureVideo ? (
+                     <video 
+                       src={settings.heroFeatureVideo}
+                       className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(220,38,38,0.3)]"
+                       autoPlay
+                       muted
+                       loop
+                       playsInline
+                     />
+                   ) : settings.heroFeatureImage ? (
+                     <img 
+                       src={settings.heroFeatureImage}
+                       className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(220,38,38,0.3)]"
+                       alt="Hero Feature"
+                     />
+                   ) : null}
+                 </div>
+               )}
             </div>
           </motion.div>
         </div>

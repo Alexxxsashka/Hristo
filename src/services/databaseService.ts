@@ -482,7 +482,8 @@ export const databaseService = {
           heroSlides: Array.isArray(data?.heroSlides) ? data.heroSlides : [],
           promoBanners: Array.isArray(data?.promoBanners) ? data.promoBanners : [],
           featuredCategoriesList: Array.isArray(data?.featuredCategoriesList) ? data.featuredCategoriesList : [],
-          footerTags: Array.isArray(data?.footerTags) ? data.footerTags : []
+          footerTags: Array.isArray(data?.footerTags) ? data.footerTags : [],
+          heroFeatureMediaType: data?.heroFeatureMediaType || 'image'
         };
       }
     } catch (err) {
@@ -493,7 +494,8 @@ export const databaseService = {
       heroSlides: [],
       promoBanners: [],
       featuredCategoriesList: [],
-      footerTags: []
+      footerTags: [],
+      heroFeatureMediaType: 'image'
     };
   },
 

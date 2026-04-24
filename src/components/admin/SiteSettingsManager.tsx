@@ -48,6 +48,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
   const [pendingLogo, setPendingLogo] = useState<File | null>(null);
   const [pendingHero, setPendingHero] = useState<File | null>(null);
   const [pendingAboutImage, setPendingAboutImage] = useState<File | null>(null);
+  const [pendingHeroFeatureImage, setPendingHeroFeatureImage] = useState<File | null>(null);
+  const [pendingHeroFeatureVideo, setPendingHeroFeatureVideo] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -101,6 +103,18 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
         if (settings.aboutUsImage) await databaseService.deleteFile(settings.aboutUsImage);
         finalSettings.aboutUsImage = await handleFileUpload(pendingAboutImage, 'about');
         setPendingAboutImage(null);
+      }
+
+      if (pendingHeroFeatureImage) {
+        if (settings.heroFeatureImage) await databaseService.deleteFile(settings.heroFeatureImage);
+        finalSettings.heroFeatureImage = await handleFileUpload(pendingHeroFeatureImage, 'hero-feature');
+        setPendingHeroFeatureImage(null);
+      }
+
+      if (pendingHeroFeatureVideo) {
+        if (settings.heroFeatureVideo) await databaseService.deleteFile(settings.heroFeatureVideo);
+        finalSettings.heroFeatureVideo = await handleFileUpload(pendingHeroFeatureVideo, 'hero-feature');
+        setPendingHeroFeatureVideo(null);
       }
 
       await databaseService.updateSiteSettings(finalSettings);
@@ -297,6 +311,93 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                   title="Hero Slideshow" 
                   subtitle="Dynamic primary visuals and CTAs" 
                 />
+                
+                {/* Hero Feature Media Section */}
+                <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
+                      <Zap size={20} className="text-zinc-400" />
+                      Hero Feature Media (Right Graphic)
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Media Type</label>
+                        <select 
+                          value={settings.heroFeatureMediaType || 'image'}
+                          onChange={e => setSettings({ ...settings, heroFeatureMediaType: e.target.value as 'image' | 'video' })}
+                          className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                        >
+                          <option value="image">Image</option>
+                          <option value="video">Video</option>
+                        </select>
+                      </div>
+
+                      {settings.heroFeatureMediaType === 'image' ? (
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Image</label>
+                          <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
+                            {(pendingHeroFeatureImage || settings.heroFeatureImage) ? (
+                              <img 
+                                src={pendingHeroFeatureImage ? URL.createObjectURL(pendingHeroFeatureImage) : settings.heroFeatureImage} 
+                                alt="Hero Feature" 
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-300">
+                                <ImageIcon size={32} />
+                                <span className="text-xs font-bold uppercase tracking-widest">No Image</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                                <Upload size={20} />
+                                <input type="file" className="hidden" accept="image/*" onChange={e => setPendingHeroFeatureImage(e.target.files?.[0] || null)} />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Video</label>
+                          <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
+                            {(pendingHeroFeatureVideo || settings.heroFeatureVideo) ? (
+                              <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+                                <Video size={32} className="text-white" />
+                                <span className="absolute bottom-4 text-[8px] text-white font-bold uppercase tracking-widest">Video Selected</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-300">
+                                <Video size={32} />
+                                <span className="text-xs font-bold uppercase tracking-widest">No Video</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                                <Upload size={20} />
+                                <input type="file" className="hidden" accept="video/*" onChange={e => setPendingHeroFeatureVideo(e.target.files?.[0] || null)} />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-zinc-50 rounded-3xl p-6 flex flex-col justify-center border border-zinc-100">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-zinc-900 mb-2">Instructions</h4>
+                      <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                        This media will appear in the decorative block on the right side of the hero section. 
+                        It will be displayed next to the "Next-Gen Interface" text.
+                        <br /><br />
+                        <b>Image:</b> High quality PNG/WebP (transparent backgrounds look best).
+                        <br />
+                        <b>Video:</b> Short looping MP4, muted by default.
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <button 
                   onClick={addHeroSlide}
                   className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest"
