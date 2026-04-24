@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { put, del } from "@vercel/blob";
 import { handleUpload } from "@vercel/blob/client";
 import Stripe from "stripe";
-import { runAllMigrations } from './lib/migrations';
+import { runAllMigrations } from './lib/migrations.js';
 
 let stripe: Stripe | null = null;
 try {

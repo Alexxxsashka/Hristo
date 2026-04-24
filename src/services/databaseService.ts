@@ -743,9 +743,10 @@ export const databaseService = {
   },
 
   async runMigrations() {
-    const res = await fetch(`${this.getApiUrl()}/admin/migrate`, {
+    const token = this.getToken();
+    const res = await fetch(`/api/admin/migrate`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     return await res.json();
   }
