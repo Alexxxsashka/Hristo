@@ -89,6 +89,8 @@ export const AdminDashboard: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [migrationResults, setMigrationResults] = useState<any[] | null>(null);
+  const [isMigrating, setIsMigrating] = useState(false);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users_list, setUsersList] = useState<any[]>([]);
@@ -116,6 +118,27 @@ export const AdminDashboard: React.FC = () => {
       databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e))
     ]);
     setIsLoading(false);
+  };
+
+  const handleRunMigrations = async () => {
+    confirmAction('This will run all pending database and storage migrations. Continue?', async () => {
+      setIsMigrating(true);
+      try {
+        const res = await databaseService.runMigrations();
+        if (res.success) {
+          setMigrationResults(res.results);
+          showNotification('Migrations executed successfully');
+          loadAllData();
+        } else {
+          showNotification(res.error || 'Migration failed', 'error');
+        }
+      } catch (err) {
+        console.error('Migration failed:', err);
+        showNotification('Migration failed', 'error');
+      } finally {
+        setIsMigrating(false);
+      }
+    });
   };
 
   useEffect(() => {
@@ -337,6 +360,15 @@ export const AdminDashboard: React.FC = () => {
             showHelp={showHelp}
             active={activeTab === 'settings'}
             onClick={() => { setActiveTab('settings'); setSearchQuery(''); }}
+          />
+
+          <SidebarItem
+            icon={<Database size={20} />}
+            label="System"
+            description="Database & Migrations"
+            showHelp={showHelp}
+            active={activeTab === 'system'}
+            onClick={() => { setActiveTab('system'); setSearchQuery(''); }}
           />
 
         </nav>
@@ -693,6 +725,86 @@ export const AdminDashboard: React.FC = () => {
 
             {activeTab === 'settings' && (
               <SiteSettingsManager onNotify={showNotification} onUpdate={loadAllData} />
+            )}
+
+            {activeTab === 'system' && (
+              <motion.div
+                key="system"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-black text-zinc-900 tracking-tight">System Management</h2>
+                    <p className="text-zinc-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Infrastructure & Database Migrations</p>
+                  </div>
+                  <button
+                    onClick={handleRunMigrations}
+                    disabled={isMigrating}
+                    className={`flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20 ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isMigrating ? <RefreshCw size={18} className="animate-spin" /> : <Database size={18} />}
+                    {isMigrating ? 'Running Migrations...' : 'Run All Migrations'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+                    <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center text-zinc-900 mb-6">
+                      <Shield size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-zinc-900">Infrastructure Tasks</h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed">
+                      Unified migration system for Neon DB tables, Vercel Blob storage cleanup, and environment synchronization.
+                    </p>
+                  </div>
+                  <div className="bg-white p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+                    <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center text-zinc-900 mb-6">
+                      <RefreshCw size={24} />
+                    </div>
+                    <h3 className="text-lg font-bold text-zinc-900">Health Check</h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed">
+                      Verify database connectivity, storage limits, and API availability across all services.
+                    </p>
+                  </div>
+                </div>
+
+                {migrationResults && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-zinc-900 text-white rounded-3xl p-8 overflow-hidden relative group"
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold flex items-center gap-2">
+                        <Check size={20} className="text-green-400" />
+                        Migration Results
+                      </h3>
+                      <button 
+                        onClick={() => setMigrationResults(null)}
+                        className="text-zinc-400 hover:text-white transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="space-y-3 font-mono text-xs">
+                      {migrationResults.map((res, i) => (
+                        <div key={i} className={`p-4 rounded-xl border ${res.success ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold">{res.name}</span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] uppercase font-bold">
+                              {res.success ? 'Success' : 'Failed'}
+                            </span>
+                          </div>
+                          <p className="opacity-80">{res.message || res.error}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

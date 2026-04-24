@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { put, del } from "@vercel/blob";
 import { handleUpload } from "@vercel/blob/client";
 import Stripe from "stripe";
+import { runAllMigrations } from './lib/migrations';
 
 let stripe: Stripe | null = null;
 try {
@@ -227,60 +228,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json(stats.rows[0]);
     }
 
-    // ── DB Migration ─────────────────────────────────────────────────────────
     if (path === "/admin/migrate" && method === "POST") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       
-      const results = [];
       try {
-        // Add attachment_slot if missing
-        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
-        results.push("Added attachment_slot column");
-        
-        // Add mount_type if missing
-        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
-        results.push("Added mount_type column");
-
-        // Create product_compatibility table
-        await pool.query(`
-          CREATE TABLE IF NOT EXISTS product_compatibility (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            parent_uid TEXT NOT NULL,
-            child_uid TEXT NOT NULL,
-            slot_name TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(parent_uid, child_uid, slot_name)
-          )
-        `);
-        results.push("Created product_compatibility table");
-        
-        // Fix orders table missing columns
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
-        results.push("Added tracking_number to orders");
-        
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT");
-        
-        // Missing Checkout / Loyalty Fields Migrations
-        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS image TEXT");
-        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS sku TEXT");
-        await pool.query("ALTER TABLE order_items ADD COLUMN IF NOT EXISTS category TEXT");
-        
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT");
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT");
-        
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS first_name TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS last_name TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_phone TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_city TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_postal_code TEXT");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10,2) DEFAULT 0");
-        await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS points_earned INTEGER DEFAULT 0");
-        results.push("Added stripe_payment_intent_id to orders");
-
+        const results = await runAllMigrations(pool);
         return res.json({ success: true, results });
       } catch (err: any) {
+        console.error("Migration error:", err);
         return res.status(500).json({ error: err.message });
       }
     }

@@ -741,4 +741,12 @@ export const databaseService = {
   async cancelOrder(orderId: string) {
     await this.updateOrderStatus(orderId, 'cancelled');
   },
+
+  async runMigrations() {
+    const res = await fetch(`${this.getApiUrl()}/admin/migrate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return await res.json();
+  }
 };
