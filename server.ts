@@ -2531,12 +2531,25 @@ app.post("/api/admin/stock/seed", authenticateAdmin, async (req, res) => {
       appType: "spa",
     });
     app.use(vite.middlewares);
+    
+    // Serve index.html for all other routes in dev
+    app.get("*", async (req, res) => {
+      try {
+        const url = req.originalUrl;
+        let template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      } catch (e: any) {
+        vite.ssrFixStacktrace(e);
+        res.status(500).end(e.stack);
+      }
+    });
   } else {
     // Serve static files in production if not Vercel
     if (!process.env.VERCEL) {
-      app.use(express.static(path.join(__dirname, "build")));
+      app.use(express.static(path.join(__dirname, "dist")));
       app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "build", "index.html"));
+        res.sendFile(path.join(__dirname, "dist", "index.html"));
       });
     }
   }
