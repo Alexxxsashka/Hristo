@@ -87,6 +87,11 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                     className="absolute inset-0 w-full h-full object-cover"
                     alt={product.name}
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://picsum.photos/seed/${product.id}/800/800`;
+                      target.onerror = null;
+                    }}
                   />
                 )}
               </div>

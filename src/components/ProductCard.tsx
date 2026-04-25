@@ -107,6 +107,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
               loading="lazy"
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = `https://picsum.photos/seed/${product.id}/600/600`;
+                target.onerror = null; // Prevent infinite loop
+              }}
             />
             
             {/* Badges */}

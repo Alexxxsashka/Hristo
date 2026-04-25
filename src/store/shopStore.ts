@@ -81,11 +81,16 @@ export const useShopStore = create<ShopState>((set, get) => ({
     let filtered = products.filter((product) => {
       // Search
       const searchLower = filters.search.toLowerCase();
+      const productCategory = get().categories.find(c => c.id === product.category);
+      const productSubcategory = get().categories.find(c => c.id === product.subcategory);
+      
       const matchesSearch = 
         product.name.toLowerCase().includes(searchLower) ||
         product.brand.toLowerCase().includes(searchLower) ||
         product.description.toLowerCase().includes(searchLower) ||
-        (product.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
+        (product.tags || []).some(tag => tag.toLowerCase().includes(searchLower)) ||
+        (productCategory?.name.toLowerCase().includes(searchLower)) ||
+        (productSubcategory?.name.toLowerCase().includes(searchLower));
 
       if (!matchesSearch) return false;
 

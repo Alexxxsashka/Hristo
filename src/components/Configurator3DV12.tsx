@@ -782,7 +782,7 @@ export const Configurator3DV12: React.FC = () => {
   
   return (
     <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
-      <Canvas shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]} performance={{ min: 0.5 }} onPointerMissed={() => setSelectedSlotId(null)}>
+      <Canvas shadows dpr={[1, 2]} performance={{ min: 0.5 }} onPointerMissed={() => setSelectedSlotId(null)}>
         <PerspectiveCamera makeDefault position={[1.5, 1, 1.5]} fov={35} />
         <Suspense fallback={null}>
           <group position={[0, 0, 0]}>
