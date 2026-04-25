@@ -369,4 +369,10 @@ export interface SiteSettings {
   heroFeatureImage?: string;
   heroFeatureVideo?: string;
   heroFeatureMediaType?: 'image' | 'video';
+
+  // SEO
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  ogImage?: string;
 }

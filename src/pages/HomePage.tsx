@@ -61,10 +61,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100">
-      <SEO 
-        title="Home"
-        description="Welcome to Hristo Airsoft Store. The best place for airsoft weapons, tactical gear, and custom 3D weapon configurations."
-      />
+      <SEO />
 
       {/* Hero Section */}
       <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 lg:pt-0">

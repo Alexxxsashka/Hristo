@@ -49,4 +49,7 @@ export const DEFAULT_SITE_SETTINGS: Partial<SiteSettings> = {
   announcementLink: "/shop",
   heroFeatureMediaType: 'image',
   heroFeatureImage: "https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800",
+  seoTitle: "HRISTO Airsoft Store - Professional Gear & Custom Engineering",
+  seoDescription: "The leading airsoft shop in Croatia. Premium weapons, tactical gear, and the most advanced 3D weapon configurator. Build your ultimate loadout today.",
+  seoKeywords: "airsoft, tactical gear, 3d configurator, custom airsoft, Hristo, Croatia, Zagreb",
 };

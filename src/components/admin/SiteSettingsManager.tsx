@@ -772,6 +772,43 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                     />
                   </div>
                 </div>
+
+                <div className="border-t border-zinc-100 pt-8 mt-8 space-y-6">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900">SEO Meta Tags</h3>
+                  
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Title</label>
+                    <input 
+                      type="text" 
+                      value={settings.seoTitle || ''}
+                      onChange={e => setSettings({ ...settings, seoTitle: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                      placeholder="Site title for search engines"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Description</label>
+                    <textarea 
+                      rows={3}
+                      value={settings.seoDescription || ''}
+                      onChange={e => setSettings({ ...settings, seoDescription: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none resize-none"
+                      placeholder="Short description for search results"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Keywords</label>
+                    <input 
+                      type="text" 
+                      value={settings.seoKeywords || ''}
+                      onChange={e => setSettings({ ...settings, seoKeywords: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                      placeholder="keyword1, keyword2..."
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="bg-amber-50 border border-amber-200 p-6 rounded-3xl flex gap-4">

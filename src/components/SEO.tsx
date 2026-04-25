@@ -11,38 +11,47 @@ interface SEOProps {
   structuredData?: any;
 }
 
+import { useSettingsStore } from '../store/settingsStore';
+
 export const SEO: React.FC<SEOProps> = ({
-  title = "Hristo Airsoft Store | Professional Equipment & 3D Configurator",
-  description = "Professional Airsoft Equipment & Customization. Experience the next generation of tactical gear building with our high-fidelity 3D configurator.",
-  keywords = "airsoft, tactical gear, airsoft guns, 3d configurator, airsoft croatia, hristo airsoft",
-  ogImage = "https://picsum.photos/seed/hristo-og/1200/630",
+  title,
+  description,
+  keywords,
+  ogImage,
   ogType = "website",
   canonicalUrl,
   structuredData
 }) => {
+  const { settings } = useSettingsStore();
+  
+  const finalTitle = title || settings?.seoTitle || "Hristo Airsoft Store | Professional Equipment & 3D Configurator";
+  const finalDescription = description || settings?.seoDescription || "Professional Airsoft Equipment & Customization. Experience the next generation of tactical gear building with our high-fidelity 3D configurator.";
+  const finalKeywords = keywords || settings?.seoKeywords || "airsoft, tactical gear, airsoft guns, 3d configurator, airsoft croatia, hristo airsoft";
+  const finalOgImage = ogImage || settings?.ogImage || "https://picsum.photos/seed/hristo-og/1200/630";
+  
   const siteName = "Hristo Airsoft Store";
-  const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+  const fullTitle = finalTitle.includes(siteName) ? finalTitle : `${finalTitle} | ${siteName}`;
 
   return (
     <Helmet>
       {/* Standard Meta Tags */}
       <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
+      <meta name="description" content={finalDescription} />
+      <meta name="keywords" content={finalKeywords} />
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
       {/* OpenGraph Meta Tags */}
       <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
+      <meta property="og:description" content={finalDescription} />
+      <meta property="og:image" content={finalOgImage} />
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={siteName} />
 
       {/* Twitter Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:description" content={finalDescription} />
+      <meta name="twitter:image" content={finalOgImage} />
 
       {/* JSON-LD Structured Data */}
       {structuredData && (
