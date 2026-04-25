@@ -71,7 +71,7 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50">
+    <header className="fixed top-0 left-0 w-full z-[100]">
       {settings?.showAnnouncement && settings?.announcement && (
         <div className="bg-red-600 py-2.5 px-4 text-center">
           <Link 

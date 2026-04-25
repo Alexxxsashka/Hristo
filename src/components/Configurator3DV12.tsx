@@ -758,8 +758,10 @@ export const Configurator3DV12: React.FC = () => {
       .then(data => {
         if (data) {
           // Strict filter: only include actual weapon modules and parts
+          const clothingCategories = ['clothing', 'uniforms', 'jackets', 'pants', 'boots', 'gloves', 'headwear'];
           const modules = data.filter((p: Product) => 
-            p.type === 'module' || p.type === 'part'
+            (p.type === 'module' || p.type === 'part') && 
+            !clothingCategories.includes(p.category_id || p.category || '')
           );
           setAllModules(modules);
         }

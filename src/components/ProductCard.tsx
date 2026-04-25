@@ -25,9 +25,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
   const { language } = useTranslation();
   const navigate = useNavigate();
 
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+
+  const variantAttributes = (product as any).variantAttributes || (product as any).variant_attributes || [];
+  const variants = product.variants || [];
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    addItem(product);
+    e.stopPropagation();
+    
+    // Check if all attributes are selected
+    if (variantAttributes.length > 0) {
+      const isComplete = variantAttributes.every((attr: any) => selectedAttributes[attr.name]);
+      if (!isComplete) {
+        // Find first missing attribute
+        const missing = variantAttributes.find((attr: any) => !selectedAttributes[attr.name]);
+        alert(`Please select ${missing.name}`);
+        return;
+      }
+    }
+
+    addItem(product, selectedVariant || undefined);
+  };
+
+  const handleAttributeSelect = (name: string, value: string) => {
+    const newAttrs = { ...selectedAttributes, [name]: value };
+    setSelectedAttributes(newAttrs);
+
+    // Find matching variant
+    if (variants.length > 0) {
+      const variant = variants.find((v: any) => 
+        Object.entries(newAttrs).every(([key, val]) => v.attributes[key] === val)
+      );
+      setSelectedVariant(variant || null);
+    }
   };
 
   const handleCompare = (e: React.MouseEvent) => {
@@ -149,6 +181,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                   )}
                 </div>
               )}
+              {variantAttributes.length > 0 && (
+                <div className="space-y-2 py-2">
+                  {variantAttributes.map((attr: any) => (
+                    <div key={attr.name} className="flex flex-col gap-1">
+                      <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{attr.name}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {attr.options?.map((opt: string) => (
+                          <button
+                            key={opt}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAttributeSelect(attr.name, opt);
+                            }}
+                            className={`px-2 py-1 rounded-md text-[8px] font-bold uppercase transition-all border ${
+                              selectedAttributes[attr.name] === opt
+                                ? 'bg-white text-black border-white'
+                                : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-1 sm:gap-2 pt-1 sm:pt-2">
@@ -162,7 +222,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 }`}
               >
                 <ShoppingCart className="w-3 h-3 sm:w-4 h-4" />
-                <span className="hidden xs:inline">Add to Cart</span>
+                <span className="hidden xs:inline">
+                  {variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]) 
+                    ? 'Select Size' 
+                    : 'Add to Cart'}
+                </span>
                 <span className="xs:hidden">Add</span>
               </button>
               

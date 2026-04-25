@@ -135,7 +135,7 @@ export const ShopPage: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[60] lg:hidden"
+                className="fixed inset-0 z-[120] lg:hidden"
               >
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
                 <motion.div
@@ -168,7 +168,7 @@ export const ShopPage: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 space-y-4 sm:space-y-8">
             {/* Top Bar */}
-            <div className="relative z-50 bg-zinc-900/50 backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-zinc-800 flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between">
+            <div className="relative z-10 bg-zinc-900/50 backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-zinc-800 flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between">
               <div className="relative w-full xl:w-96">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input

@@ -45,6 +45,16 @@ interface QuickPreviewModalProps {
 export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, isOpen, onClose }) => {
   const { addItem } = useCartStore();
   const { language, t } = useTranslation();
+  const [selectedAttributes, setSelectedAttributes] = React.useState<Record<string, string>>({});
+  const [selectedVariant, setSelectedVariant] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    // Reset selection when product changes or modal closes
+    if (!isOpen) {
+      setSelectedAttributes({});
+      setSelectedVariant(null);
+    }
+  }, [isOpen, product?.id]);
 
   if (!product) return null;
 
@@ -201,23 +211,63 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                 </div>
               )}
 
-              <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => addItem(product)}
-                  disabled={product.stock <= 0}
-                  className="flex items-center justify-center gap-3 py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white rounded-2xl transition-all font-bold uppercase tracking-widest"
-                >
-                  <ShoppingCart size={20} />
-                  ADD TO CART
-                </button>
-                <Link 
-                  to={`/shop/${product.category}/${product.subcategory}/${product.id}`}
-                  onClick={onClose}
-                  className="flex items-center justify-center gap-3 py-4 bg-white border border-zinc-200 hover:border-zinc-900 text-zinc-900 rounded-2xl transition-all font-bold uppercase tracking-widest"
-                >
-                  FULL PAGE
-                  <ArrowRight size={20} />
-                </Link>
+              <div className="mt-auto flex flex-col gap-6">
+                {/* Variant Selectors in Quick View */}
+                {((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && (
+                  <div className="space-y-4 border-t border-zinc-100 pt-6">
+                    {((product as any).variantAttributes || (product as any).variant_attributes).map((attr: any) => (
+                      <div key={attr.name} className="space-y-2">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{attr.name}</label>
+                        <div className="flex flex-wrap gap-2">
+                          {attr.options?.map((opt: string) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => {
+                                const newAttrs = { ...selectedAttributes, [attr.name]: opt };
+                                setSelectedAttributes(newAttrs);
+                                if (product.variants) {
+                                  const variant = product.variants.find(v => 
+                                    Object.entries(newAttrs).every(([key, value]) => v.attributes[key] === value)
+                                  );
+                                  setSelectedVariant(variant || null);
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                                selectedAttributes[attr.name] === opt
+                                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
+                                  : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => addItem(product, selectedVariant || undefined)}
+                    disabled={product.stock <= 0 || (((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && !((product as any).variantAttributes || (product as any).variant_attributes).every((attr: any) => selectedAttributes[attr.name]))}
+                    className="flex items-center justify-center gap-3 py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white rounded-2xl transition-all font-bold uppercase tracking-widest"
+                  >
+                    <ShoppingCart size={20} />
+                    {((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && !((product as any).variantAttributes || (product as any).variant_attributes).every((attr: any) => selectedAttributes[attr.name]) 
+                      ? 'SELECT SIZE' 
+                      : 'ADD TO CART'}
+                  </button>
+                  <Link 
+                    to={`/product/${product.id}/${product.slug}`}
+                    onClick={onClose}
+                    className="flex items-center justify-center gap-3 py-4 bg-white border border-zinc-200 hover:border-zinc-900 text-zinc-900 rounded-2xl transition-all font-bold uppercase tracking-widest"
+                  >
+                    FULL PAGE
+                    <ArrowRight size={20} />
+                  </Link>
+                </div>
               </div>
             </div>
           </motion.div>

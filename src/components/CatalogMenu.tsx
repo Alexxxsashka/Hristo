@@ -42,7 +42,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110]"
           />
 
           {/* Menu */}
@@ -50,7 +50,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-0 left-0 right-0 bg-zinc-950 border-b border-zinc-800 z-[101] shadow-2xl max-h-screen overflow-y-auto"
+            className="fixed top-0 left-0 right-0 bg-zinc-950 border-b border-zinc-800 z-[111] shadow-2xl max-h-screen overflow-y-auto"
           >
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:h-[70vh]">
               {/* Sidebar / Main Categories */}
