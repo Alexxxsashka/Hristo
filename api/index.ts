@@ -1469,10 +1469,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Map each DB column to exactly one frontend key to prevent duplicates
         const colToKeyMap = new Map<string, string>();
         Object.keys(settings).forEach(k => {
-          if (k === 'id' || k.startsWith('_')) return;
+          if (k === 'id' || k.startsWith('_') || k.toLowerCase() === 'updatedat' || k.toLowerCase() === 'createdat') return;
           const normalized = normalize(k);
           if (colMap.has(normalized)) {
             const colName = colMap.get(normalized)!.column_name;
+            if (colName === 'updated_at' || colName === 'created_at') return;
             if (!colToKeyMap.has(colName)) colToKeyMap.set(colName, k);
           }
         });
