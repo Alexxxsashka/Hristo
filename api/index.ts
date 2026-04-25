@@ -419,7 +419,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (catDel && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      await pool.query("DELETE FROM categories WHERE id = $1", [catDel[0]]);
+
+      const identifier = catDel[0];
+      try {
+        const result = await pool.query('SELECT image_url FROM categories WHERE id = $1', [identifier]);
+        if (result.rows.length > 0 && result.rows[0].image_url) {
+          const url = result.rows[0].image_url;
+          if (url && url.includes('blob.vercel-storage.com')) {
+            const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+            try { await del(url, { token }); } catch (e) { console.error('Failed to delete category blob:', e); }
+          }
+        }
+      } catch (e) {
+        console.error('Category cleanup error:', e);
+      }
+
+      await pool.query("DELETE FROM categories WHERE id = $1", [identifier]);
       return res.status(204).end();
     }
 
@@ -782,13 +797,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
 
-      const imageUrl = p.image !== undefined ? p.image : (p.image_url !== undefined ? p.image_url : null);
-      // Prioritize model3D (frontend field) over model_3d_url (backend field) to avoid using cached/old DB values
-      const model3dUrl = p.model3D !== undefined ? p.model3D : (p.model_3d_url !== undefined ? p.model_3d_url : null);
-      const baseHas3d = p.has3D !== undefined ? p.has3D : (p.has_3d !== undefined ? p.has_3d : false);
-      const has3d = model3dUrl ? true : baseHas3d;
-      const imagesArr = Array.isArray(p.images) ? p.images : (imageUrl ? [imageUrl] : []);
-      const longDescription = p.long_description !== undefined ? p.long_description : (p.longDescription !== undefined ? p.longDescription : null);
+      const imageUrl = p.image_url || p.imageUrl || null;
+      const model3dUrl = p.model_3d_url || p.model3DUrl || p.model3D || null;
+      const newImages = Array.isArray(p.images) ? p.images : [];
+
+      // 1. Cleanup orphaned blobs (files replaced or removed)
+      try {
+        const currentRes = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProd[0]]);
+        if (currentRes.rows.length > 0) {
+          const old = currentRes.rows[0];
+          const oldUrls = new Set<string>();
+          const newUrls = new Set<string>();
+
+          // Collect old URLs
+          if (old.image_url) oldUrls.add(old.image_url);
+          if (old.model_3d_url) oldUrls.add(old.model_3d_url);
+          if (old.images) {
+            try {
+              const parsed = typeof old.images === 'string' ? JSON.parse(old.images) : old.images;
+              if (Array.isArray(parsed)) parsed.forEach(u => { if (u && typeof u === 'string') oldUrls.add(u); });
+            } catch (e) {}
+          }
+
+          // Collect new URLs
+          if (imageUrl) newUrls.add(imageUrl);
+          if (model3dUrl) newUrls.add(model3dUrl);
+          newImages.forEach(u => { if (u && typeof u === 'string') newUrls.add(u); });
+
+          // Delete those that are in old but not in new
+          const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+          for (const url of oldUrls) {
+            if (!newUrls.has(url) && url && url.includes('blob.vercel-storage.com')) {
+              try { 
+                await del(url, { token }); 
+                console.log(`[Product Update Cleanup] Deleted orphaned blob: ${url}`);
+              } catch (e) { 
+                console.error(`[Product Update Cleanup] Failed to delete blob: ${url}`, e); 
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Blob cleanup error during product update:', e);
+      }
 
       try {
         // Just-in-time migration
@@ -810,7 +861,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error("Migration error:", e);
       }
 
-      try {
+        const has3d = !!model3dUrl;
+        const imagesArr = newImages;
+        const longDescription = p.longDescription || p.long_description || '';
+
         const productData = [
           adminProd[0],
           p.name || 'Unnamed Product',
@@ -913,28 +967,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
+      const identifier = adminProd[0];
       try {
         // Cleanup blobs
-        const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProd[0]]);
+        const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [identifier]);
         if (result.rows.length > 0) {
           const p = result.rows[0];
-          const urlsToDelete: string[] = [];
+          const urlsToDelete = new Set<string>();
 
-          if (p.image_url) urlsToDelete.push(p.image_url);
-          if (p.model_3d_url) urlsToDelete.push(p.model_3d_url);
-          if (Array.isArray(p.images)) {
-            p.images.forEach((u: any) => { if (typeof u === 'string') urlsToDelete.push(u); });
-          } else if (typeof p.images === 'string') {
+          if (p.image_url) urlsToDelete.add(p.image_url);
+          if (p.model_3d_url) urlsToDelete.add(p.model_3d_url);
+          
+          if (p.images) {
             try {
-              const parsed = JSON.parse(p.images);
-              if (Array.isArray(parsed)) parsed.forEach((u: any) => { if (typeof u === 'string') urlsToDelete.push(u); });
-            } catch (e) { }
+              const images = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+              if (Array.isArray(images)) {
+                images.forEach(u => { if (u && typeof u === 'string') urlsToDelete.add(u); });
+              }
+            } catch (e) {
+              console.error('Failed to parse images for cleanup:', e);
+            }
           }
 
           const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-          for (const url of urlsToDelete) {
-            if (url && url.includes('blob.vercel-storage.com')) {
-              try { await del(url, { token }); } catch (e) { console.error(`Failed to delete blob: ${url}`, e); }
+          if (urlsToDelete.size > 0) {
+            console.log(`[Product Cleanup API] Deleting ${urlsToDelete.size} files for product ${identifier}...`);
+            for (const url of urlsToDelete) {
+              if (url && url.includes('blob.vercel-storage.com')) {
+                try { 
+                  await del(url, { token }); 
+                  console.log(`[Product Cleanup API] Deleted: ${url}`);
+                } catch (e) { 
+                  console.error(`[Product Cleanup API] Failed to delete blob: ${url}`, e); 
+                }
+              }
             }
           }
         }
@@ -942,7 +1008,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('Blob cleanup error during product delete:', e);
       }
 
-      await pool.query("DELETE FROM products WHERE id = $1 OR slug = $1", [adminProd[0]]);
+      const deleteResult = await pool.query("DELETE FROM products WHERE id = $1 OR slug = $1", [identifier]);
+      if (deleteResult.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
       return res.status(204).end();
     }
 
