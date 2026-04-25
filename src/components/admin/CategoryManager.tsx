@@ -15,7 +15,7 @@ export const CategoryManager = ({
   onUpdate: () => void,
   onNotify: (msg: string, type?: 'success' | 'error') => void,
   onConfirm: (msg: string, action: () => void) => void,
-  onAddCategory: () => void,
+  onAddCategory: (parentId?: string) => void,
   onEditCategory: (cat: Category) => void
 }) => {
 
@@ -91,6 +91,15 @@ export const CategoryManager = ({
       </td>
       <td className="px-6 py-4 text-right">
         <div className="flex items-center justify-end gap-2">
+          {!cat.parent && (
+            <button
+              onClick={() => onAddCategory(cat.id)}
+              title="Add Subcategory"
+              className="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 rounded-xl transition-all shadow-sm active:scale-95"
+            >
+              <Plus size={18} />
+            </button>
+          )}
           <button 
             onClick={() => onEditCategory(cat)} 
             className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-white border border-transparent hover:border-zinc-200 rounded-xl transition-all shadow-sm active:scale-95"

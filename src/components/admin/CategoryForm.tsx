@@ -32,7 +32,9 @@ export const CategoryForm = ({
 
   useEffect(() => {
     if (initialData) {
-      setEditingCat(initialData);
+      if (initialData.id) {
+        setEditingCat(initialData as Category);
+      }
       setNewCat(initialData);
     }
   }, [initialData]);

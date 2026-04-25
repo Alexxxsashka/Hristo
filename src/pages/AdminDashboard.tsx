@@ -648,8 +648,12 @@ export const AdminDashboard: React.FC = () => {
                 onUpdate={fetchCategories}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
-                onAddCategory={() => {
-                  setEditingCategory(null);
+                onAddCategory={(parentId?: string) => {
+                  if (parentId) {
+                    setEditingCategory({ parent: parentId, name: '', slots: [], compatibleModuleCategories: [], filters: [] } as any);
+                  } else {
+                    setEditingCategory(null);
+                  }
                   setActiveTab('add-category');
                 }}
                 onEditCategory={(cat) => {
