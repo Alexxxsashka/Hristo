@@ -447,7 +447,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('Category cleanup error:', e);
       }
 
-      await pool.query("DELETE FROM categories WHERE id = $1", [identifier]);
+      try {
+        await pool.query("UPDATE products SET category_id = NULL WHERE category_id = $1", [identifier]);
+        await pool.query("UPDATE categories SET parent_id = NULL WHERE parent_id = $1", [identifier]);
+        await pool.query("DELETE FROM categories WHERE id = $1", [identifier]);
+      } catch (e) {
+        console.error('Failed to delete category from DB:', e);
+        return res.status(500).json({ error: "Failed to delete category" });
+      }
       return res.status(204).end();
     }
 

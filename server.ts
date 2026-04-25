@@ -675,6 +675,8 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.delete("/api/admin/categories/:id", authenticateAdmin, async (req, res) => {
     try {
+      await pool.query("UPDATE products SET category_id = NULL WHERE category_id = $1", [req.params.id]);
+      await pool.query("UPDATE categories SET parent_id = NULL WHERE parent_id = $1", [req.params.id]);
       await pool.query('DELETE FROM categories WHERE id = $1', [req.params.id]);
       res.json({ success: true });
     } catch (error) {
