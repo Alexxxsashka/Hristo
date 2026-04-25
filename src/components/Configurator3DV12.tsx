@@ -825,9 +825,6 @@ export const Configurator3DV12: React.FC = () => {
                 V1.2
               </div>
             </div>
-            <p className="text-zinc-500 font-mono text-[10px] sm:text-sm uppercase tracking-widest">
-              Platform: {activeProduct?.id}
-            </p>
           </div>
 
           <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-20 group">
