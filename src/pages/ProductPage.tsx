@@ -88,6 +88,7 @@ export const ProductPage: React.FC = () => {
           const products = await databaseService.getProducts();
           data = products?.find((p: any) => p.slug === slug);
         }
+        console.log('Fetched product data:', data);
         setProduct(data as Product);
       } catch (err) {
         console.error('Failed to fetch product', err);
@@ -345,9 +346,9 @@ export const ProductPage: React.FC = () => {
               )}
 
               {/* Variant Selectors */}
-              {product.variantAttributes && product.variantAttributes.length > 0 && (
+              {((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && (
                 <div className="space-y-6 pt-4 border-t border-zinc-900">
-                  {product.variantAttributes.map(attr => (
+                  {((product as any).variantAttributes || (product as any).variant_attributes).map((attr: any) => (
                     <div key={attr.name} className="space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{attr.name}</label>
@@ -356,9 +357,10 @@ export const ProductPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {attr.options.map(opt => (
+                        {attr.options?.map((opt: string) => (
                           <button
                             key={opt}
+                            type="button"
                             onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: opt }))}
                             className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${
                               selectedAttributes[attr.name] === opt
