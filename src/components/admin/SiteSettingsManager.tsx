@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
 import { SiteSettings, HeroSlide, PromoBanner, FeaturedCategory } from '../../types';
 import { useSettingsStore } from '../../store/settingsStore';
+import { DEFAULT_SITE_SETTINGS } from '../../constants/defaultSettings';
 
 type SettingsTab = 'general' | 'hero' | 'homepage' | 'social' | 'footer';
 
@@ -55,12 +56,14 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
     const fetchSettings = async () => {
       try {
         const data = await databaseService.getSiteSettings();
-        setSettings({
+        const merged = {
+          ...DEFAULT_SITE_SETTINGS,
           ...data,
-          heroSlides: data.heroSlides || [],
-          promoBanners: data.promoBanners || [],
-          featuredCategoriesList: data.featuredCategoriesList || []
-        });
+          heroSlides: data.heroSlides?.length ? data.heroSlides : DEFAULT_SITE_SETTINGS.heroSlides,
+          promoBanners: data.promoBanners?.length ? data.promoBanners : DEFAULT_SITE_SETTINGS.promoBanners,
+          featuredCategoriesList: data.featuredCategoriesList?.length ? data.featuredCategoriesList : DEFAULT_SITE_SETTINGS.featuredCategoriesList
+        };
+        setSettings(merged);
       } catch (err) {
         console.error('Failed to load settings', err);
       } finally {

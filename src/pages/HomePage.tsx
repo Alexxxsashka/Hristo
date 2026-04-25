@@ -126,16 +126,10 @@ const HomePage: React.FC = () => {
                   {(activeSlides[currentSlideIndex].title || '').split(' ').slice(0, -1).join(' ')} <br />
                   <span className="text-red-600">{(activeSlides[currentSlideIndex].title || '').split(' ').slice(-1)}</span>
                 </>
-              ) : settings?.heroTitle ? (
-                <>
-                  {settings.heroTitle.split(' ').slice(0, -1).join(' ')} <br />
-                  <span className="text-red-600">{settings.heroTitle.split(' ').slice(-1)}</span>
-                </>
               ) : (
                 <>
-                  {t('build_your')} <br />
-                  <span className="text-red-600">{t('ultimate')}</span> <br />
-                  {t('arsenal')}
+                  {(settings?.heroTitle || t('build_your')).split(' ').slice(0, -1).join(' ')} <br />
+                  <span className="text-red-600">{(settings?.heroTitle || t('ultimate')).split(' ').slice(-1)}</span>
                 </>
               )}
             </h1>
@@ -380,15 +374,7 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {(Array.isArray(settings?.featuredCategoriesList) && settings.featuredCategoriesList.filter(c => c.active).length > 0
-            ? settings.featuredCategoriesList.filter(c => c.active)
-            : [
-                { id: 'weapons', categoryId: 'weapons', customName: 'Weapons', customImage: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop' },
-                { id: 'attachments', categoryId: 'attachments', customName: 'Optics & Attach', customImage: 'https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop' },
-                { id: 'gear', categoryId: 'gear', customName: 'Tactical Gear', customImage: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200&auto=format&fit=crop' },
-                { id: 'internal_parts', categoryId: 'internal_parts', customName: 'Internal Parts', customImage: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop' },
-              ]
-          ).map((cat) => {
+          {(settings?.featuredCategoriesList || []).filter(c => c.active).map((cat) => {
             const actualCategory = categories.find(c => c.id === cat.categoryId);
             const categoryName = cat.customName || actualCategory?.name || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
             const categoryImage = actualCategory?.image || (cat as any).customImage || 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800';
@@ -525,21 +511,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Promo Banners */}
-      {(Array.isArray(settings?.promoBanners) && settings.promoBanners.filter(b => b.active).length > 0
-        ? settings.promoBanners.filter(b => b.active)
-        : [
-            {
-              id: 'default-promo',
-              image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800&auto=format&fit=crop",
-              title: t('get_20_off') || "Get 20% OFF",
-              subtitle: t('promo_desc') || "Your first order of professional equipment.",
-              ctaText: t('claim_discount') || "Claim Discount",
-              ctaLink: "/register",
-              bgColor: "#dc2626",
-              active: true
-            }
-          ]
-      ).map((banner) => (
+      {(settings?.promoBanners || []).filter(b => b.active).map((banner) => (
         <section key={banner.id} className="max-w-7xl mx-auto px-4 sm:px-8 pb-20 md:pb-32">
           <div 
             className="relative rounded-[32px] md:rounded-[40px] overflow-hidden p-8 sm:p-12 md:p-24 shadow-2xl"
