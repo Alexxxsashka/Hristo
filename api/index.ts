@@ -1438,7 +1438,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/site-settings" && method === "GET") {
       const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
       if (result.rows.length > 0) {
-        return res.json(result.rows[0]);
+        const row = result.rows[0];
+        const camelData: any = {};
+        Object.keys(row).forEach(key => {
+          const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+          camelData[camelKey] = row[key];
+        });
+        return res.json(camelData);
       } else {
         return res.json({ id: 'default' });
       }
