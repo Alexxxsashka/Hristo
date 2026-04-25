@@ -97,6 +97,7 @@ export const AdminDashboard: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'shipped'>('all');
   const [indexedSearch, setIndexedSearch] = useState('');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
@@ -271,7 +272,9 @@ export const AdminDashboard: React.FC = () => {
       (productFilter === 'out_of_stock' && p.stock <= (p.minStockLevel || 0)) ||
       (productFilter === 'premium' && p.price > 500);
 
-    return matchesSearch && matchesFilter;
+    const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
+
+    return matchesSearch && matchesFilter && matchesCategory;
   });
 
   const filteredBlogPosts = blogPosts.filter(p =>
@@ -506,10 +509,8 @@ export const AdminDashboard: React.FC = () => {
                     <div className="relative">
                       <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
                       <select
-                        onChange={e => {
-                          const categoryName = e.target.value;
-                          setSearchQuery(categoryName === 'all' ? '' : categoryName);
-                        }}
+                        value={categoryFilter}
+                        onChange={e => setCategoryFilter(e.target.value)}
                         className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
                       >
                         <option value="all">All Categories</option>
