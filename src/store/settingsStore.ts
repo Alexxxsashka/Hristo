@@ -20,16 +20,17 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     set({ isLoading: true });
     try {
       const data = await databaseService.getSiteSettings();
-      // Merge with defaults to ensure all fields have values
-      const mergedSettings = {
-        ...DEFAULT_SITE_SETTINGS,
-        ...data,
-        // Ensure arrays are merged properly or at least exist
-        heroSlides: data.heroSlides?.length ? data.heroSlides : DEFAULT_SITE_SETTINGS.heroSlides,
-        promoBanners: data.promoBanners?.length ? data.promoBanners : DEFAULT_SITE_SETTINGS.promoBanners,
-        featuredCategoriesList: data.featuredCategoriesList?.length ? data.featuredCategoriesList : DEFAULT_SITE_SETTINGS.featuredCategoriesList,
-        footerTags: data.footerTags?.length ? data.footerTags : DEFAULT_SITE_SETTINGS.footerTags,
-      } as SiteSettings;
+      
+      // Robust merge: Use default if database value is missing, empty string, or empty array
+      const mergedSettings = { ...DEFAULT_SITE_SETTINGS, ...data } as SiteSettings;
+      
+      (Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>).forEach(key => {
+        const value = data[key];
+        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+          // @ts-ignore
+          mergedSettings[key] = DEFAULT_SITE_SETTINGS[key];
+        }
+      });
       
       set({ settings: mergedSettings, isLoading: false });
     } catch (error) {

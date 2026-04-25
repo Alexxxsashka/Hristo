@@ -56,13 +56,17 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
     const fetchSettings = async () => {
       try {
         const data = await databaseService.getSiteSettings();
-        const merged = {
-          ...DEFAULT_SITE_SETTINGS,
-          ...data,
-          heroSlides: data.heroSlides?.length ? data.heroSlides : DEFAULT_SITE_SETTINGS.heroSlides,
-          promoBanners: data.promoBanners?.length ? data.promoBanners : DEFAULT_SITE_SETTINGS.promoBanners,
-          featuredCategoriesList: data.featuredCategoriesList?.length ? data.featuredCategoriesList : DEFAULT_SITE_SETTINGS.featuredCategoriesList
-        };
+        
+        // Robust merge: Use default if database value is missing, empty string, or empty array
+        const merged = { ...DEFAULT_SITE_SETTINGS, ...data } as SiteSettings;
+        
+        (Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>).forEach(key => {
+          const value = (data as any)[key];
+          if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+            (merged as any)[key] = (DEFAULT_SITE_SETTINGS as any)[key];
+          }
+        });
+
         setSettings(merged);
       } catch (err) {
         console.error('Failed to load settings', err);

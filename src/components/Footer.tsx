@@ -16,23 +16,17 @@ import { databaseService } from '../services/databaseService';
 import { useAuthStore } from '../store/authStore';
 import { SiteSettings } from '../types';
 
+import { useSettingsStore } from '../store/settingsStore';
+
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const { settings, fetchSettings } = useSettingsStore();
   const [paymentLogos, setPaymentLogos] = useState<{ [key: string]: string }>({});
   const { user } = useAuthStore();
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const data = await databaseService.getSiteSettings();
-        setSettings(data);
-      } catch (err) {
-        console.error('Failed to fetch assets:', err);
-      }
-    };
-    fetchSettings();
-  }, []);
+    if (!settings) fetchSettings();
+  }, [settings, fetchSettings]);
 
   return (
     <footer className="bg-[#050505] border-t border-zinc-900 pt-16 md:pt-24 pb-8 md:pb-12">
