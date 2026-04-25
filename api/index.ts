@@ -1465,20 +1465,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const colMap = new Map<string, { column_name: string, data_type: string }>(
           columnQuery.rows.map(r => [normalize(r.column_name), r])
         );
-        const validKeys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_') && colMap.has(normalize(k)));
 
-        if (validKeys.length === 0) {
+        // Map each DB column to exactly one frontend key to prevent duplicates
+        const colToKeyMap = new Map<string, string>();
+        Object.keys(settings).forEach(k => {
+          if (k === 'id' || k.startsWith('_')) return;
+          const normalized = normalize(k);
+          if (colMap.has(normalized)) {
+            const colName = colMap.get(normalized)!.column_name;
+            if (!colToKeyMap.has(colName)) colToKeyMap.set(colName, k);
+          }
+        });
+
+        if (colToKeyMap.size === 0) {
           return res.json({ success: true, message: "No valid fields to update" });
         }
 
         const values: any[] = [id];
         const updates: string[] = [];
+        const cols: string[] = [];
+        const placeholders: string[] = [];
         
-        validKeys.forEach((k, i) => {
-          const colInfo = colMap.get(normalize(k))!;
-          const colName = colInfo.column_name;
+        colToKeyMap.forEach((key, colName) => {
+          const colInfo = colMap.get(normalize(key))!;
           const dataType = colInfo.data_type;
-          let val = settings[k];
+          let val = settings[key];
 
           if (dataType === 'ARRAY' || (dataType === 'text' && colName.endsWith('_tags'))) {
             if (!Array.isArray(val)) val = typeof val === 'string' ? val.split(',').map(s => s.trim()) : [];
@@ -1487,6 +1498,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           updates.push(`"${colName}" = $${values.length + 1}`);
+          cols.push(`"${colName}"`);
+          placeholders.push(`$${values.length + 1}`);
           values.push(val);
         });
 
@@ -1498,8 +1511,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             values
           );
         } else {
-          const cols = validKeys.map(k => `"${colMap.get(normalize(k))!.column_name}"`);
-          const placeholders = validKeys.map((_, i) => `$${i + 2}`);
           await pool.query(
             `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
             values
