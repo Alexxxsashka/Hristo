@@ -42,6 +42,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       meshName: '',
       socketPoint: [0, 0, 0],
       slots: [],
+      variantsGroupId: '',
       compatibleModuleCategories: [],
       attachmentSlot: '',
       compatibleWeapons: [],
@@ -635,6 +636,17 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             {fieldErrors.barcode && (
               <p className="text-red-500 text-xs">{fieldErrors.barcode}</p>
             )}
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-zinc-700">Variants Group ID</label>
+            {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Link different colors of the same product.</p>}
+            <input 
+              type="text" 
+              value={formData.variantsGroupId || ''}
+              onChange={e => handleFieldChange('variantsGroupId', e.target.value)}
+              className="w-full px-4 py-3 bg-zinc-50 border rounded-xl border-zinc-200 outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
+              placeholder="e.g. EMERSON-G3"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Landing Cost (€)</label>

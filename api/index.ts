@@ -26,7 +26,7 @@ const { Pool } = pg;
 let pool: any = null;
 function getPool() {
   if (pool) return pool;
-  
+
   const connectionString =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
@@ -215,7 +215,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/stats" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       const stats = await pool.query(`
         SELECT 
           COUNT(*) as total_products,
@@ -231,7 +231,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/migrate" && method === "POST") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       try {
         const results = await runAllMigrations(pool);
         return res.json({ success: true, results });
@@ -245,7 +245,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/loyalty/recalc" && method === "POST") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       try {
         const usersRes = await pool.query("SELECT id FROM users");
         for (const u of usersRes.rows) {
@@ -276,18 +276,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const pid = item.product_id || item.productId || item.id;
         const productResult = await pool.query('SELECT price, discount, category_id FROM products WHERE id = $1', [pid]);
         if (productResult.rows.length === 0) continue;
-        
+
         const product = productResult.rows[0];
         const categoryResult = await pool.query('SELECT discount FROM categories WHERE id = $1', [product.category_id]);
         const categoryDiscount = categoryResult.rows[0]?.discount || 0;
-        
+
         const productDiscount = parseInt(product.discount) || 0;
         const bestDiscount = Math.max(productDiscount, categoryDiscount, userDiscount);
-        
+
         const price = parseFloat(product.price) * (1 - bestDiscount / 100);
         subtotal += price * (item.quantity || 1);
       }
-      
+
       const totalAmount = Math.round((subtotal + (shipping_cost || 0)) * 100);
 
       let stripeCustomerId = userResult.rows[0]?.stripe_customer_id;
@@ -342,11 +342,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
-        
+
         // Orders & Tracking
         await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted BOOLEAN DEFAULT false");
         await pool.query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT");
-        
+
         // Inventory Logs
         await pool.query(`
           CREATE TABLE IF NOT EXISTS inventory_logs (
@@ -389,11 +389,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── POST/PUT /admin/categories ──────────────────────────────────────────────
     const catUpdateMatch = match(path, "/admin/categories/:id");
     const isCatUpdate = (path === "/admin/categories" || catUpdateMatch) && (method === "POST" || method === "PUT");
-    
+
     if (isCatUpdate) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       const categoryIdFromPath = catUpdateMatch ? catUpdateMatch[0] : null;
       const { id, name, slug, image_url, parent_id, filters } = req.body || {};
       const finalId = id || categoryIdFromPath || slug;
@@ -430,17 +430,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const filename = req.query.filename as string || `upload_${Date.now()}`;
       const contentType = req.headers['content-type'] || 'application/octet-stream';
-      
+
       // Create a promise to read the raw body if it's not already a buffer
       let body: any = req.body;
       if (!Buffer.isBuffer(body) && typeof body !== 'string') {
         // Vercel might have already parsed it or it's a stream
         // If it's a stream, we can pass it directly to put
-        body = req; 
+        body = req;
       }
 
       const blobToken = process.env.HR_STORAGE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN;
-      const blob = await put(filename, body, { 
+      const blob = await put(filename, body, {
         access: 'public',
         contentType,
         token: blobToken
@@ -478,7 +478,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             return {
               allowedContentTypes: [
-                'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                 'model/gltf-binary', 'model/gltf+json', 'application/octet-stream'
               ],
               tokenPayload: JSON.stringify({ userId: user.id }),
@@ -520,7 +520,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         LIMIT $${i} OFFSET $${i + 1}
       `;
       params.push(Number(limit), Number(offset));
-      
+
       const r = await pool.query(q, params);
 
       return res.json(r.rows.map((p: any) => {
@@ -549,13 +549,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           stock: parseInt(p.stock) || 0,
           discount: p.discount ? parseInt(p.discount) : 0,
           model3D: p.model_3d_url,
-          model3DName: p.model3d_name, 
+          model3DName: p.model3d_name,
           has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
           characteristics: parseJson(p.characteristics),
           variants: parseJson(p.variants),
           variant_attributes: parseJson(p.variant_attributes),
           category_filters: parseJson(p.category_filters, {}),
-          socketPoint: parseJson(p.socket_point, [0,0,0]),
+          socketPoint: parseJson(p.socket_point, [0, 0, 0]),
           compatibleIds: parseJson(p.compatible_ids),
           compatibleWeapons: parseJson(p.compatible_ids),
           compatibleModuleCategories: parseJson(p.compatible_module_categories),
@@ -587,7 +587,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return val || fallback;
       };
 
-      return res.json({
+      const responsePayload: any = {
         ...p,
         id: p.id,
         image: p.image_url,
@@ -604,20 +604,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         stock: parseInt(p.stock) || 0,
         discount: p.discount ? parseInt(p.discount) : 0,
         model3D: p.model_3d_url,
-        model3DName: p.model3d_name, 
+        model3DName: p.model3d_name,
         has3D: p.has_3d === true || p.has_3d === 'true' || !!p.model_3d_url,
         characteristics: parseJson(p.characteristics),
         variants: parseJson(p.variants),
         variant_attributes: parseJson(p.variant_attributes),
         category_filters: parseJson(p.category_filters, {}),
-        socketPoint: parseJson(p.socket_point, [0,0,0]),
+        socketPoint: parseJson(p.socket_point, [0, 0, 0]),
         compatibleIds: parseJson(p.compatible_ids),
         compatibleWeapons: parseJson(p.compatible_ids),
         compatibleModuleCategories: parseJson(p.compatible_module_categories),
         slots: parseJson(p.slots),
         attachmentSlot: p.attachment_slot,
-        mountType: p.mount_type
-      });
+        mountType: p.mount_type,
+        variantsGroupId: p.variants_group_id
+      };
+
+      if (p.variants_group_id) {
+        try {
+          const relatedRes = await pool.query(
+            `SELECT id, slug, name, category_filters, image_url, images 
+             FROM products 
+             WHERE variants_group_id = $1`,
+            [p.variants_group_id]
+          );
+          responsePayload.relatedProducts = relatedRes.rows.map(r => ({
+            id: r.id,
+            slug: r.slug,
+            name: r.name,
+            category_filters: parseJson(r.category_filters, {}),
+            image: r.image_url,
+            images: parseJson(r.images, r.image_url ? [r.image_url] : [])
+          }));
+        } catch (e) {
+          console.error("Failed to fetch related products:", e);
+        }
+      }
+
+      return res.json(responsePayload);
     }
 
     // ── POST /admin/products ───────────────────────────────────────────────────
@@ -626,7 +650,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
       const id = p.id || `prod-${Date.now()}`;
-      
+
       const imageUrl = p.image_url || p.image || null;
       // Prioritize model3D (frontend field) over model_3d_url (backend field) to avoid using cached/old DB values
       const model3dUrl = p.model3D || p.model_3d_url || null;
@@ -640,6 +664,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -656,35 +681,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       try {
         const productData = [
-          id, 
-          p.uid || id, 
-          p.sku || '', 
+          id,
+          p.uid || id,
+          p.sku || '',
           p.barcode || '',
-          p.slug || id, 
-          p.name || 'Unnamed Product', 
-          p.description || '', 
-          longDescription || '', 
-          p.type || 'weapon', 
-          p.category_id || p.category || null, 
+          p.slug || id,
+          p.name || 'Unnamed Product',
+          p.description || '',
+          longDescription || '',
+          p.type || 'weapon',
+          p.category_id || p.category || null,
           p.subcategory || null,
-          p.brand || '', 
-          p.model || '', 
-          parseFloat(p.price) || 0, 
-          parseInt(p.stock) || 0, 
-          imageUrl, 
-          JSON.stringify(imagesArr), 
-          model3dUrl, 
-          !!has3d, 
-          JSON.stringify(p.characteristics || []), 
-          JSON.stringify(p.variants || []), 
-          JSON.stringify(p.variant_attributes || []), 
+          p.brand || '',
+          p.model || '',
+          parseFloat(p.price) || 0,
+          parseInt(p.stock) || 0,
+          imageUrl,
+          JSON.stringify(imagesArr),
+          model3dUrl,
+          !!has3d,
+          JSON.stringify(p.characteristics || []),
+          JSON.stringify(p.variants || []),
+          JSON.stringify(p.variant_attributes || []),
           JSON.stringify(p.category_filters || {}),
-          p.nameHr || null, 
-          p.descriptionHr || null, 
+          p.nameHr || null,
+          p.descriptionHr || null,
           p.longDescriptionHr || null,
           JSON.stringify(
-            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
-            ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
+            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons :
+              ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
           ),
           JSON.stringify(
             (p.compatibleModuleCategories && p.compatibleModuleCategories.length > 0) ? p.compatibleModuleCategories : []
@@ -696,7 +721,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             (p.slots && p.slots.length > 0) ? p.slots : []
           ),
           p.mountType || null,
-          p.attachmentSlot || null
+          p.attachmentSlot || null,
+          p.variantsGroupId || null
         ];
 
         const r = await pool.query(
@@ -705,21 +731,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
             variants, variant_attributes, category_filters, 
             name_hr, description_hr, long_description_hr, status,
-            compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot
+            compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot, variants_group_id
           )
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'active',$27,$28,$29,$30,$31,$32)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'active',$27,$28,$29,$30,$31,$32,$33)
            ON CONFLICT (id) DO UPDATE SET 
             name=$6, description=$7, long_description=$8, price=$14, stock=$15, image_url=$16, images=$17, 
             model_3d_url=$18, has_3d=$19, characteristics=$20, variants=$21, 
             variant_attributes=$22, category_filters=$23, 
             name_hr=$24, description_hr=$25, long_description_hr=$26,
             brand=$12, model=$13, sku=$3, barcode=$4, type=$9, category_id=$10, subcategory=$11,
-            compatible_ids=$27, compatible_module_categories=$28, socket_point=$29, slots=$30, mount_type=$31, attachment_slot=$32`,
+            compatible_ids=$27, compatible_module_categories=$28, socket_point=$29, slots=$30, mount_type=$31, attachment_slot=$32, variants_group_id=$33`,
           productData
         );
 
         console.log(`[DB] Product save success. RowCount: ${r.rowCount}, ID: ${p.uid || id}`);
-        
+
         // Sync compatibility table for whitelist
         try {
           if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
@@ -739,8 +765,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.json({ ok: true, id, uid: p.uid || id });
       } catch (dbErr: any) {
         console.error("Database Insert Error:", dbErr);
-        return res.status(500).json({ 
-          error: "Database Insert Failed", 
+        return res.status(500).json({
+          error: "Database Insert Failed",
           message: dbErr.message,
           detail: dbErr.detail,
           payload: p // Return payload for debug
@@ -754,7 +780,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
-      
+
       const imageUrl = p.image !== undefined ? p.image : (p.image_url !== undefined ? p.image_url : null);
       // Prioritize model3D (frontend field) over model_3d_url (backend field) to avoid using cached/old DB values
       const model3dUrl = p.model3D !== undefined ? p.model3D : (p.model_3d_url !== undefined ? p.model_3d_url : null);
@@ -768,6 +794,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -784,34 +811,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       try {
         const productData = [
-          adminProd[0], 
-          p.name || 'Unnamed Product', 
-          p.description || '', 
-          longDescription || '', 
-          parseFloat(p.price) || 0, 
-          parseInt(p.stock) || 0, 
-          imageUrl, 
-          JSON.stringify(imagesArr), 
-          model3dUrl, 
-          !!has3d, 
-          JSON.stringify(p.characteristics || []), 
-          JSON.stringify(p.variants || []), 
-          JSON.stringify(p.variant_attributes || []), 
+          adminProd[0],
+          p.name || 'Unnamed Product',
+          p.description || '',
+          longDescription || '',
+          parseFloat(p.price) || 0,
+          parseInt(p.stock) || 0,
+          imageUrl,
+          JSON.stringify(imagesArr),
+          model3dUrl,
+          !!has3d,
+          JSON.stringify(p.characteristics || []),
+          JSON.stringify(p.variants || []),
+          JSON.stringify(p.variant_attributes || []),
           JSON.stringify(p.category_filters || {}),
-          p.nameHr || null, 
-          p.descriptionHr || null, 
+          p.nameHr || null,
+          p.descriptionHr || null,
           p.longDescriptionHr || null,
-          p.brand || '', 
-          p.model || '', 
-          p.sku || '', 
+          p.brand || '',
+          p.model || '',
+          p.sku || '',
           p.barcode || '',
-          p.type || 'weapon', 
+          p.type || 'weapon',
           p.status || 'active',
           p.category_id || p.category || null,
           p.subcategory || null,
           JSON.stringify(
-            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
-            ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
+            (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons :
+              ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : [])
           ),
           JSON.stringify(
             (p.compatibleModuleCategories && p.compatibleModuleCategories.length > 0) ? p.compatibleModuleCategories : []
@@ -823,7 +850,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             (p.slots && p.slots.length > 0) ? p.slots : []
           ),
           p.mountType || null,
-          p.attachmentSlot || null
+          p.attachmentSlot || null,
+          p.variantsGroupId || null
         ];
 
         const r = await pool.query(
@@ -834,7 +862,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name_hr=$15, description_hr=$16, long_description_hr=$17,
             brand=$18, model=$19, sku=$20, barcode=$21, type=$22, status=$23,
             category_id=$24, subcategory=$25,
-            compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31
+            compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31, variants_group_id=$32
            WHERE id = $1 OR slug = $1
            RETURNING id`,
           productData
@@ -850,9 +878,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Simple sync for compatibility whitelist
         const currentUid = p.uid || adminProd[0];
         try {
-          const uids = (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons : 
-                       ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : null);
-          
+          const uids = (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons :
+            ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : null);
+
           if (Array.isArray(uids)) {
             console.log(`[DB] Syncing ${uids.length} compatible weapons for ${currentUid}`);
             await pool.query("DELETE FROM product_compatibility WHERE child_uid = $1", [currentUid]);
@@ -870,8 +898,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.json({ ok: true, id: r.rows[0].id, updated: true });
       } catch (dbErr: any) {
         console.error("Database Update Error:", dbErr);
-        return res.status(500).json({ 
-          error: "Database Update Failed", 
+        return res.status(500).json({
+          error: "Database Update Failed",
           message: dbErr.message,
           detail: dbErr.detail,
           idUsed: adminProd[0]
@@ -883,14 +911,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (adminProd && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       try {
         // Cleanup blobs
         const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProd[0]]);
         if (result.rows.length > 0) {
           const p = result.rows[0];
           const urlsToDelete: string[] = [];
-          
+
           if (p.image_url) urlsToDelete.push(p.image_url);
           if (p.model_3d_url) urlsToDelete.push(p.model_3d_url);
           if (Array.isArray(p.images)) {
@@ -899,7 +927,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             try {
               const parsed = JSON.parse(p.images);
               if (Array.isArray(parsed)) parsed.forEach((u: any) => { if (typeof u === 'string') urlsToDelete.push(u); });
-            } catch (e) {}
+            } catch (e) { }
           }
 
           const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
@@ -953,7 +981,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const id = p.id || `blog-${Date.now()}`;
       await pool.query(
         "INSERT INTO blog_posts (id, slug, title, content, category, image_url, author, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET title=$3, content=$4, status=$8",
-        [id, p.slug||id, p.title, p.content, p.category||'general', p.image_url||null, p.author||'Admin', p.status||'published']
+        [id, p.slug || id, p.title, p.content, p.category || 'general', p.image_url || null, p.author || 'Admin', p.status || 'published']
       );
       return res.json({ id });
     }
@@ -966,7 +994,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const p = req.body || {};
       await pool.query(
         "UPDATE blog_posts SET title=$2, content=$3, status=$4, image_url=$5 WHERE id = $1",
-        [adminBlog[0], p.title, p.content, p.status||'published', p.image_url||null]
+        [adminBlog[0], p.title, p.content, p.status || 'published', p.image_url || null]
       );
       return res.json({ ok: true });
     }
@@ -975,7 +1003,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (adminBlog && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       try {
         const result = await pool.query('SELECT image_url FROM blog_posts WHERE id = $1 OR slug = $1', [adminBlog[0]]);
         if (result.rows.length > 0 && result.rows[0].image_url) {
@@ -1045,23 +1073,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (path === "/orders" && method === "POST") {
       const user = getUser(req);
-      const { 
-        id: providedId, 
-        items, 
-        total, 
-        subtotal, 
+      const {
+        id: providedId,
+        items,
+        total,
+        subtotal,
         tax,
         discountAmount,
-        shippingCost, 
-        status, 
-        payment, 
-        shipping, 
+        shippingCost,
+        status,
+        payment,
+        shipping,
         notes,
-        pointsEarned 
+        pointsEarned
       } = req.body || {};
       const userId = user?.id || "guest";
       const id = providedId || `order-${Date.now()}`;
-      
+
       // Calculate profit if not provided
       let profit = req.body.profit;
       if (profit === undefined && items?.length) {
@@ -1104,10 +1132,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           updated_at = CURRENT_TIMESTAMP
         RETURNING order_number`,
         [
-          id, 
-          `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100+Math.random()*900)}`, 
-          userId, 
-          Number(total || 0), 
+          id,
+          `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`,
+          userId,
+          Number(total || 0),
           Number(subtotal || total || 0),
           Number(tax || 0),
           Number(discountAmount || 0),
@@ -1138,10 +1166,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           await pool.query(
             "INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
             [
-              id, 
-              item.productId || item.id, 
-              item.name || 'Product', 
-              item.quantity, 
+              id,
+              item.productId || item.id,
+              item.name || 'Product',
+              item.quantity,
               Number(item.price || 0),
               item.image || null,
               item.sku || null,
@@ -1158,16 +1186,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/orders" && method === "GET") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-      
+
       const ordersRes = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
       // Use a subquery or separate call, but let's make it fetch all matching items once
       const itemsRes = await pool.query("SELECT * FROM order_items WHERE order_id IN (SELECT id FROM orders)");
-      
+
       const orders = ordersRes.rows.map(row => {
         const items = itemsRes.rows.filter(item => String(item.order_id) === String(row.id));
         return mapOrder(row, items);
       });
-      
+
       return res.json(orders);
     }
 
@@ -1178,19 +1206,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const { status: newStatus, tracking_number } = req.body || {};
       const orderId = orderStatusMatch[0];
-      
+
       try {
         // Fetch current order info to see if stock needs updating
         const orderRes = await pool.query("SELECT status, stock_deducted FROM orders WHERE id = $1", [orderId]);
-        
+
         if (orderRes.rows.length > 0) {
           const { stock_deducted } = orderRes.rows[0];
-          
+
           // Logic: Deduct stock when moving TO 'processing', 'paid', 'shipped', or 'delivered'
           // BUT only if stock hasn't been deducted yet.
           const fulfilledStatuses = ['processing', 'paid', 'shipped', 'delivered'];
           const shouldDeduct = fulfilledStatuses.includes(newStatus) && !stock_deducted;
-          
+
           // Logic: Return stock when moving FROM a fulfilled status TO 'cancelled' or 'refunded'
           const shouldReturn = (newStatus === 'cancelled' || newStatus === 'refunded') && stock_deducted;
 
@@ -1200,10 +1228,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               const modifier = shouldDeduct ? -item.quantity : item.quantity;
               // Update main stock
               await pool.query("UPDATE products SET stock = stock + $1 WHERE id = $2", [modifier, item.product_id]);
-              
+
               // Note: Ideally we'd also update the 'stock' table if using multi-warehouse, 
               // but for now the 'products' table is the source of truth for the frontend gallery.
-              
+
               // Add to inventory log
               try {
                 await pool.query(
@@ -1220,7 +1248,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         await pool.query("UPDATE orders SET status=$2, tracking_number=$3 WHERE id = $1", [orderId, newStatus, tracking_number]);
-        
+
         // Recalculate rank for the user who owns this order
         const ownerRes = await pool.query("SELECT user_id FROM orders WHERE id = $1", [orderId]);
         if (ownerRes.rows.length > 0) {
@@ -1265,16 +1293,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (userId && method === "GET") {
       const authenticatedUser = getUser(req);
       const targetUserId = userId[0]; // match() returns groups starting at index 0
-      
+
       try {
         // Ensure loyalty data is fresh before returning
         await recalculateUserPointsAndRank(pool, targetUserId);
 
         const r = await pool.query(
-          "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\", callsign, team_name as \"teamName\" FROM users WHERE id = $1", 
+          "SELECT id, username, email, role, phone, address, rank, points, discount_level as \"discountLevel\", callsign, team_name as \"teamName\" FROM users WHERE id = $1",
           [targetUserId]
         );
-        
+
         if (r.rows.length > 0) {
           const u = r.rows[0];
           return res.json({
@@ -1283,7 +1311,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             discountLevel: Number(u.discountLevel || 0)
           });
         }
-        
+
         // If not found in DB but is the current authenticated user, return skeleton
         if (authenticatedUser && authenticatedUser.id === targetUserId) {
           return res.json({
@@ -1440,10 +1468,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (result.rows.length > 0) {
         const row = result.rows[0];
         const camelData: any = {};
+
+        // Group all columns by their target camelCase key
+        const groups: Record<string, string[]> = {};
         Object.keys(row).forEach(key => {
           const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-          camelData[camelKey] = row[key];
+          if (!groups[camelKey]) groups[camelKey] = [];
+          groups[camelKey].push(key);
         });
+
+        // For each camelCase key, pick the best available value from its source columns
+        Object.keys(groups).forEach(camelKey => {
+          const keys = groups[camelKey];
+          // Prioritize non-null values and snake_case column names
+          let bestKey = keys[0];
+          for (const k of keys) {
+            const val = row[k];
+            const isBetter = (val !== null && val !== undefined && val !== '' &&
+              (!Array.isArray(val) || val.length > 0));
+
+            if (isBetter) {
+              bestKey = k;
+              if (k.includes('_')) break; // Found a snake_case column with a value, stop here
+            } else if (k.includes('_') && (row[bestKey] === null || row[bestKey] === undefined)) {
+              // If current best is null, still prefer the snake_case key name
+              bestKey = k;
+            }
+          }
+          camelData[camelKey] = row[bestKey];
+        });
+
         return res.json(camelData);
       } else {
         return res.json({ id: 'default' });
@@ -1458,19 +1512,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const settings = req.body;
         const id = settings.id || 'default';
-        
+
         // Helper to match camelCase to snake_case
         const normalize = (s: string) => s.toLowerCase().replace(/_/g, '');
-        
+
         const columnQuery = await pool.query(`
           SELECT column_name, data_type 
           FROM information_schema.columns 
           WHERE table_name = 'site_settings'
         `);
-        
-        const colMap = new Map<string, { column_name: string, data_type: string }>(
-          columnQuery.rows.map(r => [normalize(r.column_name), r])
-        );
+
+        const colMap = new Map<string, { column_name: string, data_type: string }>();
+        columnQuery.rows.forEach(r => {
+          const normalized = normalize(r.column_name);
+          // Prefer snake_case (has underscore) over camelCase if both exist for consistency
+          if (!colMap.has(normalized) || r.column_name.includes('_')) {
+            colMap.set(normalized, r);
+          }
+        });
 
         // Map each DB column to exactly one frontend key to prevent duplicates
         const colToKeyMap = new Map<string, string>();
@@ -1492,7 +1551,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const updates: string[] = [];
         const cols: string[] = [];
         const placeholders: string[] = [];
-        
+
         colToKeyMap.forEach((key, colName) => {
           const colInfo = colMap.get(normalize(key))!;
           const dataType = colInfo.data_type;
@@ -1511,7 +1570,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
 
         const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
-        
+
         if (exists.rows.length > 0) {
           await pool.query(
             `UPDATE site_settings SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
@@ -1523,7 +1582,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             values
           );
         }
-        
+
         return res.json({ success: true });
       } catch (err: any) {
         console.error("Site settings update error:", err);

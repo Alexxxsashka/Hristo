@@ -80,6 +80,8 @@ export interface Product {
   characteristics?: Characteristic[];
   variantAttributes?: ProductAttribute[];
   variants?: ProductVariant[];
+  variantsGroupId?: string;
+  relatedProducts?: { id: string; slug: string; name: string; category_filters: any; image?: string; images?: string[] }[];
   categoryFilters?: Record<string, string | number | boolean>; // Values for category-specific filters
   has3D?: boolean;
   mountType?: string; // e.g., 'Picatinny', 'M-LOK', 'Dovetail', 'KeyMod'

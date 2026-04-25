@@ -316,6 +316,34 @@ export const ProductPage: React.FC = () => {
                 ))}
               </div>
 
+              {/* Color / Variant Switcher */}
+              {product.relatedProducts && product.relatedProducts.length > 1 && (
+                <div className="space-y-3 pt-4 border-t border-zinc-900">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('color_variant') || 'Color / Pattern'}</label>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {product.relatedProducts.map(rp => {
+                      const isActive = rp.id === product.id;
+                      return isActive ? (
+                        <div key={rp.id} className="w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 border-white shadow-lg shadow-white/10 overflow-hidden relative cursor-default" title={rp.name}>
+                          <img src={rp.image || (rp.images && rp.images[0]) || `https://picsum.photos/seed/${rp.id}/200/200`} className="w-full h-full object-cover" alt={rp.name} />
+                        </div>
+                      ) : (
+                        <Link
+                          key={rp.id}
+                          to={`/product/${rp.id}/${rp.slug}`}
+                          className="w-16 h-16 md:w-20 md:h-20 rounded-xl border border-zinc-800 hover:border-zinc-500 overflow-hidden relative opacity-60 hover:opacity-100 transition-all"
+                          title={rp.name}
+                        >
+                          <img src={rp.image || (rp.images && rp.images[0]) || `https://picsum.photos/seed/${rp.id}/200/200`} className="w-full h-full object-cover" alt={rp.name} />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Variant Selectors */}
               {product.variantAttributes && product.variantAttributes.length > 0 && (
                 <div className="space-y-6 pt-4 border-t border-zinc-900">
