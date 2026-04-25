@@ -395,23 +395,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
       const categoryIdFromPath = catUpdateMatch ? catUpdateMatch[0] : null;
-      const { id, name, slug, image_url, parent_id, filters } = req.body || {};
+      const body = req.body || {};
+      const id = body.id;
+      const name = body.name;
+      const slug = body.slug || body.id;
+      const imageUrl = body.image_url || body.image || null;
+      const parentId = body.parent_id || body.parent || null;
+      const filters = body.filters || [];
+      const discount = body.discount ? parseInt(body.discount, 10) : 0;
       const finalId = id || categoryIdFromPath || slug;
 
       if (!finalId) return res.status(400).json({ error: "Category ID is required" });
 
-      await pool.query(
-        `INSERT INTO categories (id, name, slug, image_url, parent_id, filters) 
-         VALUES ($1,$2,$3,$4,$5,$6) 
-         ON CONFLICT (id) DO UPDATE SET 
-           name = EXCLUDED.name, 
-           slug = EXCLUDED.slug, 
-           image_url = EXCLUDED.image_url, 
-           parent_id = EXCLUDED.parent_id, 
-           filters = EXCLUDED.filters`,
-        [finalId, name, slug, image_url, parent_id || null, JSON.stringify(filters || [])]
-      );
-      return res.json({ ok: true });
+      try {
+        await pool.query(
+          `INSERT INTO categories (id, name, slug, image_url, parent_id, filters, discount) 
+           VALUES ($1,$2,$3,$4,$5,$6,$7) 
+           ON CONFLICT (id) DO UPDATE SET 
+             name = EXCLUDED.name, 
+             slug = EXCLUDED.slug, 
+             image_url = EXCLUDED.image_url, 
+             parent_id = EXCLUDED.parent_id, 
+             filters = EXCLUDED.filters,
+             discount = EXCLUDED.discount`,
+          [finalId, name, slug, imageUrl, parentId, JSON.stringify(filters), discount]
+        );
+        return res.json({ ok: true });
+      } catch (err: any) {
+        console.error("Failed to save category:", err);
+        return res.status(500).json({ error: "Failed to save category", message: err.message });
+      }
     }
 
     // ── DELETE /admin/categories/:id ───────────────────────────────────────────

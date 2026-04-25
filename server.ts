@@ -640,36 +640,40 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
   });
 
-  app.post("/api/categories", authenticateAdmin, async (req, res) => {
+  app.post("/api/admin/categories", authenticateAdmin, async (req, res) => {
     try {
-      const { id, name, description, parent, icon, image, slots, compatibleModuleCategories, discount, filters } = req.body;
+      const { id, name, parent, image, discount, filters, slug } = req.body;
+      const finalId = id || `cat-${Date.now()}`;
+      const finalSlug = slug || finalId;
       await pool.query(
-        `INSERT INTO categories (id, name, description, parent_id, icon, image_url, slots, compatible_module_categories, discount, filters) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [id, name, description, parent, icon, image, JSON.stringify(slots || []), JSON.stringify(compatibleModuleCategories || []), discount || 0, JSON.stringify(filters || [])]
+        `INSERT INTO categories (id, name, slug, image_url, parent_id, filters, discount) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [finalId, name, finalSlug, image, parent || null, JSON.stringify(filters || []), discount ? parseInt(discount, 10) : 0]
       );
-      res.status(201).json({ success: true });
+      res.status(201).json({ success: true, id: finalId });
     } catch (error) {
       console.error('Category creation error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
 
-  app.put("/api/categories/:id", authenticateAdmin, async (req, res) => {
+  app.put("/api/admin/categories/:id", authenticateAdmin, async (req, res) => {
     try {
-      const { name, description, parent, icon, image, slots, compatibleModuleCategories, discount, filters } = req.body;
+      const { name, parent, image, discount, filters, slug } = req.body;
+      const finalSlug = slug || req.params.id;
       await pool.query(
-        `UPDATE categories SET name = $1, description = $2, parent_id = $3, icon = $4, image_url = $5, 
-         slots = $6, compatible_module_categories = $7, discount = $8, filters = $9 WHERE id = $10`,
-        [name, description, parent, icon, image, JSON.stringify(slots || []), JSON.stringify(compatibleModuleCategories || []), discount || 0, JSON.stringify(filters || []), req.params.id]
+        `UPDATE categories SET name = $1, parent_id = $2, image_url = $3, 
+         discount = $4, filters = $5, slug = $6 WHERE id = $7`,
+        [name, parent || null, image, discount ? parseInt(discount, 10) : 0, JSON.stringify(filters || []), finalSlug, req.params.id]
       );
       res.json({ success: true });
     } catch (error) {
+      console.error('Category update error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
 
-  app.delete("/api/categories/:id", authenticateAdmin, async (req, res) => {
+  app.delete("/api/admin/categories/:id", authenticateAdmin, async (req, res) => {
     try {
       await pool.query('DELETE FROM categories WHERE id = $1', [req.params.id]);
       res.json({ success: true });
