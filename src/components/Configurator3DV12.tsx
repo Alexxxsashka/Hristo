@@ -179,14 +179,20 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
     const mType = (m.type || '').toLowerCase();
     
     // 1. SLOT TYPE MATCH (Check all possible category fields)
-    const isSynonymMatch = slotSynonyms[sType]?.some(syn => 
-      cat.includes(syn) || subcat.includes(syn) || catId.includes(syn) || syn.includes(cat) || syn.includes(subcat) || syn.includes(catId)
-    );
+    const isSynonymMatch = slotSynonyms[sType]?.some(syn => {
+      if (!syn) return false;
+      return (cat && cat.includes(syn)) || 
+             (subcat && subcat.includes(syn)) || 
+             (catId && catId.includes(syn)) || 
+             (cat && syn.includes(cat)) || 
+             (subcat && syn.includes(subcat)) || 
+             (catId && syn.includes(catId));
+    });
     
     const fitsInSlot = (m.attachmentSlot || '').toLowerCase() === sType;
     const allowedInSlots = (m.allowedSlots || []).some(s => s.toLowerCase() === sType);
     
-    const typeMatch = cat === sType || subcat === sType || catId === sType || mType === sType || fitsInSlot || allowedInSlots || isSynonymMatch;
+    const typeMatch = (cat && cat === sType) || (subcat && subcat === sType) || (catId && catId === sType) || (mType && mType === sType) || fitsInSlot || allowedInSlots || isSynonymMatch;
     
     // 2. WEAPON MATCH (Whitelists)
     const activeProd = useConfiguratorStore.getState().activeProduct;
@@ -751,9 +757,9 @@ export const Configurator3DV12: React.FC = () => {
     databaseService.getProducts()
       .then(data => {
         if (data) {
-          // Broaden filter: catch anything that isn't a primary weapon
+          // Strict filter: only include actual weapon modules and parts
           const modules = data.filter((p: Product) => 
-            p.type !== 'weapon' && p.category?.toLowerCase() !== 'weapons'
+            p.type === 'module' || p.type === 'part'
           );
           setAllModules(modules);
         }
