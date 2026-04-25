@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getDiscountedPrice } from '../utils/price';
 import { Product, ProductVariant } from '../types';
+import { useToastStore } from './toastStore';
 
 export interface CartItem {
   id: string; // Unique ID for the cart item (e.g., timestamp + productId)
@@ -81,10 +82,11 @@ export const useCartStore = create<CartStore>()(
             const newItems = [...state.cartItems];
             newItems[existingItemIndex].quantity += quantity;
             newItems[existingItemIndex].totalPrice = newItems[existingItemIndex].price * newItems[existingItemIndex].quantity;
+            useToastStore.getState().addToast(`Updated ${product.name} quantity`, 'success');
             return { cartItems: newItems };
           }
 
-          return {
+          const result = {
             cartItems: [
               ...state.cartItems,
               {
@@ -110,6 +112,9 @@ export const useCartStore = create<CartStore>()(
               },
             ],
           };
+
+          useToastStore.getState().addToast(`${product.name} added to cart`, 'success');
+          return result;
         }),
       updateQuantity: (id, delta) =>
         set((state) => ({

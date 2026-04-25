@@ -77,9 +77,15 @@ export const Footer: React.FC = () => {
           <div className="space-y-8">
             <h3 className="text-white font-black uppercase tracking-[0.2em] text-xs">SHOP</h3>
             <ul className="space-y-4">
-              {['Weapons', 'Attachments', 'Tactical Gear', 'Internal Parts', 'Apparel'].map(link => (
-                <li key={link}>
-                  <Link to="/shop" className="text-zinc-500 hover:text-red-500 transition-colors text-xs font-black tracking-widest uppercase">{link}</Link>
+              {[
+                { name: 'Weapons', slug: 'airsoft-weapons' },
+                { name: 'Attachments', slug: 'airsoft-attachments' },
+                { name: 'Tactical Gear', slug: 'tactical-gear' },
+                { name: 'Internal Parts', slug: 'internal-parts' },
+                { name: 'Apparel', slug: 'apparel' }
+              ].map(link => (
+                <li key={link.name}>
+                  <Link to={`/shop/${link.slug}`} className="text-zinc-500 hover:text-red-500 transition-colors text-xs font-black tracking-widest uppercase">{link.name}</Link>
                 </li>
               ))}
             </ul>

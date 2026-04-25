@@ -9,10 +9,14 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { SEO } from '../components/SEO';
 
+const QuickPreviewModal = lazy(() => import('../components/QuickPreviewModal').then(m => ({ default: m.QuickPreviewModal })));
+
 export const ShopPage: React.FC = () => {
   const { t } = useTranslation();
   const { category, subcategory } = useParams();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
+  const [selectedQuickView, setSelectedQuickView] = React.useState<any>(null);
+
   const { 
     fetchProducts, 
     fetchCategories, 
@@ -55,11 +59,15 @@ export const ShopPage: React.FC = () => {
       if (sub) targetSubcategoryIds.push(sub.id);
     }
 
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get('search') || '';
+
     setFilters({ 
       categories: targetCategoryIds,
-      subcategories: targetSubcategoryIds
+      subcategories: targetSubcategoryIds,
+      search: searchQuery
     });
-  }, [category, subcategory, categories, setFilters]);
+  }, [category, subcategory, categories, location.search, setFilters]);
 
   const activeSubcategoryId = filters.subcategories[0];
   const activeCategoryId = filters.categories[0];
@@ -284,7 +292,7 @@ export const ShopPage: React.FC = () => {
             {/* Product Grid/List */}
             {isLoading ? (
               <div className={getGridColsClass()}>
-                {[...Array(6)].map((_, i) => (
+                {[...Array(itemsPerPage)].map((_, i) => (
                   <div key={i} className={viewMode === 'grid' ? "aspect-[3/4] bg-zinc-900/50 rounded-2xl sm:rounded-3xl animate-pulse border border-zinc-800" : "h-32 sm:h-48 bg-zinc-900/50 rounded-2xl sm:rounded-3xl animate-pulse border border-zinc-800 w-full"} />
                 ))}
               </div>
@@ -293,82 +301,79 @@ export const ShopPage: React.FC = () => {
                 <div className={getGridColsClass()}>
                   <AnimatePresence mode="popLayout">
                     {paginatedProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        viewMode={viewMode}
+                        onQuickPreview={(p) => setSelectedQuickView(p)}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>
 
-                {/* Pagination Controls */}
+                {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 sm:gap-4 pt-8 sm:pt-12 border-t border-zinc-800">
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 pt-12 md:pt-20 border-t border-zinc-900">
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-400 hover:text-white hover:border-red-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-500 transition-all"
                     >
-                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <ChevronLeft size={20} />
                     </button>
                     
                     <div className="flex items-center gap-1 sm:gap-2">
-                      {[...Array(totalPages)].map((_, i) => {
-                        const page = i + 1;
-                        if (
-                          page === 1 || 
-                          page === totalPages || 
-                          (page >= currentPage - 1 && page <= currentPage + 1)
-                        ) {
-                          return (
-                            <button
-                              key={page}
-                              onClick={() => setCurrentPage(page)}
-                              className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl text-[9px] sm:text-[10px] font-black transition-all border ${
-                                currentPage === page 
-                                  ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20' 
-                                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700'
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          );
-                        }
-                        if (
-                          (page === 2 && currentPage > 3) || 
-                          (page === totalPages - 1 && currentPage < totalPages - 2)
-                        ) {
-                          return <span key={page} className="text-zinc-700 text-[10px] sm:text-xs px-0.5 sm:px-1">...</span>;
-                        }
-                        return null;
-                      })}
+                      {[...Array(totalPages)].map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i + 1)}
+                          className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black transition-all border ${
+                            currentPage === i + 1
+                              ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20'
+                              : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-white'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
                     </div>
 
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-400 hover:text-white hover:border-red-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-500 transition-all"
                     >
-                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <ChevronRight size={20} />
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-20 sm:py-32 bg-zinc-900/30 rounded-3xl sm:rounded-[40px] border border-zinc-800 border-dashed">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-zinc-900 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-6 border border-zinc-800">
-                  <Search className="w-6 h-6 sm:w-8 sm:h-8 text-zinc-700" />
+              <div className="bg-zinc-900/30 border border-zinc-800 rounded-3xl p-12 md:p-20 text-center space-y-6">
+                <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                  <Search size={40} className="text-zinc-700" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-white mb-2">{t('no_products_found')}</h3>
-                <p className="text-zinc-500 text-sm font-medium max-w-xs mx-auto mb-8 px-4">{t('no_products_desc')}</p>
-                <button
-                  onClick={() => setFilters({ search: '', categories: [], subcategories: [], minPrice: 0, maxPrice: 5000, inStock: false })}
-                  className="px-6 sm:px-8 py-3.5 sm:py-4 bg-zinc-800 hover:bg-zinc-700 text-white text-[9px] sm:text-[10px] font-black tracking-widest uppercase rounded-xl sm:rounded-2xl transition-all border border-zinc-700"
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-white">No items match your hunt</h3>
+                <p className="text-zinc-500 max-w-sm mx-auto font-medium">Try adjusting your filters or search terms to find the gear you're looking for.</p>
+                <button 
+                  onClick={() => setFilters({ search: '', categories: [], subcategories: [], brands: [], mountTypes: [], minPrice: 0, maxPrice: 10000, inStock: false, sortBy: 'newest', categoryFilters: {} })}
+                  className="px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-red-700 transition-all"
                 >
-                  {t('clear_all_filters')}
+                  Clear All Filters
                 </button>
               </div>
             )}
           </main>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <QuickPreviewModal 
+          isOpen={!!selectedQuickView}
+          product={selectedQuickView}
+          onClose={() => setSelectedQuickView(null)}
+        />
+      </Suspense>
     </div>
   );
 };

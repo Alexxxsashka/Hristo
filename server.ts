@@ -566,15 +566,18 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     let filteredProducts = products;
     
     if (category) {
-      const catId = (category as string).toLowerCase();
+      const searchCat = categories.find((c: any) => 
+        c.id === category || c.slug === category || c.name.toLowerCase() === (category as string).toLowerCase()
+      );
+      const catId = searchCat ? searchCat.id : (category as string);
+      
       filteredProducts = products.filter((p: any) => 
-        (p.category_id && p.category_id.toLowerCase() === catId) || 
-        (p.subcategory && p.subcategory.toLowerCase() === catId) ||
+        (p.category_id === catId) || 
+        (p.subcategory === catId) ||
         // Also check if the product's category has this as a parent
         categories.some((c: any) => c.id === p.category_id && c.parent_id === catId) ||
-        categories.some((c: any) => c.id === p.subcategory && c.parent_id === catId) ||
         // If searching for weapons, also include anything with type 'weapon'
-        (catId === 'weapons' && p.type && p.type.toLowerCase() === 'weapon')
+        (catId.toLowerCase() === 'weapons' && p.type && p.type.toLowerCase() === 'weapon')
       );
     }
     
@@ -1069,11 +1072,18 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     try {
       const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
       if (result.rows.length > 0) {
-        res.json(result.rows[0]);
+        const row = result.rows[0];
+        const camelData: any = {};
+        Object.keys(row).forEach(key => {
+          const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+          camelData[camelKey] = row[key];
+        });
+        res.json(camelData);
       } else {
         res.json({ id: 'default' });
       }
     } catch (error) {
+      console.error('Site settings fetch error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   });
@@ -1090,51 +1100,57 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         WHERE table_name = 'site_settings'
       `);
       
-      const validColumns = new Map(columnQuery.rows.map(r => [r.column_name.toLowerCase(), r.data_type]));
-
-      // Filter keys that exist in DB and are not internal
-      const keys = Object.keys(settings).filter(k => {
-        const lowerK = k.toLowerCase();
-        return k !== 'id' && !k.startsWith('_') && validColumns.has(lowerK);
+      const colMap = new Map();
+      const normalize = (s: string) => s.toLowerCase().replace(/_/g, '');
+      
+      columnQuery.rows.forEach(r => {
+        colMap.set(normalize(r.column_name), r);
       });
 
-      if (keys.length === 0) {
+      const updates: string[] = [];
+      const values: any[] = [id];
+      const cols: string[] = [];
+      const placeholders: string[] = [];
+
+      Object.keys(settings).forEach(key => {
+        if (key === 'id' || key.startsWith('_')) return;
+        
+        const normalizedKey = normalize(key);
+        const colInfo = colMap.get(normalizedKey);
+        
+        if (colInfo) {
+          const colName = colInfo.column_name;
+          let val = settings[key];
+          
+          // Handle serialization
+          if (colInfo.data_type === 'ARRAY' && Array.isArray(val)) {
+            // Keep as array
+          } else if (typeof val === 'object' && val !== null) {
+            val = JSON.stringify(val);
+          }
+          
+          updates.push(`"${colName}" = $${values.length + 1}`);
+          cols.push(`"${colName}"`);
+          placeholders.push(`$${values.length + 1}`);
+          values.push(val);
+        }
+      });
+
+      if (updates.length === 0) {
         return res.json({ success: true, message: "No valid fields to update" });
       }
 
-      // Map to actual DB column names (preserving case if needed via double quotes)
-      const actualKeys = keys.map(k => {
-        const lowerK = k.toLowerCase();
-        const col = columnQuery.rows.find(r => r.column_name.toLowerCase() === lowerK);
-        return col ? col.column_name : k;
-      });
-
-      // Prepare values with proper serialization
-      const values = keys.map(k => {
-        const val = settings[k];
-        const lowerK = k.toLowerCase();
-        const dataType = validColumns.get(lowerK);
-        
-        // Handle Postgres ARRAY types (don't stringify)
-        if (dataType === 'ARRAY' && Array.isArray(val)) return val;
-        // Stringify JSONB and other objects
-        return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
-      });
-
       // Try update first
-      const setClause = actualKeys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
       const updateResult = await pool.query(
-        `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-        [id, ...values]
+        `UPDATE site_settings SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        values
       );
 
       if (updateResult.rowCount === 0) {
         // Fallback to insert
-        const columns = actualKeys.map(k => `"${k}"`).join(', ');
-        const placeholders = keys.map((_, i) => `$${i + 2}`).join(', ');
         await pool.query(
-          `INSERT INTO site_settings (id, ${columns}) VALUES ($1, ${placeholders})`,
-          [id, ...values]
+          `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
+          values
         );
       }
 

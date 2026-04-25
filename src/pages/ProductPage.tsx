@@ -115,7 +115,7 @@ export const ProductPage: React.FC = () => {
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/shop' },
-    { label: categoryName, path: `/shop?category=${product.category}` },
+    { label: categoryName, path: `/shop/${categoryObj?.slug || product.category}` },
     { label: product.name, path: `/product/${product.id}/${product.slug}` }
   ];
 
@@ -155,11 +155,11 @@ export const ProductPage: React.FC = () => {
           <span>/</span>
           <Link to="/shop" className="hover:text-white transition-colors">{t('shop')}</Link>
           <span>/</span>
-          <Link to={`/shop?category=${product.category}`} className="hover:text-white transition-colors">{categoryName}</Link>
+          <Link to={`/shop/${categoryObj?.slug || product.category}`} className="hover:text-white transition-colors">{categoryName}</Link>
           {subcategoryObj && (
             <>
               <span>/</span>
-              <Link to={`/shop?subcategory=${product.subcategory}`} className="hover:text-white transition-colors">{subcategoryName}</Link>
+              <Link to={`/shop/${categoryObj?.slug || product.category}/${subcategoryObj?.slug || product.subcategory}`} className="hover:text-white transition-colors">{subcategoryName}</Link>
             </>
           )}
           <span>/</span>

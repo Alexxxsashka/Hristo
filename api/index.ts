@@ -536,10 +536,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const where = ["p.status = 'active'"];
       const params: any[] = [];
       let i = 1;
-      if (category) {
+      if (category && category !== 'all') {
+        // If it looks like a UUID, use it directly, otherwise resolve slug
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(category);
+        let catId = category;
+        
+        if (!isUuid) {
+          const catRes = await pool.query('SELECT id FROM categories WHERE slug = $1', [category]);
+          if (catRes.rowCount > 0) {
+            catId = catRes.rows[0].id;
+          }
+        }
+        
         // Search by category_id, subcategory ID, or if the product's category is a child of the filter category
         where.push(`(p.category_id = $${i} OR p.subcategory = $${i} OR c.parent_id = $${i})`);
-        params.push(category);
+        params.push(catId);
         i++;
       }
       if (type) {

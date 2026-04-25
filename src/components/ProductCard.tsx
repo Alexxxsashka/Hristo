@@ -3,12 +3,13 @@ import { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
 import { useCompareStore } from '../store/compareStore';
 import { useConfiguratorStore } from '../store/configuratorStore';
-import { ShoppingCart, GitCompare, Settings, Eye, Heart } from 'lucide-react';
+import { ShoppingCart, GitCompare, Settings, Eye, Heart, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QuickPreviewModal } from './QuickPreviewModal';
 import { getDiscountedPrice } from '../utils/price';
 import { useWishlistStore } from '../store/wishlistStore';
+import { useToastStore } from '../store/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface ProductCardProps {
@@ -17,12 +18,13 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
+  const { language, t } = useTranslation();
   const { addItem } = useCartStore();
+  const { addToast } = useToastStore();
   const { toggleCompare, isInCompare } = useCompareStore();
   const { toggleItem: toggleWishlist, isInWishlist } = useWishlistStore();
   const { setActiveProduct } = useConfiguratorStore();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { language, t } = useTranslation();
   const navigate = useNavigate();
 
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
@@ -41,7 +43,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
       if (!isComplete) {
         // Find first missing attribute
         const missing = variantAttributes.find((attr: any) => !selectedAttributes[attr.name]);
-        alert(`Please select ${missing.name}`);
+        addToast(`${t('please_select')} ${missing.name}`, 'error');
         return;
       }
     }
@@ -64,22 +66,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
 
   const handleCompare = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     toggleCompare(product);
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     toggleWishlist(product);
   };
 
   const handleConfigure = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setActiveProduct(product);
     navigate('/configurator');
   };
 
   const handleQuickPreview = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsPreviewOpen(true);
   };
 
@@ -160,11 +166,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 </span>
                 <div className="flex flex-col items-end shrink-0">
                   <span className={`${viewMode === 'list' ? 'text-base sm:text-lg md:text-2xl' : 'text-xs sm:text-base md:text-xl'} font-black text-white tracking-tighter`}>
-                    €{getDiscountedPrice(product.price, product.discount).toFixed(2)}
+                    €{getDiscountedPrice(Number(product.price), product.discount).toFixed(2)}
                   </span>
                   {product.discount > 0 && (
                     <span className="text-[7px] xs:text-[8px] sm:text-[10px] text-zinc-600 line-through font-bold">
-                      €{product.price.toFixed(2)}
+                      €{Number(product.price).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -266,6 +272,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                     title={t('configure')}
                   >
                     <Settings size={16} />
+                  </button>
+                )}
+                
+                {(Number(product.price) > 0 || (product.variants && product.variants.length > 0)) && (
+                  <button 
+                    onClick={handleAddToCart}
+                    className="p-3.5 bg-zinc-950 hover:bg-red-600 text-zinc-500 hover:text-white rounded-xl transition-all border border-zinc-800 hover:border-red-600 shadow-lg active:scale-95"
+                    title={t('add_to_cart')}
+                  >
+                    <Zap className="w-4 h-4" />
                   </button>
                 )}
               </div>

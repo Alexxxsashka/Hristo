@@ -100,8 +100,10 @@ export const useShopStore = create<ShopState>((set, get) => ({
       }
 
       // Subcategories
-      if (filters.subcategories.length > 0 && !filters.subcategories.includes(product.subcategory)) {
-        return false;
+      if (filters.subcategories.length > 0) {
+        const matchesSub = filters.subcategories.includes(product.subcategory) || 
+                          filters.subcategories.includes(product.category);
+        if (!matchesSub) return false;
       }
 
       // Brands

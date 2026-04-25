@@ -15,7 +15,12 @@ import { SEO } from '../components/SEO';
 import { SiteSettings } from '../types';
 import { useSettingsStore } from '../store/settingsStore';
 
+const QuickPreviewModal = Suspense ? React.lazy(() => import('../components/QuickPreviewModal').then(m => ({ default: m.QuickPreviewModal }))) : null;
+
+import { useToastStore } from '../store/toastStore';
+
 const HomePage: React.FC = () => {
+  const { addToast } = useToastStore();
   const { settings, fetchSettings } = useSettingsStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +29,7 @@ const HomePage: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [selectedQuickView, setSelectedQuickView] = useState<any>(null);
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -56,6 +62,7 @@ const HomePage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       setNewsletterStatus('success');
+      addToast(t('newsletter_success') || 'Thank you for subscribing!', 'success');
       setNewsletterEmail('');
       // In a real app, we'd call databaseService.subscribeNewsletter(newsletterEmail)
     } catch (err) {
@@ -442,9 +449,13 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onQuickPreview={(p) => setSelectedQuickView(p)}
+                />
               ))}
             </div>
           )}
@@ -470,9 +481,13 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {bestsellers.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onQuickPreview={(p) => setSelectedQuickView(p)}
+                />
               ))}
             </div>
           )}
@@ -619,6 +634,16 @@ const HomePage: React.FC = () => {
           </p>
         </div>
       </section>
+      {/* Quick Preview Modal */}
+      {QuickPreviewModal && (
+        <Suspense fallback={null}>
+          <QuickPreviewModal 
+            isOpen={!!selectedQuickView}
+            product={selectedQuickView}
+            onClose={() => setSelectedQuickView(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

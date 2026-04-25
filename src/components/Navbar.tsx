@@ -56,6 +56,17 @@ export const Navbar: React.FC = () => {
     if (searchQuery.trim()) {
       navigate(`/shop?search=${encodeURIComponent(searchQuery)}`);
       setIsSearchOpen(false);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const toggleSearch = () => {
+    if (isHomePage) {
+      // On home page, search is typically a full screen overlay or scroll to search
+      // For now, let's just navigate to shop
+      navigate('/shop');
+    } else {
+      setIsSearchOpen(!isSearchOpen);
     }
   };
 
@@ -64,7 +75,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { to: '/shop', label: t('shop') },
     ...(weaponsCat ? [{
-      to: `/shop?category=${weaponsCat.id}`,
+      to: `/shop/${weaponsCat.slug}`,
       label: weaponsCat.name
     }] : []),
     { to: '/configurator', label: t('configurator'), highlight: true },
@@ -225,7 +236,10 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4 shrink-0 justify-end ml-4">
             <div className="flex items-center gap-2 sm:gap-4">
               {!isHomePage && (
-                <button className="p-2 text-zinc-400 hover:text-white transition-colors md:hidden">
+                <button 
+                  onClick={toggleSearch}
+                  className="p-2 text-zinc-400 hover:text-white transition-colors md:hidden"
+                >
                   <Search size={20} />
                 </button>
               )}

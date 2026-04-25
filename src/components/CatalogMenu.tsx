@@ -92,7 +92,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                       <h3 className="text-xl lg:text-2xl font-black text-white uppercase tracking-tighter mb-6 lg:mb-8 flex items-center gap-3">
                         {language === 'HR' && activeCategory.nameHr ? activeCategory.nameHr : activeCategory.name}
                         <Link 
-                          to={`/shop?category=${activeCategory.id}`} 
+                          to={`/shop/${activeCategory.slug}`} 
                           onClick={onClose}
                           className="text-[10px] font-bold text-red-500 hover:underline tracking-widest uppercase"
                         >
@@ -105,9 +105,9 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                           subCategories.map(sub => (
                             <div key={sub.id} className="space-y-4">
                               <Link
-                                to={`/shop?category=${sub.id}`}
+                                to={`/shop/${activeCategory.slug}/${sub.slug}`}
                                 onClick={onClose}
-                                className="block text-base lg:text-lg font-bold text-white hover:text-red-500 transition-colors uppercase tracking-tight"
+                                className="block text-base lg:text-lg font-bold text-white hover:text-red-500 transition-all uppercase tracking-tight"
                               >
                                 {language === 'HR' && sub.nameHr ? sub.nameHr : sub.name}
                               </Link>

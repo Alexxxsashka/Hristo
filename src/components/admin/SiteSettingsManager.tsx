@@ -52,17 +52,23 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
   const [pendingAboutImage, setPendingAboutImage] = useState<File | null>(null);
   const [pendingHeroFeatureImage, setPendingHeroFeatureImage] = useState<File | null>(null);
   const [pendingHeroFeatureVideo, setPendingHeroFeatureVideo] = useState<File | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        const data = await databaseService.getSiteSettings();
+        const [settingsData, categoriesData] = await Promise.all([
+          databaseService.getSiteSettings(),
+          databaseService.getCategories()
+        ]);
+        
+        setCategories(categoriesData || []);
         
         // Robust merge: Use default if database value is missing, empty string, or empty array
-        const merged = { ...DEFAULT_SITE_SETTINGS, ...data } as SiteSettings;
+        const merged = { ...DEFAULT_SITE_SETTINGS, ...settingsData } as SiteSettings;
         
         (Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>).forEach(key => {
-          const value = (data as any)[key];
+          const value = (settingsData as any)[key];
           if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
             (merged as any)[key] = (DEFAULT_SITE_SETTINGS as any)[key];
           }
@@ -75,7 +81,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
         setLoading(false);
       }
     };
-    fetchSettings();
+    fetchData();
   }, []);
 
   const handleFileUpload = async (file: File, folder: string, previousUrl?: string) => {
@@ -686,6 +692,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                       key={fc.id}
                       fc={fc}
                       index={index}
+                      categories={categories}
                       onUpdate={(updates) => {
                         setSettings({
                           ...settings,
@@ -781,7 +788,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
               <SectionHeader 
                 icon={<Settings className="text-zinc-900" />} 
                 title="Footer & Global Content" 
-                subtitle="Legal text and SEO information" 
+                subtitle="Legal text and navigation info" 
               />
 
               <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm space-y-8">
@@ -791,58 +798,21 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                     rows={4}
                     value={settings.footerDescription || ''}
                     onChange={e => setSettings({ ...settings, footerDescription: e.target.value })}
-                    className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                    className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
                     placeholder="Short description of your store shown in footer"
                   />
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">SEO / Footer Tags (Comma separated)</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Footer Tags (Comma separated)</label>
                   <div className="relative">
                     <Tag size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400" />
                     <input 
                       type="text" 
                       value={(Array.isArray(settings.footerTags) ? settings.footerTags : []).join(', ')}
                       onChange={e => setSettings({ ...settings, footerTags: e.target.value.split(',').map(s => s.trim()) })}
-                      className="w-full pl-14 pr-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
-                      placeholder="airsoft, tactical gear, custom builds, CROATIA..."
-                    />
-                  </div>
-                </div>
-
-                <div className="border-t border-zinc-100 pt-8 mt-8 space-y-6">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900">SEO Meta Tags</h3>
-                  
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Title</label>
-                    <input 
-                      type="text" 
-                      value={settings.seoTitle || ''}
-                      onChange={e => setSettings({ ...settings, seoTitle: e.target.value })}
-                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
-                      placeholder="Site title for search engines"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Description</label>
-                    <textarea 
-                      rows={3}
-                      value={settings.seoDescription || ''}
-                      onChange={e => setSettings({ ...settings, seoDescription: e.target.value })}
-                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none resize-none"
-                      placeholder="Short description for search results"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Keywords</label>
-                    <input 
-                      type="text" 
-                      value={settings.seoKeywords || ''}
-                      onChange={e => setSettings({ ...settings, seoKeywords: e.target.value })}
-                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
-                      placeholder="keyword1, keyword2..."
+                      className="w-full pl-14 pr-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      placeholder="airsoft, tactical gear, custom builds..."
                     />
                   </div>
                 </div>
@@ -855,6 +825,71 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                   <p className="text-amber-700/80 text-xs font-medium leading-relaxed">
                     Ensure all your policy pages (Privacy, Terms, Shipping) are updated in the <b className="text-amber-900">Policies</b> tab. Links to these pages are automatically generated in the footer based on your policy database.
                   </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'seo' && (
+            <motion.div 
+              key="seo"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-8"
+            >
+              <SectionHeader 
+                icon={<Search className="text-zinc-900" />} 
+                title="Search Engine Optimization" 
+                subtitle="Manage how your store appears in search results" 
+              />
+
+              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm space-y-8">
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-100 p-6 rounded-3xl flex gap-4">
+                    <Info className="text-blue-600 shrink-0" />
+                    <div className="space-y-1">
+                      <p className="text-blue-900 font-bold text-sm tracking-tight">SEO Best Practices</p>
+                      <p className="text-blue-700/80 text-xs font-medium leading-relaxed">
+                        Titles should be 50-60 characters. Descriptions should be 150-160 characters. These tags help search engines understand and rank your content.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Title</label>
+                    <input 
+                      type="text" 
+                      value={settings.seoTitle || ''}
+                      onChange={e => setSettings({ ...settings, seoTitle: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      placeholder="e.g. Hristo Airsoft | Best Tactical Gear"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Description</label>
+                    <textarea 
+                      rows={4}
+                      value={settings.seoDescription || ''}
+                      onChange={e => setSettings({ ...settings, seoDescription: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium resize-none"
+                      placeholder="e.g. Discover premium airsoft equipment, 3D custom builds and the latest tactical gear at Hristo Store."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Meta Keywords</label>
+                    <input 
+                      type="text" 
+                      value={settings.seoKeywords || ''}
+                      onChange={e => setSettings({ ...settings, seoKeywords: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      placeholder="airsoft, tactical, gear, croatia, shop"
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1115,9 +1150,10 @@ const HeroSlideEditor = ({ slide, index, onUpdate, onDelete, onUploadMedia, onRe
   );
 };
 
-const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete }: {
+const FeaturedCategoryEditor = ({ fc, index, categories, onUpdate, onDelete }: {
   fc: FeaturedCategory,
   index: number,
+  categories: any[],
   onUpdate: (updates: Partial<FeaturedCategory>) => void,
   onDelete: () => void
 }) => {
@@ -1146,12 +1182,9 @@ const FeaturedCategoryEditor = ({ fc, index, onUpdate, onDelete }: {
             onChange={e => onUpdate({ categoryId: e.target.value })}
             className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl outline-none text-xs font-bold"
           >
-            <option value="weapons">Weapons</option>
-            <option value="attachments">Attachments</option>
-            <option value="gear">Tactical Gear</option>
-            <option value="internal_parts">Internal Parts</option>
-            <option value="apparel">Apparel</option>
-            <option value="consumables">Consumables</option>
+            {categories.filter(c => !c.parent).map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
           </select>
         </div>
 

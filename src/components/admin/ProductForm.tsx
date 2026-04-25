@@ -66,6 +66,19 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     }
     return data;
   });
+
+  // Keep formData in sync with initialData when it changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        category: initialData.category || initialData.category_id || '',
+        subcategory: initialData.subcategory || ''
+      });
+    } else {
+      setFormData(baseDefaults);
+    }
+  }, [initialData]);
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [combinedImages, setCombinedImages] = useState<(string | File)[]>(() => {
     const existingImages = initialData?.images || [];
