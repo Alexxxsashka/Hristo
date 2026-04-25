@@ -272,7 +272,7 @@ export const AdminDashboard: React.FC = () => {
       (productFilter === 'out_of_stock' && p.stock <= (p.minStockLevel || 0)) ||
       (productFilter === 'premium' && p.price > 500);
 
-    const matchesCategory = categoryFilter === 'all' || p.category?.toLowerCase() === categoryFilter.toLowerCase();
+    const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
 
     return matchesSearch && matchesFilter && matchesCategory;
   });
@@ -515,7 +515,7 @@ export const AdminDashboard: React.FC = () => {
                       >
                         <option value="all">All Categories</option>
                         {categories.map(cat => (
-                          <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
                       </select>
                     </div>
