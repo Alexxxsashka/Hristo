@@ -668,6 +668,7 @@ export const AdminDashboard: React.FC = () => {
                 initialData={editingCategory}
                 categories={categories}
                 showHelp={showHelp}
+                onUpdate={fetchCategories}
                 onNotify={showNotification}
                 onSuccess={() => {
                   fetchCategories();

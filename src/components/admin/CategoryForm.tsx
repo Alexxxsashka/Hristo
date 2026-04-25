@@ -11,6 +11,7 @@ export const CategoryForm = ({
   showHelp, 
   onSuccess, 
   onCancel,
+  onUpdate,
   onNotify 
 }: { 
   initialData?: Category | null,
@@ -18,6 +19,7 @@ export const CategoryForm = ({
   showHelp?: boolean, 
   onSuccess: () => void,
   onCancel: () => void,
+  onUpdate?: () => void,
   onNotify: (msg: string, type?: 'success' | 'error') => void
 }) => {
   const [newCat, setNewCat] = useState<Partial<Category>>({ 
@@ -29,6 +31,7 @@ export const CategoryForm = ({
   });
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [newSubcatName, setNewSubcatName] = useState('');
 
   useEffect(() => {
     if (initialData) {
@@ -174,6 +177,37 @@ export const CategoryForm = ({
       ? currentCats.filter(c => c !== cat)
       : [...currentCats, cat];
     setNewCat({ ...newCat, compatibleModuleCategories: newCats });
+  };
+
+  const handleAddInlineSubcategory = async () => {
+    if (!newSubcatName.trim() || !editingCat) return;
+    
+    try {
+      const subCat = {
+        name: newSubcatName.trim(),
+        parent: editingCat.id,
+        id: newSubcatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')
+      };
+      await databaseService.saveCategory(subCat as any);
+      setNewSubcatName('');
+      onUpdate?.();
+      onNotify('Subcategory added successfully');
+    } catch (err) {
+      console.error('Failed to add subcategory', err);
+      onNotify('Failed to add subcategory', 'error');
+    }
+  };
+
+  const handleDeleteSubcategory = async (id: string) => {
+    if (!window.confirm('Delete this subcategory?')) return;
+    try {
+      await databaseService.deleteCategory(id);
+      onUpdate?.();
+      onNotify('Subcategory deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete subcategory', err);
+      onNotify('Failed to delete subcategory', 'error');
+    }
   };
 
   return (
@@ -326,6 +360,69 @@ export const CategoryForm = ({
           </div>
         </div>
 
+
+        {/* Subcategories */}
+        {editingCat && !newCat.parent && (
+          <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Subcategories</label>
+            </div>
+            
+            <div className="space-y-2">
+              {categories.filter(c => c.parent === editingCat.id).map(subCat => (
+                <div key={subCat.id} className="flex items-center justify-between p-3 bg-white border border-zinc-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-200 overflow-hidden flex items-center justify-center">
+                      {subCat.image ? (
+                        <img src={subCat.image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon size={14} className="text-zinc-300" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-zinc-900">{subCat.name}</div>
+                      <div className="text-[10px] text-zinc-400 font-mono">{subCat.id}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSubcategory(subCat.id)}
+                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              {categories.filter(c => c.parent === editingCat.id).length === 0 && (
+                <p className="text-center py-2 text-xs text-zinc-400 italic">No subcategories found.</p>
+              )}
+            </div>
+
+            <div className="flex gap-2 mt-4 pt-4 border-t border-zinc-200">
+              <input
+                type="text"
+                placeholder="New subcategory name..."
+                value={newSubcatName}
+                onChange={e => setNewSubcatName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddInlineSubcategory();
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm outline-none focus:border-zinc-900 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={handleAddInlineSubcategory}
+                disabled={!newSubcatName.trim()}
+                className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-800 transition-colors"
+              >
+                Add Sub
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Category Filters */}
         <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
