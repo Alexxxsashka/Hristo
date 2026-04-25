@@ -25,7 +25,7 @@ import {
 import { Order } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
-import { generateOrdersReport, generateSingleOrderInvoice } from '../../utils/reportGenerator';
+import { generateOrdersReport, generateSingleOrderInvoice, exportOrdersToCSV } from '../../utils/reportGenerator';
 
 
 
@@ -135,7 +135,10 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
             <FileText size={16} />
             Generate Report (PDF)
           </button>
-          <button className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all">
+          <button 
+            onClick={() => exportOrdersToCSV(filteredOrders)}
+            className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all"
+          >
             Export CSV
           </button>
         </div>
@@ -203,8 +206,12 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                       </button>
                     )}
                     <button 
-                      onClick={() => onNotify('Additional actions coming soon')}
+                      onClick={() => {
+                        navigator.clipboard.writeText(order.id);
+                        onNotify('Order ID copied to clipboard');
+                      }}
                       className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all"
+                      title="Copy Order ID"
                     >
                       <MoreVertical size={18} />
                     </button>
@@ -412,7 +419,10 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button className="px-6 py-3 bg-white border border-zinc-200 text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-50 transition-all">
+                  <button 
+                    onClick={() => generateSingleOrderInvoice(selectedOrder)}
+                    className="px-6 py-3 bg-white border border-zinc-200 text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-50 transition-all"
+                  >
                     Download Invoice
                   </button>
                   <button 

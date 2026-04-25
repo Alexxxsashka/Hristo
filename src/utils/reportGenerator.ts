@@ -342,3 +342,31 @@ export const generateSingleOrderInvoice = (order: Order) => {
   // Save the PDF
   doc.save(`Invoice_${order.id.slice(-8).toUpperCase()}.pdf`);
 };
+
+export const exportOrdersToCSV = (orders: Order[]) => {
+  const headers = ["Order ID", "Date", "Customer", "Email", "Items Count", "Status", "Total EUR"];
+  const rows = orders.map(order => [
+    order.id,
+    new Date(order.createdAt).toISOString(),
+    order.shipping?.fullName || 'Guest',
+    order.shipping?.email || 'N/A',
+    order.items.length,
+    order.status,
+    order.total.toFixed(2)
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Orders_Export_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};

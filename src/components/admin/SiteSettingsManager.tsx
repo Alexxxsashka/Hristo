@@ -25,7 +25,8 @@ import {
   CheckCircle2,
   Zap,
   Tag,
-  Video
+  Video,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
@@ -33,7 +34,7 @@ import { SiteSettings, HeroSlide, PromoBanner, FeaturedCategory } from '../../ty
 import { useSettingsStore } from '../../store/settingsStore';
 import { DEFAULT_SITE_SETTINGS } from '../../constants/defaultSettings';
 
-type SettingsTab = 'general' | 'hero' | 'homepage' | 'social' | 'footer';
+type SettingsTab = 'general' | 'hero' | 'homepage' | 'social' | 'footer' | 'seo';
 
 export const SiteSettingsManager = ({ onNotify, onUpdate }: { 
   onNotify: (msg: string, type?: 'success' | 'error') => void,
@@ -213,6 +214,12 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
           icon={<Settings size={18} />} 
           label="Footer & Legal" 
         />
+        <TabButton 
+          active={activeTab === 'seo'} 
+          onClick={() => setActiveTab('seo')} 
+          icon={<Search size={18} />} 
+          label="SEO & Metadata" 
+        />
 
         <div className="pt-8 px-4">
           <button
@@ -325,6 +332,36 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                 >
                   <Plus size={16} /> Add Slide
                 </button>
+              </div>
+
+              {/* Hero Fallback Content */}
+              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+                <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3 mb-8">
+                  <Monitor size={20} className="text-red-600" />
+                  Hero Text Content
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Main Title</label>
+                    <input 
+                      type="text" 
+                      value={settings.heroTitle || ''}
+                      onChange={e => setSettings({ ...settings, heroTitle: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      placeholder="Build your ultimate arsenal"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Subtitle Text</label>
+                    <input 
+                      type="text" 
+                      value={settings.heroSubtitle || ''}
+                      onChange={e => setSettings({ ...settings, heroSubtitle: e.target.value })}
+                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      placeholder="Explore our curated collection of professional airsoft weapons..."
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Hero Feature Media Section - Dedicated Card */}

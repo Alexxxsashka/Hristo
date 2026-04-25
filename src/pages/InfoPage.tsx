@@ -105,12 +105,12 @@ export const InfoPage: React.FC = () => {
             <div className="p-8 bg-zinc-950 border border-zinc-800 rounded-3xl space-y-4">
               <h3 className="text-white font-black uppercase text-sm tracking-widest">{t('need_help') || 'Need Help?'}</h3>
               <p className="text-zinc-500 text-sm">{t('need_help_desc') || 'Our team is available for all your questions regarding this topic.'}</p>
-              <button className="text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('contact_us') || 'Contact Us'} →</button>
+              <Link to="/contact" className="inline-block text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('contact_us') || 'Contact Us'} →</Link>
             </div>
             <div className="p-8 bg-zinc-950 border border-zinc-800 rounded-3xl space-y-4">
               <h3 className="text-white font-black uppercase text-sm tracking-widest">{t('secure_shopping') || 'Secure Shopping'}</h3>
               <p className="text-zinc-500 text-sm">{t('secure_shopping_desc') || 'Your security and satisfaction are our top priorities.'}</p>
-              <button className="text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('learn_more') || 'Learn More'} →</button>
+              <Link to="/blog" className="inline-block text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('learn_more') || 'Learn More'} →</Link>
             </div>
           </div>
         </motion.div>

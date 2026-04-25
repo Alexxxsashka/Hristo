@@ -449,6 +449,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       try {
         await pool.query("UPDATE products SET category_id = NULL WHERE category_id = $1", [identifier]);
+        await pool.query("UPDATE products SET subcategory = NULL WHERE subcategory = $1", [identifier]);
         await pool.query("UPDATE categories SET parent_id = NULL WHERE parent_id = $1", [identifier]);
         await pool.query("DELETE FROM categories WHERE id = $1", [identifier]);
       } catch (e) {
@@ -536,7 +537,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const params: any[] = [];
       let i = 1;
       if (category) {
-        where.push(`(p.category_id = $${i} OR c.parent_id = $${i})`);
+        // Search by category_id, subcategory ID, or if the product's category is a child of the filter category
+        where.push(`(p.category_id = $${i} OR p.subcategory = $${i} OR c.parent_id = $${i})`);
         params.push(category);
         i++;
       }
@@ -607,7 +609,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (prodId && method === "GET") {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const r = await pool.query(
-        `SELECT p.*, c.parent_id as parent_cat_id 
+        `SELECT p.*, c.parent_id as parent_cat_id, c.name as category_name 
          FROM products p 
          LEFT JOIN categories c ON p.category_id = c.id 
          WHERE p.id = $1 OR p.slug = $1`,
@@ -761,6 +763,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.variantsGroupId || null
         ];
 
+        console.log(`[DB] Product save payload:`, JSON.stringify(p, null, 2));
         const r = await pool.query(
           `INSERT INTO products (
             id, uid, sku, barcode, slug, name, description, long_description, type, category_id, subcategory, brand, model, 
@@ -780,7 +783,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           productData
         );
 
-        console.log(`[DB] Product save success. RowCount: ${r.rowCount}, ID: ${p.uid || id}`);
+        console.log(`[DB] Product save success. RowCount: ${r.rowCount}, ID: ${p.uid || id}, Category: ${p.category || p.category_id}, Subcategory: ${p.subcategory}`);
 
         // Sync compatibility table for whitelist
         try {
@@ -1557,38 +1560,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── GET /site-settings ─────────────────────────────────────────────────────
     if (path === "/site-settings" && method === "GET") {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
       if (result.rows.length > 0) {
         const row = result.rows[0];
         const camelData: any = {};
 
-        // Group all columns by their target camelCase key
-        const groups: Record<string, string[]> = {};
         Object.keys(row).forEach(key => {
+          // Convert snake_case to camelCase
           const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-          if (!groups[camelKey]) groups[camelKey] = [];
-          groups[camelKey].push(key);
-        });
-
-        // For each camelCase key, pick the best available value from its source columns
-        Object.keys(groups).forEach(camelKey => {
-          const keys = groups[camelKey];
-          // Prioritize non-null values and snake_case column names
-          let bestKey = keys[0];
-          for (const k of keys) {
-            const val = row[k];
-            const isBetter = (val !== null && val !== undefined && val !== '' &&
-              (!Array.isArray(val) || val.length > 0));
-
-            if (isBetter) {
-              bestKey = k;
-              if (k.includes('_')) break; // Found a snake_case column with a value, stop here
-            } else if (k.includes('_') && (row[bestKey] === null || row[bestKey] === undefined)) {
-              // If current best is null, still prefer the snake_case key name
-              bestKey = k;
-            }
+          
+          // If we have both hero_title and heroTitle, hero_title takes precedence if it's not null
+          const val = row[key];
+          const isBetter = (val !== null && val !== undefined && val !== '' && 
+                          (!Array.isArray(val) || val.length > 0));
+          
+          if (!camelData[camelKey] || isBetter) {
+            camelData[camelKey] = val;
           }
-          camelData[camelKey] = row[bestKey];
         });
 
         return res.json(camelData);
@@ -1605,6 +1594,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const settings = req.body;
         const id = settings.id || 'default';
+
+        // 1. Just-in-time migration for site_settings columns
+        await pool.query(`
+          ALTER TABLE site_settings 
+          ADD COLUMN IF NOT EXISTS hero_title TEXT,
+          ADD COLUMN IF NOT EXISTS hero_subtitle TEXT,
+          ADD COLUMN IF NOT EXISTS about_us_title TEXT,
+          ADD COLUMN IF NOT EXISTS about_us_text TEXT,
+          ADD COLUMN IF NOT EXISTS about_us_image TEXT,
+          ADD COLUMN IF NOT EXISTS about_us_link TEXT,
+          ADD COLUMN IF NOT EXISTS footer_description TEXT,
+          ADD COLUMN IF NOT EXISTS seo_title TEXT,
+          ADD COLUMN IF NOT EXISTS seo_description TEXT,
+          ADD COLUMN IF NOT EXISTS seo_keywords TEXT,
+          ADD COLUMN IF NOT EXISTS hero_feature_media_type TEXT,
+          ADD COLUMN IF NOT EXISTS hero_feature_image TEXT,
+          ADD COLUMN IF NOT EXISTS hero_feature_video TEXT
+        `);
 
         // Helper to match camelCase to snake_case
         const normalize = (s: string) => s.toLowerCase().replace(/_/g, '');

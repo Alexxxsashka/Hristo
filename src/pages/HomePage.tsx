@@ -22,6 +22,8 @@ const HomePage: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [categories, setCategories] = useState<any[]>([]);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -44,6 +46,22 @@ const HomePage: React.FC = () => {
     };
     fetchData();
   }, [fetchSettings]);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterStatus('loading');
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setNewsletterStatus('success');
+      setNewsletterEmail('');
+      // In a real app, we'd call databaseService.subscribeNewsletter(newsletterEmail)
+    } catch (err) {
+      setNewsletterStatus('idle');
+    }
+  };
 
   const activeSlides = Array.isArray(settings?.heroSlides) ? settings.heroSlides.filter(s => s.active) : [];
 
@@ -567,16 +585,35 @@ const HomePage: React.FC = () => {
           <p className="text-zinc-500 font-medium mb-8 md:mb-12 text-sm md:text-base">
             {t('newsletter_desc')}
           </p>
-          <form className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4">
             <input 
               type="email" 
+              required
+              value={newsletterEmail}
+              onChange={e => setNewsletterEmail(e.target.value)}
               placeholder={t('enter_email') || 'Enter your email address'}
               className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-red-600 transition-colors text-sm"
+              disabled={newsletterStatus === 'loading' || newsletterStatus === 'success'}
             />
-            <button className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-black tracking-widest uppercase text-sm rounded-2xl transition-all shadow-lg shadow-red-600/20">
-              {t('subscribe')}
+            <button 
+              type="submit"
+              disabled={newsletterStatus === 'loading' || newsletterStatus === 'success'}
+              className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-black tracking-widest uppercase text-sm rounded-2xl transition-all shadow-lg shadow-red-600/20 disabled:opacity-50"
+            >
+              {newsletterStatus === 'loading' ? t('subscribing') || '...' : 
+               newsletterStatus === 'success' ? t('subscribed') || 'DONE!' : 
+               t('subscribe')}
             </button>
           </form>
+          {newsletterStatus === 'success' && (
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-green-500 font-bold text-xs uppercase tracking-widest mt-4"
+            >
+              {t('newsletter_success') || 'Successfully subscribed!'}
+            </motion.p>
+          )}
           <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-6">
             {t('newsletter_disclaimer')}
           </p>
