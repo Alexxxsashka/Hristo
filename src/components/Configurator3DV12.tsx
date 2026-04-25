@@ -762,7 +762,7 @@ export const Configurator3DV12: React.FC = () => {
           const modules = data.filter((p: Product) => 
             (p.type === 'module' || p.type === 'part') && 
             !clothingCategories.includes(p.category_id || p.category || '') &&
-            p.type !== 'gear' && p.type !== 'consumable'
+            (p.type as string) !== 'gear' && (p.type as string) !== 'consumable'
           );
           setAllModules(modules);
         }

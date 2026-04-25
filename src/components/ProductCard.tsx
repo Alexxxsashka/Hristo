@@ -22,7 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
   const { toggleItem: toggleWishlist, isInWishlist } = useWishlistStore();
   const { setActiveProduct } = useConfiguratorStore();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
   const navigate = useNavigate();
 
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
