@@ -232,7 +232,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   product.stock <= 0 
                     ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
-                    : (product.attributes && product.attributes.length > 0 && !product.attributes.every(attr => selectedAttributes[attr.name]))
+                    : (variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]))
                       ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                       : 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20 active:scale-[0.98]'
                 }`}
@@ -240,7 +240,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 <ShoppingCart size={14} />
                 {product.stock <= 0 
                   ? t('out_of_stock') 
-                  : (product.attributes && product.attributes.length > 0 && !product.attributes.every(attr => selectedAttributes[attr.name]))
+                  : (variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]))
                     ? 'SELECT SIZE'
                     : t('add_to_cart')
                 }
