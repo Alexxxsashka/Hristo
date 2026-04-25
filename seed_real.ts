@@ -62,12 +62,35 @@ const products = [
   { 
     name: "Specna Arms SA-E04 EDGE", slug: "sa-e04-edge", brand: "Specna Arms", price: 249, type: "weapon", category_id: "aeg_rifles", 
     image: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&q=80", 
-    description: "Full metal AEG with MOSFET X-ASR. High quality performance for any field.", stock: 12 
+    description: "Full metal AEG with MOSFET X-ASR. High quality performance for any field.", stock: 12,
+    characteristics: [
+      { emoji: "🔫", label: "Type", value: "AEG" },
+      { emoji: "⚖️", label: "Weight", value: "2.5kg" }
+    ]
   },
   { 
     name: "Tokyo Marui Hi-Capa 5.1 GBB", slug: "tm-hi-capa-51", brand: "Tokyo Marui", price: 185, type: "weapon", category_id: "pistols", 
     image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?auto=format&fit=crop&q=80", 
-    description: "The most popular airsoft pistol in the world. Exceptional accuracy and recoil.", stock: 20 
+    description: "The most popular airsoft pistol in the world. Exceptional accuracy and recoil.", stock: 20,
+    characteristics: [
+      { emoji: "💨", label: "System", value: "Gas Blowback" },
+      { emoji: "🎯", label: "Accuracy", value: "Legendary" }
+    ]
+  },
+  {
+    name: "Glock 17 Gen5 GBB – Umarex",
+    slug: "umarex-glock17-gen5-gbb",
+    brand: "Umarex",
+    price: 145.00,
+    type: "weapon",
+    category_id: "pistols",
+    image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?auto=format&fit=crop&q=80",
+    description: "Officially licensed Glock 17 Gen5 replica with realistic blowback. Compatible with all standard Glock accessories.",
+    stock: 15,
+    characteristics: [
+      { emoji: "🛡️", label: "License", value: "Official Glock" },
+      { emoji: "🔥", label: "Blowback", value: "Strong" }
+    ]
   },
   { 
     name: "CYMA CM.701B VSR-10", slug: "cyma-cm701b", brand: "CYMA", price: 110, type: "weapon", category_id: "snipers", 
@@ -167,6 +190,21 @@ const products = [
   },
 
   // Accessories
+  { 
+    name: "Sound Suppressor 14mm+ Replica", 
+    slug: "suppressor-14mm-ccw", 
+    brand: "Madbull", 
+    price: 28.00, 
+    type: "module", 
+    category_id: "suppressors", 
+    image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", 
+    description: "Full aluminum suppressor replica. 14mm- thread. Compatible with most M4/M16 AEG barrels.", 
+    stock: 30,
+    characteristics: [
+      { emoji: "🤫", label: "Thread", value: "14mm CCW" },
+      { emoji: "🧱", label: "Material", value: "T6 Aluminum" }
+    ]
+  },
   { name: "EOTech 558 Replica Red Dot", slug: "eotech-558-replica", brand: "Vector Optics", price: 65, type: "module", category_id: "optics", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", description: "Bright and clear holographic sight replica. Fits any standard picatinny rail.", stock: 10 },
   { name: "Magpul P-MAG 120rd Mid-Cap", slug: "magpul-pmag-120", brand: "Magpul", price: 22, type: "module", category_id: "magazines", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", description: "Reliable feeding mid-cap magazine for M4/AR15 series.", stock: 50 },
 
