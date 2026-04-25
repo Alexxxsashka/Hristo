@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, Settings, LogIn, UserPlus, Menu, X, Search, Heart, ShieldCheck, Truck, Clock, GitCompare, LayoutGrid, LayoutDashboard, Package, Crosshair, TrendingUp } from 'lucide-react';
+import { User, LogOut, Settings, LogIn, UserPlus, Menu, X, Search, Heart, ShieldCheck, Truck, Clock, GitCompare, LayoutGrid, LayoutDashboard, Package, Crosshair, TrendingUp, Zap } from 'lucide-react';
 import { CartIcon } from './CartIcon';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { CatalogMenu } from './CatalogMenu';
@@ -72,6 +72,18 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
+      {settings?.showAnnouncement && settings?.announcement && (
+        <div className="bg-red-600 py-2.5 px-4 text-center">
+          <Link 
+            to={settings.announcementLink || "#"} 
+            className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <Zap size={14} className="fill-white animate-pulse" />
+            {settings.announcement}
+            <Zap size={14} className="fill-white animate-pulse" />
+          </Link>
+        </div>
+      )}
       {/* Top Bar */}
       <div className="bg-zinc-950 border-b border-zinc-900 py-2 hidden md:block">
         <div className="max-w-7xl mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-widest text-zinc-500 uppercase">

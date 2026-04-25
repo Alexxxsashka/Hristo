@@ -66,19 +66,6 @@ const HomePage: React.FC = () => {
         description="Welcome to Hristo Airsoft Store. The best place for airsoft weapons, tactical gear, and custom 3D weapon configurations."
       />
 
-      {settings?.showAnnouncement && settings?.announcement && (
-        <div className="fixed top-0 left-0 w-full z-[60] bg-red-600 py-2.5 px-4 text-center">
-          <Link 
-            to={settings.announcementLink || "#"} 
-            className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <Zap size={14} className="fill-white animate-pulse" />
-            {settings.announcement}
-            <Zap size={14} className="fill-white animate-pulse" />
-          </Link>
-        </div>
-      )}
-      
       {/* Hero Section */}
       <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 lg:pt-0">
         <AnimatePresence mode="wait">
