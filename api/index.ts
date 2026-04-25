@@ -791,8 +791,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── PUT /admin/products/:id ────────────────────────────────────────────────
-    const adminProd = match(path, "/admin/products/:id");
-    if (adminProd && method === "PUT") {
+    const adminProdPUT = match(path, "/admin/products/:id");
+    if (adminProdPUT && method === "PUT") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
@@ -803,7 +803,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // 1. Cleanup orphaned blobs (files replaced or removed)
       try {
-        const currentRes = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProd[0]]);
+        const currentRes = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [adminProdPUT[0]]);
         if (currentRes.rows.length > 0) {
           const old = currentRes.rows[0];
           const oldUrls = new Set<string>();
@@ -861,12 +861,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error("Migration error:", e);
       }
 
+      try {
         const has3d = !!model3dUrl;
         const imagesArr = newImages;
         const longDescription = p.longDescription || p.long_description || '';
 
         const productData = [
-          adminProd[0],
+          adminProdPUT[0],
           p.name || 'Unnamed Product',
           p.description || '',
           longDescription || '',
@@ -924,14 +925,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         );
 
         if (r.rowCount === 0) {
-          console.warn(`[DB] No product found to update with ID/Slug: ${adminProd[0]}`);
+          console.warn(`[DB] No product found to update with ID/Slug: ${adminProdPUT[0]}`);
           return res.status(404).json({ error: "Product not found to update" });
         }
 
-        console.log(`[DB] Update successful for ${adminProd[0]}. RowCount: ${r.rowCount}`);
+        console.log(`[DB] Update successful for ${adminProdPUT[0]}. RowCount: ${r.rowCount}`);
 
         // Simple sync for compatibility whitelist
-        const currentUid = p.uid || adminProd[0];
+        const currentUid = p.uid || adminProdPUT[0];
         try {
           const uids = (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons :
             ((p.compatibleIds && p.compatibleIds.length > 0) ? p.compatibleIds : null);
@@ -957,17 +958,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           error: "Database Update Failed",
           message: dbErr.message,
           detail: dbErr.detail,
-          idUsed: adminProd[0]
+          idUsed: adminProdPUT[0]
         });
       }
     }
 
     // ── DELETE /admin/products/:id ─────────────────────────────────────────────
-    if (adminProd && method === "DELETE") {
+    const adminProductDeleteMatch = match(path, "/admin/products/:id");
+    if (adminProductDeleteMatch && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
-      const identifier = adminProd[0];
+      const identifier = adminProductDeleteMatch[0];
       try {
         // Cleanup blobs
         const result = await pool.query('SELECT image_url, images, model_3d_url FROM products WHERE id = $1 OR slug = $1', [identifier]);
@@ -1057,25 +1059,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // ── PUT /admin/blog/:id ────────────────────────────────────────────────────
-    const adminBlog = match(path, "/admin/blog/:id");
-    if (adminBlog && method === "PUT") {
+    const adminBlogPUT = match(path, "/admin/blog/:id");
+    if (adminBlogPUT && method === "PUT") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
       const p = req.body || {};
       await pool.query(
         "UPDATE blog_posts SET title=$2, content=$3, status=$4, image_url=$5 WHERE id = $1",
-        [adminBlog[0], p.title, p.content, p.status || 'published', p.image_url || null]
+        [adminBlogPUT[0], p.title, p.content, p.status || 'published', p.image_url || null]
       );
       return res.json({ ok: true });
     }
 
     // ── DELETE /admin/blog/:id ─────────────────────────────────────────────────
-    if (adminBlog && method === "DELETE") {
+    const adminBlogDELETE = match(path, "/admin/blog/:id");
+    if (adminBlogDELETE && method === "DELETE") {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
       try {
-        const result = await pool.query('SELECT image_url FROM blog_posts WHERE id = $1 OR slug = $1', [adminBlog[0]]);
+        const result = await pool.query('SELECT image_url FROM blog_posts WHERE id = $1 OR slug = $1', [adminBlogDELETE[0]]);
         if (result.rows.length > 0 && result.rows[0].image_url) {
           const url = result.rows[0].image_url;
           if (url && url.includes('blob.vercel-storage.com')) {
@@ -1087,7 +1090,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('Blob cleanup error during blog delete:', e);
       }
 
-      await pool.query("DELETE FROM blog_posts WHERE id = $1 OR slug = $1", [adminBlog[0]]);
+      await pool.query("DELETE FROM blog_posts WHERE id = $1 OR slug = $1", [adminBlogDELETE[0]]);
       return res.status(204).end();
     }
 
@@ -1639,17 +1642,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           values.push(val);
         });
 
-        const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
+        // Cleanup orphaned blobs in site settings
+        const currentSettings = await pool.query("SELECT * FROM site_settings LIMIT 1");
+        if (currentSettings.rows.length > 0) {
+          const old = currentSettings.rows[0];
+          const newUrls = new Set<string>();
+          Object.values(req.body).forEach(val => {
+            if (typeof val === 'string' && val.includes('blob.vercel-storage.com')) newUrls.add(val);
+            if (Array.isArray(val)) val.forEach(v => { if (typeof v === 'string' && v.includes('blob.vercel-storage.com')) newUrls.add(v); });
+          });
 
-        if (exists.rows.length > 0) {
+          const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+          for (const key of Object.keys(old)) {
+            const oldVal = old[key];
+            if (typeof oldVal === 'string' && oldVal.includes('blob.vercel-storage.com') && !newUrls.has(oldVal)) {
+              try { await del(oldVal, { token }); console.log(`[Settings Cleanup] Deleted: ${oldVal}`); } catch (e) { console.error(e); }
+            }
+            if (Array.isArray(oldVal)) {
+              for (const v of oldVal) {
+                if (typeof v === 'string' && v.includes('blob.vercel-storage.com') && !newUrls.has(v)) {
+                  try { await del(v, { token }); console.log(`[Settings Cleanup] Deleted: ${v}`); } catch (e) { console.error(e); }
+                }
+              }
+            }
+          }
+        }
+
+        if (currentSettings.rows.length > 0) {
           await pool.query(
-            `UPDATE site_settings SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-            values
+            `UPDATE site_settings SET ${cols.map((c, i) => `${c} = $${i + 2}`).join(', ')} WHERE id = $1`,
+            [currentSettings.rows[0].id, ...values]
           );
         } else {
           await pool.query(
             `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
-            values
+            ['default', ...values]
           );
         }
 

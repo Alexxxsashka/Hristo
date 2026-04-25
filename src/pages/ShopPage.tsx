@@ -82,7 +82,7 @@ export const ShopPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 md:pt-32 pb-24">
+    <div className="min-h-screen bg-[#0a0a0a] pt-32 md:pt-44 pb-24">
       <SEO 
         title={activeCategory ? `${activeCategory.name} | Hristo` : t('shop_title')}
         description={activeCategory ? `Browse our ${activeCategory.name} collection. ${activeCategory.name} high-quality products.` : "Browse our extensive collection of airsoft weapons, attachments, and tactical gear."}

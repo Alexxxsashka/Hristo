@@ -182,28 +182,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
                 </div>
               )}
               {variantAttributes.length > 0 && (
-                <div className="space-y-2 py-2">
+                <div className="space-y-3 py-3 border-t border-zinc-800/50 mt-2">
                   {variantAttributes.map((attr: any) => (
-                    <div key={attr.name} className="flex flex-col gap-1">
-                      <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{attr.name}</span>
-                      <div className="flex flex-wrap gap-1">
-                        {attr.options?.map((opt: string) => (
-                          <button
-                            key={opt}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleAttributeSelect(attr.name, opt);
-                            }}
-                            className={`px-2 py-1 rounded-md text-[8px] font-bold uppercase transition-all border ${
-                              selectedAttributes[attr.name] === opt
-                                ? 'bg-white text-black border-white'
-                                : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-600'
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
+                    <div key={attr.name} className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">{attr.name}</span>
+                        {selectedAttributes[attr.name] && (
+                          <span className="text-[9px] font-bold text-red-500 uppercase">{selectedAttributes[attr.name]}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {attr.options?.map((opt: string) => {
+                          const isSelected = selectedAttributes[attr.name] === opt;
+                          
+                          return (
+                            <button
+                              key={opt}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleAttributeSelect(attr.name, opt);
+                              }}
+                              className={`h-7 min-w-[28px] px-2 rounded-lg text-[9px] font-black uppercase transition-all border flex items-center justify-center ${
+                                isSelected
+                                  ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20 scale-105'
+                                  : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
@@ -211,46 +220,43 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
               )}
             </div>
 
-            <div className="flex gap-1 sm:gap-2 pt-1 sm:pt-2">
+            <div className="flex items-center gap-2 pt-4 border-t border-zinc-800/50 mt-auto">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock <= 0}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[7px] xs:text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
-                  product.stock > 0
-                    ? 'bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-lg shadow-red-600/10'
-                    : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  product.stock <= 0 
+                    ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
+                    : 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20 active:scale-[0.98]'
                 }`}
               >
-                <ShoppingCart className="w-3 h-3 sm:w-4 h-4" />
-                <span className="hidden xs:inline">
-                  {variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]) 
-                    ? 'Select Size' 
-                    : 'Add to Cart'}
-                </span>
-                <span className="xs:hidden">Add</span>
+                <ShoppingCart size={14} />
+                {t('add_to_cart')}
               </button>
-              
-              <button
-                onClick={handleCompare}
-                className={`w-7 sm:w-12 flex items-center justify-center rounded-lg sm:rounded-xl border transition-all active:scale-95 ${
-                  isInCompare(product.id)
-                    ? 'bg-zinc-800 border-red-600 text-red-500'
-                    : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
-                }`}
-                title="Compare"
-              >
-                <GitCompare className="w-3 h-3 sm:w-4 h-4" />
-              </button>
-              
-              {product.has3D && (
+
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleConfigure}
-                  className="w-7 sm:w-12 flex items-center justify-center rounded-lg sm:rounded-xl border border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300 transition-all active:scale-95"
-                  title="Configure"
+                  onClick={handleCompare}
+                  className={`p-3.5 rounded-xl border transition-all ${
+                    isInCompare(product.id)
+                      ? 'bg-zinc-100 border-white text-black'
+                      : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'
+                  }`}
+                  title={t('compare')}
                 >
-                  <Settings className="w-3 h-3 sm:w-4 h-4" />
+                  <GitCompare size={16} />
                 </button>
-              )}
+                
+                {(product.has3D) && (
+                  <button
+                    onClick={handleConfigure}
+                    className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:border-red-600/50 hover:text-red-500 transition-all"
+                    title={t('configure')}
+                  >
+                    <Settings size={16} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </Link>
