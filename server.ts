@@ -709,7 +709,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           price: parseFloat(product.price),
           stock: parseInt(product.stock),
           discount: product.discount ? parseInt(product.discount) : 0,
-          category: product.category_id,
+          category: product.category_id, subcategory: product.subcategory || null,
           image: product.image_url,
           model3D: product.model_3d_url,
           has3D: product.has_3d === true || product.has_3d === 'true'
@@ -839,7 +839,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           price: parseFloat(product.price),
           stock: parseInt(product.stock),
           discount: product.discount ? parseInt(product.discount) : 0,
-          category: product.category_id,
+          category: product.category_id, subcategory: product.subcategory || null,
           image: product.image_url,
           model3D: product.model_3d_url,
           has3D: product.has_3d === true || product.has_3d === 'true'
@@ -1322,6 +1322,8 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const result = await pool.query('SELECT * FROM products');
       const mapped = result.rows.map(p => ({
         ...p,
+        category: p.category_id,
+        subcategory: p.subcategory || null,
         image: p.image_url,
         model3D: p.model_3d_url,
         has3D: !!p.model_3d_url,
@@ -1374,7 +1376,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         ) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)`,
         [
-          id, uid, p.sku||id, p.barcode||'', finalSlug, p.name||'Unnamed Product', p.description||'', p.type||'weapon', p.category||p.category_id||null, p.subcategory||null, 
+          id, uid, p.sku||id, p.barcode||'', finalSlug, p.name||'Unnamed Product', p.description||'', p.type||'weapon', (p.category !== undefined ? (p.category || null) : (p.category_id || null)), p.subcategory||null, 
           p.brand||'', p.model||'', p.price||0, p.stock||0, imageUrl, JSON.stringify(p.images || []), model3dUrl, has3d,
           JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
           JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
@@ -1457,22 +1459,47 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
       await pool.query(
         `UPDATE products SET 
-          sku = $1, barcode = $2, slug = $3, name = $4, description = $5, 
-          type = $6, category_id = $7, subcategory = $8, brand = $9, model = $10, 
-          price = $11, stock = $12, image_url = $13, images = $14, model_3d_url = $15, 
-          has_3d = $16, characteristics = $17, variant_attributes = $18, variants = $19, 
-          category_filters = $20, slots = $21, compatible_module_categories = $22, socket_point = $23,
-          compatible_ids = $24, mount_type = $25, attachment_slot = $26
-         WHERE id = $27`,
+          name=$2, description=$3, long_description=$4, price=$5, stock=$6, image_url=$7, images=$8, 
+          model_3d_url=$9, has_3d=$10, characteristics=$11, variants=$12, 
+          variant_attributes=$13, category_filters=$14, 
+          name_hr=$15, description_hr=$16, long_description_hr=$17,
+          brand=$18, model=$19, sku=$20, barcode=$21, type=$22, status=$23,
+          category_id=$24, subcategory=$25,
+          compatible_ids=$26, compatible_module_categories=$27, socket_point=$28,
+          slots=$29, mount_type=$30, attachment_slot=$31
+         WHERE id = $1`,
         [
-          p.sku, p.barcode, p.slug, p.name, p.description, 
-          p.type, p.category||p.category_id, p.subcategory, p.brand, p.model, 
-          p.price, p.stock, imageUrl, JSON.stringify(newImages), model3dUrl, 
-          has3d, JSON.stringify(p.characteristics || []), JSON.stringify(p.variant_attributes || []), JSON.stringify(p.variants || []), 
-          JSON.stringify(p.category_filters || {}), JSON.stringify(p.slots || []), 
-          JSON.stringify(p.compatible_module_categories || []), JSON.stringify(p.socket_point || []),
-          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []), p.mountType || null, p.attachmentSlot || null,
-          productId
+          productId,
+          p.name || 'Unnamed Product',
+          p.description || '',
+          p.longDescription || p.long_description || '',
+          p.price || 0,
+          p.stock || 0,
+          imageUrl,
+          JSON.stringify(newImages),
+          model3dUrl,
+          has3d,
+          JSON.stringify(p.characteristics || []),
+          JSON.stringify(p.variants || []),
+          JSON.stringify(p.variant_attributes || []),
+          JSON.stringify(p.category_filters || {}),
+          p.nameHr || p.name_hr || '',
+          p.descriptionHr || p.description_hr || '',
+          p.longDescriptionHr || p.long_description_hr || '',
+          p.brand || '',
+          p.model || '',
+          p.sku || '',
+          p.barcode || '',
+          p.type || 'weapon',
+          p.status || 'active',
+          (p.category !== undefined ? (p.category || null) : (p.category_id || null)),
+          p.subcategory || null,
+          JSON.stringify(p.compatibleIds || p.compatibleWeapons || []),
+          JSON.stringify(p.compatible_module_categories || []),
+          JSON.stringify(p.socket_point || [0, 0, 0]),
+          JSON.stringify(p.slots || []),
+          p.mountType || p.mount_type || null,
+          p.attachmentSlot || p.attachment_slot || null
         ]
       );
 

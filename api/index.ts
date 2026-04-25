@@ -726,7 +726,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.description || '',
           longDescription || '',
           p.type || 'weapon',
-          p.category_id || p.category || null,
+          (p.category !== undefined ? (p.category || null) : (p.category_id || null)),
           p.subcategory || null,
           p.brand || '',
           p.model || '',
@@ -910,7 +910,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           p.barcode || '',
           p.type || 'weapon',
           p.status || 'active',
-          p.category_id || p.category || null,
+          (p.category !== undefined ? (p.category || null) : (p.category_id || null)),
           p.subcategory || null,
           JSON.stringify(
             (p.compatibleWeapons && p.compatibleWeapons.length > 0) ? p.compatibleWeapons :

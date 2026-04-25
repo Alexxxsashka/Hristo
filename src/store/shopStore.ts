@@ -85,7 +85,7 @@ export const useShopStore = create<ShopState>((set, get) => ({
         product.name.toLowerCase().includes(searchLower) ||
         product.brand.toLowerCase().includes(searchLower) ||
         product.description.toLowerCase().includes(searchLower) ||
-        product.tags.some(tag => tag.toLowerCase().includes(searchLower));
+        (product.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
 
       if (!matchesSearch) return false;
 
