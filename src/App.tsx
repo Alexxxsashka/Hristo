@@ -44,11 +44,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 export default function App() {
-  const { fetchUser } = useAuthStore();
+  const { initialize } = useAuthStore();
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    initialize();
+  }, [initialize]);
 
   return (
     <Router>

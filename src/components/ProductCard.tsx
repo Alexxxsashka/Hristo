@@ -15,9 +15,16 @@ import { useTranslation } from '../hooks/useTranslation';
 interface ProductCardProps {
   product: Product;
   viewMode?: 'grid' | 'list';
+  onQuickPreview?: (product: Product) => void;
+  onWishlist?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ 
+  product, 
+  viewMode = 'grid',
+  onQuickPreview,
+  onWishlist
+}) => {
   const { language, t } = useTranslation();
   const { addItem } = useCartStore();
   const { addToast } = useToastStore();
@@ -73,7 +80,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(product);
+    if (onWishlist) {
+      onWishlist(product);
+    } else {
+      toggleWishlist(product);
+    }
   };
 
   const handleConfigure = (e: React.MouseEvent) => {
@@ -86,7 +97,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'g
   const handleQuickPreview = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsPreviewOpen(true);
+    if (onQuickPreview) {
+      onQuickPreview(product);
+    } else {
+      setIsPreviewOpen(true);
+    }
   };
 
   return (
