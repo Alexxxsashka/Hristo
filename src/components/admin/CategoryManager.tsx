@@ -125,7 +125,7 @@ export const CategoryManager = ({
           <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] mt-1">Structural Category Management Pool</p>
         </div>
         <button
-          onClick={onAddCategory}
+          onClick={() => onAddCategory()}
           className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all hover:bg-red-600 active:scale-95 shadow-xl shadow-zinc-900/20"
         >
           <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
