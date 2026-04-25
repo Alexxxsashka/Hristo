@@ -508,7 +508,10 @@ export const databaseService = {
       },
       body: JSON.stringify(settings)
     });
-    if (!res.ok) throw new Error('Failed to update site settings');
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to update site settings');
+    }
   },
 
   // Currency

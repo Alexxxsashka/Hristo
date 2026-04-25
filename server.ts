@@ -1065,7 +1065,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       if (result.rows.length > 0) {
         res.json(result.rows[0]);
       } else {
-        res.json({});
+        res.json({ id: 'default' });
       }
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
@@ -1073,32 +1073,69 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   });
 
   app.put("/api/site-settings", authenticateAdmin, async (req, res) => {
-    const s = req.body;
+    const settings = req.body;
+    const id = 'default';
+
     try {
-      // Check if exists
-      const check = await pool.query('SELECT id FROM site_settings LIMIT 1');
-      if (check.rows.length > 0) {
-        const id = check.rows[0].id;
-        const keys = Object.keys(s).filter(k => k !== 'id' && k !== 'updated_at');
-        const setClause = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+      // Get column metadata to handle case-sensitivity and data types
+      const columnQuery = await pool.query(`
+        SELECT column_name, data_type 
+        FROM information_schema.columns 
+        WHERE table_name = 'site_settings'
+      `);
+      
+      const validColumns = new Map(columnQuery.rows.map(r => [r.column_name.toLowerCase(), r.data_type]));
+
+      // Filter keys that exist in DB and are not internal
+      const keys = Object.keys(settings).filter(k => {
+        const lowerK = k.toLowerCase();
+        return k !== 'id' && !k.startsWith('_') && validColumns.has(lowerK);
+      });
+
+      if (keys.length === 0) {
+        return res.json({ success: true, message: "No valid fields to update" });
+      }
+
+      // Map to actual DB column names (preserving case if needed via double quotes)
+      const actualKeys = keys.map(k => {
+        const lowerK = k.toLowerCase();
+        const col = columnQuery.rows.find(r => r.column_name.toLowerCase() === lowerK);
+        return col ? col.column_name : k;
+      });
+
+      // Prepare values with proper serialization
+      const values = keys.map(k => {
+        const val = settings[k];
+        const lowerK = k.toLowerCase();
+        const dataType = validColumns.get(lowerK);
+        
+        // Handle Postgres ARRAY types (don't stringify)
+        if (dataType === 'ARRAY' && Array.isArray(val)) return val;
+        // Stringify JSONB and other objects
+        return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
+      });
+
+      // Try update first
+      const setClause = actualKeys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
+      const updateResult = await pool.query(
+        `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [id, ...values]
+      );
+
+      if (updateResult.rowCount === 0) {
+        // Fallback to insert
+        const columns = actualKeys.map(k => `"${k}"`).join(', ');
+        const placeholders = keys.map((_, i) => `$${i + 2}`).join(', ');
         await pool.query(
-          `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $${keys.length + 1}`,
-          [...keys.map(k => s[k]), id]
-        );
-      } else {
-        const id = 'default';
-        const keys = Object.keys(s).filter(k => k !== 'id' && k !== 'updated_at');
-        const columns = ['id', ...keys].join(', ');
-        const placeholders = ['$1', ...keys.map((_, i) => `$${i + 2}`)].join(', ');
-        await pool.query(
-          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
-          [id, ...keys.map(k => s[k])]
+          `INSERT INTO site_settings (id, ${columns}) VALUES ($1, ${placeholders})`,
+          [id, ...values]
         );
       }
+
       res.json({ success: true });
-    } catch (error) {
-      console.error('Site settings update failed:', error);
-      res.status(500).json({ error: 'Database error' });
+    } catch (err: any) {
+      console.error('Site settings update failed:', err);
+      res.status(500).json({ error: err.message || 'Database error' });
     }
   });
 
@@ -1519,57 +1556,6 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     }
   });
 
-  // Site Settings API
-  app.get("/api/site-settings", async (req, res) => {
-    try {
-      const result = await pool.query('SELECT * FROM site_settings LIMIT 1');
-      if (result.rows.length > 0) {
-        res.json(result.rows[0]);
-      } else {
-        res.json({ id: 'default' });
-      }
-    } catch (error) {
-      res.status(500).json({ error: 'Database error' });
-    }
-  });
-
-  app.put("/api/site-settings", authenticateAdmin, async (req, res) => {
-    try {
-      const settings = req.body;
-      const id = settings.id || 'default';
-      
-      const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
-      
-      if (exists.rows.length > 0) {
-        // Build dynamic update query
-        const keys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_'));
-        if (keys.length === 0) return res.json({ success: true, message: "No fields to update" });
-        
-        const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
-        const values = keys.map(k => settings[k]);
-        
-        await pool.query(
-          `UPDATE site_settings SET ${setClause} WHERE id = $1`,
-          [id, ...values]
-        );
-      } else {
-        const keys = Object.keys(settings);
-        const columns = keys.map(k => `"${k}"`).join(', ');
-        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-        const values = keys.map(k => settings[k]);
-        
-        await pool.query(
-          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
-          values
-        );
-      }
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Settings update error:', error);
-      res.status(500).json({ error: 'Database error' });
-    }
-  });
 
   app.get("/api/users", authenticateAdmin, async (req, res) => {
     try {

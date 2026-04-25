@@ -439,10 +439,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         body = req; 
       }
 
+      const blobToken = process.env.HR_STORAGE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN;
       const blob = await put(filename, body, { 
         access: 'public',
         contentType,
-        token: process.env.HR_STORAGE_TOKEN
+        token: blobToken
       });
 
       return res.json(blob);
@@ -456,8 +457,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const url = req.query.url as string;
       if (!url) return res.status(400).json({ error: "URL is required" });
 
+      const blobToken = process.env.HR_STORAGE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN;
       await del(url, {
-        token: process.env.HR_STORAGE_TOKEN
+        token: blobToken
       });
 
       return res.status(204).end();
@@ -467,7 +469,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (path === "/admin/upload-handle" && method === "POST") {
       try {
         const jsonResponse = await handleUpload({
-          token: process.env.HR_STORAGE_TOKEN,
+          token: process.env.HR_STORAGE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN,
           body: req.body,
           request: req as any,
           onBeforeGenerateToken: async () => {
@@ -1447,67 +1449,68 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
-      const settings = req.body;
-      const id = settings.id || 'default';
-      
-      const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
-      
-      if (exists.rows.length > 0) {
-        // Get table columns first to avoid 500 on unknown fields
+      try {
+        const settings = req.body;
+        const id = settings.id || 'default';
+        
+        // Helper to match camelCase to snake_case
+        const normalize = (s: string) => s.toLowerCase().replace(/_/g, '');
+        
         const columnQuery = await pool.query(`
-          SELECT column_name 
+          SELECT column_name, data_type 
           FROM information_schema.columns 
           WHERE table_name = 'site_settings'
         `);
-        const validColumns = new Set(columnQuery.rows.map(r => r.column_name.toLowerCase()));
-
-        const keys = Object.keys(settings).filter(k => {
-          const lowerK = k.toLowerCase();
-          return k !== 'id' && 
-                 !k.startsWith('_') && 
-                 validColumns.has(lowerK);
-        });
-
-        if (keys.length === 0) return res.json({ success: true, message: "No valid fields to update" });
-
-        const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
-        const values = keys.map(k => {
-          const val = settings[k];
-          return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
-        });
-
-        await pool.query(
-          `UPDATE site_settings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-          [id, ...values]
+        
+        const colMap = new Map<string, { column_name: string, data_type: string }>(
+          columnQuery.rows.map(r => [normalize(r.column_name), r])
         );
-      } else {
-        // Get table columns first for insert too
-        const columnQuery = await pool.query(`
-          SELECT column_name 
-          FROM information_schema.columns 
-          WHERE table_name = 'site_settings'
-        `);
-        const validColumns = new Set(columnQuery.rows.map(r => r.column_name.toLowerCase()));
+        const validKeys = Object.keys(settings).filter(k => k !== 'id' && !k.startsWith('_') && colMap.has(normalize(k)));
 
-        const keys = Object.keys(settings).filter(k => validColumns.has(k.toLowerCase()));
-        if (!keys.includes('id')) {
-          keys.push('id');
-          settings.id = id;
+        if (validKeys.length === 0) {
+          return res.json({ success: true, message: "No valid fields to update" });
         }
 
-        const columns = keys.map(k => `"${k}"`).join(', ');
-        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-        const values = keys.map(k => {
-          const val = settings[k];
-          return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val;
-        });
+        const values: any[] = [id];
+        const updates: string[] = [];
         
-        await pool.query(
-          `INSERT INTO site_settings (${columns}) VALUES (${placeholders})`,
-          values
-        );
+        validKeys.forEach((k, i) => {
+          const colInfo = colMap.get(normalize(k))!;
+          const colName = colInfo.column_name;
+          const dataType = colInfo.data_type;
+          let val = settings[k];
+
+          if (dataType === 'ARRAY' || (dataType === 'text' && colName.endsWith('_tags'))) {
+            if (!Array.isArray(val)) val = typeof val === 'string' ? val.split(',').map(s => s.trim()) : [];
+          } else if (typeof val === 'object' && val !== null) {
+            val = JSON.stringify(val);
+          }
+
+          updates.push(`"${colName}" = $${values.length + 1}`);
+          values.push(val);
+        });
+
+        const exists = await pool.query('SELECT id FROM site_settings WHERE id = $1', [id]);
+        
+        if (exists.rows.length > 0) {
+          await pool.query(
+            `UPDATE site_settings SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            values
+          );
+        } else {
+          const cols = validKeys.map(k => `"${colMap.get(normalize(k))!.column_name}"`);
+          const placeholders = validKeys.map((_, i) => `$${i + 2}`);
+          await pool.query(
+            `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
+            values
+          );
+        }
+        
+        return res.json({ success: true });
+      } catch (err: any) {
+        console.error("Site settings update error:", err);
+        return res.status(500).json({ error: err.message });
       }
-      return res.json({ success: true });
     }
 
     // ── Admin init ─────────────────────────────────────────────────────────────

@@ -110,7 +110,27 @@ async function migrateSiteSettings(pool: Pool): Promise<MigrationResult> {
     "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_feature_title TEXT",
     "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_feature_subtitle TEXT",
     "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_feature_link TEXT",
-    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_feature_link_text TEXT"
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_feature_link_text TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS logo_url TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_image_url TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_title TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS hero_subtitle TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS featured_categories_list JSONB DEFAULT '[]'",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS contact_email TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS contact_phone TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS address TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS facebook_url TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS instagram_url TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS youtube_url TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS announcement TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS show_announcement BOOLEAN DEFAULT TRUE",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS announcement_link TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_us_title TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_us_text TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_us_image TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS about_us_link TEXT",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS footer_tags TEXT[] DEFAULT '{}'",
+    "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS footer_description TEXT"
   ];
 
   for (const sql of tasks) {
