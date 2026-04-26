@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuthStore } from './store/authStore';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingCompare } from './components/FloatingCompare';
 import { ToastContainer } from './components/Toast';
 
@@ -52,6 +53,7 @@ export default function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <ErrorBoundary>
         <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
