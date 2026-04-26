@@ -959,11 +959,11 @@ export const Configurator3DV12: React.FC = () => {
           <Layout size={18} />
         </button>
 
-        <div className="w-px h-6 bg-zinc-800 mx-1" />
+        <div className="w-px h-6 bg-zinc-800 mx-1 hidden sm:block" />
 
         <button 
           onClick={toggleFullscreen}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all hidden sm:flex ${
             isFullscreen ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white hover:bg-zinc-800'
           }`}
           title="Toggle Fullscreen [F]"
