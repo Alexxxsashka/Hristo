@@ -1,0 +1,30 @@
+# Scratch Files History - 2026-04-26
+
+The following scripts were created for one-time diagnostic or data manipulation tasks and have been removed to maintain a clean workspace.
+
+## Product & Category Management
+- add_test_clothing.cjs: Added initial test clothing data with complex variants (sizes/colors) for testing the 3D configurator and variant picker.
+- add_test_products_v2.js: Supplemented the product database with additional diverse test items.
+- check_categories.js / check_categories_table.js: Verified the 'categories' table structure and hierarchy.
+- check_clothing.js / check_clothing_detail.js: Detailed inspection of clothing product data and variant serialization.
+- check_misclassified.js: Identified products assigned to incorrect category IDs.
+- check_products.js / check_recent.js: General audits of the products table and recently added items.
+- find_no_variants.js: Filtered products missing necessary variant definitions.
+- fix_all_clothing_sizes.cjs: Batch corrected clothing size labels across the database.
+- update_db_variants.js: One-off update to harmonize variant JSON structures.
+
+## Database & System Diagnostics
+- check_db.js / check_status.js: Connectivity and health checks for the PostgreSQL database.
+- check_db_variants.cjs: Focused audit of how variants are stored in the JSONB columns.
+- check_emerson.cjs: Brand-specific data verification for Emerson products.
+- check_links.py: Python script to validate external image and media URLs.
+- check_modules.js / check_test_clothing.js: Unit-test style validation for specific code paths and data injections.
+- list_site_settings_columns.ts: Introspection of the 'site_settings' table schema.
+- migrate_site_settings.ts: Migrated configuration data from legacy structures to the current format.
+- test_update.ts: Safe environment for testing new database update logic before moving to the main server.
+
+---
+- check_site_settings.ts: Checked site_settings table schema for duplicate columns and metadata.
+- reproduce_error.ts: Reproduced parameter mismatch bug for site settings update.
+
+Archive generated on 2026-04-26

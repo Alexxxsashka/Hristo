@@ -1709,12 +1709,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (currentSettings.rows.length > 0) {
           await pool.query(
             `UPDATE site_settings SET ${cols.map((c, i) => `${c} = $${i + 2}`).join(', ')} WHERE id = $1`,
-            [currentSettings.rows[0].id, ...values]
+            values
           );
         } else {
           await pool.query(
             `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
-            ['default', ...values]
+            values
           );
         }
 
