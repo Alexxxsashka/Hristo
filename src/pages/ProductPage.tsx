@@ -109,8 +109,8 @@ export const ProductPage: React.FC = () => {
 
   const currentPrice = selectedVariant?.price ?? product.price;
   const currentStock = selectedVariant?.stock ?? product.stock;
-  const isSelectionComplete = !product.variantAttributes || 
-    product.variantAttributes.every(attr => selectedAttributes[attr.name]);
+  const missingAttribute = product.variantAttributes?.find(attr => !selectedAttributes[attr.name]);
+  const isSelectionComplete = !missingAttribute;
 
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
@@ -419,7 +419,9 @@ export const ProductPage: React.FC = () => {
                 className="flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 bg-red-600 hover:bg-red-700 disabled:bg-zinc-900 disabled:text-zinc-700 disabled:border-zinc-800 border border-red-500 text-white rounded-xl md:rounded-2xl transition-all shadow-2xl shadow-red-900/20 text-xs sm:text-sm font-black uppercase tracking-widest group"
               >
                 <ShoppingCart size={18} className="sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                {!isSelectionComplete ? t('select_options') : t('add_to_cart')}
+                {missingAttribute 
+                  ? t('select_attr', { attr: formatLabel(missingAttribute.name) }) 
+                  : t('add_to_cart')}
               </button>
               <button 
                 onClick={() => toggleCompare(product)}

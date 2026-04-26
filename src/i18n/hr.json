@@ -477,6 +477,7 @@
   "dovetail": "Lastin Rep",
   "mount_type_desc": "Odaberite sustav montaže kompatibilan s vašim oružjem.",
   "select_options": "Odaberite opcije",
+  "select_attr": "ODABERITE {attr}",
   "product_story": "Opis",
   "how_to_use": "Kako koristiti",
   "configurator_controls": "Kontrole konfiguratora",

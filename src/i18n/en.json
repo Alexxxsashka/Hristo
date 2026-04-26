@@ -477,6 +477,7 @@
   "dovetail": "Dovetail",
   "mount_type_desc": "Select the mounting system compatible with your weapon.",
   "select_options": "Select Options",
+  "select_attr": "SELECT {attr}",
   "product_story": "Description",
   "how_to_use": "How to Use",
   "configurator_controls": "Configurator Controls",
