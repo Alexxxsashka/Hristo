@@ -254,16 +254,23 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => addItem(product, selectedVariant || undefined)}
-                    disabled={product.stock <= 0 || (((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && !((product as any).variantAttributes || (product as any).variant_attributes).every((attr: any) => selectedAttributes[attr.name]))}
-                    className="flex items-center justify-center gap-3 py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white rounded-2xl transition-all font-bold uppercase tracking-widest"
-                  >
-                    <ShoppingCart size={20} />
-                    {((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && !((product as any).variantAttributes || (product as any).variant_attributes).every((attr: any) => selectedAttributes[attr.name]) 
-                      ? 'SELECT SIZE' 
-                      : 'ADD TO CART'}
-                  </button>
+                  {(() => {
+                    const attrs = (product as any).variantAttributes || (product as any).variant_attributes || [];
+                    const missing = attrs.find((attr: any) => !selectedAttributes[attr.name]);
+                    
+                    return (
+                      <button 
+                        onClick={() => addItem(product, selectedVariant || undefined)}
+                        disabled={product.stock <= 0 || !!missing}
+                        className="flex items-center justify-center gap-3 py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white rounded-2xl transition-all font-bold uppercase tracking-widest"
+                      >
+                        <ShoppingCart size={20} />
+                        {missing 
+                          ? t('select_attr', { attr: formatLabel(missing.name) }) 
+                          : t('add_to_cart')}
+                      </button>
+                    );
+                  })()}
                   <Link 
                     to={`/product/${product.id}/${product.slug}`}
                     onClick={onClose}

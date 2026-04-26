@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QuickPreviewModal } from './QuickPreviewModal';
 import { getDiscountedPrice } from '../utils/price';
+import { formatLabel } from '../utils/formatText';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useToastStore } from '../store/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -261,9 +262,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <ShoppingCart size={14} />
                 {product.stock <= 0 
                   ? t('out_of_stock') 
-                  : (variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]))
-                    ? 'SELECT SIZE'
-                    : t('add_to_cart')
+                  : (() => {
+                      const missing = variantAttributes.find((attr: any) => !selectedAttributes[attr.name]);
+                      return missing ? t('select_attr', { attr: formatLabel(missing.name) }) : t('add_to_cart');
+                    })()
                 }
               </button>
 
