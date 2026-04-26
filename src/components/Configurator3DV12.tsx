@@ -774,6 +774,7 @@ export const Configurator3DV12: React.FC = () => {
     isFullscreen,
     setAllModules
   } = useConfiguratorStore();
+  const [showNavGuide, setShowNavGuide] = React.useState(false);
 
   React.useEffect(() => {
     databaseService.getProducts()
@@ -859,11 +860,18 @@ export const Configurator3DV12: React.FC = () => {
           </div>
 
           <div className="absolute top-20 sm:top-24 right-4 sm:right-8 z-20 group">
-            <button className="w-10 h-10 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-red-500 hover:border-red-500/50 transition-all shadow-2xl">
+            <button 
+              onClick={() => setShowNavGuide(!showNavGuide)}
+              className={`w-10 h-10 bg-zinc-900/90 backdrop-blur-xl border rounded-xl flex items-center justify-center transition-all shadow-2xl ${
+                showNavGuide ? 'text-red-500 border-red-500/50' : 'text-zinc-400 border-zinc-800 hover:text-red-500 hover:border-red-500/50'
+              }`}
+            >
               <Lightbulb size={20} />
             </button>
             
-            <div className="absolute top-12 right-0 sm:top-0 sm:right-12 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-4 sm:translate-y-0 sm:translate-x-4 group-hover:translate-y-0 group-hover:translate-x-0">
+            <div className={`absolute top-12 right-0 sm:top-0 sm:right-12 transition-all duration-300 ${
+              showNavGuide ? 'opacity-100 pointer-events-auto translate-y-0 translate-x-0' : 'opacity-0 pointer-events-none translate-y-4 sm:translate-y-0 sm:translate-x-4'
+            } group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:translate-x-0`}>
               <div className="bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 p-4 rounded-2xl shadow-2xl w-56 sm:w-64">
                 <h4 className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                   <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
