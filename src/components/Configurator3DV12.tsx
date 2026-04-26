@@ -937,7 +937,7 @@ export const Configurator3DV12: React.FC = () => {
         whileHover={{ opacity: 1 }}
         whileTap={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-2 p-1.5 bg-zinc-900/80 backdrop-blur-2xl border border-zinc-800 rounded-2xl shadow-2xl z-50 transition-all duration-500 ${showHUD ? 'bottom-40 md:bottom-32' : 'bottom-8'}`}
+        className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-2 p-1.5 bg-zinc-900/80 backdrop-blur-2xl border border-zinc-800 rounded-2xl shadow-2xl z-50 transition-all duration-500 ${showHUD ? 'bottom-[220px] sm:bottom-32' : 'bottom-8'}`}
       >
         <button 
           onClick={toggleMarkers}

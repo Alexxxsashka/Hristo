@@ -409,7 +409,7 @@ export const ConfiguratorPageV12: React.FC = () => {
         <motion.footer 
           initial={false}
           animate={{ 
-            y: showHUD ? 0 : 120,
+            y: showHUD ? 0 : 250,
             opacity: showHUD ? 1 : 0
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
