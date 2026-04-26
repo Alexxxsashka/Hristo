@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useMemo, Component, ErrorInfo, ReactNode } from 'react';
-import { Canvas, useFrame, createPortal } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, ContactShadows, Float, Html, useGLTF, Text } from '@react-three/drei';
+import { Canvas, useFrame, createPortal, useThree } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment, ContactShadows, Float, Html, useGLTF, Text, Stage } from '@react-three/drei';
 import { useConfiguratorStore } from '../store/configuratorStore';
 import { Product } from '../types';
 import { formatEnum } from '../utils/format';
@@ -293,6 +293,8 @@ const Socket = ({
   index?: number;
 }) => {
   const { selectedParts, setSelectedSlotId, showMarkers } = useConfiguratorStore();
+  const { size } = useThree();
+  const isMobile = size.width < 768;
   const [hovered, setHovered] = React.useState(false);
   const fullSlotId = `${parentId}:${slot.id}`;
   const currentPart = selectedParts[fullSlotId];
@@ -350,7 +352,7 @@ const Socket = ({
                     : (hovered ? 'opacity-80' : 'opacity-30')
                 }`}
                 style={{ 
-                  width: `${(isSelected ? 120 : (hovered ? 100 : 80)) + layout.lengthOffset}px`,
+                  width: `${(isSelected ? (isMobile ? 80 : 120) : (hovered ? (isMobile ? 70 : 100) : (isMobile ? 60 : 80))) + layout.lengthOffset}px`,
                   left: '0', 
                   top: '0', 
                   transform: `rotate(${layout.angle}deg)`,
@@ -367,8 +369,8 @@ const Socket = ({
                   isSelected ? 'scale-110' : 'scale-100'
                 }`}
                 style={{ 
-                  left: `${((isSelected ? 120 : (hovered ? 100 : 80)) + layout.lengthOffset) * layout.cos}px`, 
-                  top: `${((isSelected ? 120 : (hovered ? 100 : 80)) + layout.lengthOffset) * layout.sin}px`,
+                  left: `${((isSelected ? (isMobile ? 80 : 120) : (hovered ? (isMobile ? 70 : 100) : (isMobile ? 60 : 80))) + layout.lengthOffset) * layout.cos}px`, 
+                  top: `${((isSelected ? (isMobile ? 80 : 120) : (hovered ? (isMobile ? 70 : 100) : (isMobile ? 60 : 80))) + layout.lengthOffset) * layout.sin}px`,
                   transform: 'translate(-50%, -50%)'
                 }}
               >
@@ -411,11 +413,12 @@ const Socket = ({
                     initial={false}
                     animate={{ 
                       opacity: isSelected ? 1 : 0,
-                      x: isSelected ? 12 : 0,
+                      x: isSelected ? (isMobile ? 0 : 12) : 0,
+                      y: isSelected ? (isMobile ? 12 : 0) : 0,
                       scale: isSelected ? 1 : 0.95,
                       pointerEvents: isSelected ? 'auto' : 'none'
                     }}
-                    className="absolute top-0 left-full z-50"
+                    className={`absolute z-50 ${isMobile ? 'bottom-full left-1/2 -translate-x-1/2 mb-4' : 'top-0 left-full'}`}
                   >
                     <ModuleSelectorPopover 
                       slotId={slot.id} 
@@ -739,6 +742,25 @@ const ActualWeaponModel = ({ path, onLoad }: { path: string | null, onLoad: (sce
   }
 };
 
+const ResponsiveCamera = () => {
+  const { size } = useThree();
+  const aspect = size.width / size.height;
+  const isMobile = aspect < 1;
+  
+  // Dynamically adjust FOV and Distance based on aspect ratio
+  // For vertical screens (mobile), we increase FOV and distance to fit the model
+  const fov = isMobile ? Math.min(60, 35 / aspect) : 35;
+  const distance = isMobile ? Math.max(2.5, 1.5 / aspect) : 1.5;
+  
+  return (
+    <PerspectiveCamera 
+      makeDefault 
+      position={[distance, 0.5, distance]} 
+      fov={fov} 
+    />
+  );
+};
+
 export const Configurator3DV12: React.FC = () => {
   const { 
     activeProduct, 
@@ -782,8 +804,29 @@ export const Configurator3DV12: React.FC = () => {
   
   return (
     <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
-      <Canvas shadows dpr={[1, 2]} performance={{ min: 0.5 }} onPointerMissed={() => setSelectedSlotId(null)}>
-        <PerspectiveCamera makeDefault position={[1.5, 1, 1.5]} fov={35} />
+      <Canvas 
+        shadows 
+        dpr={[1, 2]} 
+        performance={{ min: 0.5 }} 
+        onPointerMissed={() => setSelectedSlotId(null)}
+        camera={{ position: [1.5, 0.5, 1.5], fov: 35 }}
+      >
+        <ResponsiveCamera />
+        
+        {/* Lights and Controls outside Suspense to prevent black screen during loading */}
+        <OrbitControls 
+          makeDefault 
+          enableDamping
+          dampingFactor={0.05}
+          minDistance={0.5}
+          maxDistance={5}
+        />
+        
+        <Environment preset="city" />
+        <ambientLight intensity={0.5} />
+        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+        <pointLight position={[-10, -10, -10]} intensity={1} color="#ff0000" />
+        
         <Suspense fallback={null}>
           <group position={[0, 0, 0]}>
             {activeProduct && <WeaponModel product={activeProduct} />}
@@ -797,18 +840,6 @@ export const Configurator3DV12: React.FC = () => {
             resolution={256} 
             color="#000000" 
           />
-          
-          <OrbitControls 
-            makeDefault 
-            enableDamping
-            dampingFactor={0.05}
-            minDistance={0.5}
-            maxDistance={5}
-          />
-          
-          <Environment preset="city" /> {/* Slightly different preset for V1.2 */}
-          <ambientLight intensity={0.3} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
         </Suspense>
       </Canvas>
       
