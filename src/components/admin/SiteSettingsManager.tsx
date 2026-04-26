@@ -70,7 +70,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
         
         (Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>).forEach(key => {
           const value = (settingsData as any)[key];
-          if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+          if (value === undefined || value === null) {
             (merged as any)[key] = (DEFAULT_SITE_SETTINGS as any)[key];
           }
         });

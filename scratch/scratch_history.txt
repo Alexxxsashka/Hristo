@@ -26,6 +26,10 @@ The following scripts were created for one-time diagnostic or data manipulation 
 ---
 - check_site_settings.ts: Checked site_settings table schema for duplicate columns and metadata.
 - reproduce_error.ts: Reproduced parameter mismatch bug for site settings update.
+- fetch_schema.ts: Fetched the current database schema to identify tables and columns.
+- check_usage.ts: Analyzed column population percentages to find unused fields.
+- inspect_settings.ts: Examined actual data in site_settings to identify redundant camelCase vs snake_case duplicates.
+- cleanup_db.ts: Performed the final cleanup: dropped 10 empty tables, renamed/merged redundant site_settings columns to snake_case, and removed ~15 unused product columns.
 - update_site_settings_schema.ts: Added live_demo_model_url column to site_settings table to enable dynamic 3D model replacement on the homepage.
 
 Archive generated on 2026-04-26

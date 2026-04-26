@@ -26,7 +26,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       
       (Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>).forEach(key => {
         const value = data[key];
-        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+        if (value === undefined || value === null) {
           // @ts-ignore
           mergedSettings[key] = DEFAULT_SITE_SETTINGS[key];
         }
