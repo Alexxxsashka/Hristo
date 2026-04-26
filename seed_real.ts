@@ -18,40 +18,150 @@ const generateId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
 // ─── Categories ──────────────────────────────────────────────────────────
 const categories = [
   // 1. Airsoft Weapons
-  { id: "weapons", name: "Airsoft Weapons", name_hr: "Airsoft Oružje", slug: "airsoft-weapons", parent_id: null },
-  { id: "aeg_rifles", name: "AEG Rifles", name_hr: "AEG Puške", slug: "aeg-rifles", parent_id: "weapons" },
-  { id: "gbb_rifles", name: "GBB Rifles", name_hr: "GBB Puške", slug: "gbb-rifles", parent_id: "weapons" },
-  { id: "pistols", name: "Pistols", name_hr: "Pištolji", slug: "pistols", parent_id: "weapons" },
-  { id: "snipers", name: "Sniper Rifles", name_hr: "Snajperske Puške", slug: "sniper-rifles", parent_id: "weapons" },
+  { 
+    id: "weapons", name: "Airsoft Weapons", name_hr: "Airsoft Oružje", slug: "airsoft-weapons", parent_id: null,
+    filters: [
+      { id: 'fire_mode', label: 'Fire Mode', type: 'select', options: ['Semi', 'Full Auto', '3-Round Burst', 'Single/Bolt'] },
+      { id: 'material', label: 'Body Material', type: 'select', options: ['Full Metal', 'Polymer', 'Nylon Fiber', 'Steel', 'Real Wood'] },
+      { id: 'power_source', label: 'Power Source', type: 'select', options: ['AEG (Electric)', 'GBB (Gas)', 'CO2', 'Spring', 'HPA'] },
+      { id: 'blowback', label: 'Blowback', type: 'boolean' },
+      { id: 'fps', label: 'FPS', type: 'select', options: ['< 300', '300 - 350', '350 - 400', '400 - 450', '> 450'] }
+    ]
+  },
+  { 
+    id: "aeg_rifles", name: "AEG Rifles", name_hr: "AEG Puške", slug: "aeg-rifles", parent_id: "weapons",
+    filters: [
+      { id: 'gearbox', label: 'Gearbox Version', type: 'select', options: ['V2', 'V3', 'V6', 'V7', 'AEP'] },
+      { id: 'battery_type', label: 'Optimal Battery', type: 'select', options: ['LiPo 7.4V', 'LiPo 11.1V', 'NiMH 9.6V', 'Li-Ion 7.4V'] },
+      { id: 'connector', label: 'Connector Type', type: 'select', options: ['Mini Tamiya', 'Deans (T-Plug)', 'Large Tamiya'] },
+      { id: 'mosfet', label: 'MOSFET/ETU', type: 'select', options: ['Built-in MOSFET', 'Electronic Trigger Unit', 'No MOSFET'] },
+      { id: 'quick_spring', label: 'Quick Spring Change', type: 'boolean' }
+    ]
+  },
+  { 
+    id: "gbb_rifles", name: "GBB Rifles", name_hr: "GBB Puške", slug: "gbb-rifles", parent_id: "weapons",
+    filters: [
+      { id: 'gas_type', label: 'Gas Compatibility', type: 'select', options: ['Green Gas', 'CO2', 'Black Gas (High Pressure)'] },
+      { id: 'platform', label: 'Platform', type: 'select', options: ['M4/AR-15', 'AK', 'MCX', 'G36', 'SCAR', 'MP5'] }
+    ]
+  },
+  { 
+    id: "pistols", name: "Pistols", name_hr: "Pištolji", slug: "pistols", parent_id: "weapons",
+    filters: [
+      { id: 'action', label: 'Action', type: 'select', options: ['Blowback (GBB)', 'Non-Blowback (NBB)', 'CO2 Driven', 'AEP (Electric)'] },
+      { id: 'optics_ready', label: 'Optics Ready', type: 'boolean' },
+      { id: 'rail', label: 'Accessory Rail', type: 'boolean' }
+    ]
+  },
+  { 
+    id: "snipers", name: "Sniper Rifles", name_hr: "Snajperske Puške", slug: "sniper-rifles", parent_id: "weapons",
+    filters: [
+      { id: 'action', label: 'Action', type: 'select', options: ['Bolt Action', 'Semi-Auto (DMR)', 'Gas Operated'] },
+      { id: 'spring_rating', label: 'Spring Tension', type: 'select', options: ['M130', 'M150', 'M170', 'M190'] },
+      { id: 'hopup_type', label: 'Hop-Up Type', type: 'select', options: ['Standard', 'TDC Mod', 'Rotary'] }
+    ]
+  },
   { id: "shotguns", name: "Shotguns", name_hr: "Sačmarice", slug: "shotguns", parent_id: "weapons" },
 
   // 2. Clothing
-  { id: "clothing", name: "Clothing & Apparel", name_hr: "Odjeća i obuća", slug: "clothing-apparel", parent_id: null },
-  { id: "uniforms", name: "Uniforms", name_hr: "Uniforme", slug: "uniforms", parent_id: "clothing" },
+  { 
+    id: "clothing", name: "Clothing & Apparel", name_hr: "Odjeća i obuća", slug: "clothing-apparel", parent_id: null,
+    filters: [
+      { id: 'size', label: 'Size', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'] },
+      { id: 'camo', label: 'Camo/Color', type: 'select', options: ['Multicam', 'Woodland', 'Flecktarn', 'Black', 'Tan', 'Grey', 'OD Green', 'AOR1', 'AOR2'] },
+      { id: 'material', label: 'Material', type: 'select', options: ['Rip-stop', 'NyCo', 'Cotton', 'Softshell', 'Fleece'] }
+    ]
+  },
+  { 
+    id: "uniforms", name: "Uniforms", name_hr: "Uniforme", slug: "uniforms", parent_id: "clothing",
+    filters: [
+      { id: 'size', label: 'Size', type: 'select', options: ['S', 'M', 'L', 'XL', 'XXL'] },
+      { id: 'camo', label: 'Camouflage', type: 'select', options: ['Multicam', 'Woodland', 'Digital Desert', 'Olive Drab', 'Black'] },
+      { id: 'generation', label: 'Generation', type: 'select', options: ['G2', 'G3', 'G4'] }
+    ]
+  },
   { id: "jackets", name: "Jackets", name_hr: "Jakne", slug: "jackets", parent_id: "clothing" },
-  { id: "pants", name: "Tactical Pants", name_hr: "Taktičke hlače", slug: "tactical-pants", parent_id: "clothing" },
+  { 
+    id: "pants", name: "Tactical Pants", name_hr: "Taktičke hlače", slug: "tactical-pants", parent_id: "clothing",
+    filters: [
+      { id: 'waist', label: 'Waist Size', type: 'select', options: ['28', '30', '32', '34', '36', '38', '40'] },
+      { id: 'length', label: 'Length', type: 'select', options: ['Regular', 'Long', 'Short'] },
+      { id: 'kneepads', label: 'Integrated Knee Pads', type: 'boolean' }
+    ]
+  },
   { id: "boots", name: "Boots", name_hr: "Čizme", slug: "boots", parent_id: "clothing" },
-  { id: "gloves", name: "Gloves", name_hr: "Rukavice", slug: "gloves", parent_id: "clothing" },
+  { 
+    id: "gloves", name: "Gloves", name_hr: "Rukavice", slug: "gloves", parent_id: "clothing",
+    filters: [
+      { id: 'size', label: 'Size', type: 'select', options: ['S', 'M', 'L', 'XL', 'XXL'] },
+      { id: 'protection', label: 'Knuckle Protection', type: 'select', options: ['Hard Shell', 'Soft Padding', 'No Padding', 'Carbon Fiber'] },
+      { id: 'touchscreen', label: 'Touchscreen Compatible', type: 'boolean' }
+    ]
+  },
   { id: "headwear", name: "Headwear", name_hr: "Kape i kacige", slug: "headwear", parent_id: "clothing" },
 
   // 3. Weapon Accessories
   { id: "accessories", name: "Weapon Accessories", name_hr: "Dodaci za Oružje", slug: "weapon-accessories", parent_id: null },
-  { id: "optics", name: "Optics & Red Dots", name_hr: "Optika i Ciljnici", slug: "optics-sights", parent_id: "accessories" },
-  { id: "suppressors", name: "Suppressors & Tracers", name_hr: "Prigušivači i Traceri", slug: "suppressors-tracers", parent_id: "accessories" },
+  { 
+    id: "optics", name: "Optics & Red Dots", name_hr: "Optika i Ciljnici", slug: "optics-sights", parent_id: "accessories",
+    filters: [
+      { id: 'type', label: 'Optic Type', type: 'select', options: ['Red Dot', 'LPVO', 'Sniper Scope', 'Holographic', 'Iron Sights', 'Magnifier'] },
+      { id: 'magnification', label: 'Magnification', type: 'select', options: ['1x', '3x', '4x', '1-4x', '1-6x', '3-9x', '4-12x'] }
+    ]
+  },
+  { 
+    id: "suppressors", name: "Suppressors & Tracers", name_hr: "Prigušivači i Traceri", slug: "suppressors-tracers", parent_id: "accessories",
+    filters: [
+      { id: 'threading', label: 'Threading', type: 'select', options: ['14mm CCW (Standard)', '14mm CW', '24mm CW', 'LCT 24mm', 'Special'] },
+      { id: 'tracer_module', label: 'Tracer Module', type: 'select', options: ['Built-in', 'Housing Only (Dummy)', 'Simulated Muzzle Flash', 'Both (Tracer + Flash)'] }
+    ]
+  },
   { id: "grips", name: "Grips & Handguards", name_hr: "Ručke i Rukohvati", slug: "grips-handguards", parent_id: "accessories" },
-  { id: "magazines", name: "Magazines", name_hr: "Spremnici", slug: "magazines", parent_id: "accessories" },
-  { id: "parts", name: "Internal Parts", name_hr: "Unutarnji dijelovi", slug: "internal-parts", parent_id: "accessories" },
+  { 
+    id: "magazines", name: "Magazines", name_hr: "Spremnici", slug: "magazines", parent_id: "accessories",
+    filters: [
+      { id: 'mag_type', label: 'Magazine Type', type: 'select', options: ['Low-Cap', 'Mid-Cap', 'Hi-Cap', 'Drum', 'Real-Cap'] },
+      { id: 'capacity', label: 'Capacity (Rounds)', type: 'select', options: ['15-30', '30-80', '80-150', '150-500', '1000+'] },
+      { id: 'caliber', label: 'Caliber', type: 'select', options: ['5.56 / NATO', '7.62 / AK', '9mm', '.45 ACP', '7.62 NATO / .308'] }
+    ]
+  },
+  { 
+    id: "parts", name: "Internal Parts", name_hr: "Unutarnji dijelovi", slug: "internal-parts", parent_id: "accessories",
+    filters: [
+      { id: 'part_category', label: 'Part Group', type: 'select', options: ['Hop-Up/Bucking', 'Inner Barrel', 'Gearset', 'Piston/Head', 'Motor', 'Trigger/MOSFET', 'Spring'] }
+    ]
+  },
 
   // 4. Consumables
   { id: "consumables", name: "BBs, Gas & Batteries", name_hr: "Kuglice, plin i baterije", slug: "consumables", parent_id: null },
-  { id: "bbs", name: "BBs", name_hr: "Kuglice", slug: "bbs", parent_id: "consumables" },
+  { 
+    id: "bbs", name: "BBs", name_hr: "Kuglice", slug: "bbs", parent_id: "consumables",
+    filters: [
+      { id: 'weight', label: 'BB Weight', type: 'select', options: ['0.20g', '0.23g', '0.25g', '0.28g', '0.30g', '0.32g', '0.36g', '0.40g', '0.45g', '0.48g', '0.50g'] },
+      { id: 'type', label: 'Material Type', type: 'select', options: ['BIO-Degradable', 'Standard Polymer'] },
+      { id: 'tracer_type', label: 'Tracer Type', type: 'select', options: ['Non-Tracer', 'Tracer Green', 'Tracer Red'] }
+    ]
+  },
   { id: "gas", name: "Green Gas & CO2", name_hr: "Zeleni plin i CO2", slug: "gas-co2", parent_id: "consumables" },
-  { id: "batteries", name: "Batteries & Chargers", name_hr: "Baterije i punjači", slug: "batteries-chargers", parent_id: "consumables" },
+  { 
+    id: "batteries", name: "Batteries & Chargers", name_hr: "Baterije i punjači", slug: "batteries-chargers", parent_id: "consumables",
+    filters: [
+      { id: 'chemistry', label: 'Chemistry', type: 'select', options: ['LiPo', 'Li-Ion', 'NiMH', 'LiFe'] },
+      { id: 'cells', label: 'Voltage', type: 'select', options: ['7.4V', '11.1V', '9.6V', '8.4V', '14.8V'] },
+      { id: 'capacity', label: 'Capacity (mAh)', type: 'select', options: ['< 1000', '1000-1500', '1500-2000', '> 2000'] }
+    ]
+  },
   { id: "maintenance", name: "Maintenance & Tools", name_hr: "Održavanje i alati", slug: "maintenance", parent_id: "consumables" },
 
   // 5. Camping & Outdoor
   { id: "camping", name: "Camping & Outdoor", name_hr: "Kampiranje i Outdoor", slug: "camping-outdoor", parent_id: null },
-  { id: "tents", name: "Tents & Sleeping Bags", name_hr: "Šatori i vreće za spavanje", slug: "tents-sleeping-bags", parent_id: "camping" },
+  { 
+    id: "tents", name: "Tents & Sleeping Bags", name_hr: "Šatori i vreće za spavanje", slug: "tents-sleeping-bags", parent_id: "camping",
+    filters: [
+      { id: 'season', label: 'Season Rating', type: 'select', options: ['1 Season (Summer)', '2 Season', '3 Season', '4 Season (Winter)'] },
+      { id: 'capacity', label: 'Capacity (Persons)', type: 'select', options: ['1 Person', '2 Persons', '3-4 Persons', '5+ Persons'] }
+    ]
+  },
   { id: "navigation", name: "Navigation & Electronics", name_hr: "Navigacija i elektronika", slug: "navigation", parent_id: "camping" },
   { id: "hydration", name: "Hydration & Food", name_hr: "Hidratacija i hrana", slug: "hydration", parent_id: "camping" },
 ];
@@ -63,6 +173,17 @@ const products = [
     name: "Specna Arms SA-E04 EDGE", slug: "sa-e04-edge", brand: "Specna Arms", price: 249, type: "weapon", category_id: "aeg_rifles", 
     image: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&q=80", 
     description: "Full metal AEG with MOSFET X-ASR. High quality performance for any field.", stock: 12,
+    category_filters: {
+      fire_mode: "Full Auto",
+      material: "Full Metal",
+      power_source: "AEG (Electric)",
+      blowback: false,
+      fps: "350 - 400",
+      gearbox: "V2",
+      battery_type: "LiPo 7.4V",
+      connector: "Mini Tamiya",
+      mosfet: "Built-in MOSFET"
+    },
     characteristics: [
       { emoji: "🔫", label: "Type", value: "AEG" },
       { emoji: "⚖️", label: "Weight", value: "2.5kg" }
@@ -72,6 +193,15 @@ const products = [
     name: "Tokyo Marui Hi-Capa 5.1 GBB", slug: "tm-hi-capa-51", brand: "Tokyo Marui", price: 185, type: "weapon", category_id: "pistols", 
     image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?auto=format&fit=crop&q=80", 
     description: "The most popular airsoft pistol in the world. Exceptional accuracy and recoil.", stock: 20,
+    category_filters: {
+      fire_mode: "Semi",
+      material: "Polymer",
+      power_source: "GBB (Gas)",
+      blowback: true,
+      fps: "< 300",
+      action: "Blowback (GBB)",
+      optics_ready: false
+    },
     characteristics: [
       { emoji: "💨", label: "System", value: "Gas Blowback" },
       { emoji: "🎯", label: "Accuracy", value: "Legendary" }
@@ -87,6 +217,15 @@ const products = [
     image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?auto=format&fit=crop&q=80",
     description: "Officially licensed Glock 17 Gen5 replica with realistic blowback. Compatible with all standard Glock accessories.",
     stock: 15,
+    category_filters: {
+      fire_mode: "Semi",
+      material: "Full Metal",
+      power_source: "GBB (Gas)",
+      blowback: true,
+      fps: "< 300",
+      action: "Blowback (GBB)",
+      optics_ready: true
+    },
     characteristics: [
       { emoji: "🛡️", label: "License", value: "Official Glock" },
       { emoji: "🔥", label: "Blowback", value: "Strong" }
@@ -95,7 +234,16 @@ const products = [
   { 
     name: "CYMA CM.701B VSR-10", slug: "cyma-cm701b", brand: "CYMA", price: 110, type: "weapon", category_id: "snipers", 
     image: "https://images.unsplash.com/photo-1633354931941-c5e67c07febb?auto=format&fit=crop&q=80", 
-    description: "Classic bolt action sniper rifle. Highly upgradeable VSR-10 platform.", stock: 5 
+    description: "Classic bolt action sniper rifle. Highly upgradeable VSR-10 platform.", stock: 5,
+    category_filters: {
+      fire_mode: "Single/Bolt",
+      material: "Polymer",
+      power_source: "Spring",
+      blowback: false,
+      fps: "> 450",
+      action: "Bolt Action",
+      spring_rating: "M150"
+    }
   },
 
   // Clothing with Variants (Sizes & Colors)
@@ -109,6 +257,14 @@ const products = [
     image: "https://images.unsplash.com/photo-1619641782842-83f2246fdc21?auto=format&fit=crop&q=80", 
     description: "Combat pants with built-in knee pads. Durable and comfortable for long games.", 
     stock: 15,
+    category_filters: {
+      size: "M",
+      camo: "Multicam",
+      material: "Rip-stop",
+      kneepads: true,
+      waist: "32",
+      length: "Regular"
+    },
     variant_attributes: [
       { name: "Size", options: ["S", "M", "L", "XL"] },
       { name: "Color", options: ["Multicam", "Black", "Ranger Green"] }
@@ -134,6 +290,11 @@ const products = [
     image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80", 
     description: "Heavy fleece jacket designed for tactical use in cold weather.", 
     stock: 12,
+    category_filters: {
+      size: "L",
+      camo: "Tan",
+      material: "Fleece"
+    },
     variant_attributes: [
       { name: "Size", options: ["M", "L", "XL"] },
       { name: "Color", options: ["Coyote", "Foliage Green", "Shadow Grey"] }
@@ -242,8 +403,8 @@ const seedRealData = async () => {
     // First pass: insert without parent_id to avoid FK issues
     for (const cat of categories) {
       await pool.query(
-        "INSERT INTO categories (id, name, name_hr, slug) VALUES ($1, $2, $3, $4)",
-        [cat.id, cat.name, cat.name_hr, cat.slug]
+        "INSERT INTO categories (id, name, name_hr, slug, filters) VALUES ($1, $2, $3, $4, $5)",
+        [cat.id, cat.name, cat.name_hr, cat.slug, JSON.stringify((cat as any).filters || [])]
       );
     }
 
@@ -264,8 +425,8 @@ const seedRealData = async () => {
         `INSERT INTO products (
           id, uid, sku, barcode, slug, name, description, type, 
           category_id, brand, price, stock, status, image_url,
-          variants, variant_attributes, characteristics, images
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active', $13, $14, $15, $16, $17)`,
+          variants, variant_attributes, characteristics, images, category_filters
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active', $13, $14, $15, $16, $17, $18)`,
         [
           pid, 
           pid, 
@@ -283,7 +444,8 @@ const seedRealData = async () => {
           JSON.stringify((prod as any).variants || []),
           JSON.stringify((prod as any).variant_attributes || []),
           JSON.stringify((prod as any).characteristics || []),
-          JSON.stringify([prod.image])
+          JSON.stringify([prod.image]),
+          JSON.stringify((prod as any).category_filters || {})
         ]
       );
     }
