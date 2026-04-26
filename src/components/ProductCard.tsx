@@ -247,7 +247,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2 pt-4 border-t border-zinc-800/50 mt-auto">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 pt-4 border-t border-zinc-800/50 mt-auto">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock <= 0}
@@ -269,10 +269,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 }
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-center xs:justify-start">
                 <button
                   onClick={handleCompare}
-                  className={`p-3.5 rounded-xl border transition-all ${
+                  className={`p-3 xs:p-3.5 rounded-xl border transition-all ${
                     isInCompare(product.id)
                       ? 'bg-zinc-100 border-white text-black'
                       : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'
@@ -285,7 +285,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {(product.has3D) && (
                   <button
                     onClick={handleConfigure}
-                    className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:border-red-600/50 hover:text-red-500 transition-all"
+                    className="p-3 xs:p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:border-red-600/50 hover:text-red-500 transition-all"
                     title={t('configure')}
                   >
                     <Settings size={16} />
@@ -295,7 +295,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {(Number(product.price) > 0 || (product.variants && product.variants.length > 0)) && (
                   <button 
                     onClick={handleAddToCart}
-                    className="p-3.5 bg-zinc-950 hover:bg-red-600 text-zinc-500 hover:text-white rounded-xl transition-all border border-zinc-800 hover:border-red-600 shadow-lg active:scale-95"
+                    className="p-3 xs:p-3.5 bg-zinc-950 hover:bg-red-600 text-zinc-500 hover:text-white rounded-xl transition-all border border-zinc-800 hover:border-red-600 shadow-lg active:scale-95"
                     title={t('add_to_cart')}
                   >
                     <Zap className="w-4 h-4" />
