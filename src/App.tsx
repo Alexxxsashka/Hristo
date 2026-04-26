@@ -1,5 +1,5 @@
 import React, { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -38,10 +38,69 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     this.state = { hasError: false };
   }
   static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any, info: any) {
+    console.error('App Error Boundary caught:', error, info);
+  }
   render() {
-    if (this.state.hasError) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Something went wrong.</div>;
+    if (this.state.hasError) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white p-4 text-center">
+      <h1 className="text-2xl font-black mb-4">Something went wrong.</h1>
+      <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 rounded-lg">Reload Page</button>
+    </div>;
     return this.props.children;
   }
+}
+
+function AppContent() {
+  const location = useLocation();
+  const isConfigurator = location.pathname.startsWith('/configurator');
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+      {!isConfigurator && <Navbar />}
+      <main className={`flex-grow ${isConfigurator ? '' : 'pt-20'}`}>
+        <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/:category" element={<ShopPage />} />
+            <Route path="/shop/:category/:subcategory" element={<ShopPage />} />
+            <Route path="/product/:id/:slug" element={<ProductPage />} />
+            <Route path="/configurator" element={<ConfiguratorPageV12 />} />
+            <Route path="/configurator/:id" element={<ConfiguratorPageV12 />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:id" element={<ArticlePage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/info/:pageId" element={<InfoPage />} />
+            <Route path="/about" element={<InfoPage />} />
+            <Route path="/terms" element={<InfoPage />} />
+            <Route path="/privacy" element={<InfoPage />} />
+            <Route path="/shipping" element={<InfoPage />} />
+            <Route path="/payment-methods" element={<InfoPage />} />
+            <Route path="/returns" element={<InfoPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/account" element={<UserDashboard />} />
+            
+            <Route 
+              path="/admin/*" 
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboard />
+                </ProtectedAdminRoute>
+              } 
+            />
+          </Routes>
+        </Suspense>
+      </main>
+      {!isConfigurator && <Footer />}
+      {!isConfigurator && <FloatingCompare />}
+      <ToastContainer />
+    </div>
+  );
 }
 
 export default function App() {
@@ -55,50 +114,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <ErrorBoundary>
-        <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
-          <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
-            <Navbar />
-            <main className="flex-grow pt-20">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/shop/:category" element={<ShopPage />} />
-                <Route path="/shop/:category/:subcategory" element={<ShopPage />} />
-                <Route path="/product/:id/:slug" element={<ProductPage />} />
-                <Route path="/configurator" element={<ConfiguratorPageV12 />} />
-                <Route path="/compare" element={<ComparePage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/blog" element={<BlogPage />} />
-                <Route path="/blog/:id" element={<ArticlePage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/info/:pageId" element={<InfoPage />} />
-                <Route path="/about" element={<InfoPage />} />
-                <Route path="/terms" element={<InfoPage />} />
-                <Route path="/privacy" element={<InfoPage />} />
-                <Route path="/shipping" element={<InfoPage />} />
-                <Route path="/payment-methods" element={<InfoPage />} />
-                <Route path="/returns" element={<InfoPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/account" element={<UserDashboard />} />
-                
-                <Route 
-                  path="/admin/*" 
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminDashboard />
-                    </ProtectedAdminRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-            <Footer />
-            <FloatingCompare />
-            <ToastContainer />
-          </div>
-        </Suspense>
+        <AppContent />
       </ErrorBoundary>
     </Router>
   );

@@ -71,10 +71,19 @@ export const ConfiguratorPageV12: React.FC = () => {
       try {
         const data = await databaseService.getProducts();
         if (data) {
-          const weaponList = data.filter((p: Product) => 
-            (p.category?.toLowerCase() === 'weapons' || p.type?.toLowerCase() === 'weapon') && 
-            p.stock > 0
-          );
+          // More inclusive filtering for weapons
+          const weaponList = data.filter((p: Product) => {
+            const cat = p.category?.toLowerCase() || '';
+            const type = p.type?.toLowerCase() || '';
+            const name = p.name?.toLowerCase() || '';
+            return (
+              cat.includes('weapon') || 
+              type.includes('weapon') || 
+              cat === 'rifles' ||
+              cat === 'pistols' ||
+              type === 'base_weapon'
+            ) && (p.stock > 0 || p.stock === undefined); // Some items might not have stock defined
+          });
           setWeapons(weaponList);
           
           // Only preload the active weapon if it's in the list
@@ -123,7 +132,7 @@ export const ConfiguratorPageV12: React.FC = () => {
   const isSelectionScreen = !id;
 
   return (
-    <div ref={pageRef} className="fixed inset-0 w-full h-[100dvh] bg-[#050505] overflow-hidden flex flex-col select-none">
+    <div ref={pageRef} className="fixed inset-0 w-full h-[100dvh] bg-[#050505] overflow-hidden flex flex-col select-none z-[1000]">
       <LoadingScreen />
       <motion.header 
         initial={false}
@@ -352,7 +361,23 @@ export const ConfiguratorPageV12: React.FC = () => {
                         <p className="text-zinc-500 text-sm uppercase tracking-widest">{t('start_configuring_to_save')}</p>
                       </div>
                     )
-                  )}
+                  ) : weapons.length === 0 ? (
+                    <div className="col-span-full py-20 text-center">
+                      <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600">
+                        <Box size={32} className="animate-pulse" />
+                      </div>
+                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">{t('no_weapons_available')}</h3>
+                      <p className="text-zinc-500 text-sm uppercase tracking-widest mb-6 max-w-md mx-auto">
+                        {t('armory_empty_desc')}
+                      </p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className="px-8 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-red-700 transition-all"
+                      >
+                        {t('retry_connection')}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </motion.div>
