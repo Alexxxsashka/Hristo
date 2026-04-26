@@ -400,9 +400,9 @@ const Socket = ({
                       <Plus size={16} className={`transition-all ${hovered ? 'text-white scale-110' : 'text-white/20'}`} />
                     )}
                     
-                    <div className="absolute -top-5 sm:-top-4 left-0 whitespace-nowrap bg-black/40 backdrop-blur-sm px-1 rounded-sm">
-                      <span className={`text-[10px] sm:text-[8px] font-black uppercase tracking-[0.2em] transition-colors ${
-                        isSelected ? 'text-red-500' : 'text-zinc-200'
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                      <span className={`text-[9px] sm:text-[7px] font-black uppercase tracking-[0.3em] transition-colors drop-shadow-md ${
+                        isSelected ? 'text-red-500' : 'text-white'
                       }`}>
                         {slot.type}
                       </span>
