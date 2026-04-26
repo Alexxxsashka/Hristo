@@ -54,8 +54,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 function AppContent() {
   const location = useLocation();
-  // Using regex for more robust detection of configurator routes
-  const isConfigurator = /^\/configurator/i.test(location.pathname);
+  // Using includes for the widest possible detection of configurator
+  const isConfigurator = location.pathname.toLowerCase().includes('/configurator');
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
@@ -69,9 +69,8 @@ function AppContent() {
             <Route path="/shop/:category/:subcategory" element={<ShopPage />} />
             <Route path="/product/:id/:slug" element={<ProductPage />} />
             
-            {/* Configurator Routes - explicitly defined */}
-            <Route path="/configurator/:id" element={<ConfiguratorPageV12 />} />
-            <Route path="/configurator" element={<ConfiguratorPageV12 />} />
+            {/* Configurator Routes - using wildcard to ensure matching even with deep paths */}
+            <Route path="/configurator/*" element={<ConfiguratorPageV12 />} />
             
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/cart" element={<CartPage />} />
@@ -99,7 +98,7 @@ function AppContent() {
                 </ProtectedAdminRoute>
               } 
             />
-            {/* Fallback for unknown routes */}
+            {/* Catch-all redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

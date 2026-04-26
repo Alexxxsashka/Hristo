@@ -17,7 +17,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../services/databaseService';
 
 export const ConfiguratorPageV12: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const id = params.id || params['*'];
   const navigate = useNavigate();
   const { setActiveProduct, activeProduct, showHUD, isFullscreen, setIsFullscreen, toggleFullscreen, savedBuilds, loadBuild, deleteBuild } = useConfiguratorStore();
   const [loading, setLoading] = useState(true);
