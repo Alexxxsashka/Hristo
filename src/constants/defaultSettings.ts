@@ -52,4 +52,5 @@ export const DEFAULT_SITE_SETTINGS: Partial<SiteSettings> = {
   seoTitle: "HRISTO Airsoft Store - Professional Gear & Custom Engineering",
   seoDescription: "The leading airsoft shop in Croatia. Premium weapons, tactical gear, and the most advanced 3D weapon configurator. Build your ultimate loadout today.",
   seoKeywords: "airsoft, tactical gear, 3d configurator, custom airsoft, Hristo, Croatia, Zagreb",
+  liveDemoModelUrl: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
 };

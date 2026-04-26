@@ -334,7 +334,7 @@ const HomePage: React.FC = () => {
               <div className="absolute inset-0 bg-red-600/5 rounded-[40px] blur-3xl group-hover:bg-red-600/10 transition-colors" />
               <div className="w-full h-full relative z-10">
                 <Suspense fallback={<div className="w-full h-full bg-zinc-900/50 rounded-[40px] animate-pulse flex items-center justify-center"><div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
-                  <ModelViewer modelPath="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" />
+                  <ModelViewer modelPath={settings?.liveDemoModelUrl || "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"} />
                 </Suspense>
                 
                 {/* Interaction Hint */}

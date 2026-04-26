@@ -52,6 +52,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
   const [pendingAboutImage, setPendingAboutImage] = useState<File | null>(null);
   const [pendingHeroFeatureImage, setPendingHeroFeatureImage] = useState<File | null>(null);
   const [pendingHeroFeatureVideo, setPendingHeroFeatureVideo] = useState<File | null>(null);
+  const [pendingLiveDemoModel, setPendingLiveDemoModel] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
@@ -129,6 +130,12 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
         if (settings.heroFeatureVideo) await databaseService.deleteFile(settings.heroFeatureVideo);
         finalSettings.heroFeatureVideo = await handleFileUpload(pendingHeroFeatureVideo, 'hero-feature');
         setPendingHeroFeatureVideo(null);
+      }
+
+      if (pendingLiveDemoModel) {
+        if (settings.liveDemoModelUrl) await databaseService.deleteFile(settings.liveDemoModelUrl);
+        finalSettings.liveDemoModelUrl = await handleFileUpload(pendingLiveDemoModel, 'live-demo');
+        setPendingLiveDemoModel(null);
       }
 
       await databaseService.updateSiteSettings(finalSettings);
@@ -590,6 +597,73 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
                       </div>
                     </div>
                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-center mt-2">Recommended: 1920x1080px WebP</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 3D Live Demo Section */}
+              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
+                    <Zap size={20} className="text-red-600" />
+                    3D Live Demo Model
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-6">
+                    <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-2">Current Model Path</h4>
+                      <p className="text-xs font-mono text-zinc-500 break-all bg-white p-3 rounded-lg border border-zinc-200">
+                        {settings.liveDemoModelUrl || 'Using default Khronos Helmet'}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Manual URL Override</label>
+                      <input 
+                        type="text" 
+                        value={settings.liveDemoModelUrl || ''}
+                        onChange={e => setSettings({ ...settings, liveDemoModelUrl: e.target.value })}
+                        placeholder="https://example.com/model.glb"
+                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:border-zinc-900 transition-all font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Upload New GLB Model</label>
+                    <div className="relative group aspect-video bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 flex flex-col items-center justify-center gap-4">
+                      {pendingLiveDemoModel ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <CheckCircle2 size={40} className="text-green-500" />
+                          <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">{pendingLiveDemoModel.name}</span>
+                          <button 
+                            onClick={() => setPendingLiveDemoModel(null)}
+                            className="text-[10px] text-red-600 font-black uppercase tracking-widest hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-zinc-300">
+                          <Upload size={40} />
+                          <span className="text-xs font-bold uppercase tracking-widest">Select .GLB File</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                          <Upload size={20} />
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".glb,.gltf" 
+                            onChange={e => setPendingLiveDemoModel(e.target.files?.[0] || null)} 
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-center mt-2">Maximum file size: 50MB. Recommended: Optimized GLB.</p>
                   </div>
                 </div>
               </div>

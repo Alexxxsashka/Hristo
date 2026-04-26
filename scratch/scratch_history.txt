@@ -26,5 +26,6 @@ The following scripts were created for one-time diagnostic or data manipulation 
 ---
 - check_site_settings.ts: Checked site_settings table schema for duplicate columns and metadata.
 - reproduce_error.ts: Reproduced parameter mismatch bug for site settings update.
+- update_site_settings_schema.ts: Added live_demo_model_url column to site_settings table to enable dynamic 3D model replacement on the homepage.
 
 Archive generated on 2026-04-26

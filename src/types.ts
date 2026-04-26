@@ -375,4 +375,7 @@ export interface SiteSettings {
   seoDescription?: string;
   seoKeywords?: string;
   ogImage?: string;
+
+  // 3D Live Demo
+  liveDemoModelUrl?: string;
 }
