@@ -17,42 +17,42 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   onNotify: (msg: string, type?: 'success' | 'error') => void
 }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<Partial<Product>>(() => {
-    const baseDefaults: Partial<Product> = {
-      name: '',
-      description: '',
-      type: 'weapon',
-      category: '',
-      subcategory: '',
-      brand: '',
-      model: '',
-      sku: '',
-      barcode: '',
-      price: 0,
-      landingCost: 0,
-      msrp: 0,
-      currency: 'EUR',
-      stock: 0,
-      minStockLevel: 0,
-      tags: [],
-      uid: '',
-      model3D: '',
-      model3DName: '',
-      has3D: false,
-      meshName: '',
-      socketPoint: [0, 0, 0],
-      slots: [],
-      variantsGroupId: '',
-      compatibleModuleCategories: [],
-      attachmentSlot: '',
-      compatibleWeapons: [],
-      characteristics: [
-        { emoji: '🛡️', label: 'durability', value: 'high' },
-        { emoji: '⚡', label: 'handling', value: 'medium' },
-        { emoji: '🎯', label: 'precision', value: 'elite' }
-      ]
-    };
+  const baseDefaults: Partial<Product> = {
+    name: '',
+    description: '',
+    type: 'weapon',
+    category: '',
+    subcategory: '',
+    brand: '',
+    model: '',
+    sku: '',
+    barcode: '',
+    price: 0,
+    landingCost: 0,
+    msrp: 0,
+    currency: 'EUR',
+    stock: 0,
+    minStockLevel: 0,
+    tags: [],
+    uid: '',
+    model3D: '',
+    model3DName: '',
+    has3D: false,
+    meshName: '',
+    socketPoint: [0, 0, 0],
+    slots: [],
+    variantsGroupId: '',
+    compatibleModuleCategories: [],
+    attachmentSlot: '',
+    compatibleWeapons: [],
+    characteristics: [
+      { emoji: '🛡️', label: 'durability', value: 'high' },
+      { emoji: '⚡', label: 'handling', value: 'medium' },
+      { emoji: '🎯', label: 'precision', value: 'elite' }
+    ]
+  };
 
+  const [formData, setFormData] = useState<Partial<Product>>(() => {
     if (!initialData) return baseDefaults;
 
     // If initialData exists but characteristics are empty, provide defaults
