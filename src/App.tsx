@@ -42,22 +42,25 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     console.error('App Error Boundary caught:', error, info);
   }
   render() {
-    if (this.state.hasError) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white p-4 text-center">
-      <h1 className="text-2xl font-black mb-4">Something went wrong.</h1>
-      <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 rounded-lg">Reload Page</button>
-    </div>;
+    if (this.state.hasError) return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white p-4 text-center">
+        <h1 className="text-2xl font-black mb-4">Something went wrong.</h1>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 rounded-lg">Reload Page</button>
+      </div>
+    );
     return this.props.children;
   }
 }
 
 function AppContent() {
   const location = useLocation();
-  const isConfigurator = location.pathname.startsWith('/configurator');
+  // Using regex for more robust detection of configurator routes
+  const isConfigurator = /^\/configurator/i.test(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
       {!isConfigurator && <Navbar />}
-      <main className={`flex-grow ${isConfigurator ? '' : 'pt-20'}`}>
+      <main className={`flex-grow flex flex-col ${isConfigurator ? '' : 'pt-20'}`}>
         <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -65,8 +68,11 @@ function AppContent() {
             <Route path="/shop/:category" element={<ShopPage />} />
             <Route path="/shop/:category/:subcategory" element={<ShopPage />} />
             <Route path="/product/:id/:slug" element={<ProductPage />} />
-            <Route path="/configurator" element={<ConfiguratorPageV12 />} />
+            
+            {/* Configurator Routes - explicitly defined */}
             <Route path="/configurator/:id" element={<ConfiguratorPageV12 />} />
+            <Route path="/configurator" element={<ConfiguratorPageV12 />} />
+            
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
@@ -93,6 +99,8 @@ function AppContent() {
                 </ProtectedAdminRoute>
               } 
             />
+            {/* Fallback for unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </main>
