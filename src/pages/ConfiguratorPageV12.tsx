@@ -258,43 +258,61 @@ export const ConfiguratorPageV12: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {activeTab === 'all' ? (
-                    weapons.map((weapon, index) => (
-                      <motion.div 
-                        key={weapon.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1, duration: 0.6 }}
-                        className="group relative bg-zinc-900/40 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 hover:bg-zinc-900/60 transition-all duration-500 cursor-pointer"
-                        onClick={() => navigate(`/configurator/${weapon.id}`)}
-                      >
-                        <div className="aspect-[16/10] relative overflow-hidden">
-                          <img 
-                            src={weapon.images && weapon.images.length > 0 ? weapon.images[0] : (weapon.image?.startsWith('http') ? weapon.image : (weapon.image || `https://picsum.photos/seed/${weapon.id}/800/500`))}
-                            alt={weapon.name}
-                            className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
-                        </div>
-                        
-                        <div className="p-6 relative">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">0{index + 1}</span>
-                            <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">{weapon.brand}</span>
+                    weapons.length > 0 ? (
+                      weapons.map((weapon, index) => (
+                        <motion.div 
+                          key={weapon.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 + index * 0.1, duration: 0.6 }}
+                          className="group relative bg-zinc-900/40 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 hover:bg-zinc-900/60 transition-all duration-500 cursor-pointer"
+                          onClick={() => navigate(`/configurator/${weapon.id}`)}
+                        >
+                          <div className="aspect-[16/10] relative overflow-hidden">
+                            <img 
+                              src={weapon.images && weapon.images.length > 0 ? weapon.images[0] : (weapon.image?.startsWith('http') ? weapon.image : (weapon.image || `https://picsum.photos/seed/${weapon.id}/800/500`))}
+                              alt={weapon.name}
+                              className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
                           </div>
-                          <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-red-500 transition-colors">
-                            {weapon.name}
-                          </h3>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1 h-1 bg-red-600 rounded-full" />
-                              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('ready_for_mods')}</span>
+                          
+                          <div className="p-6 relative">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">0{index + 1}</span>
+                              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">{weapon.brand}</span>
                             </div>
-                            <ChevronRight size={16} className="text-zinc-700 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-red-500 transition-colors">
+                              {weapon.name}
+                            </h3>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-1 bg-red-600 rounded-full" />
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('ready_for_mods')}</span>
+                              </div>
+                              <ChevronRight size={16} className="text-zinc-700 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
+                            </div>
                           </div>
+                          <div className="absolute inset-0 border-2 border-red-600/0 group-hover:border-red-600/20 rounded-3xl transition-all pointer-events-none" />
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className="col-span-full py-20 text-center">
+                        <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600">
+                          <Box size={32} className="animate-pulse" />
                         </div>
-                        <div className="absolute inset-0 border-2 border-red-600/0 group-hover:border-red-600/20 rounded-3xl transition-all pointer-events-none" />
-                      </motion.div>
-                    ))
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">{t('no_weapons_available')}</h3>
+                        <p className="text-zinc-500 text-sm uppercase tracking-widest mb-6 max-w-md mx-auto">
+                          {t('armory_empty_desc')}
+                        </p>
+                        <button 
+                          onClick={() => window.location.reload()}
+                          className="px-8 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-red-700 transition-all"
+                        >
+                          {t('retry_connection')}
+                        </button>
+                      </div>
+                    )
                   ) : (
                     savedBuilds.length > 0 ? (
                       savedBuilds.map((build, index) => (
@@ -362,23 +380,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                         <p className="text-zinc-500 text-sm uppercase tracking-widest">{t('start_configuring_to_save')}</p>
                       </div>
                     )
-                  ) : weapons.length === 0 ? (
-                    <div className="col-span-full py-20 text-center">
-                      <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600">
-                        <Box size={32} className="animate-pulse" />
-                      </div>
-                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">{t('no_weapons_available')}</h3>
-                      <p className="text-zinc-500 text-sm uppercase tracking-widest mb-6 max-w-md mx-auto">
-                        {t('armory_empty_desc')}
-                      </p>
-                      <button 
-                        onClick={() => window.location.reload()}
-                        className="px-8 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-red-700 transition-all"
-                      >
-                        {t('retry_connection')}
-                      </button>
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
             </motion.div>
