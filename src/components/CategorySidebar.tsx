@@ -23,9 +23,21 @@ export const CategorySidebar: React.FC = () => {
 
   // Get products filtered by category to determine available brands and mount types
   const categoryProducts = products.filter(p => {
-    if (filters.categories.length > 0 && !filters.categories.includes(p.category)) return false;
+    if (filters.categories.length > 0) {
+      const matchesCat = filters.categories.some(catId => {
+        if (p.category === catId) return true;
+        if (p.subcategory === catId) return true;
+        const pCat = categories.find(c => c.id === p.category);
+        const pSub = categories.find(c => c.id === p.subcategory);
+        return pCat?.parent === catId || pSub?.parent === catId;
+      });
+      if (!matchesCat) return false;
+    }
+    
     if (filters.subcategories.length > 0) {
-      const matchesSub = filters.subcategories.includes(p.subcategory) || filters.subcategories.includes(p.category);
+      const matchesSub = filters.subcategories.some(subId => {
+        return p.subcategory === subId || p.category === subId;
+      });
       if (!matchesSub) return false;
     }
     return true;

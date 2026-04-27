@@ -95,14 +95,23 @@ export const useShopStore = create<ShopState>((set, get) => ({
       if (!matchesSearch) return false;
 
       // Categories
-      if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
-        return false;
+      if (filters.categories.length > 0) {
+        const matchesCat = filters.categories.some(catId => {
+          if (product.category === catId) return true;
+          if (product.subcategory === catId) return true;
+          // Check if catId is a parent of the product's category or subcategory
+          const pCat = get().categories.find(c => c.id === product.category);
+          const pSub = get().categories.find(c => c.id === product.subcategory);
+          return pCat?.parent === catId || pSub?.parent === catId;
+        });
+        if (!matchesCat) return false;
       }
 
       // Subcategories
       if (filters.subcategories.length > 0) {
-        const matchesSub = filters.subcategories.includes(product.subcategory) || 
-                          filters.subcategories.includes(product.category);
+        const matchesSub = filters.subcategories.some(subId => {
+          return product.subcategory === subId || product.category === subId;
+        });
         if (!matchesSub) return false;
       }
 
