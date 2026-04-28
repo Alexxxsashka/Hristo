@@ -92,7 +92,6 @@ export const AdminDashboard: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users_list, setUsersList] = useState<any[]>([]);
