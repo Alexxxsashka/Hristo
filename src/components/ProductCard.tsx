@@ -12,6 +12,7 @@ import { formatLabel } from '../utils/formatText';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useToastStore } from '../store/toastStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { NoImage } from './NoImage';
 
 interface ProductCardProps {
   product: Product;
@@ -123,18 +124,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className={`relative overflow-hidden bg-zinc-950 ${
             viewMode === 'list' ? 'w-full md:w-64 aspect-square md:aspect-auto' : 'aspect-square'
           }`}>
-            <img
-              src={product.images && product.images.length > 0 ? product.images[0] : (product.image?.startsWith('http') ? product.image : (product.image || `https://picsum.photos/seed/${product.id}/600/600`))}
-              alt={product.name}
-              loading="lazy"
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = `https://picsum.photos/seed/${product.id}/600/600`;
-                target.onerror = null; // Prevent infinite loop
-              }}
-            />
+            {(() => {
+              const [imgError, setImgError] = useState(false);
+              const mainImage = product.images && product.images.length > 0 
+                ? product.images[0] 
+                : (product.image?.startsWith('http') ? product.image : product.image);
+
+              if (!mainImage || imgError) {
+                return <NoImage className="w-full h-full" />;
+              }
+
+              return (
+                <img
+                  src={mainImage}
+                  alt={product.name}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                  referrerPolicy="no-referrer"
+                  onError={() => setImgError(true)}
+                />
+              );
+            })()}
             
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">

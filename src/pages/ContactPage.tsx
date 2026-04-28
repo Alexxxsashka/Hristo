@@ -123,14 +123,9 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] pb-20">
       {/* Hero Section */}
-      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-[#0a0a0a] z-10" />
-        <img 
-          src="https://picsum.photos/seed/contact-hero/1920/1080?blur=4" 
-          alt="Contact Hero" 
-          className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
+      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-zinc-950">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-zinc-900/40 to-[#0a0a0a] z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.05)_0%,transparent_70%)]" />
         <div className="relative z-20 text-center space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}

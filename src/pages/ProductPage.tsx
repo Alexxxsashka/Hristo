@@ -20,6 +20,7 @@ import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Heart } from 'lucide-react';
 import { ProductPageSkeleton } from '../components/Skeleton';
+import { NoImage } from '../components/NoImage';
 
 const RedIcon = ({ emoji, size = 24 }: { emoji: string; size?: number }) => {
   const iconMap: Record<string, any> = {
@@ -124,7 +125,7 @@ export const ProductPage: React.FC = () => {
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": product.name,
-    "image": product.image || (product.model3D ? `https://picsum.photos/seed/${product.id}/800/600` : undefined),
+    "image": product.image || (product.images && product.images[0]) || undefined,
     "description": product.description,
     "brand": {
       "@type": "Brand",
@@ -173,17 +174,29 @@ export const ProductPage: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="aspect-square bg-zinc-900 rounded-[24px] sm:rounded-[32px] md:rounded-[40px] border border-zinc-800 overflow-hidden relative group"
+              className="aspect-square rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-zinc-800 relative group"
             >
               {product.has3D ? (
                 <ModelViewer modelPath={product.model3D?.startsWith('http') ? product.model3D : (product.model3D || product.model)} />
               ) : (
-                <img 
-                  src={product.images && product.images.length > 0 ? product.images[0] : (product.image?.startsWith('http') ? product.image : (product.image || `https://picsum.photos/seed/${product.id}/800/800`))} 
-                  className="absolute inset-0 w-full h-full object-cover"
-                  alt={product.name}
-                  referrerPolicy="no-referrer"
-                />
+                (() => {
+                  const [imgError, setImgError] = useState(false);
+                  const mainImage = previewImage || (product.images && product.images.length > 0 ? product.images[0] : (product.image?.startsWith('http') ? product.image : product.image));
+
+                  if (!mainImage || imgError) {
+                    return <NoImage className="w-full h-full" iconSize={64} />;
+                  }
+
+                  return (
+                    <img 
+                      src={mainImage} 
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                      onError={() => setImgError(true)}
+                    />
+                  );
+                })()
               )}
               <div className="absolute top-4 left-4 md:top-8 md:left-8 flex flex-col gap-2 md:gap-3">
                 <span className="px-2.5 py-1 md:px-4 md:py-2 bg-red-600 text-white text-[8px] md:text-[10px] font-black tracking-widest uppercase rounded-lg md:rounded-xl shadow-xl shadow-red-600/20">
@@ -329,7 +342,11 @@ export const ProductPage: React.FC = () => {
                       const isActive = rp.id === product.id;
                       return isActive ? (
                         <div key={rp.id} className="w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 border-white shadow-lg shadow-white/10 overflow-hidden relative cursor-default" title={rp.name}>
-                          <img src={rp.image || (rp.images && rp.images[0]) || `https://picsum.photos/seed/${rp.id}/200/200`} className="w-full h-full object-cover" alt={rp.name} />
+                          {rp.image || (rp.images && rp.images.length > 0) ? (
+                            <img src={rp.image || rp.images[0]} className="w-full h-full object-cover" alt={rp.name} />
+                          ) : (
+                            <NoImage className="w-full h-full" iconSize={16} text="" />
+                          )}
                         </div>
                       ) : (
                         <Link
@@ -338,7 +355,11 @@ export const ProductPage: React.FC = () => {
                           className="w-16 h-16 md:w-20 md:h-20 rounded-xl border border-zinc-800 hover:border-zinc-500 overflow-hidden relative opacity-60 hover:opacity-100 transition-all"
                           title={rp.name}
                         >
-                          <img src={rp.image || (rp.images && rp.images[0]) || `https://picsum.photos/seed/${rp.id}/200/200`} className="w-full h-full object-cover" alt={rp.name} />
+                          {rp.image || (rp.images && rp.images.length > 0) ? (
+                            <img src={rp.image || rp.images[0]} className="w-full h-full object-cover" alt={rp.name} />
+                          ) : (
+                            <NoImage className="w-full h-full" iconSize={16} text="" />
+                          )}
                         </Link>
                       );
                     })}

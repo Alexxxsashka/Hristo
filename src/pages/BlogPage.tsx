@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { BlogPost } from '../types';
 import { BLOG_CATEGORIES } from '../constants';
+import { NoImage } from '../components/NoImage';
 
 import { SEO } from '../components/SEO';
 import { databaseService } from '../services/databaseService';
@@ -72,14 +73,9 @@ export const BlogPage: React.FC = () => {
         keywords="airsoft blog, airsoft news, airsoft reviews, tactical guides"
       />
       {/* Hero Section */}
-      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-[#0a0a0a] z-10" />
-        <img 
-          src="https://picsum.photos/seed/blog-hero/1920/1080?blur=4" 
-          alt="Blog Hero" 
-          className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
+      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-zinc-950">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-zinc-900/40 to-[#0a0a0a] z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.05)_0%,transparent_70%)]" />
         <div className="relative z-20 text-center space-y-4 px-4">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -152,13 +148,17 @@ export const BlogPage: React.FC = () => {
                     className="bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 transition-all group flex flex-col"
                   >
                     <Link to={`/blog/${post.slug}`} className="relative h-64 overflow-hidden block">
-                      <img 
-                        src={post.image?.startsWith('http') ? post.image : (post.image || 'https://picsum.photos/seed/airsoft/800/600')} 
-                        alt={post.title} 
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        referrerPolicy="no-referrer"
-                      />
+                      {post.image?.startsWith('http') ? (
+                        <img 
+                          src={post.image} 
+                          alt={post.title} 
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <NoImage className="w-full h-full" iconSize={48} />
+                      )}
                       <div className="absolute top-4 left-4">
                         <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
                           {post.category}

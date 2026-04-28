@@ -27,7 +27,7 @@ export const SEO: React.FC<SEOProps> = ({
   const finalTitle = title || settings?.seoTitle || "Hristo Airsoft Store | Professional Equipment & 3D Configurator";
   const finalDescription = description || settings?.seoDescription || "Professional Airsoft Equipment & Customization. Experience the next generation of tactical gear building with our high-fidelity 3D configurator.";
   const finalKeywords = keywords || settings?.seoKeywords || "airsoft, tactical gear, airsoft guns, 3d configurator, airsoft croatia, hristo airsoft";
-  const finalOgImage = ogImage || settings?.ogImage || "https://picsum.photos/seed/hristo-og/1200/630";
+  const finalOgImage = ogImage || settings?.ogImage || settings?.logoUrl || "";
   
   const siteName = "Hristo Airsoft Store";
   const fullTitle = finalTitle.includes(siteName) ? finalTitle : `${finalTitle} | ${siteName}`;

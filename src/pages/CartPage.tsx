@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { NoImage } from '../components/NoImage';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -162,12 +163,16 @@ export const CartPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                       {/* Product Image */}
                       <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800 shrink-0 group-hover:border-red-600/30 transition-colors">
-                        <img 
-                          src={item.image || `https://picsum.photos/seed/${item.productId}/300/300`} 
-                          alt={item.productName}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          referrerPolicy="no-referrer"
-                        />
+                        {item.image ? (
+                          <img 
+                            src={item.image} 
+                            alt={item.productName}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <NoImage className="w-full h-full" iconSize={24} />
+                        )}
                       </div>
 
                       <div className="flex-1 min-w-0 flex flex-col justify-between">

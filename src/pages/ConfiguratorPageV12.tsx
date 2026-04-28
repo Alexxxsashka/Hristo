@@ -15,6 +15,7 @@ import { CartIcon } from '../components/CartIcon';
 import { Product } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../services/databaseService';
+import { NoImage } from '../components/NoImage';
 
 export const ConfiguratorPageV12: React.FC = () => {
   const params = useParams();
@@ -269,11 +270,21 @@ export const ConfiguratorPageV12: React.FC = () => {
                           onClick={() => navigate(`/configurator/${weapon.id}`)}
                         >
                           <div className="aspect-[16/10] relative overflow-hidden">
-                            <img 
-                              src={weapon.images && weapon.images.length > 0 ? weapon.images[0] : (weapon.image?.startsWith('http') ? weapon.image : (weapon.image || `https://picsum.photos/seed/${weapon.id}/800/500`))}
-                              alt={weapon.name}
-                              className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                            />
+                            {weapon.images && weapon.images.length > 0 ? (
+                              <img 
+                                src={weapon.images[0]}
+                                alt={weapon.name}
+                                className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                              />
+                            ) : weapon.image && weapon.image.startsWith('http') ? (
+                              <img 
+                                src={weapon.image}
+                                alt={weapon.name}
+                                className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                              />
+                            ) : (
+                              <NoImage className="w-full h-full" iconSize={24} />
+                            )}
                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
                           </div>
                           
@@ -330,11 +341,21 @@ export const ConfiguratorPageV12: React.FC = () => {
                               navigate(`/configurator/${build.activeProduct.id}`);
                             }}
                           >
-                            <img 
-                              src={build.activeProduct.images && build.activeProduct.images.length > 0 ? build.activeProduct.images[0] : (build.activeProduct.image?.startsWith('http') ? build.activeProduct.image : (build.activeProduct.image || `https://picsum.photos/seed/${build.activeProduct.id}/800/500`))}
-                              alt={build.name}
-                              className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                            />
+                            {build.activeProduct.images && build.activeProduct.images.length > 0 ? (
+                              <img 
+                                src={build.activeProduct.images[0]}
+                                alt={build.name}
+                                className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                              />
+                            ) : build.activeProduct.image && build.activeProduct.image.startsWith('http') ? (
+                              <img 
+                                src={build.activeProduct.image}
+                                alt={build.name}
+                                className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                              />
+                            ) : (
+                              <NoImage className="w-full h-full" iconSize={24} />
+                            )}
                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60" />
                           </div>
                           

@@ -51,6 +51,8 @@ import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
 import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
 import { databaseService } from '../services/databaseService';
 import { formatEnum, formatModelName } from '../utils/format';
+import { formatLabel } from '../utils/formatText';
+import { NoImage } from '../components/NoImage';
 import {
   BarChart,
   Bar,
@@ -639,8 +641,16 @@ export const AdminDashboard: React.FC = () => {
                           <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400">
-                                  <Package size={20} />
+                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-400 relative">
+                                  {product.image || (product.images && product.images.length > 0) ? (
+                                    <img 
+                                      src={product.images && product.images.length > 0 ? product.images[0] : product.image} 
+                                      className="w-full h-full object-cover"
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <NoImage className="w-full h-full" iconSize={16} text="" />
+                                  )}
                                 </div>
                                 <div>
                                   <div className="font-bold text-zinc-900">{product.name}</div>

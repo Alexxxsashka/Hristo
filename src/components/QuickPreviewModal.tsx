@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { getDiscountedPrice } from '../utils/price';
 import { useTranslation } from '../hooks/useTranslation';
 import { formatLabel } from '../utils/formatText';
+import { NoImage } from './NoImage';
 
 const RedIcon = ({ emoji, size = 20 }: { emoji: string; size?: number }) => {
   const iconMap: Record<string, any> = {
@@ -82,17 +83,26 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                 {product.has3D ? (
                   <ModelViewer modelPath={product.model3D?.startsWith('http') ? product.model3D : (product.model3D || product.model)} />
                 ) : (
-                  <img 
-                    src={product.images && product.images.length > 0 ? product.images[0] : (product.image?.startsWith('http') ? product.image : (product.image || `https://picsum.photos/seed/${product.id}/800/800`))} 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    alt={product.name}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = `https://picsum.photos/seed/${product.id}/800/800`;
-                      target.onerror = null;
-                    }}
-                  />
+                  (() => {
+                    const [imgError, setImgError] = React.useState(false);
+                    const mainImage = product.images && product.images.length > 0 
+                      ? product.images[0] 
+                      : (product.image?.startsWith('http') ? product.image : product.image);
+
+                    if (!mainImage || imgError) {
+                      return <NoImage className="absolute inset-0 w-full h-full" iconSize={48} />;
+                    }
+
+                    return (
+                      <img 
+                        src={mainImage} 
+                        className="absolute inset-0 w-full h-full object-cover"
+                        alt={product.name}
+                        referrerPolicy="no-referrer"
+                        onError={() => setImgError(true)}
+                      />
+                    );
+                  })()
                 )}
               </div>
 

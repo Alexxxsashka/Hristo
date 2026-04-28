@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
 import { databaseService } from '../../services/databaseService';
 import { Order } from '../../types';
+import { NoImage } from '../NoImage';
 
 interface OrderHistoryProps {
   orders: Order[];
@@ -129,8 +130,12 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                 <div className="space-y-4">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-zinc-950 rounded-xl border border-zinc-800 p-2">
-                        <img src={item.image || 'https://picsum.photos/seed/gear/200/200'} alt={item.name} className="w-full h-full object-contain" />
+                      <div className="w-16 h-16 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center p-2">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <NoImage className="w-full h-full" iconSize={12} text="" />
+                        )}
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-sm">{item.name}</p>

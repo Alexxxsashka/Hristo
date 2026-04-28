@@ -24,6 +24,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { getDiscountedPrice } from '../utils/price';
+import { NoImage } from '../components/NoImage';
 
 export const ComparePage: React.FC = () => {
   const { compareProducts, removeProduct, clearCompare } = useCompareStore();
@@ -192,12 +193,16 @@ export const ComparePage: React.FC = () => {
 
                       <div className="relative mb-6">
                         <div className="aspect-[4/3] bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 group-hover:border-red-600/50 transition-all duration-500">
-                          <img 
-                            src={product.images?.[0] || product.image || `https://picsum.photos/seed/${product.id}/600/450`} 
-                            alt={product.name}
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                            referrerPolicy="no-referrer"
-                          />
+                          {product.images?.[0] || product.image ? (
+                            <img 
+                              src={product.images?.[0] || product.image} 
+                              alt={product.name}
+                              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <NoImage className="w-full h-full" iconSize={32} />
+                          )}
                         </div>
                         <div className="absolute -bottom-3 left-4 right-4 flex justify-center gap-2">
                           <button 

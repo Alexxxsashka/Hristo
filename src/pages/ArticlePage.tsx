@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Package
 } from 'lucide-react';
+import { NoImage } from '../components/NoImage';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '../hooks/useTranslation';
 import { BlogPost, Product } from '../types';
@@ -88,7 +89,7 @@ export const ArticlePage: React.FC = () => {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": post.title,
-    "image": [post.image || 'https://picsum.photos/seed/article/1200/630'],
+    "image": [post.image || ''],
     "datePublished": post.date,
     "author": [{
       "@type": "Person",
@@ -114,12 +115,18 @@ export const ArticlePage: React.FC = () => {
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-end pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent z-10" />
-        <img 
-          src={post.image?.startsWith('http') ? post.image : (post.image || 'https://picsum.photos/seed/article/1920/1080')} 
-          alt={post.title} 
-          className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
+        {post.image?.startsWith('http') ? (
+          <img 
+            src={post.image} 
+            alt={post.title} 
+            className="absolute inset-0 w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="absolute inset-0">
+            <NoImage className="w-full h-full" iconSize={64} />
+          </div>
+        )}
         
         <div className="max-w-4xl mx-auto px-8 relative z-20 w-full">
           <motion.div
@@ -207,12 +214,16 @@ export const ArticlePage: React.FC = () => {
                     className="flex items-center gap-4 p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-red-600/30 transition-all group"
                   >
                     <div className="w-20 h-20 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center">
-                      <img 
-                        src={product.image?.startsWith('http') ? product.image : (product.image || (product.model3D ? `https://picsum.photos/seed/${product.id}/200` : 'https://placehold.co/200x200?text=No+Image'))} 
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                        referrerPolicy="no-referrer"
-                      />
+                      {product.image?.startsWith('http') || (product.images && product.images.length > 0) ? (
+                        <img 
+                          src={product.images && product.images.length > 0 ? product.images[0] : product.image} 
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <NoImage className="w-full h-full" iconSize={16} text="" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-white font-bold text-sm truncate group-hover:text-red-500 transition-colors">{product.name}</h4>
