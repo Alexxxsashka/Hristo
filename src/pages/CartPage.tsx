@@ -113,24 +113,7 @@ export const CartPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-24">
-      {/* Header */}
-      <header className="h-16 sm:h-20 border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-xl sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-3 md:gap-6">
-          <Link to="/" className="p-1.5 sm:p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
-            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
-          </Link>
-          <div className="h-5 sm:h-6 w-px bg-zinc-800" />
-          <h1 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-2 md:gap-3">
-            <ShoppingBag className="text-red-600 sm:w-6 sm:h-6" size={20} />
-            {t('shopping_cart')}
-          </h1>
-        </div>
-        <div className="hidden sm:block">
-          <LanguageSwitcher />
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-8 md:py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-8 md:py-12">
         <AnimatePresence mode="wait">
           {cartItems.length === 0 ? (
             <motion.div 
@@ -152,9 +135,9 @@ export const CartPage: React.FC = () => {
               </Link>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Items List */}
-              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              <div className="lg:col-span-7 xl:col-span-8 space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between mb-2 sm:mb-4">
                   <h2 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-500">
                     {cartItems.length} {t('active_attachments')}
@@ -262,7 +245,7 @@ export const CartPage: React.FC = () => {
               </div>
 
               {/* Order Summary */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-5 xl:col-span-4">
                 <div className="lg:sticky lg:top-32 p-8 sm:p-10 bg-zinc-900 border border-zinc-800 rounded-[32px] sm:rounded-[40px] shadow-2xl shadow-red-900/10 relative overflow-hidden group">
                   {/* Decorative background gradient */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 blur-[60px] rounded-full group-hover:bg-red-600/10 transition-colors" />
