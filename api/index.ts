@@ -1288,6 +1288,141 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(204).end();
     }
 
+    // ── GET /admin/coupons ─────────────────────────────────────────────────────
+    if (path === "/admin/coupons" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const result = await pool.query('SELECT * FROM coupons ORDER BY created_at DESC');
+      return res.json(result.rows.map(row => ({
+        ...row,
+        productId: row.product_id,
+        categoryId: row.category_id,
+        minOrderAmount: Number(row.min_order_amount),
+        expiresAt: row.expires_at,
+        value: Number(row.value)
+      })));
+    }
+
+    // ── POST /admin/coupons ────────────────────────────────────────────────────
+    if (path === "/admin/coupons" && method === "POST") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const { code, type, value, productId, categoryId, minOrderAmount, expiresAt, active } = req.body;
+      const id = `coupon-${Date.now()}`;
+      await pool.query(
+        'INSERT INTO coupons (id, code, type, value, product_id, category_id, min_order_amount, expires_at, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        [id, code, type, value, productId || null, categoryId || null, minOrderAmount || 0, expiresAt || null, active !== false]
+      );
+      await logAudit(pool, {
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.email.split('@')[0],
+        action: 'CREATE_COUPON',
+        resourceType: 'coupon',
+        resourceId: id,
+        details: `Administrator ${user.email} created coupon: ${code}`,
+        severity: 'info',
+        req
+      });
+      return res.status(201).json({ success: true, id });
+    }
+
+    // ── PUT /admin/coupons/:id ─────────────────────────────────────────────────
+    const adminCouponPUT = match(path, "/admin/coupons/:id");
+    if (adminCouponPUT && method === "PUT") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      const { code, type, value, productId, categoryId, minOrderAmount, expiresAt, active } = req.body;
+      await pool.query(
+        'UPDATE coupons SET code = $1, type = $2, value = $3, product_id = $4, category_id = $5, min_order_amount = $6, expires_at = $7, active = $8 WHERE id = $9',
+        [code, type, value, productId || null, categoryId || null, minOrderAmount || 0, expiresAt || null, active !== false, adminCouponPUT[0]]
+      );
+      await logAudit(pool, {
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.email.split('@')[0],
+        action: 'UPDATE_COUPON',
+        resourceType: 'coupon',
+        resourceId: adminCouponPUT[0],
+        details: `Administrator ${user.email} updated coupon: ${code}`,
+        severity: 'info',
+        req
+      });
+      return res.json({ success: true });
+    }
+
+    // ── DELETE /admin/coupons/:id ──────────────────────────────────────────────
+    const adminCouponDELETE = match(path, "/admin/coupons/:id");
+    if (adminCouponDELETE && method === "DELETE") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+      await pool.query('DELETE FROM coupons WHERE id = $1', [adminCouponDELETE[0]]);
+      await logAudit(pool, {
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.email.split('@')[0],
+        action: 'DELETE_COUPON',
+        resourceType: 'coupon',
+        resourceId: adminCouponDELETE[0],
+        details: `Administrator ${user.email} deleted coupon ${adminCouponDELETE[0]}`,
+        severity: 'warning',
+        req
+      });
+      return res.status(204).end();
+    }
+
+    // ── POST /coupons/validate ─────────────────────────────────────────────────
+    if (path === "/coupons/validate" && method === "POST") {
+      const { code, items = [] } = req.body;
+      const result = await pool.query('SELECT * FROM coupons WHERE code = $1', [code]);
+      if (result.rows.length === 0) {
+        return res.json({ valid: false, message: 'Coupon not found' });
+      }
+      
+      const coupon = result.rows[0];
+      if (!coupon.active) {
+        return res.json({ valid: false, message: 'Coupon is not active' });
+      }
+      
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        return res.json({ valid: false, message: 'Coupon has expired' });
+      }
+
+      let subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      if (coupon.min_order_amount && subtotal < Number(coupon.min_order_amount)) {
+        return res.json({ valid: false, message: `Minimum order amount for this coupon is €${coupon.min_order_amount}` });
+      }
+
+      const applicableItems = items.filter((item: any) => {
+        if (!coupon.product_id && !coupon.category_id) return true;
+        if (coupon.product_id && item.productId === coupon.product_id) return true;
+        if (coupon.category_id && item.category === coupon.category_id) return true;
+        return false;
+      });
+
+      if (applicableItems.length === 0) {
+        return res.json({ valid: false, message: 'Coupon is not applicable to selected items' });
+      }
+
+      let discountAmount = 0;
+      if (coupon.type === 'percent') {
+        const applicableSubtotal = applicableItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+        discountAmount = applicableSubtotal * (Number(coupon.value) / 100);
+      } else {
+        discountAmount = Math.min(Number(coupon.value), subtotal);
+      }
+
+      return res.json({ 
+        valid: true, 
+        discount: discountAmount, 
+        coupon: {
+          code: coupon.code,
+          type: coupon.type,
+          value: Number(coupon.value)
+        }
+      });
+    }
+
     // ── POST /auth/register ────────────────────────────────────────────────────
     if (path === "/auth/register" && method === "POST") {
       const { username, email, password } = req.body || {};

@@ -481,12 +481,27 @@ export const databaseService = {
   },
 
   async validateCoupon(code: string, cartItems: any[]) {
-    const res = await fetch('/api/coupons/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, items: cartItems })
-    });
-    return await res.json();
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, items: cartItems })
+      });
+      
+      const data = await res.json().catch(() => ({}));
+      
+      if (!res.ok) {
+        return { 
+          valid: false, 
+          message: data.message || data.error || `Validation error (${res.status})` 
+        };
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Coupon validation error:', err);
+      return { valid: false, message: 'Network or server error' };
+    }
   },
 
   async getBIAnalytics(): Promise<BIWidgetData> {

@@ -118,6 +118,19 @@ async function migrateSchema(pool: Pool): Promise<MigrationResult> {
       user_agent TEXT,
       severity TEXT DEFAULT 'info',
       timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    )`,
+
+    `CREATE TABLE IF NOT EXISTS coupons (
+      id TEXT PRIMARY KEY,
+      code TEXT UNIQUE NOT NULL,
+      type TEXT NOT NULL, -- 'percent' or 'fixed'
+      value DECIMAL NOT NULL,
+      product_id TEXT,
+      category_id TEXT,
+      min_order_amount DECIMAL DEFAULT 0,
+      expires_at TIMESTAMP WITH TIME ZONE,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     )`
   ];
 
