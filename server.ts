@@ -2359,25 +2359,24 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     try {
       const result = await pool.query('SELECT * FROM coupons WHERE code = $1', [code]);
       if (result.rows.length === 0) {
-        return res.json({ valid: false, message: 'Промокод не найден' });
+        return res.json({ valid: false, message: 'Coupon not found' });
       }
       
       const coupon = result.rows[0];
       if (!coupon.active) {
-        return res.json({ valid: false, message: 'Промокод не активен' });
+        return res.json({ valid: false, message: 'Coupon is not active' });
       }
       
       if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
-        return res.json({ valid: false, message: 'Срок действия промокода истек' });
+        return res.json({ valid: false, message: 'Coupon has expired' });
       }
 
       // Check if it applies to the items
-      let applicable = false;
       let discountAmount = 0;
       let subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
 
       if (coupon.min_order_amount && subtotal < Number(coupon.min_order_amount)) {
-        return res.json({ valid: false, message: `Минимальная сумма заказа для этого промокода: €${coupon.min_order_amount}` });
+        return res.json({ valid: false, message: `Minimum order amount for this coupon is €${coupon.min_order_amount}` });
       }
 
       const applicableItems = items.filter((item: any) => {
@@ -2388,19 +2387,19 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       });
 
       if (applicableItems.length === 0) {
-        return res.json({ valid: false, message: 'Промокод не применим к выбранным товарам' });
+        return res.json({ valid: false, message: 'Coupon is not applicable to selected items' });
       }
 
       if (coupon.type === 'percent') {
         const applicableSubtotal = applicableItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
         discountAmount = applicableSubtotal * (Number(coupon.value) / 100);
       } else {
-        discountAmount = Number(coupon.value);
+        discountAmount = Math.min(Number(coupon.value), subtotal); // Fixed discount cannot exceed subtotal
       }
 
       res.json({ 
         valid: true, 
-        message: 'Промокод применен!', 
+        message: 'Coupon applied successfully!', 
         discount: discountAmount,
         coupon: {
           id: coupon.id,
@@ -2422,11 +2421,13 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         FROM order_items oi
         LEFT JOIN products p ON oi.product_id = p.id
         LEFT JOIN categories c ON p.category_id = c.id
-        WHERE oi.order_id IN (SELECT id FROM orders)
       `);
       
+      console.log(`[Admin] Fetched ${ordersRes.rows.length} orders and ${itemsRes.rows.length} total order items`);
+
       const orders = ordersRes.rows.map(row => {
-        const items = itemsRes.rows.filter(item => String(item.order_id) === String(row.id));
+        const orderId = String(row.id);
+        const items = itemsRes.rows.filter(item => String(item.order_id) === orderId);
         return mapOrder(row, items);
       });
 

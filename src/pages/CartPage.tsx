@@ -59,11 +59,33 @@ export const CartPage: React.FC = () => {
       }
     } catch (err) {
       setPromoStatus('error');
-      setPromoMessage('Ошибка валидации');
+      setPromoMessage('Validation error occurred');
     } finally {
       setIsValidating(false);
     }
   };
+
+  // Auto-revalidate promo code when cart items change
+  React.useEffect(() => {
+    if (appliedCoupon) {
+      const revalidate = async () => {
+        try {
+          const result = await databaseService.validateCoupon(appliedCoupon.code, cartItems);
+          if (result.valid) {
+            setPromoDiscount(result.discount);
+          } else {
+            setPromoDiscount(0);
+            setAppliedCoupon(null);
+            setPromoStatus('error');
+            setPromoMessage(result.message);
+          }
+        } catch (err) {
+          console.error('Coupon revalidation failed:', err);
+        }
+      };
+      revalidate();
+    }
+  }, [cartItems, appliedCoupon?.code]);
 
   const handleRemoveItem = (id: string, name: string) => {
     setConfirmDialog({

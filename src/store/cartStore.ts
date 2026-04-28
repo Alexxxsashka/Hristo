@@ -99,7 +99,7 @@ export const useCartStore = create<CartStore>()(
                 quantity: quantity,
                 image: product.image,
                 sku: variant?.sku || product.sku,
-                category: product.category,
+                category: product.category || product.category_id || 'Other',
                 landingCost: product.landingCost,
                 selectedVariant: variant ? {
                   id: variant.id,
