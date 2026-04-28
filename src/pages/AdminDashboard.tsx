@@ -112,6 +112,14 @@ export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
+  useEffect(() => {
+    loadAllData();
+    
+    // 🕵️ Audit Real-time Polling (Every 10 seconds to catch actions from other admins)
+    const auditInterval = setInterval(fetchAuditLogs, 10000);
+    return () => clearInterval(auditInterval);
+  }, []);
+
   const loadAllData = async () => {
     setIsLoading(true);
     await Promise.all([
@@ -122,9 +130,18 @@ export const AdminDashboard: React.FC = () => {
       fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
       databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
       databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e)),
-      databaseService.getAuditLogs().then(a => setAuditLogs(a || [])).catch(e => console.error('Failed to fetch audit logs:', e))
+      fetchAuditLogs()
     ]);
     setIsLoading(false);
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      const logs = await databaseService.getAuditLogs();
+      setAuditLogs(logs || []);
+    } catch (e) {
+      console.error('Failed to fetch audit logs:', e);
+    }
   };
 
   const handleRunMigrations = async () => {
@@ -231,6 +248,7 @@ export const AdminDashboard: React.FC = () => {
         await databaseService.deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
         showNotification('Product deleted successfully');
+        fetchAuditLogs();
       } catch (err) {
         console.error('Failed to delete product', err);
         showNotification('Failed to delete product', 'error');
@@ -244,6 +262,7 @@ export const AdminDashboard: React.FC = () => {
         await databaseService.deleteBlogPost(id);
         setBlogPosts(blogPosts.filter(p => p.id !== id));
         showNotification('Post deleted successfully');
+        fetchAuditLogs();
       } catch (err) {
         console.error('Failed to delete post', err);
         showNotification('Failed to delete post', 'error');
@@ -257,6 +276,7 @@ export const AdminDashboard: React.FC = () => {
         await databaseService.deleteMessage(id);
         setMessages(messages.filter(m => m.id !== id));
         showNotification('Message deleted successfully');
+        fetchAuditLogs();
       } catch (err) {
         console.error('Failed to delete message', err);
         showNotification('Failed to delete message', 'error');
@@ -483,7 +503,7 @@ export const AdminDashboard: React.FC = () => {
                   orders={orders}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
-                  onUpdate={fetchOrdersInternal}
+                  onUpdate={() => { fetchOrdersInternal(); fetchAuditLogs(); }}
                 />
               </motion.div>
             )}
@@ -653,6 +673,7 @@ export const AdminDashboard: React.FC = () => {
                 onConfirm={confirmAction}
                 onSuccess={() => {
                   fetchProducts();
+                  fetchAuditLogs();
                   setActiveTab('products');
                   setEditingProduct(null);
                 }}
@@ -666,7 +687,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'categories' && (
               <CategoryManager
                 categories={categories}
-                onUpdate={fetchCategories}
+                onUpdate={() => { fetchCategories(); fetchAuditLogs(); }}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
                 onAddCategory={(parentId?: string) => {
@@ -689,11 +710,12 @@ export const AdminDashboard: React.FC = () => {
                 initialData={editingCategory}
                 categories={categories}
                 showHelp={showHelp}
-                onUpdate={fetchCategories}
+                onUpdate={() => { fetchCategories(); fetchAuditLogs(); }}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
                 onSuccess={() => {
                   fetchCategories();
+                  fetchAuditLogs();
                   setActiveTab('categories');
                   setEditingCategory(null);
                 }}
@@ -726,7 +748,7 @@ export const AdminDashboard: React.FC = () => {
 
                 <BlogManager
                   posts={filteredBlogPosts}
-                  onUpdate={fetchBlogPosts}
+                  onUpdate={() => { fetchBlogPosts(); fetchAuditLogs(); }}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
                 />
@@ -744,7 +766,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'orders' && (
               <OrderManager 
                 orders={orders}
-                onUpdate={fetchOrders}
+                onUpdate={() => { fetchOrdersInternal(); fetchAuditLogs(); }}
                 onNotify={showNotification} 
                 onConfirm={confirmAction}
               />
@@ -753,7 +775,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'policies' && (
               <PolicyManager
                 policies={policies}
-                onUpdate={fetchPolicies}
+                onUpdate={() => { fetchPolicies(); fetchAuditLogs(); }}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
               />
@@ -762,7 +784,11 @@ export const AdminDashboard: React.FC = () => {
 
 
             {activeTab === 'settings' && (
-              <SiteSettingsManager onNotify={showNotification} onConfirm={confirmAction} onUpdate={loadAllData} />
+              <SiteSettingsManager 
+                onNotify={showNotification} 
+                onConfirm={confirmAction} 
+                onUpdate={() => { loadAllData(); fetchAuditLogs(); }} 
+              />
             )}
 
             {activeTab === 'system' && (
