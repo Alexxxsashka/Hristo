@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, UserPlus, AlertCircle } from 'lucide-react';
 import { auth } from '../auth';
@@ -24,6 +25,7 @@ export const RegisterPage: React.FC = () => {
   });
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -40,46 +42,46 @@ export const RegisterPage: React.FC = () => {
     switch (field) {
       case 'username':
         if (!value.trim()) {
-          error = 'Username is ';
+          error = t('username_required');
         } else if (value.length < 3) {
-          error = 'Username must be at least 3 characters';
+          error = t('username_min');
         } else if (value.length > 50) {
-          error = 'Username must be less than 50 characters';
+          error = t('username_max');
         } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-          error = 'Username can only contain letters, numbers, and underscores';
+          error = t('username_invalid');
         }
         break;
       case 'email':
         if (!value.trim()) {
-          error = 'Email is ';
+          error = t('email_required');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Please enter a valid email address';
+          error = t('invalid_email');
         } else if (value.length > 255) {
-          error = 'Email must be less than 255 characters';
+          error = t('email_max_chars');
         }
         break;
       case 'password':
         if (!value) {
-          error = 'Password is ';
+          error = t('password_required');
         } else if (value.length < 8) {
-          error = 'Password must be at least 8 characters';
+          error = t('password_min');
         } else if (value.length > 128) {
-          error = 'Password must be less than 128 characters';
+          error = t('password_max');
         } else if (!/[A-Z]/.test(value)) {
-          error = 'Password must contain at least one uppercase letter';
+          error = t('password_uppercase');
         } else if (!/[a-z]/.test(value)) {
-          error = 'Password must contain at least one lowercase letter';
+          error = t('password_lowercase');
         } else if (!/[0-9]/.test(value)) {
-          error = 'Password must contain at least one number';
+          error = t('password_number');
         } else if (!/[^A-Za-z0-9]/.test(value)) {
-          error = 'Password must contain at least one special character';
+          error = t('password_special');
         }
         break;
       case 'confirmPassword':
         if (!value) {
-          error = 'Please confirm your password';
+          error = t('confirm_password_prompt');
         } else if (value !== password) {
-          error = 'Passwords do not match';
+          error = t('passwords_dont_match');
         }
         break;
     }
@@ -170,8 +172,8 @@ export const RegisterPage: React.FC = () => {
             <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
               <UserPlus className="text-white" size={32} />
             </div>
-            <h1 className="text-3xl font-black tracking-tighter uppercase">Join the Squad</h1>
-            <p className="text-zinc-500 text-sm mt-2">Create your account to start customizing</p>
+            <h1 className="text-3xl font-black tracking-tighter uppercase">{t('join_squad')}</h1>
+            <p className="text-zinc-500 text-sm mt-2 text-center">{t('create_account_desc')}</p>
           </div>
 
           {error && (
@@ -183,7 +185,7 @@ export const RegisterPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Username</label>
+              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('username')}</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input 
@@ -203,7 +205,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input 
@@ -223,7 +225,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Password</label>
+              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('password')}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input 
@@ -244,7 +246,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Confirm Password</label>
+              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('confirm_password')}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input 
@@ -268,7 +270,7 @@ export const RegisterPage: React.FC = () => {
               disabled={loading}
               className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest mt-4"
             >
-              {loading ? 'Creating Account...' : 'Register'}
+              {loading ? t('creating_account') : t('register')}
             </button>
           </form>
 
@@ -278,9 +280,9 @@ export const RegisterPage: React.FC = () => {
 
           <div className="mt-8 pt-8 border-t border-zinc-800 text-center">
             <p className="text-zinc-500 text-sm">
-              Already have an account?{' '}
+              {t('already_have_account')}{' '}
               <Link to="/login" className="text-red-500 hover:text-red-400 font-bold transition-colors">
-                Login Now
+                {t('login_now')}
               </Link>
             </p>
           </div>

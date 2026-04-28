@@ -148,61 +148,61 @@ export const CheckoutPage: React.FC = () => {
     switch (field) {
       case 'firstName':
         if (!value?.trim()) {
-          error = 'First name is required';
+          error = t('first_name_required');
         } else if (value.length < 2) {
-          error = 'First name must be at least 2 characters';
+          error = t('first_name_min');
         } else if (value.length > 50) {
-          error = 'First name must be less than 50 characters';
+          error = t('first_name_max');
         }
         break;
       case 'lastName':
         if (!value?.trim()) {
-          error = 'Last name is required';
+          error = t('last_name_required');
         } else if (value.length < 2) {
-          error = 'Last name must be at least 2 characters';
+          error = t('last_name_min');
         } else if (value.length > 50) {
-          error = 'Last name must be less than 50 characters';
+          error = t('last_name_max');
         }
         break;
       case 'email':
         if (!value?.trim()) {
-          error = 'Email is required';
+          error = t('email_required');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Please enter a valid email address';
+          error = t('invalid_email');
         } else if (value.length > 255) {
-          error = 'Email must be less than 255 characters';
+          error = t('email_max_chars');
         }
         break;
       case 'address':
         if (!value?.trim()) {
-          error = 'Address is required';
+          error = t('address_required');
         } else if (value.length < 5) {
-          error = 'Address must be at least 5 characters';
+          error = t('address_min');
         } else if (value.length > 200) {
-          error = 'Address must be less than 200 characters';
+          error = t('address_max');
         }
         break;
       case 'city':
         if (!value?.trim()) {
-          error = 'City is required';
+          error = t('city_required');
         } else if (value.length < 2) {
-          error = 'City must be at least 2 characters';
+          error = t('city_min');
         } else if (value.length > 100) {
-          error = 'City must be less than 100 characters';
+          error = t('city_max');
         }
         break;
       case 'postalCode':
         if (!value?.trim()) {
-          error = 'Postal code is required';
+          error = t('postal_code_required');
         } else if (!/^[0-9]{4,10}$/.test(value.replace(/\s/g, ''))) {
-          error = 'Postal code must be 4-10 digits';
+          error = t('postal_code_invalid');
         }
         break;
       case 'phone':
         if (!value?.trim()) {
-          error = 'Phone number is required';
+          error = t('phone_required');
         } else if (!/^[0-9+\-\s()]{7,20}$/.test(value)) {
-          error = 'Please enter a valid phone number';
+          error = t('phone_invalid');
         }
         break;
     }
@@ -297,7 +297,7 @@ export const CheckoutPage: React.FC = () => {
           setStripeClientSecret(clientSecret);
         } catch (err: any) {
           console.error('Stripe Init Error:', err);
-          setError('Failed to initialize Stripe payment. Please try another method or contact support.');
+          setError(t('stripe_init_error'));
         }
       };
       initStripe();
@@ -326,7 +326,7 @@ export const CheckoutPage: React.FC = () => {
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       const errorFields = Object.keys(errors).join(', ');
-      setError(`Please fix the validation errors in: ${errorFields}`);
+      setError(t('validation_error_fix', { fields: errorFields }));
       return;
     }
     
@@ -402,7 +402,7 @@ export const CheckoutPage: React.FC = () => {
       clearCart();
     } catch (err: any) {
       console.error('Checkout error:', err);
-      setError(err.message || 'Failed to place order. Please check stock levels.');
+      setError(t('order_place_error'));
       setIsProcessing(false);
     }
   };
@@ -716,7 +716,7 @@ export const CheckoutPage: React.FC = () => {
                           <p className="font-bold text-white">{formData.firstName} {formData.lastName}</p>
                           <p>{formData.address}</p>
                           <p>{formData.postalCode} {formData.city}</p>
-                          <p>Croatia</p>
+                          <p>{t('croatia')}</p>
                         </div>
                       </div>
                       <div className="space-y-3 sm:space-y-4">

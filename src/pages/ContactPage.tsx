@@ -21,7 +21,7 @@ export const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: 'Pitanje o proizvodu',
+    subject: t('product_question'),
     message: ''
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -38,38 +38,38 @@ export const ContactPage: React.FC = () => {
     switch (field) {
       case 'name':
         if (!value.trim()) {
-          error = 'Ime je obavezno';
+          error = t('name_required');
         } else if (value.length < 2) {
-          error = 'Ime mora imati najmanje 2 znaka';
+          error = t('name_min_chars');
         } else if (value.length > 100) {
-          error = 'Ime ne može biti duže od 100 znakova';
+          error = t('name_max_chars');
         } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-          error = 'Ime može sadržavati samo slova i razmake';
+          error = t('letters_only');
         }
         break;
       case 'email':
         if (!value.trim()) {
-          error = 'Email je obavezan';
+          error = t('email_required');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Unesite valjanu email adresu';
+          error = t('invalid_email');
         } else if (value.length > 255) {
-          error = 'Email ne može biti duži od 255 znakova';
+          error = t('email_max_chars');
         }
         break;
       case 'subject':
         if (!value.trim()) {
-          error = 'Predmet je obavezan';
+          error = t('subject_required');
         } else if (value.length > 200) {
-          error = 'Predmet ne može biti duži od 200 znakova';
+          error = t('subject_max_chars');
         }
         break;
       case 'message':
         if (!value.trim()) {
-          error = 'Poruka je obavezna';
+          error = t('message_required');
         } else if (value.length < 10) {
-          error = 'Poruka mora imati najmanje 10 znakova';
+          error = t('message_min_chars');
         } else if (value.length > 2000) {
-          error = 'Poruka ne može biti duža od 2000 znakova';
+          error = t('message_max_chars');
         }
         break;
     }
@@ -110,12 +110,12 @@ export const ContactPage: React.FC = () => {
       setFormData({
         name: '',
         email: '',
-        subject: 'Pitanje o proizvodu',
+        subject: t('product_question'),
         message: ''
       });
       setFieldErrors({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
-      setErrorMessage('Mrežna pogreška. Molimo pokušajte ponovno.');
+      setErrorMessage(t('network_error'));
       setStatus('error');
     }
   };
@@ -193,8 +193,8 @@ export const ContactPage: React.FC = () => {
               <div>
                 <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2">{t('working_hours')}</h3>
                 <div className="space-y-1 text-zinc-400 text-sm">
-                  <p>{t('mon_fri')}: 09-19 sati</p>
-                  <p>{t('sat')}: 9-14h</p>
+                  <p>{t('mon_fri')}: {t('mon_fri_hours')}</p>
+                  <p>{t('sat')}: {t('sat_hours')}</p>
                   <p>{t('sun')}: {t('closed')}</p>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export const ContactPage: React.FC = () => {
                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_name')}</label>
                           <input 
                             type="text" 
-                            placeholder="Vaše ime"
+                            placeholder={t('your_name_placeholder')}
                             value={formData.name}
                             onChange={e => handleFieldChange('name', e.target.value)}
                             className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${
@@ -261,7 +261,7 @@ export const ContactPage: React.FC = () => {
                           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_email')}</label>
                           <input 
                             type="email" 
-                            placeholder="Vaš email"
+                            placeholder={t('your_email_placeholder')}
                             value={formData.email}
                             onChange={e => handleFieldChange('email', e.target.value)}
                             className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${

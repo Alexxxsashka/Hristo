@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, LogIn, AlertCircle, Phone, ArrowLeft, RefreshCw } from 'lucide-react';
 import { auth } from '../auth';
@@ -25,6 +26,7 @@ export const LoginPage: React.FC = () => {
   });
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -37,18 +39,18 @@ export const LoginPage: React.FC = () => {
     switch (field) {
       case 'email':
         if (!value.trim()) {
-          error = 'Email is required';
+          error = t('email_required');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Please enter a valid email address';
+          error = t('invalid_email');
         } else if (value.length > 255) {
-          error = 'Email must be less than 255 characters';
+          error = t('email_max_chars');
         }
         break;
       case 'password':
         if (!value) {
-          error = 'Password is required';
+          error = t('password_required');
         } else if (value.length > 128) {
-          error = 'Password must be less than 128 characters';
+          error = t('password_max');
         }
         break;
     }
@@ -105,7 +107,7 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccess('Password reset link sent to your email.');
+      setSuccess(t('reset_link_sent'));
     } catch (err: any) {
       setError(getAuthErrorMessage(err.code));
     } finally {
@@ -126,12 +128,12 @@ export const LoginPage: React.FC = () => {
               <LogIn className="text-white" size={32} />
             </div>
             <h1 className="text-3xl font-black tracking-tighter uppercase">
-              {showForgot ? 'Reset Password' : 'Welcome Back'}
+              {showForgot ? t('reset_password_title') : t('welcome_back_title')}
             </h1>
             <p className="text-zinc-500 text-sm mt-2 text-center">
               {showForgot 
-                ? 'Enter your email to receive a reset link' 
-                : 'Access your tactical dashboard'}
+                ? t('forgot_password_subtitle') 
+                : t('login_subtitle')}
             </p>
           </div>
 
@@ -142,7 +144,7 @@ export const LoginPage: React.FC = () => {
                 method === 'email' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Email
+              {t('email')}
             </button>
             <button
               onClick={() => { setMethod('phone'); setShowForgot(false); }}
@@ -150,7 +152,7 @@ export const LoginPage: React.FC = () => {
                 method === 'phone' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Phone
+              {t('phone_method')}
             </button>
           </div>
 
@@ -179,7 +181,7 @@ export const LoginPage: React.FC = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                     <input 
@@ -202,7 +204,7 @@ export const LoginPage: React.FC = () => {
                   disabled={loading}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest"
                 >
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? t('sending_reset_link') : t('send_reset_link')}
                 </button>
                 <button
                   type="button"
@@ -210,7 +212,7 @@ export const LoginPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 text-zinc-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
                 >
                   <ArrowLeft size={14} />
-                  Back to Login
+                  {t('back_to_login')}
                 </button>
               </motion.form>
             ) : method === 'email' ? (
@@ -223,7 +225,7 @@ export const LoginPage: React.FC = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                     <input 
@@ -244,13 +246,13 @@ export const LoginPage: React.FC = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-1.5 ml-1">
-                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Password</label>
+                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('password')}</label>
                     <button
                       type="button"
                       onClick={() => setShowForgot(true)}
                       className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-400"
                     >
-                      Forgot?
+                      {t('forgot_password')}
                     </button>
                   </div>
                   <div className="relative">
@@ -276,7 +278,7 @@ export const LoginPage: React.FC = () => {
                   disabled={loading}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest mt-4"
                 >
-                  {loading ? 'Authenticating...' : 'Login'}
+                  {loading ? t('authenticating') : t('login')}
                 </button>
               </motion.form>
             ) : (
@@ -299,9 +301,9 @@ export const LoginPage: React.FC = () => {
 
           <div className="mt-8 pt-8 border-t border-zinc-800 text-center">
             <p className="text-zinc-500 text-sm">
-              Don't have an account?{' '}
+              {t('dont_have_account')}{' '}
               <Link to="/register" className="text-red-500 hover:text-red-400 font-bold transition-colors">
-                Register Now
+                {t('register_now')}
               </Link>
             </p>
           </div>

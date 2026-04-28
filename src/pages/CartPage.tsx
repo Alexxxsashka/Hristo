@@ -118,7 +118,7 @@ export const CartPage: React.FC = () => {
                               </div>
                             )}
                             <div className="mt-2 text-[8px] sm:text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">
-                              SKU: {item.sku || 'N/A'}
+                              {t('sku')}: {item.sku || 'N/A'}
                             </div>
                           </div>
                           <button 
@@ -196,7 +196,7 @@ export const CartPage: React.FC = () => {
                       <div className="flex justify-between text-xs sm:text-sm text-emerald-500 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/20">
                         <div className="flex flex-col">
                           <span className="font-black uppercase tracking-widest text-[10px]">{t('dashboard_discount')} ({formatLabel(user?.rank || '')})</span>
-                          <span className="text-[9px] opacity-70">LOYALTY PROGRAM</span>
+                          <span className="text-[9px] opacity-70">{t('loyalty_program')}</span>
                         </div>
                         <span className="font-mono font-black text-lg">-{userDiscount}%</span>
                       </div>
