@@ -391,6 +391,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── GET /categories ────────────────────────────────────────────────────────
     if (path === "/categories" && method === "GET") {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       const r = await pool.query(
         "SELECT id, name, name_hr as \"nameHr\", slug, image_url as image, parent_id as parent, filters FROM categories ORDER BY name"
       );
