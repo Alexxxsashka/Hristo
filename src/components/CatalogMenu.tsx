@@ -17,17 +17,25 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
   const { t, language } = useTranslation();
 
   useEffect(() => {
-    databaseService.getCategories()
-      .then(data => {
-        if (data) {
-          setCategories(data);
-          if (data.length > 0) {
-            const mainCats = data.filter((c: Category) => !c.parent);
-            setActiveCategory(mainCats[0]);
+    if (isOpen) {
+      databaseService.getCategories()
+        .then(data => {
+          if (data) {
+            setCategories(data);
+            if (data.length > 0) {
+              // Only reset activeCategory if it's currently null or no longer exists
+              const mainCats = data.filter((c: Category) => !c.parent);
+              const currentActive = data.find(c => c.id === activeCategory?.id);
+              if (currentActive) {
+                setActiveCategory(currentActive);
+              } else {
+                setActiveCategory(mainCats[0]);
+              }
+            }
           }
-        }
-      });
-  }, []);
+        });
+    }
+  }, [isOpen]);
 
   const mainCategories = categories.filter(c => !c.parent);
   const subCategories = categories.filter(c => c.parent === activeCategory?.id);
