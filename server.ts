@@ -376,10 +376,7 @@ function mapOrder(row: any, items: any[] = []) {
 }
 
 // Just-in-time migration
-async function initSchema() {
-}
-
-  async function initializeDatabase() {
+async function initializeDatabase() {
     // 1. First test the standard connection
     await testConnection();
 
@@ -2277,7 +2274,6 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
     }
-  });
   });
 
   app.get("/api/admin/orders", authenticateAdmin, async (req, res) => {
