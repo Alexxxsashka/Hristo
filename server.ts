@@ -337,6 +337,48 @@ const authenticateAdmin = async (req: any, res: any, next: any) => {
     });
   }
 
+function mapOrder(row: any, items: any[] = []) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    userId: row.user_id,
+    subtotal: Number(row.subtotal),
+    tax: Number(row.tax || 0),
+    shippingCost: Number(row.shipping_cost || 0),
+    total: Number(row.total),
+    profit: Number(row.profit || 0),
+    status: row.status,
+    payment: {
+      method: row.payment_method || 'unknown',
+      status: row.payment_status || 'pending',
+      amount: Number(row.total || 0),
+      currency: row.currency || "EUR"
+    },
+    shipping: typeof row.shipping_address === 'string' ? JSON.parse(row.shipping_address) : (row.shipping_address || {}),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    notes: row.notes,
+    items: items.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      name: item.name || item.product_name || 'Unknown Product',
+      price: Number(item.price),
+      quantity: item.quantity,
+      image: item.image || item.product_image,
+      sku: item.sku || item.product_sku,
+      category: item.category || item.category_name,
+      configuration: typeof item.variant_info === 'string' ? JSON.parse(item.variant_info) : item.variant_info
+    })),
+    stripePaymentIntentId: row.stripe_payment_intent_id,
+    trackingNumber: row.tracking_number
+  };
+}
+
+// Just-in-time migration
+async function initSchema() {
+}
+
   async function initializeDatabase() {
     // 1. First test the standard connection
     await testConnection();
@@ -1979,9 +2021,8 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
   // Orders API
   app.post("/api/orders", authenticateToken, async (req: any, res) => {
     const orderData = req.body;
-    const orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
-    const orderId = `order-${Date.now()}`;
-    const timestamp = new Date().toISOString();
+    const orderNumber = `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+    const orderId = orderData.id || `order-${Date.now()}`;
     
     const client = await pool.connect();
     try {
@@ -2007,8 +2048,9 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         }
 
         // Fetch category for category-level discounts
-        const categoryResult = await client.query('SELECT discount FROM categories WHERE id = $1', [product.category_id]);
+        const categoryResult = await client.query('SELECT discount, name FROM categories WHERE id = $1', [product.category_id]);
         const categoryDiscount = categoryResult.rows[0]?.discount || 0;
+        const categoryName = categoryResult.rows[0]?.name || '';
         
         const productDiscount = parseInt(product.discount) || 0;
         const userDiscount = userProfile?.discount_level || 0;
@@ -2018,16 +2060,22 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         const discountedPrice = parseFloat(product.price) * (1 - bestDiscount / 100);
         const landingCost = parseFloat(product.landing_cost) || (parseFloat(product.price) * 0.6);
         
-        authoritativeSubtotal += discountedPrice * item.quantity;
+        const itemSubtotal = discountedPrice * item.quantity;
+        authoritativeSubtotal += itemSubtotal;
         authoritativeProfit += (discountedPrice - landingCost) * item.quantity;
 
-        orderItems.push({
-          ...item,
+        const processedItem = {
+          order_id: orderId,
           product_id: product.id,
+          name: product.name,
           price: discountedPrice,
-          landing_cost: landingCost,
-          sku: product.sku || ''
-        });
+          quantity: item.quantity,
+          image: product.image_url,
+          sku: product.sku || '',
+          category: categoryName || product.category_id,
+          variant_info: item.configuration ? JSON.stringify(item.configuration) : (item.selectedVariant ? JSON.stringify(item.selectedVariant) : null)
+        };
+        orderItems.push(processedItem);
 
         // Update stock
         await client.query(
@@ -2044,10 +2092,57 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       }
 
       const shippingCost = parseFloat(orderData.shipping_cost || orderData.shipping?.cost || 0);
-      const authoritativeTotal = authoritativeSubtotal + shippingCost;
+      const discountAmount = parseFloat(orderData.discountAmount || 0);
+      const authoritativeTotal = authoritativeSubtotal + shippingCost - discountAmount;
       const tax = authoritativeTotal * 0.25; // Example tax rate
 
-      // 3. Trigger robust recalculation instead of naive addition
+      // 3. Save the actual order
+      const shipping = orderData.shipping || {};
+      const payment = orderData.payment || {};
+      
+      await client.query(
+        `INSERT INTO orders (
+          id, order_number, user_id, total, subtotal, tax, discount_amount, shipping_cost, 
+          status, payment_method, payment_status, shipping_address, 
+          first_name, last_name, email, shipping_city, shipping_phone, shipping_postal_code,
+          notes, profit, points_earned
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
+        [
+          orderId,
+          orderNumber,
+          req.user.id,
+          authoritativeTotal,
+          authoritativeSubtotal,
+          tax,
+          discountAmount,
+          shippingCost,
+          'pending',
+          payment.method || 'unknown',
+          payment.status || 'pending',
+          JSON.stringify(shipping),
+          shipping.firstName || '',
+          shipping.lastName || '',
+          shipping.email || '',
+          shipping.city || '',
+          shipping.phone || '',
+          shipping.postalCode || '',
+          orderData.notes || '',
+          authoritativeProfit,
+          orderData.pointsEarned || 0
+        ]
+      );
+
+      // 4. Save order items
+      for (const oi of orderItems) {
+        await client.query(
+          `INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info, category) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [oi.order_id, oi.product_id, oi.name, oi.quantity, oi.price, oi.image, oi.sku, oi.variant_info, oi.category]
+        );
+      }
+
+      // 5. Trigger robust recalculation
       await recalculateUserPointsAndRank(req.user.id);
 
       await client.query('COMMIT');
@@ -2140,8 +2235,22 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.get("/api/orders", authenticateToken, async (req: any, res) => {
     try {
-      const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
-      res.json(result.rows);
+      const ordersRes = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+      const itemsRes = await pool.query(`
+        SELECT oi.*, p.image_url as product_image, p.sku as product_sku, c.name as category_name
+        FROM order_items oi 
+        JOIN orders o ON oi.order_id = o.id 
+        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE o.user_id = $1
+      `, [req.user.id]);
+      
+      const orders = ordersRes.rows.map(row => {
+        const items = itemsRes.rows.filter(item => item.order_id === row.id);
+        return mapOrder(row, items);
+      });
+      
+      res.json(orders);
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
     }
@@ -2152,52 +2261,42 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [req.params.id]);
       if (orderResult.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
       
-      const order = orderResult.rows[0];
-      if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+      const orderRow = orderResult.rows[0];
+      if (orderRow.user_id !== req.user.id && req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
-      const itemsResult = await pool.query('SELECT oi.*, p.name, p.image_url FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = $1', [req.params.id]);
-      order.items = itemsResult.rows;
-      
-      res.json(order);
+      const itemsResult = await pool.query(`
+        SELECT oi.*, p.image_url as product_image, p.sku as product_sku, c.name as category_name
+        FROM order_items oi 
+        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE oi.order_id = $1
+      `, [req.params.id]);
+      res.json(mapOrder(orderRow, itemsResult.rows));
     } catch (error) {
       res.status(500).json({ error: 'Database error' });
     }
   });
+  });
 
   app.get("/api/admin/orders", authenticateAdmin, async (req, res) => {
     try {
-      const ordersResult = await pool.query('SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC');
-      const orders = ordersResult.rows;
-      
-      // Fetch items for all orders in one go if possible, or just add them.
-      // For simplicity in this dashboard, we'll fetch items for each order or use a join.
-      // Better to use a JSON aggregation in Postgres if available.
-      const result = await pool.query(`
-        SELECT 
-          o.*, 
-          u.email as user_email,
-          COALESCE(
-            (SELECT json_agg(json_build_object(
-              'id', oi.id,
-              'product_id', oi.product_id,
-              'name', oi.name,
-              'price', oi.price,
-              'quantity', oi.quantity,
-              'image', p.image_url
-            ))
-             FROM order_items oi
-             LEFT JOIN products p ON oi.product_id = p.id
-             WHERE oi.order_id = o.id
-            ), '[]'::json
-          ) as items
-        FROM orders o 
-        LEFT JOIN users u ON o.user_id = u.id 
-        ORDER BY o.created_at DESC
+      const ordersRes = await pool.query('SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC');
+      const itemsRes = await pool.query(`
+        SELECT oi.*, p.image_url as product_image, p.sku as product_sku, c.name as category_name
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE oi.order_id IN (SELECT id FROM orders)
       `);
       
-      res.json(result.rows);
+      const orders = ordersRes.rows.map(row => {
+        const items = itemsRes.rows.filter(item => String(item.order_id) === String(row.id));
+        return mapOrder(row, items);
+      });
+
+      res.json(orders);
     } catch (error) {
       console.error('Admin orders fetch error:', error);
       res.status(500).json({ error: 'Database error' });
