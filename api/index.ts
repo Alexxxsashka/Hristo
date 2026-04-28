@@ -8,14 +8,14 @@ import { testConnection } from "../backend/services/db.service.js";
 let isConnected = false;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // 1. Ensure DB connection
+  // 1. Ensure DB connection and run migrations
   if (!isConnected) {
     try {
-      await testConnection();
+      await testConnection(); // This now calls runMigrations internally
       isConnected = true;
     } catch (error) {
-      console.error("DB connection failed in Vercel handler:", error);
-      return res.status(500).json({ error: "Internal Server Error (DB)" });
+      console.error("DB connection/migration failed in Vercel handler:", error);
+      return res.status(500).json({ error: "Internal Server Error (DB/Migration)" });
     }
   }
 
