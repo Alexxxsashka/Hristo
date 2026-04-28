@@ -1,4 +1,4 @@
-import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings, AuditLog } from "../types";
+import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings, AuditLog, Coupon } from "../types";
 
 const VERCEL_FUNCTION_BODY_LIMIT_BYTES = 4 * 1024 * 1024;
 const IMAGE_COMPRESSION_TARGET_BYTES = Math.floor(VERCEL_FUNCTION_BODY_LIMIT_BYTES * 0.9);
