@@ -81,9 +81,11 @@ import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
 import { ReportModal } from '../components/admin/ReportModal';
+import { AuditManager } from '../components/admin/AuditManager';
+import { AuditLog } from '../types';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'settings' | 'system'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'settings' | 'system' | 'audit'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -95,6 +97,7 @@ export const AdminDashboard: React.FC = () => {
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users_list, setUsersList] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [productFilter, setProductFilter] = useState<'all' | 'out_of_stock' | 'premium'>('all');
@@ -118,7 +121,8 @@ export const AdminDashboard: React.FC = () => {
       fetchPolicies().catch(e => console.error('Failed to fetch policies:', e)),
       fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
       databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
-      databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e))
+      databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e)),
+      databaseService.getAuditLogs().then(a => setAuditLogs(a || [])).catch(e => console.error('Failed to fetch audit logs:', e))
     ]);
     setIsLoading(false);
   };
@@ -375,6 +379,12 @@ export const AdminDashboard: React.FC = () => {
             active={activeTab === 'system'}
             onClick={() => { setActiveTab('system'); setSearchQuery(''); }}
           />
+          <SidebarItem
+            icon={<Shield size={18} />}
+            label="Audit"
+            active={activeTab === 'audit'}
+            onClick={() => { setActiveTab('audit'); setSearchQuery(''); }}
+          />
 
         </nav>
 
@@ -417,6 +427,7 @@ export const AdminDashboard: React.FC = () => {
                 {activeTab === 'blog' && 'Manage news and articles for your customers'}
                 {activeTab === 'messages' && 'Read and reply to customer messages'}
                 {activeTab === 'policies' && 'Edit legal documents and information pages'}
+                {activeTab === 'audit' && 'Security Registry of system events'}
               </span>
             )}
           </div>
@@ -831,6 +842,16 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </motion.div>
                 )}
+              </motion.div>
+            )}
+            {activeTab === 'audit' && (
+              <motion.div
+                key="audit"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <AuditManager logs={auditLogs} onRefresh={loadAllData} />
               </motion.div>
             )}
           </AnimatePresence>

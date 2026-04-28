@@ -1,4 +1,4 @@
-import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings } from "../types";
+import { Category, Product, BlogPost, PolicyPage, Order, OrderItem, BIWidgetData, UserProfile, Address, ServiceRequest, SavedBuild, SiteSettings, AuditLog } from "../types";
 
 const VERCEL_FUNCTION_BODY_LIMIT_BYTES = 4 * 1024 * 1024;
 const IMAGE_COMPRESSION_TARGET_BYTES = Math.floor(VERCEL_FUNCTION_BODY_LIMIT_BYTES * 0.9);
@@ -752,5 +752,16 @@ export const databaseService = {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return await res.json();
+  },
+  
+  async getAuditLogs(): Promise<AuditLog[]> {
+    try {
+      const res = await fetch('/api/admin/audit', {
+        headers: { 'Authorization': `Bearer ${this.getToken()}` }
+      });
+      return res.ok ? await res.json() : [];
+    } catch {
+      return [];
+    }
   }
 };

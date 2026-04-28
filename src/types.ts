@@ -379,3 +379,18 @@ export interface SiteSettings {
   // 3D Live Demo
   liveDemoModelUrl?: string;
 }
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  action: string;
+  resourceType: string;
+  resourceId?: string;
+  details: string;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: string;
+  severity: 'info' | 'warning' | 'error' | 'critical';
+}

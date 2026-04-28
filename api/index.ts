@@ -136,6 +136,32 @@ function match(path: string, pattern: string): string[] | null {
   return keys.map((_, i) => m[i + 1]);
 }
 
+async function logAudit(pool: any, data: {
+  userId?: string;
+  userEmail?: string;
+  userName?: string;
+  action: string;
+  resourceType?: string;
+  resourceId?: string;
+  details: string;
+  severity?: string;
+  req?: VercelRequest;
+}) {
+  const { userId, userEmail, userName, action, resourceType, resourceId, details, severity = 'info', req } = data;
+  const ip = req ? (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').toString() : null;
+  const userAgent = req ? req.headers['user-agent'] : null;
+
+  try {
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, user_email, user_name, action, resource_type, resource_id, details, severity, ip_address, user_agent)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [userId, userEmail, userName, action, resourceType, resourceId, details, severity, ip, userAgent]
+    );
+  } catch (err) {
+    console.error("Audit logging failed:", err);
+  }
+}
+
 async function recalculateUserPointsAndRank(pool: any, userId: string) {
   if (!userId || userId === "guest") return;
   console.log(`🔄 [Loyalty] Recalculating for user: ${userId}`);
@@ -239,6 +265,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error("Migration error:", err);
         return res.status(500).json({ error: err.message });
       }
+    }
+
+    if (path === "/admin/audit" && method === "GET") {
+      const user = getUser(req);
+      if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+
+      const logs = await pool.query(`
+        SELECT 
+          id, 
+          user_id as "userId", 
+          user_email as "userEmail", 
+          user_name as "userName", 
+          action, 
+          resource_type as "resourceType", 
+          resource_id as "resourceId", 
+          details, 
+          ip_address as "ipAddress", 
+          user_agent as "userAgent", 
+          severity, 
+          timestamp 
+        FROM audit_logs 
+        ORDER BY timestamp DESC 
+        LIMIT 200
+      `);
+      return res.status(200).json(logs.rows);
     }
 
     // ── Loyalty Recalculate ──────────────────────────────────────────────────
@@ -432,6 +483,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
              discount = EXCLUDED.discount`,
           [finalId, name, slug, imageUrl, parentId, JSON.stringify(filters), discount]
         );
+
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: categoryIdFromPath ? 'UPDATE_CATEGORY' : 'CREATE_CATEGORY',
+          resourceType: 'category',
+          resourceId: finalId,
+          details: `Administrator ${user.email} ${categoryIdFromPath ? 'updated' : 'created'} category: ${name} (ID: ${finalId})`,
+          severity: 'info',
+          req
+        });
+
         return res.json({ ok: true });
       } catch (err: any) {
         console.error("Failed to save category:", err);
@@ -464,6 +528,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("UPDATE products SET subcategory = NULL WHERE subcategory = $1", [identifier]);
         await pool.query("UPDATE categories SET parent_id = NULL WHERE parent_id = $1", [identifier]);
         await pool.query("DELETE FROM categories WHERE id = $1", [identifier]);
+
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: 'DELETE_CATEGORY',
+          resourceType: 'category',
+          resourceId: identifier,
+          details: `Administrator ${user.email} deleted category: ${identifier}`,
+          severity: 'warning',
+          req
+        });
       } catch (e) {
         console.error('Failed to delete category from DB:', e);
         return res.status(500).json({ error: "Failed to delete category" });
@@ -820,6 +896,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         console.log(`[DB] Product save success. RowCount: ${r.rowCount}, ID: ${p.uid || id}, Category: ${p.category || p.category_id}, Subcategory: ${p.subcategory}`);
 
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: p.id ? 'UPDATE_PRODUCT' : 'CREATE_PRODUCT',
+          resourceType: 'product',
+          resourceId: id,
+          details: `Administrator ${user.email} ${p.id ? 'updated' : 'created'} product: ${p.name} (SKU: ${p.sku})`,
+          severity: 'info',
+          req
+        });
+
         // Sync compatibility table for whitelist
         try {
           if (Array.isArray(p.compatibleIds || p.compatibleWeapons)) {
@@ -1020,6 +1108,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.error("Compatibility sync failed:", syncErr);
         }
 
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: 'UPDATE_PRODUCT',
+          resourceType: 'product',
+          resourceId: r.rows[0].id,
+          details: `Administrator ${user.email} updated product: ${p.name || 'Unnamed'} (ID: ${r.rows[0].id})`,
+          severity: 'info',
+          req
+        });
+
         return res.json({ ok: true, id: r.rows[0].id, updated: true });
       } catch (dbErr: any) {
         console.error("Database Update Error:", dbErr);
@@ -1080,6 +1180,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const deleteResult = await pool.query("DELETE FROM products WHERE id = $1 OR slug = $1", [identifier]);
+      
+      if (deleteResult.rowCount > 0) {
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: 'DELETE_PRODUCT',
+          resourceType: 'product',
+          resourceId: identifier,
+          details: `Administrator ${user.email} deleted product: ${identifier}`,
+          severity: 'warning',
+          req
+        });
+      }
+
       if (deleteResult.rowCount === 0) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -1396,6 +1511,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (ownerRes.rows.length > 0) {
           await recalculateUserPointsAndRank(pool, ownerRes.rows[0].user_id);
         }
+
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: 'UPDATE_ORDER_STATUS',
+          resourceType: 'order',
+          resourceId: orderId,
+          details: `Administrator ${user.email} updated status for order ${orderId} to ${newStatus}`,
+          severity: 'info',
+          req
+        });
       } catch (err: any) {
         console.error("Order status update error:", err);
         // Fallback simple update if everything above fails
@@ -1770,6 +1897,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             values
           );
         }
+
+        await logAudit(pool, {
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.email.split('@')[0],
+          action: 'UPDATE_SETTINGS',
+          resourceType: 'settings',
+          resourceId: 'site_settings',
+          details: `Administrator ${user.email} updated general site settings`,
+          severity: 'info',
+          req
+        });
 
         return res.json({ success: true });
       } catch (err: any) {
