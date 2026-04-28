@@ -15,12 +15,6 @@ export const CartPage: React.FC = () => {
   const { user } = useAuthStore();
   const { t } = useTranslation();
 
-  const userDiscount = user?.discountLevel || 0;
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
-  const userDiscountAmount = totalAmount * (userDiscount / 100);
-  const finalTotal = Math.max(0, totalAmount - userDiscountAmount - promoDiscount);
-  const vatAmount = finalTotal * 0.2;
-
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
   const [confirmDialog, setConfirmDialog] = React.useState<{
     isOpen: boolean;
@@ -29,16 +23,22 @@ export const CartPage: React.FC = () => {
     onConfirm: () => void;
   } | null>(null);
 
-  const handleCheckout = () => {
-    navigate('/checkout', { state: { appliedCoupon } });
-  };
-
   const [promoCode, setPromoCode] = React.useState('');
   const [promoDiscount, setPromoDiscount] = React.useState(0);
   const [promoMessage, setPromoMessage] = React.useState('');
   const [promoStatus, setPromoStatus] = React.useState<'success' | 'error' | null>(null);
   const [appliedCoupon, setAppliedCoupon] = React.useState<any | null>(null);
   const [isValidating, setIsValidating] = React.useState(false);
+
+  const userDiscount = user?.discountLevel || 0;
+  const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const userDiscountAmount = totalAmount * (userDiscount / 100);
+  const finalTotal = Math.max(0, totalAmount - userDiscountAmount - promoDiscount);
+  const vatAmount = finalTotal * 0.2;
+
+  const handleCheckout = () => {
+    navigate('/checkout', { state: { appliedCoupon } });
+  };
 
   const handleApplyPromoCode = async () => {
     if (!promoCode.trim()) return;

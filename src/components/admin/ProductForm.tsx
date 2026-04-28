@@ -317,7 +317,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             model3D: modelUrl,
             model3DName: modelName,
             images: finalImageUrls,
-            image_url: finalImageUrls[0] || '', // Явно передаем и image_url и image для бэкенда
+            image_url: finalImageUrls[0] || '', // Explicitly pass both image_url and image for the backend
             image: finalImageUrls[0] || '',
             has3D: !!modelUrl || formData.has3D,
             characteristics: finalCharacteristics
@@ -1066,7 +1066,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                         const newImages = [...combinedImages];
                         [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
                         setCombinedImages(newImages);
-                        // Синхронизируем с formData
+                        // Sync with formData
                         setFormData(prev => ({
                           ...prev,
                           images: newImages.filter(img => typeof img === 'string') as string[],
@@ -1085,7 +1085,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                         const newImages = [...combinedImages];
                         [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]];
                         setCombinedImages(newImages);
-                        // Синхронизируем с formData
+                        // Sync with formData
                         setFormData(prev => ({
                           ...prev,
                           images: newImages.filter(img => typeof img === 'string') as string[],
@@ -1106,7 +1106,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                       }
                       const newImages = combinedImages.filter((_, i) => i !== index);
                       setCombinedImages(newImages);
-                      // Mгновенно обновляем formData, чтобы удаление точно зафиксировалось
+                      // Instantly update formData to ensure deletion is captured
                       setFormData(prev => ({
                         ...prev,
                         images: newImages.filter(img => typeof img === 'string') as string[],

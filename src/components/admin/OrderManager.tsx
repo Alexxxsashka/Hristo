@@ -44,11 +44,11 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const filteredOrders = orders.filter(order => {
-    // Еквівалент BindingSource.Filter
+    // Equivalent to BindingSource.Filter
     const activeStatus = externalFilter && externalFilter !== 'all' ? externalFilter : statusFilter;
     const matchesStatus = activeStatus === 'all' || order.status === activeStatus;
 
-    // Еквівалент BindingSource.Find: пошук за проіндексованим ID замовлення
+    // Equivalent to BindingSource.Find: search by indexed order ID
     if (externalSearch) {
        return order.id.toLowerCase() === externalSearch.toLowerCase() ||
               order.id.toLowerCase().includes(externalSearch.toLowerCase());
