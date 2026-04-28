@@ -16,6 +16,8 @@ export const CouponManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Partial<Coupon> | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -39,18 +41,37 @@ export const CouponManager: React.FC = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (!editingCoupon?.code?.trim()) errors.code = 'Coupon code is required / Kod kupona je obavezan';
+    if (!editingCoupon?.value || editingCoupon.value <= 0) errors.value = 'Value must be greater than 0 / Vrijednost mora biti veća od 0';
+    if (editingCoupon?.type === 'percent' && editingCoupon.value > 100) errors.value = 'Percentage cannot exceed 100% / Postotak ne može biti veći od 100%';
+    
+    if (editingCoupon?.categoryId && editingCoupon?.productId) {
+      errors.binding = 'Select either Category OR Product, not both / Odaberite Kategoriju ILI Proizvod, ne oboje';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCoupon) return;
+    if (!validateForm()) return;
 
+    setIsSaving(true);
     try {
       await databaseService.saveCoupon(editingCoupon);
       setShowModal(false);
       setEditingCoupon(null);
+      setFieldErrors({});
       fetchData();
     } catch (err) {
       console.error('Save failed:', err);
-      alert('Failed to save coupon');
+      setFieldErrors({ submit: 'Database error / Greška u bazi podataka' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -258,11 +279,15 @@ export const CouponManager: React.FC = () => {
                     <input 
                       required
                       type="text"
-                      value={editingCoupon?.code}
-                      onChange={(e) => setEditingCoupon({ ...editingCoupon!, code: e.target.value.toUpperCase() })}
+                      value={editingCoupon?.code || ''}
+                      onChange={(e) => {
+                        setEditingCoupon({ ...editingCoupon!, code: e.target.value.toUpperCase() });
+                        if (fieldErrors.code) setFieldErrors(prev => ({ ...prev, code: '' }));
+                      }}
                       placeholder="WINTER2026"
-                      className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-900 font-bold uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all"
+                      className={`w-full px-5 py-3 bg-zinc-50 border rounded-2xl text-zinc-900 font-bold uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all ${fieldErrors.code ? 'border-red-500' : 'border-zinc-200'}`}
                     />
+                    {fieldErrors.code && <p className="mt-1 text-[10px] text-red-500 font-bold uppercase tracking-widest">{fieldErrors.code}</p>}
                   </div>
 
                   <div>
@@ -290,10 +315,14 @@ export const CouponManager: React.FC = () => {
                     <input 
                       required
                       type="number"
-                      value={editingCoupon?.value}
-                      onChange={(e) => setEditingCoupon({ ...editingCoupon!, value: parseFloat(e.target.value) })}
-                      className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-900 font-mono font-bold focus:ring-2 focus:ring-zinc-900 outline-none transition-all"
+                      value={editingCoupon?.value || ''}
+                      onChange={(e) => {
+                        setEditingCoupon({ ...editingCoupon!, value: parseFloat(e.target.value) });
+                        if (fieldErrors.value) setFieldErrors(prev => ({ ...prev, value: '' }));
+                      }}
+                      className={`w-full px-5 py-3 bg-zinc-50 border rounded-2xl text-zinc-900 font-mono font-bold focus:ring-2 focus:ring-zinc-900 outline-none transition-all ${fieldErrors.value ? 'border-red-500' : 'border-zinc-200'}`}
                     />
+                    {fieldErrors.value && <p className="mt-1 text-[10px] text-red-500 font-bold uppercase tracking-widest">{fieldErrors.value}</p>}
                   </div>
                 </div>
 
@@ -302,7 +331,7 @@ export const CouponManager: React.FC = () => {
                     <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 px-1">Min Order (€)</label>
                     <input 
                       type="number"
-                      value={editingCoupon?.minOrderAmount}
+                      value={editingCoupon?.minOrderAmount || 0}
                       onChange={(e) => setEditingCoupon({ ...editingCoupon!, minOrderAmount: parseFloat(e.target.value) })}
                       className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-900 font-mono font-bold focus:ring-2 focus:ring-zinc-900 outline-none transition-all"
                     />
@@ -326,8 +355,11 @@ export const CouponManager: React.FC = () => {
                     </label>
                     <select 
                       value={editingCoupon?.categoryId || ''}
-                      onChange={(e) => setEditingCoupon({ ...editingCoupon!, categoryId: e.target.value || undefined })}
-                      className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all appearance-none"
+                      onChange={(e) => {
+                        setEditingCoupon({ ...editingCoupon!, categoryId: e.target.value || undefined });
+                        if (fieldErrors.binding) setFieldErrors(prev => ({ ...prev, binding: '' }));
+                      }}
+                      className={`w-full px-5 py-3 bg-zinc-50 border rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all appearance-none ${fieldErrors.binding ? 'border-red-500' : 'border-zinc-200'}`}
                     >
                       <option value="">All Categories</option>
                       {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -339,13 +371,17 @@ export const CouponManager: React.FC = () => {
                     </label>
                     <select 
                       value={editingCoupon?.productId || ''}
-                      onChange={(e) => setEditingCoupon({ ...editingCoupon!, productId: e.target.value || undefined })}
-                      className="w-full px-5 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all appearance-none"
+                      onChange={(e) => {
+                        setEditingCoupon({ ...editingCoupon!, productId: e.target.value || undefined });
+                        if (fieldErrors.binding) setFieldErrors(prev => ({ ...prev, binding: '' }));
+                      }}
+                      className={`w-full px-5 py-3 bg-zinc-50 border rounded-2xl text-zinc-900 font-bold text-xs uppercase tracking-widest focus:ring-2 focus:ring-zinc-900 outline-none transition-all appearance-none ${fieldErrors.binding ? 'border-red-500' : 'border-zinc-200'}`}
                     >
                       <option value="">All Products</option>
                       {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
+                  {fieldErrors.binding && <div className="col-span-2 text-center text-[10px] text-red-500 font-black uppercase tracking-widest">{fieldErrors.binding}</div>}
                 </div>
 
                 <div>
@@ -368,23 +404,29 @@ export const CouponManager: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex gap-4 pt-4">
-                  <button 
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 py-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border border-zinc-200"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    className="flex-1 py-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-zinc-900/20 flex items-center justify-center gap-2"
-                  >
-                    <Save size={16} />
-                    Save Campaign
-                  </button>
+                <div className="pt-4 flex flex-col gap-4">
+                  {fieldErrors.submit && <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold text-center">{fieldErrors.submit}</div>}
+                  
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 py-4 bg-zinc-100 text-zinc-600 rounded-[20px] font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSaving}
+                      className="flex-1 py-4 bg-zinc-900 text-white rounded-[20px] font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                    >
+                      {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+                      {editingCoupon?.id ? 'Update Campaign' : 'Create Campaign'}
+                    </button>
+                  </div>
                 </div>
               </form>
+
             </motion.div>
           </div>
         )}

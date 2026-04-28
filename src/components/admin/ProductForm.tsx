@@ -172,12 +172,22 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         break;
       case 'brand':
         if (value && value.length > 100) {
-          error = 'Brand must be less than 100 characters';
+          error = 'Brand must be less than 100 characters / Marka mora biti kraća od 100 znakova';
         }
         break;
       case 'model':
         if (value && value.length > 100) {
-          error = 'Model must be less than 100 characters';
+          error = 'Model must be less than 100 characters / Model mora biti kraći od 100 znakova';
+        }
+        break;
+      case 'category':
+        if (!value) {
+          error = 'Category is required / Kategorija je obavezna';
+        }
+        break;
+      case 'type':
+        if (!value) {
+          error = 'Product type is required / Vrsta proizvoda je obavezna';
         }
         break;
     }
@@ -198,15 +208,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     } else {
       setActiveCategory(null);
     }
-
-    // SCORCHED EARTH: Forcibly remove 'required' from all visible inputs to block browser tooltips
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-      if (input.hasAttribute('required')) {
-        input.removeAttribute('required');
-      }
-    });
-  }, [formData.category, formData.subcategory, categories, formData.name]); // Re-run when crucial fields change
+  }, [formData.category, formData.subcategory, categories]);
 
   const handleCategoryFilterChange = (filterId: string, value: any) => {
     setFormData({
@@ -236,7 +238,18 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     if (Object.keys(errors).length > 0) {
       console.log('[ProductForm Debug] Submission blocked by custom validation errors');
       setFieldErrors(errors);
-      onNotify('Please fix the validation errors before submitting', 'error');
+      onNotify('Please fix the validation errors / Molimo ispravite pogreške', 'error');
+      
+      // Smooth scroll to the first error
+      const firstErrorKey = Object.keys(errors)[0];
+      const element = document.querySelector(`[name="${firstErrorKey}"], .error-${firstErrorKey}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Extra logical validation
+    if (combinedImages.length === 0 && !modelFile && !formData.model3D) {
+      onNotify('At least one image or 3D model is required / Potrebna je barem jedna slika ili 3D model', 'error');
       return;
     }
 
@@ -614,14 +627,23 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Determines how the item is handled in the 3D configurator.</p>}
             <select 
               value={formData.type}
-              onChange={e => setFormData({...formData, type: e.target.value as any})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              onChange={e => {
+                setFormData({...formData, type: e.target.value as any});
+                if (fieldErrors.type) setFieldErrors(prev => ({ ...prev, type: '' }));
+              }}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.type ? 'border-red-500' : 'border-zinc-200'
+              }`}
             >
+              <option value="">Select Type</option>
               <option value="weapon">Weapon</option>
               <option value="module">Module</option>
               <option value="gear">Gear</option>
               <option value="part">Internal Part</option>
             </select>
+            {fieldErrors.type && (
+              <p className="text-red-500 text-xs error-type">{fieldErrors.type}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Visual Mode</label>
@@ -747,14 +769,22 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <label className="text-sm font-semibold text-zinc-700">Category</label>
             <select 
               value={formData.category}
-              onChange={e => setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}})}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
+              onChange={e => {
+                setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}});
+                if (fieldErrors.category) setFieldErrors(prev => ({ ...prev, category: '' }));
+              }}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
+                fieldErrors.category ? 'border-red-500' : 'border-zinc-200'
+              }`}
             >
               <option value="">Select Category</option>
               {categories.filter(c => !c.parent).map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+            {fieldErrors.category && (
+              <p className="text-red-500 text-xs error-category">{fieldErrors.category}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Subcategory</label>
