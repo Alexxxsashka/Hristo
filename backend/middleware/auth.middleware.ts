@@ -1,10 +1,32 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { admin } from '../services/firebase.service.js';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest, UserPayload } from '../types/index.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "hristo-ec3b1";
+
+/**
+ * Verify a Firebase ID token using Google's public REST endpoint.
+ * This does NOT require Firebase Admin SDK or service account credentials.
+ */
+async function verifyFirebaseToken(token: string): Promise<{ uid: string; email?: string } | null> {
+  try {
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.FIREBASE_API_KEY || 'AIzaSyCdZBH8bIH__r0Hcd_j86YcK9mxAhuaU3A'}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: token }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json() as any;
+    const user = data?.users?.[0];
+    if (!user) return null;
+    return { uid: user.localId, email: user.email };
+  } catch {
+    return null;
+  }
+}
 
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -13,26 +35,34 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   try {
-    // Try local JWT first
+    // 1. Try local JWT first (fastest path)
     try {
       const user = jwt.verify(token, JWT_SECRET) as UserPayload;
       req.user = user;
       return next();
-    } catch (jwtErr) {
-      // Fallback to Firebase
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      
-      // Fetch user from DB to get role
-      const userResult = await pool.query('SELECT role, username FROM users WHERE id = $1', [decodedToken.uid]);
-      const dbUser = userResult.rows[0];
-      
-      req.user = {
-        id: decodedToken.uid,
-        email: decodedToken.email || '',
-        role: dbUser?.role || (decodedToken.email === 'guardsowh@gmail.com' ? 'admin' : 'user')
-      };
-      next();
+    } catch {
+      // Not a local JWT — try Firebase token
     }
+
+    // 2. Verify Firebase ID token via REST (no Admin SDK needed)
+    const firebaseUser = await verifyFirebaseToken(token);
+    if (!firebaseUser) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+
+    // 3. Fetch role from DB
+    const userResult = await pool.query(
+      'SELECT role, username FROM users WHERE id = $1',
+      [firebaseUser.uid]
+    );
+    const dbUser = userResult.rows[0];
+
+    req.user = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      role: dbUser?.role || (firebaseUser.email === 'guardsowh@gmail.com' ? 'admin' : 'user'),
+    };
+    next();
   } catch (error) {
     console.error('Auth verification failed:', error);
     return res.status(403).json({ error: "Forbidden" });
