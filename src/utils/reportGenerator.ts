@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { Order } from '../types';
 import { formatEnum } from './format';
 
-export const generateOrdersReport = (orders: Order[], filters: { status: string, search: string }) => {
+export const generateOrdersReport = (orders: Order[], filters: { status: string, search: string, dateRange?: { start: Date, end: Date } }) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const date = new Date().toLocaleString();
@@ -19,7 +19,10 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('ORDERS REVENUE REPORT', 14, 30);
+  const reportTitle = filters.dateRange 
+    ? `ORDERS REVENUE REPORT (${filters.dateRange.start.toLocaleDateString()} - ${filters.dateRange.end.toLocaleDateString()})`
+    : 'ORDERS REVENUE REPORT';
+  doc.text(reportTitle, 14, 30);
   
   doc.setFontSize(8);
   doc.text(`Generated on: ${date}`, pageWidth - 14, 30, { align: 'right' });
@@ -107,7 +110,7 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
   doc.save(`Orders_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const generateProductsReport = (products: any[], orders: Order[]) => {
+export const generateProductsReport = (products: any[], orders: Order[], dateRange?: { start: Date, end: Date }) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const date = new Date().toLocaleString();
@@ -123,7 +126,10 @@ export const generateProductsReport = (products: any[], orders: Order[]) => {
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('PRODUCT PERFORMANCE & INVENTORY REPORT', 14, 30);
+  const reportTitle = dateRange 
+    ? `PRODUCT PERFORMANCE (${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()})`
+    : 'PRODUCT PERFORMANCE & INVENTORY REPORT';
+  doc.text(reportTitle, 14, 30);
   
   doc.setFontSize(8);
   doc.text(`Generated on: ${date}`, pageWidth - 14, 30, { align: 'right' });

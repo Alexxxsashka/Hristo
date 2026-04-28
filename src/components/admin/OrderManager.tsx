@@ -26,6 +26,7 @@ import { Order } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
 import { generateOrdersReport, generateSingleOrderInvoice, exportOrdersToCSV } from '../../utils/reportGenerator';
+import { ReportModal } from './ReportModal';
 
 
 
@@ -40,6 +41,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const filteredOrders = orders.filter(order => {
     // Еквівалент BindingSource.Filter
@@ -129,7 +131,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
         </div>
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => generateOrdersReport(filteredOrders, { status: statusFilter, search: searchQuery })}
+            onClick={() => setIsReportModalOpen(true)}
             className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-zinc-900/20"
           >
             <FileText size={16} />
@@ -438,6 +440,24 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
           </div>
         )}
       </AnimatePresence>
+
+      <ReportModal 
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Sales & Revenue Report"
+        onGenerate={(start, end) => {
+          const filteredByDate = orders.filter(o => {
+            const date = new Date(o.createdAt);
+            return date >= start && date <= end;
+          });
+          generateOrdersReport(filteredByDate, { 
+            status: statusFilter, 
+            search: searchQuery,
+            dateRange: { start, end }
+          });
+          onNotify(`Report generated for ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+        }}
+      />
     </div>
   );
 };

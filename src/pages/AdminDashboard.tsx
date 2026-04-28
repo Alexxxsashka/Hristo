@@ -80,6 +80,7 @@ import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
 import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
+import { ReportModal } from '../components/admin/ReportModal';
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'settings' | 'system'>('dashboard');
@@ -104,6 +105,7 @@ export const AdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
+  const [isProductReportModalOpen, setIsProductReportModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
@@ -529,7 +531,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => generateProductsReport(products, orders)}
+                      onClick={() => setIsProductReportModalOpen(true)}
                       className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all border border-zinc-200"
                     >
                       <FileText size={16} />
@@ -872,6 +874,20 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <ReportModal
+        isOpen={isProductReportModalOpen}
+        onClose={() => setIsProductReportModalOpen(false)}
+        title="Product Performance Report"
+        onGenerate={(start, end) => {
+          const filteredOrders = orders.filter(o => {
+            const date = new Date(o.createdAt);
+            return date >= start && date <= end;
+          });
+          generateProductsReport(products, filteredOrders, { start, end });
+          showNotification(`Product report generated for ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+        }}
+      />
     </div>
   );
 };
