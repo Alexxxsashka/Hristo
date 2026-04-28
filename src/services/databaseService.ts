@@ -825,5 +825,4 @@ export const databaseService = {
       return [];
     }
   }
-  }
 };
