@@ -13,6 +13,7 @@ import contactRoutes from './routes/contact.routes.js';
 import buildRoutes from './routes/build.routes.js';
 import stripeRoutes from './routes/stripe.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
+import categoryRoutes from './routes/category.routes.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -59,15 +60,36 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/site-settings', settingsRoutes); // Alias
+app.use('/api/currency-rates', settingsRoutes); // Alias
 app.use('/api/contact', contactRoutes);
 app.use('/api/saved-builds', buildRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/analytics', analyticsRoutes);
+
+// Admin Aliases (for compatibility with frontend databaseService.ts)
+app.use('/api/admin/products', productRoutes);
+app.use('/api/admin/categories', categoryRoutes);
+app.use('/api/admin/orders', orderRoutes);
+app.use('/api/admin/blog', blogRoutes);
+app.use('/api/admin/policies', policyRoutes);
+app.use('/api/admin/coupons', couponRoutes);
+app.use('/api/admin/settings', settingsRoutes);
+app.use('/api/admin/site-settings', settingsRoutes);
+app.use('/api/admin/messages', contactRoutes); 
+app.use('/api/admin/analytics', analyticsRoutes);
+app.use('/api/admin/stats', analyticsRoutes);
+app.use('/api/admin/stock', productRoutes); // Stock is often part of products
+app.use('/api/admin/inventory-logs', productRoutes);
+app.use('/api/admin/audit', analyticsRoutes); 
+app.use('/api/admin/audit-logs', analyticsRoutes); 
+app.use('/api/admin/users', authRoutes);
 
 // Error Handling
 app.use(notFoundHandler);

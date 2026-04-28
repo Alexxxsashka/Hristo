@@ -58,6 +58,15 @@ export const databaseService = {
   _productsCache: null as Product[] | null,
   _categoriesCache: null as Category[] | null,
 
+  async _handleResponse(res: Response) {
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json && typeof json === 'object' && json.success === true && 'data' in json) {
+      return json.data;
+    }
+    return json;
+  },
+
   async uploadFile(file: File, path: string, onProgress?: (progress: number) => void): Promise<string> {
     try {
       const { upload } = await import('@vercel/blob/client');
@@ -110,8 +119,10 @@ export const databaseService = {
   },
 
   async getFileURL(path: string): Promise<string> {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('blob:')) return path;
     if (this._urlCache[path]) return this._urlCache[path];
-    const resolvedPath = `/${path}`;
+    const resolvedPath = path.startsWith('/') ? path : `/${path}`;
     this._urlCache[path] = resolvedPath;
     return resolvedPath;
   },
@@ -137,14 +148,14 @@ export const databaseService = {
       if (category) url.searchParams.append('category', category);
       if (type) url.searchParams.append('type', type);
       const res = await fetch(url.toString());
-      return res.ok ? await res.json() : [];
+      return await this._handleResponse(res) || [];
     } catch { return []; }
   },
 
   async getProduct(id: string): Promise<Product | null> {
     try {
       const res = await fetch(`/api/products/${id}`);
-      return res.ok ? await res.json() : null;
+      return await this._handleResponse(res);
     } catch { return null; }
   },
 
@@ -184,7 +195,7 @@ export const databaseService = {
   // Categories
   async getCategories(): Promise<Category[]> {
     const res = await fetch('/api/categories');
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveCategory(category: any) {
@@ -215,16 +226,12 @@ export const databaseService = {
     if (category) url.searchParams.append('category', category);
     url.searchParams.append('limit', limitCount.toString());
     const res = await fetch(url.toString());
-    if (res.ok) {
-      const data = await res.json();
-      return data.posts || [];
-    }
-    return [];
+    return await this._handleResponse(res) || [];
   },
 
   async getBlogPost(id: string) {
     const res = await fetch(`/api/blog/${id}`);
-    return res.ok ? await res.json() : null;
+    return await this._handleResponse(res);
   },
 
   async saveBlogPost(post: any) {
@@ -252,12 +259,12 @@ export const databaseService = {
   // Policies
   async getPolicies(): Promise<PolicyPage[]> {
     const res = await fetch('/api/policies');
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async getPolicy(id: string): Promise<PolicyPage | null> {
     const res = await fetch(`/api/policies/${id}`);
-    return res.ok ? await res.json() : null;
+    return await this._handleResponse(res);
   },
 
   async savePolicy(policy: any) {
@@ -296,14 +303,14 @@ export const databaseService = {
     const res = await fetch('/api/admin/messages', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async getUsers() {
     const res = await fetch('/api/admin/users', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveMessage(message: any) {
@@ -389,7 +396,7 @@ export const databaseService = {
     const res = await fetch('/api/orders', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async updateOrderStatus(orderId: string, status: string, trackingNumber?: string, updatedBy?: string) {
@@ -408,7 +415,7 @@ export const databaseService = {
     const res = await fetch('/api/admin/orders', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   // Inventory / Stock
@@ -508,16 +515,17 @@ export const databaseService = {
     const res = await fetch('/api/admin/analytics', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    if (res.ok) {
-      const raw = await res.json();
+    const data = await this._handleResponse(res);
+    if (data) {
+      const stats = data.stats || {};
       return {
-        revenue: Number(raw?.revenue ?? raw?.totalRevenue ?? 0),
-        profit: Number(raw?.profit ?? 0),
-        conversionRate: Number(raw?.conversionRate ?? 0),
-        avgOrderValue: Number(raw?.avgOrderValue ?? 0),
-        salesVelocity: Array.isArray(raw?.salesVelocity) ? raw.salesVelocity : [],
-        topSellers: Array.isArray(raw?.topSellers) ? raw.topSellers : [],
-        lowStockAlerts: Array.isArray(raw?.lowStockAlerts) ? raw.lowStockAlerts : [],
+        revenue: Number(stats.revenue ?? data.revenue ?? data.totalRevenue ?? 0),
+        profit: Number(stats.profit ?? data.profit ?? 0),
+        conversionRate: Number(stats.conversionRate ?? data.conversionRate ?? 0),
+        avgOrderValue: Number(stats.avgOrderValue ?? data.avgOrderValue ?? 0),
+        salesVelocity: Array.isArray(data.salesVelocity) ? data.salesVelocity : [],
+        topSellers: Array.isArray(data.topSellers) ? data.topSellers : [],
+        lowStockAlerts: Array.isArray(data.lowStockAlerts) ? data.lowStockAlerts : [],
       };
     }
     throw new Error('Failed to fetch analytics');
@@ -527,16 +535,16 @@ export const databaseService = {
   async getSiteSettings(): Promise<SiteSettings> {
     try {
       const res = await fetch('/api/site-settings');
-      if (res.ok) {
-        const data = await res.json();
+      const data = await this._handleResponse(res);
+      if (data) {
         // Ensure critical array fields are actually arrays to prevent UI crashes
         return {
           ...data,
-          heroSlides: Array.isArray(data?.heroSlides) ? data.heroSlides : [],
-          promoBanners: Array.isArray(data?.promoBanners) ? data.promoBanners : [],
-          featuredCategoriesList: Array.isArray(data?.featuredCategoriesList) ? data.featuredCategoriesList : [],
-          footerTags: Array.isArray(data?.footerTags) ? data.footerTags : [],
-          heroFeatureMediaType: data?.heroFeatureMediaType || 'image'
+          heroSlides: Array.isArray(data.heroSlides) ? data.heroSlides : [],
+          promoBanners: Array.isArray(data.promoBanners) ? data.promoBanners : [],
+          featuredCategoriesList: Array.isArray(data.featuredCategoriesList) ? data.featuredCategoriesList : [],
+          footerTags: Array.isArray(data.footerTags) ? data.footerTags : [],
+          heroFeatureMediaType: data.heroFeatureMediaType || 'image'
         };
       }
     } catch (err) {
@@ -570,7 +578,7 @@ export const databaseService = {
   // Currency
   async getCurrencyRates() {
     const res = await fetch('/api/currency-rates');
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveCurrencyRate(rate: any) {
@@ -590,7 +598,7 @@ export const databaseService = {
     const res = await fetch('/api/admin/warehouses', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveWarehouse(warehouse: any) {
@@ -617,7 +625,7 @@ export const databaseService = {
     const res = await fetch('/api/admin/suppliers', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveSupplier(supplier: any) {
@@ -664,7 +672,7 @@ export const databaseService = {
     const res = await fetch('/api/admin/purchase-orders', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async savePurchaseOrder(po: any) {
@@ -696,7 +704,7 @@ export const databaseService = {
     const res = await fetch('/api/loadouts', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveLoadout(loadout: any) {
@@ -715,7 +723,7 @@ export const databaseService = {
     const res = await fetch('/api/saved-builds', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveBuild(build: any) {
@@ -755,7 +763,7 @@ export const databaseService = {
     const res = await fetch('/api/service-requests', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async updateAddress(uid: string, address: Address) {
@@ -812,9 +820,10 @@ export const databaseService = {
       const res = await fetch('/api/admin/audit', {
         headers: { 'Authorization': `Bearer ${this.getToken()}` }
       });
-      return res.ok ? await res.json() : [];
+      return await this._handleResponse(res) || [];
     } catch {
       return [];
     }
+  }
   }
 };

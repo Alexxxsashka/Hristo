@@ -127,8 +127,34 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
 export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+    const role = req.user?.role;
+    
+    let query = 'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC';
+    let params = [userId];
+    
+    if (role === 'admin') {
+      query = 'SELECT * FROM orders ORDER BY created_at DESC';
+      params = [];
+    }
+    
+    const result = await pool.query(query, params);
     res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Database error' });
+  }
+};
+
+export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status, tracking_number } = req.body;
+    
+    await pool.query(
+      'UPDATE orders SET status = $1, tracking_number = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+      [status, tracking_number, id]
+    );
+    
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
   }

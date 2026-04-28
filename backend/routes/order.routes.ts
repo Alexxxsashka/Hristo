@@ -8,5 +8,6 @@ const router = Router();
 
 router.post('/', authenticateToken, validate(createOrderSchema), orderController.createOrder);
 router.get('/', authenticateToken, orderController.getOrders);
+router.put('/:id/status', authenticateToken, orderController.updateOrderStatus);
 
 export default router;

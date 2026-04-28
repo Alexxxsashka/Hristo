@@ -91,3 +91,33 @@ export const getCategories = async (req: AuthenticatedRequest, res: Response) =>
     res.status(500).json({ success: false, error: 'Database error' });
   }
 };
+
+export const saveCategory = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const cat = req.body;
+    const id = cat.id || `cat-${Date.now()}`;
+    
+    const query = cat.id 
+      ? `UPDATE categories SET name = $1, parent = $2, slots = $3, compatible_module_categories = $4, filters = $5 WHERE id = $6`
+      : `INSERT INTO categories (id, name, parent, slots, compatible_module_categories, filters) VALUES ($1, $2, $3, $4, $5, $6)`;
+    
+    const params = cat.id
+      ? [cat.name, cat.parent, JSON.stringify(cat.slots || []), JSON.stringify(cat.compatible_module_categories || []), JSON.stringify(cat.filters || []), cat.id]
+      : [id, cat.name, cat.parent, JSON.stringify(cat.slots || []), JSON.stringify(cat.compatible_module_categories || []), JSON.stringify(cat.filters || [])];
+
+    await pool.query(query, params);
+    res.json({ success: true, data: { ...cat, id } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Database error' });
+  }
+};
+
+export const deleteCategory = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id;
+    await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Database error' });
+  }
+};
