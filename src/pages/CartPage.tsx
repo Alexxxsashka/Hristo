@@ -21,9 +21,39 @@ export const CartPage: React.FC = () => {
   const vatAmount = finalTotal * 0.2;
 
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const handleCheckout = () => {
     navigate('/checkout');
+  };
+
+  const handleRemoveItem = (id: string, name: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: t('remove_item'),
+      message: `${t('confirm_remove_item')} "${name}"?`,
+      onConfirm: () => {
+        removeFromCart(id);
+        setConfirmDialog(null);
+      }
+    });
+  };
+
+  const handleClearCart = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: t('clear_cart'),
+      message: t('confirm_clear_cart'),
+      onConfirm: () => {
+        clearCart();
+        setConfirmDialog(null);
+      }
+    });
   };
 
   return (
@@ -75,7 +105,7 @@ export const CartPage: React.FC = () => {
                     {cartItems.length} {t('active_attachments')}
                   </h2>
                   <button 
-                    onClick={clearCart}
+                    onClick={handleClearCart}
                     className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-600 hover:text-red-500 transition-colors"
                   >
                     {t('clear_all')}
@@ -122,7 +152,7 @@ export const CartPage: React.FC = () => {
                             </div>
                           </div>
                           <button 
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => handleRemoveItem(item.id, item.productName)}
                             className="p-2 sm:p-2.5 bg-zinc-950/50 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl border border-zinc-800 hover:border-red-500/30 transition-all shrink-0"
                           >
                             <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -243,6 +273,48 @@ export const CartPage: React.FC = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <AnimatePresence>
+        {confirmDialog?.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+            >
+              <div className="flex flex-col items-center text-center space-y-4 mb-8">
+                <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center text-red-600">
+                  <Trash2 size={32} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter">{confirmDialog.title}</h3>
+                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Tactical Confirmation Required</p>
+                </div>
+              </div>
+              
+              <p className="text-zinc-300 text-sm leading-relaxed mb-8 font-medium text-center">
+                {confirmDialog.message}
+              </p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setConfirmDialog(null)}
+                  className="flex-1 px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all border border-zinc-700"
+                >
+                  {t('cancel')}
+                </button>
+                <button 
+                  onClick={confirmDialog.onConfirm}
+                  className="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl shadow-red-600/20"
+                >
+                  {t('confirm')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

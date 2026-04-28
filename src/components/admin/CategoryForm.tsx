@@ -12,7 +12,8 @@ export const CategoryForm = ({
   onSuccess, 
   onCancel,
   onUpdate,
-  onNotify 
+  onNotify,
+  onConfirm 
 }: { 
   initialData?: Category | null,
   categories: Category[], 
@@ -20,7 +21,8 @@ export const CategoryForm = ({
   onSuccess: () => void,
   onCancel: () => void,
   onUpdate?: () => void,
-  onNotify: (msg: string, type?: 'success' | 'error') => void
+  onNotify: (msg: string, type?: 'success' | 'error') => void,
+  onConfirm: (message: string, action: () => void) => void
 }) => {
   const [newCat, setNewCat] = useState<Partial<Category>>({ 
     name: '', 
@@ -106,19 +108,19 @@ export const CategoryForm = ({
       return;
     }
     
-    try {
-      const categoryToSave = {
-        ...newCat,
-        id: editingCat ? editingCat.id : newCat.name?.toLowerCase().replace(/\s+/g, '_')
-      };
-      
-      await databaseService.saveCategory(categoryToSave as any);
-      onSuccess();
-      onNotify(editingCat ? 'Category updated successfully' : 'Category added successfully');
-    } catch (err) {
-      console.error('Failed to save category', err);
-      onNotify('Failed to save category', 'error');
-    }
+    onConfirm(
+      editingCat ? 'Are you sure you want to update this category?' : 'Are you sure you want to create this new category?',
+      async () => {
+        try {
+          await databaseService.saveCategory(newCat as any);
+          onNotify(editingCat ? 'Category updated' : 'Category added');
+          onSuccess();
+        } catch (err) {
+          console.error('Failed to save category', err);
+          onNotify('Failed to save category', 'error');
+        }
+      }
+    );
   };
 
   const addFilter = () => {
@@ -199,15 +201,16 @@ export const CategoryForm = ({
   };
 
   const handleDeleteSubcategory = async (id: string) => {
-    if (!window.confirm('Delete this subcategory?')) return;
-    try {
-      await databaseService.deleteCategory(id);
-      onUpdate?.();
-      onNotify('Subcategory deleted successfully');
-    } catch (err) {
-      console.error('Failed to delete subcategory', err);
-      onNotify('Failed to delete subcategory', 'error');
-    }
+    onConfirm('Are you sure you want to delete this subcategory?', async () => {
+      try {
+        await databaseService.deleteCategory(id);
+        onUpdate?.();
+        onNotify('Subcategory deleted successfully');
+      } catch (err) {
+        console.error('Failed to delete subcategory', err);
+        onNotify('Failed to delete subcategory', 'error');
+      }
+    });
   };
 
   return (

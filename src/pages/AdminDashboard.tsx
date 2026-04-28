@@ -607,7 +607,7 @@ export const AdminDashboard: React.FC = () => {
                                 <Edit size={18} />
                               </button>
                               <button
-                                onClick={() => deleteProduct(product.id)}
+                                onClick={() => confirmAction(`Are you sure you want to delete the product "${product.name}"?`, () => deleteProduct(product.id))}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 size={18} />
@@ -639,6 +639,7 @@ export const AdminDashboard: React.FC = () => {
                 weapons={products.filter(p => p.type === 'weapon')}
                 showHelp={showHelp}
                 onNotify={showNotification}
+                onConfirm={confirmAction}
                 onSuccess={() => {
                   fetchProducts();
                   setActiveTab('products');
@@ -679,6 +680,7 @@ export const AdminDashboard: React.FC = () => {
                 showHelp={showHelp}
                 onUpdate={fetchCategories}
                 onNotify={showNotification}
+                onConfirm={confirmAction}
                 onSuccess={() => {
                   fetchCategories();
                   setActiveTab('categories');
@@ -723,7 +725,17 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'messages' && (
               <MessageManager
                 messages={messages}
+                onConfirm={confirmAction}
                 onDelete={deleteMessage}
+              />
+            )}
+
+            {activeTab === 'orders' && (
+              <OrderManager 
+                orders={orders}
+                onUpdate={fetchOrders}
+                onNotify={showNotification} 
+                onConfirm={confirmAction}
               />
             )}
 
@@ -739,7 +751,7 @@ export const AdminDashboard: React.FC = () => {
 
 
             {activeTab === 'settings' && (
-              <SiteSettingsManager onNotify={showNotification} onUpdate={loadAllData} />
+              <SiteSettingsManager onNotify={showNotification} onConfirm={confirmAction} onUpdate={loadAllData} />
             )}
 
             {activeTab === 'system' && (
@@ -756,7 +768,7 @@ export const AdminDashboard: React.FC = () => {
                     <p className="text-zinc-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Infrastructure & Database Migrations</p>
                   </div>
                   <button
-                    onClick={handleRunMigrations}
+                    onClick={() => confirmAction('Are you sure you want to run all system migrations? This will rebuild database tables and can take some time.', handleRunMigrations)}
                     disabled={isMigrating}
                     className={`flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20 ${isMigrating ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >

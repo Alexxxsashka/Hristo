@@ -36,9 +36,10 @@ import { DEFAULT_SITE_SETTINGS } from '../../constants/defaultSettings';
 
 type SettingsTab = 'general' | 'hero' | 'homepage' | 'social' | 'footer' | 'seo';
 
-export const SiteSettingsManager = ({ onNotify, onUpdate }: { 
+export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: { 
   onNotify: (msg: string, type?: 'success' | 'error') => void,
-  onUpdate?: () => void
+  onUpdate?: () => void,
+  onConfirm: (message: string, action: () => void) => void
 }) => {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
@@ -97,7 +98,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
   };
 
   const handleSave = async () => {
-    setSaving(true);
+    onConfirm('Are you sure you want to save all site settings?', async () => {
+      setSaving(true);
     try {
       let finalSettings = { ...settings };
 
@@ -150,6 +152,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
       setSaving(false);
       setUploadProgress(0);
     }
+      }
+    );
   };
 
   const addHeroSlide = () => {
@@ -173,12 +177,15 @@ export const SiteSettingsManager = ({ onNotify, onUpdate }: {
   };
 
   const deleteHeroSlide = async (id: string) => {
-    const slides = Array.isArray(settings.heroSlides) ? settings.heroSlides : [];
-    const slide = slides.find(s => s.id === id);
-    if (slide?.image) await handleFileDelete(slide.image);
-    setSettings({
-      ...settings,
-      heroSlides: (Array.isArray(settings.heroSlides) ? settings.heroSlides : []).filter(s => s.id !== id)
+    onConfirm('Are you sure you want to delete this hero slide?', async () => {
+      const slides = Array.isArray(settings.heroSlides) ? settings.heroSlides : [];
+      const slide = slides.find(s => s.id === id);
+      if (slide?.image) await handleFileDelete(slide.image);
+      setSettings({
+        ...settings,
+        heroSlides: (Array.isArray(settings.heroSlides) ? settings.heroSlides : []).filter(s => s.id !== id)
+      });
+      onNotify('Hero slide removed');
     });
   };
 

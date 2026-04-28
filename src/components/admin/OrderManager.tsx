@@ -63,16 +63,18 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
   });
 
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
-    try {
-      await databaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
-      onNotify(`Order status updated to ${newStatus}`);
-      onUpdate(); // Refresh the main orders list automatically
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
+    onConfirm(`Are you sure you want to update the status of order #${orderId} to ${newStatus}?`, async () => {
+      try {
+        await databaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
+        onNotify(`Order status updated to ${newStatus}`);
+        onUpdate(); // Refresh the main orders list automatically
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder({ ...selectedOrder, status: newStatus });
+        }
+      } catch (err) {
+        onNotify('Failed to update order status', 'error');
       }
-    } catch (err) {
-      onNotify('Failed to update order status', 'error');
-    }
+    });
   };
 
   const getStatusColor = (status: string) => {

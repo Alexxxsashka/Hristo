@@ -7,14 +7,15 @@ import { Product, Category, Characteristic, ProductVariant, ProductAttribute } f
 import { WEAPON_SLOTS } from '../../constants';
 import { formatEnum, formatModelName } from '../../utils/format';
 
-export const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify }: { 
+export const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify, onConfirm }: { 
   initialData: Product | null, 
   categories: Category[],
   weapons: Product[],
   showHelp?: boolean,
   onSuccess: () => void,
   onCancel: () => void,
-  onNotify: (msg: string, type?: 'success' | 'error') => void
+  onNotify: (msg: string, type?: 'success' | 'error') => void,
+  onConfirm: (message: string, action: () => void) => void
 }) => {
   const navigate = useNavigate();
   const baseDefaults: Partial<Product> = {
@@ -241,109 +242,113 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
     console.log('[ProductForm Debug] Validation passed, starting submission...');
 
-    // Auto-add pending characteristic if user forgot to click "Add"
-    let finalCharacteristics = [...(formData.characteristics || [])];
-    if (newChar.label.trim() && newChar.value.trim()) {
-      console.log('[ProductForm Debug] Auto-adding pending characteristic');
-      finalCharacteristics.push(newChar);
-    }
-    
-    setIsSubmitting(true);
-    console.log('Starting product save process...');
+    onConfirm(
+      initialData ? 'Are you sure you want to update this product?' : 'Are you sure you want to create this new product?',
+      async () => {
+        setIsSubmitting(true);
+        console.log('Starting product save process...');
 
-    try {
-      let modelUrl = formData.model3D || '';
-      let modelName = formData.model3DName || '';
-      const finalImageUrls: string[] = [];
-
-      if (modelFile) {
-        console.log('Uploading 3D model...', modelFile.name);
-        
-        // If there was an existing model, delete it to save space
-        if (initialData?.model3D) {
-          console.log('Deleting old 3D model...', initialData.model3D);
-          await databaseService.deleteFile(initialData.model3D);
-        }
-
-        setUploadingFile('3D Model');
         try {
-          const extension = modelFile.name.split('.').pop();
-          const originalName = modelFile.name;
-          const safeName = `model_${Date.now()}.${extension}`;
-          modelUrl = await databaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
-          modelName = originalName;
-          console.log('3D model uploaded successfully:', modelUrl);
-        } catch (uploadErr) {
-          console.error('3D Model upload failed:', uploadErr);
-          onNotify(`Failed to upload 3D model: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
-          setIsSubmitting(false);
+          let finalCharacteristics = [...(formData.characteristics || [])];
+          if (newChar.label.trim() && newChar.value.trim()) {
+            console.log('[ProductForm Debug] Auto-adding pending characteristic');
+            finalCharacteristics.push(newChar);
+          }
+
+          let modelUrl = formData.model3D || '';
+          let modelName = formData.model3DName || '';
+          const finalImageUrls: string[] = [];
+
+          if (modelFile) {
+            console.log('Uploading 3D model...', modelFile.name);
+            
+            // If there was an existing model, delete it to save space
+            if (initialData?.model3D) {
+              console.log('Deleting old 3D model...', initialData.model3D);
+              await databaseService.deleteFile(initialData.model3D);
+            }
+
+            setUploadingFile('3D Model');
+            try {
+              const extension = modelFile.name.split('.').pop();
+              const originalName = modelFile.name;
+              const safeName = `model_${Date.now()}.${extension}`;
+              modelUrl = await databaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
+              modelName = originalName;
+              console.log('3D model uploaded successfully:', modelUrl);
+            } catch (uploadErr) {
+              console.error('3D Model upload failed:', uploadErr);
+              onNotify(`Failed to upload 3D model: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
+              setIsSubmitting(false);
+              setUploadingFile(null);
+              return;
+            }
+          }
+
+          // Handle multiple images
+          for (let i = 0; i < combinedImages.length; i++) {
+            const item = combinedImages[i];
+            if (typeof item === 'string') {
+              finalImageUrls.push(item);
+            } else {
+              console.log(`Uploading image ${i + 1}...`, item.name);
+              setUploadingFile(`Image ${i + 1}`);
+              setUploadProgress(0);
+              try {
+                const extension = item.name.split('.').pop();
+                const safeName = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
+                const url = await databaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
+                finalImageUrls.push(url);
+                console.log(`Image ${i + 1} uploaded successfully:`, url);
+              } catch (uploadErr) {
+                console.error(`Image ${i + 1} upload failed:`, uploadErr);
+                onNotify(`Failed to upload image ${i + 1}: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
+                setIsSubmitting(false);
+                setUploadingFile(null);
+                return;
+              }
+            }
+          }
+
           setUploadingFile(null);
-          return;
-        }
-      }
 
-      // Handle multiple images
-      for (let i = 0; i < combinedImages.length; i++) {
-        const item = combinedImages[i];
-        if (typeof item === 'string') {
-          finalImageUrls.push(item);
-        } else {
-          console.log(`Uploading image ${i + 1}...`, item.name);
-          setUploadingFile(`Image ${i + 1}`);
-          setUploadProgress(0);
-          try {
-            const extension = item.name.split('.').pop();
-            const safeName = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
-            const url = await databaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
-            finalImageUrls.push(url);
-            console.log(`Image ${i + 1} uploaded successfully:`, url);
-          } catch (uploadErr) {
-            console.error(`Image ${i + 1} upload failed:`, uploadErr);
-            onNotify(`Failed to upload image ${i + 1}: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
-            setIsSubmitting(false);
-            setUploadingFile(null);
-            return;
+          const productToSave = {
+            ...formData,
+            model3D: modelUrl,
+            model3DName: modelName,
+            images: finalImageUrls,
+            image_url: finalImageUrls[0] || '', // Явно передаем и image_url и image для бэкенда
+            image: finalImageUrls[0] || '',
+            has3D: !!modelUrl || formData.has3D,
+            characteristics: finalCharacteristics
+          };
+
+          console.log('Saving product to database...', productToSave);
+          await databaseService.saveProduct(productToSave as any);
+          
+          // Permanently delete orphaned blobs from storage after successful DB save
+          if (deletedBlobs.length > 0) {
+            console.log(`Cleaning up ${deletedBlobs.length} orphaned blobs...`);
+            for (const url of deletedBlobs) {
+              try {
+                await databaseService.deleteFile(url);
+              } catch (err) {
+                console.warn("Failed to delete orphaned blob:", url, err);
+              }
+            }
           }
+
+          console.log('Product saved successfully!');
+          onNotify('Product saved successfully!');
+          onSuccess();
+        } catch (err) {
+          console.error('Failed to save product:', err);
+          onNotify(`Failed to save product: ${err instanceof Error ? err.message : String(err)}`, 'error');
+        } finally {
+          setIsSubmitting(false);
         }
       }
-
-      setUploadingFile(null);
-
-      const productToSave = {
-        ...formData,
-        model3D: modelUrl,
-        model3DName: modelName,
-        images: finalImageUrls,
-        image_url: finalImageUrls[0] || '', // Явно передаем и image_url и image для бэкенда
-        image: finalImageUrls[0] || '',
-        has3D: !!modelUrl || formData.has3D,
-        characteristics: finalCharacteristics
-      };
-
-      console.log('Saving product to database...', productToSave);
-      await databaseService.saveProduct(productToSave as any);
-      
-      // Permanently delete orphaned blobs from storage after successful DB save
-      if (deletedBlobs.length > 0) {
-        console.log(`Cleaning up ${deletedBlobs.length} orphaned blobs...`);
-        for (const url of deletedBlobs) {
-          try {
-            await databaseService.deleteFile(url);
-          } catch (err) {
-            console.warn("Failed to delete orphaned blob:", url, err);
-          }
-        }
-      }
-
-      console.log('Product saved successfully!');
-      onNotify('Product saved successfully!');
-      onSuccess();
-    } catch (err) {
-      console.error('Failed to save product:', err);
-      onNotify(`Failed to save product: ${err instanceof Error ? err.message : String(err)}`, 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
   };
 
   const addSlot = () => {

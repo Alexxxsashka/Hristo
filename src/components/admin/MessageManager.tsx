@@ -3,8 +3,9 @@ import { Trash2, Mail, MessageSquare } from 'lucide-react';
 
 export const MessageManager: React.FC<{ 
   messages: any[], 
-  onDelete: (id: string) => void 
-}> = ({ messages, onDelete }) => {
+  onDelete: (id: string) => void,
+  onConfirm: (message: string, action: () => void) => void
+}> = ({ messages, onDelete, onConfirm }) => {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
 
   return (
@@ -62,7 +63,12 @@ export const MessageManager: React.FC<{
                   <p className="text-zinc-500 font-medium">{selectedMessage.email}</p>
                 </div>
                 <button 
-                  onClick={() => { onDelete(selectedMessage.id); setSelectedMessage(null); }}
+                  onClick={() => { 
+                    onConfirm('Are you sure you want to delete this message?', () => {
+                      onDelete(selectedMessage.id); 
+                      setSelectedMessage(null); 
+                    });
+                  }}
                   className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
                 >
                   <Trash2 size={20} />

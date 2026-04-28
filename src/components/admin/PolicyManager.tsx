@@ -22,23 +22,25 @@ export const PolicyManager = ({ policies, onUpdate, onNotify, onConfirm }: {
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const id = editingPolicy.id || editingPolicy.title.toLowerCase().replace(/\s+/g, '-');
-      await databaseService.savePolicy({
-        ...editingPolicy,
-        id,
-        lastUpdated: new Date().toISOString()
-      } as PolicyPage);
-      onNotify('Policy saved successfully');
-      setEditingPolicy(null);
-      onUpdate();
-    } catch (err) {
-      console.error('Failed to save policy', err);
-      onNotify('Failed to save policy', 'error');
-    } finally {
-      setIsSaving(false);
-    }
+    onConfirm(`Are you sure you want to save the "${editingPolicy.title}" policy?`, async () => {
+      setIsSaving(true);
+      try {
+        const id = editingPolicy.id || editingPolicy.title.toLowerCase().replace(/\s+/g, '-');
+        await databaseService.savePolicy({
+          ...editingPolicy,
+          id,
+          lastUpdated: new Date().toISOString()
+        } as PolicyPage);
+        onNotify('Policy saved successfully');
+        setEditingPolicy(null);
+        onUpdate();
+      } catch (err) {
+        console.error('Failed to save policy', err);
+        onNotify('Failed to save policy', 'error');
+      } finally {
+        setIsSaving(false);
+      }
+    });
   };
 
   const handleDelete = async (id: string) => {
