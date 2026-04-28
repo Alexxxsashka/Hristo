@@ -93,6 +93,15 @@ const initSchema = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(parent_uid, child_uid, slot_name)
       );
+
+      CREATE TABLE IF NOT EXISTS contact_messages (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        subject TEXT,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
     `);
     console.log('✅ DB Schema verified');
   } catch (err) {
@@ -1220,7 +1229,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
   app.get("/api/admin/messages", authenticateAdmin, async (req, res) => {
     try {
-      const result = await pool.query('SELECT * FROM contact_messages ORDER BY date DESC');
+      const result = await pool.query('SELECT * FROM contact_messages ORDER BY created_at DESC');
       res.json(result.rows);
     } catch (error) {
       res.status(500).json({ error: 'Database error' });

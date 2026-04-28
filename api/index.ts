@@ -370,6 +370,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             UNIQUE(parent_uid, child_uid, slot_name)
           )
         `);
+        
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS contact_messages (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            subject TEXT,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
       } catch (e) {
         console.error("Migration test error:", e);
       }
@@ -1477,12 +1488,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── POST /contact ──────────────────────────────────────────────────────────
     if (path === "/contact" && method === "POST") {
-      const { name, email, message, subject } = req.body || {};
-      await pool.query(
-        "INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)",
-        [name, email, subject || "Contact", message]
-      );
-      return res.json({ ok: true });
+      try {
+        const { name, email, message, subject } = req.body || {};
+        
+        if (!name || !email || !message) {
+          return res.status(400).json({ error: "Name, email and message are required" });
+        }
+
+        const id = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        
+        await pool.query(
+          "INSERT INTO contact_messages (id, name, email, subject, message) VALUES ($1, $2, $3, $4, $5)",
+          [id, name, email, subject || "Contact", message]
+        );
+        
+        console.log(`[Contact] Message from ${email} saved successfully with ID ${id}`);
+        return res.json({ ok: true, id });
+      } catch (err: any) {
+        console.error("[Contact] Submission error:", err);
+        return res.status(500).json({ 
+          error: "Failed to send message", 
+          message: err.message,
+          detail: err.detail 
+        });
+      }
     }
 
     // ── GET /admin/users ───────────────────────────────────────────────────────
