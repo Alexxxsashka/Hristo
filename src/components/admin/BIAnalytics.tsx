@@ -119,15 +119,21 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
 
   // Calculate category distribution based on actual units sold
   const categoryCounts = orders.reduce((acc, order) => {
-    order.items.forEach(item => {
+    order.items?.forEach(item => {
       const cat = (item.category || '').toLowerCase();
+      const name = (item.name || '').toLowerCase();
       const qty = Number(item.quantity) || 0;
       
-      if (cat.includes('rifle')) {
+      // Robust matching including IDs, English names, and Croatian names
+      const isRifle = cat.includes('rifle') || cat.includes('pušk') || cat.includes('aeg') || cat.includes('sniper') || name.includes('rifle') || name.includes('puška');
+      const isPistol = cat.includes('pistol') || cat.includes('pištolj') || name.includes('pistol') || name.includes('pištolj');
+      const isGear = cat.includes('gear') || cat.includes('oprema') || cat.includes('accessory') || cat.includes('optic') || cat.includes('mag') || cat.includes('part') || cat.includes('protection') || cat.includes('uniform') || cat.includes('ammo') || cat.includes('gas') || cat.includes('battery') || name.includes('gear') || name.includes('oprema');
+
+      if (isRifle) {
         acc.rifles += qty;
-      } else if (cat.includes('pistol')) {
+      } else if (isPistol) {
         acc.pistols += qty;
-      } else if (cat.includes('gear')) {
+      } else if (isGear) {
         acc.gear += qty;
       } else {
         acc.other += qty;
@@ -136,14 +142,14 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
     return acc;
   }, { rifles: 0, pistols: 0, gear: 0, other: 0 });
 
-  const categoryData = [
-    { name: 'Rifles', value: categoryCounts.rifles },
-    { name: 'Pistols', value: categoryCounts.pistols },
-    { name: 'Gear', value: categoryCounts.gear },
-    { name: 'Other', value: categoryCounts.other },
-  ];
-
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+
+  const categoryData = [
+    { name: 'Rifles', value: categoryCounts.rifles, color: COLORS[0] },
+    { name: 'Pistols', value: categoryCounts.pistols, color: COLORS[1] },
+    { name: 'Gear', value: categoryCounts.gear, color: COLORS[2] },
+    { name: 'Other', value: categoryCounts.other, color: COLORS[3] },
+  ].filter(item => item.value > 0);
 
   return (
     <div className="space-y-8">
@@ -277,14 +283,14 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
                   dataKey="value"
                 >
                   {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black">{orders.reduce((acc, o) => acc + o.items.reduce((sum, i) => sum + i.quantity, 0), 0).toLocaleString()}</span>
+              <span className="text-2xl font-black">{orders.reduce((acc, o) => acc + (o.items || []).reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), 0).toLocaleString()}</span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Total Units Sold</span>
             </div>
           </div>
@@ -292,7 +298,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
             {categoryData.map((item, idx) => (
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
                   <span className="text-xs font-bold text-zinc-600">{item.name}</span>
                 </div>
                 <span className="text-xs font-black text-zinc-900">{item.value}</span>
