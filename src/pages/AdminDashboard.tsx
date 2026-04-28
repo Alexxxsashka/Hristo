@@ -43,7 +43,8 @@ import {
   ArrowUp,
   ArrowDown,
   Globe,
-  Tag
+  Tag,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
