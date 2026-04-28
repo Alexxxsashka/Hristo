@@ -31,6 +31,8 @@ import {
 import { Order } from '../../types';
 
 export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: any[] }) => {
+  const [timeRange, setTimeRange] = React.useState<'weekly' | 'monthly'>('weekly');
+
   // Calculate basic metrics
   const totalRevenue = orders.reduce((acc, curr) => {
     const total = typeof curr.total === 'string' ? parseFloat(curr.total) : Number(curr.total);
@@ -39,7 +41,6 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
   
   // Real conversion rate: (orders / total visitors/users)
-  // For now we use orders / users as a proxy or just orders relative to user count
   const conversionRate = users.length > 0 ? (orders.length / users.length) * 100 : 0;
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const completedOrders = orders.filter(o => o.status === 'delivered').length;
@@ -79,8 +80,42 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
     return result;
   };
 
-  const chartData = getDailyData();
-  const totalNewUsers = chartData.reduce((acc, curr) => acc + curr.users, 0);
+  // Prepare monthly data (last 6 months)
+  const getMonthlyData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const result = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = months[d.getMonth()];
+      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
+
+      const monthOrders = orders.filter(o => {
+        const date = new Date(o.createdAt).getTime();
+        return date >= monthStart && date <= monthEnd;
+      });
+
+      const revenue = monthOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+      
+      const newUsers = users.filter(u => {
+        const date = new Date(u.created_at).getTime();
+        return date >= monthStart && date <= monthEnd;
+      }).length;
+
+      result.push({
+        name: monthName,
+        revenue,
+        orders: monthOrders.length,
+        users: newUsers
+      });
+    }
+    return result;
+  };
+
+  const chartData = timeRange === 'weekly' ? getDailyData() : getMonthlyData();
+  const totalNewUsersInPeriod = chartData.reduce((acc, curr) => acc + curr.users, 0);
 
   const categoryData = [
     { name: 'Rifles', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('rifle'))).length },
@@ -106,7 +141,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
         <StatCard 
           title="Total Users" 
           value={users.length.toString()} 
-          trend={`+${totalNewUsers} this week`} 
+          trend={`+${totalNewUsersInPeriod} this ${timeRange === 'weekly' ? 'week' : '6 months'}`} 
           isUp={true} 
           icon={<Users size={20} />} 
           color="blue"
@@ -135,11 +170,31 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
           <div className="flex items-center justify-between mb-8">
             <div>
               <h4 className="text-xl font-black uppercase tracking-tighter">Revenue Overview</h4>
-              <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mt-1">Weekly performance tracking</p>
+              <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mt-1">
+                {timeRange === 'weekly' ? 'Weekly' : 'Monthly'} performance tracking
+              </p>
             </div>
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all">Weekly</button>
-              <button className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg">Monthly</button>
+              <button 
+                onClick={() => setTimeRange('weekly')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  timeRange === 'weekly' 
+                    ? 'bg-zinc-900 text-white shadow-lg' 
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                }`}
+              >
+                Weekly
+              </button>
+              <button 
+                onClick={() => setTimeRange('monthly')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  timeRange === 'monthly' 
+                    ? 'bg-zinc-900 text-white shadow-lg' 
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                }`}
+              >
+                Monthly
+              </button>
             </div>
           </div>
           <div className="h-[350px] w-full">
@@ -235,7 +290,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
             <h4 className="text-xl font-black uppercase tracking-tighter">Customer Growth</h4>
             <div className="flex items-center gap-2 text-emerald-500">
               <Users size={16} />
-              <span className="text-xs font-black">+{totalNewUsers} New This Week</span>
+              <span className="text-xs font-black">+{totalNewUsersInPeriod} New This {timeRange === 'weekly' ? 'Week' : 'Period'}</span>
             </div>
           </div>
           <div className="h-[200px] w-full">
