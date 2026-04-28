@@ -714,6 +714,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS name_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS description_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description_hr TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -881,6 +885,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS name_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS description_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description_hr TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

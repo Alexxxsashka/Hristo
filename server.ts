@@ -53,11 +53,44 @@ let pool = createPool();
 // Initialize Database Schema if needed
 const initSchema = async () => {
   try {
-    // Add stripe columns if they don't exist
+    // Add missing columns if they don't exist
     await pool.query(`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+      
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS name_hr TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS description_hr TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description_hr TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS characteristics JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS variants JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_attributes JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS category_filters JSONB DEFAULT '{}';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS compatible_ids JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS compatible_module_categories JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS socket_point JSONB DEFAULT '[0,0,0]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS slots JSONB DEFAULT '[]';
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS landing_cost DECIMAL;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS msrp DECIMAL;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS discount INTEGER DEFAULT 0;
+
+      ALTER TABLE categories ADD COLUMN IF NOT EXISTS name_hr TEXT;
+      ALTER TABLE categories ADD COLUMN IF NOT EXISTS discount INTEGER DEFAULT 0;
+      ALTER TABLE categories ADD COLUMN IF NOT EXISTS filters JSONB DEFAULT '[]';
+
+      CREATE TABLE IF NOT EXISTS product_compatibility (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        parent_uid TEXT NOT NULL,
+        child_uid TEXT NOT NULL,
+        slot_name TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(parent_uid, child_uid, slot_name)
+      );
     `);
     console.log('✅ DB Schema verified');
   } catch (err) {
