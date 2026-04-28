@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus, Minus } from 'lucide-react';
+import { Trash2, ArrowLeft, ShoppingBag, CreditCard, Plus, Minus, Tag, Ticket, RefreshCw, Check, X } from 'lucide-react';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useAuthStore } from '../store/authStore';
 import { formatLabel } from '../utils/formatText';
+import { databaseService } from '../services/databaseService';
 
 export const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,8 +17,8 @@ export const CartPage: React.FC = () => {
 
   const userDiscount = user?.discountLevel || 0;
   const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
-  const discountAmount = totalAmount * (userDiscount / 100);
-  const finalTotal = totalAmount - discountAmount;
+  const userDiscountAmount = totalAmount * (userDiscount / 100);
+  const finalTotal = Math.max(0, totalAmount - userDiscountAmount - promoDiscount);
   const vatAmount = finalTotal * 0.2;
 
   const [isCheckingOut, setIsCheckingOut] = React.useState(false);
@@ -29,7 +30,39 @@ export const CartPage: React.FC = () => {
   } | null>(null);
 
   const handleCheckout = () => {
-    navigate('/checkout');
+    navigate('/checkout', { state: { appliedCoupon } });
+  };
+
+  const [promoCode, setPromoCode] = React.useState('');
+  const [promoDiscount, setPromoDiscount] = React.useState(0);
+  const [promoMessage, setPromoMessage] = React.useState('');
+  const [promoStatus, setPromoStatus] = React.useState<'success' | 'error' | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = React.useState<any | null>(null);
+  const [isValidating, setIsValidating] = React.useState(false);
+
+  const handleApplyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    setIsValidating(true);
+    setPromoMessage('');
+    try {
+      const result = await databaseService.validateCoupon(promoCode, cartItems);
+      if (result.valid) {
+        setPromoDiscount(result.discount);
+        setAppliedCoupon(result.coupon);
+        setPromoStatus('success');
+        setPromoMessage(result.message);
+      } else {
+        setPromoDiscount(0);
+        setAppliedCoupon(null);
+        setPromoStatus('error');
+        setPromoMessage(result.message);
+      }
+    } catch (err) {
+      setPromoStatus('error');
+      setPromoMessage('Ошибка валидации');
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   const handleRemoveItem = (id: string, name: string) => {
@@ -231,6 +264,56 @@ export const CartPage: React.FC = () => {
                         <span className="font-mono font-black text-lg">-{userDiscount}%</span>
                       </div>
                     )}
+
+                    {/* Promo Code Input */}
+                    <div className="pt-4 border-t border-zinc-800/50">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-1">Promo Code</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
+                            <input
+                              type="text"
+                              value={promoCode}
+                              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                              placeholder="ENTER CODE"
+                              className="w-full pl-11 pr-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-red-600/50 transition-all text-xs font-black uppercase tracking-widest"
+                            />
+                          </div>
+                          <button
+                            onClick={handleApplyPromoCode}
+                            disabled={isValidating || !promoCode}
+                            className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border border-zinc-700"
+                          >
+                            {isValidating ? <RefreshCw size={14} className="animate-spin" /> : 'Apply'}
+                          </button>
+                        </div>
+                        {promoMessage && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`flex items-center gap-2 p-3 rounded-xl border text-[10px] font-bold uppercase tracking-wide ${promoStatus === 'success'
+                              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                              : 'bg-red-500/10 border-red-500/20 text-red-500'
+                              }`}
+                          >
+                            {promoStatus === 'success' ? <Check size={14} /> : <X size={14} />}
+                            {promoMessage}
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between items-center p-3 bg-red-600/10 border border-red-600/20 rounded-xl">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">Promo Discount</span>
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">{appliedCoupon?.code} Applied</span>
+                        </div>
+                        <span className="text-lg font-black text-red-600 font-mono">-€{promoDiscount.toLocaleString()}</span>
+                      </div>
+                    )}
+
                     <div className="h-px bg-zinc-800/50 my-4 sm:my-6" />
                     <div className="space-y-2">
                       <div className="flex justify-between items-baseline">

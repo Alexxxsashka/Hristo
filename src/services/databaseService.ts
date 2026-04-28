@@ -451,6 +451,44 @@ export const databaseService = {
   },
 
   // BI Analytics
+  async getCoupons(): Promise<Coupon[]> {
+    const res = await fetch('/api/admin/coupons', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return res.ok ? await res.json() : [];
+  },
+
+  async saveCoupon(coupon: any) {
+    const url = coupon.id ? `/api/admin/coupons/${coupon.id}` : '/api/admin/coupons';
+    const method = coupon.id ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify(coupon)
+    });
+    if (!res.ok) throw new Error('Failed to save coupon');
+  },
+
+  async deleteCoupon(id: string) {
+    const res = await fetch(`/api/admin/coupons/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete coupon');
+  },
+
+  async validateCoupon(code: string, cartItems: any[]) {
+    const res = await fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, items: cartItems })
+    });
+    return await res.json();
+  },
+
   async getBIAnalytics(): Promise<BIWidgetData> {
     const res = await fetch('/api/admin/analytics', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }

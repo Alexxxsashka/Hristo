@@ -42,7 +42,8 @@ import {
   AlertCircle,
   ArrowUp,
   ArrowDown,
-  Globe
+  Globe,
+  Tag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
@@ -82,10 +83,11 @@ import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
 import { ReportModal } from '../components/admin/ReportModal';
 import { AuditManager } from '../components/admin/AuditManager';
+import { CouponManager } from '../components/admin/CouponManager';
 import { AuditLog } from '../types';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'settings' | 'audit'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -314,6 +316,14 @@ export const AdminDashboard: React.FC = () => {
             showHelp={showHelp}
             active={activeTab === 'orders'}
             onClick={() => { setActiveTab('orders'); setSearchQuery(''); }}
+          />
+          <SidebarItem
+            icon={<Tag size={20} />}
+            label="Coupons"
+            description="Manage promo codes"
+            showHelp={showHelp}
+            active={activeTab === 'coupons'}
+            onClick={() => { setActiveTab('coupons'); setSearchQuery(''); }}
           />
           <SidebarItem
             icon={<Package size={20} />}
@@ -737,6 +747,10 @@ export const AdminDashboard: React.FC = () => {
                 onNotify={showNotification} 
                 onConfirm={confirmAction}
               />
+            )}
+
+            {activeTab === 'coupons' && (
+              <CouponManager />
             )}
 
             {activeTab === 'policies' && (

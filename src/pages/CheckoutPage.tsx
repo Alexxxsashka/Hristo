@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { formatLabel } from '../utils/formatText';
@@ -81,6 +81,23 @@ export const CheckoutPage: React.FC = () => {
   const { cartItems, clearCart } = useCartStore();
   const { user, isAuthenticated, refreshProfile } = useAuthStore();
   const { t } = useTranslation();
+  const location = useLocation();
+
+  const [appliedCoupon, setAppliedCoupon] = useState<any | null>(location.state?.appliedCoupon || null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+
+  useEffect(() => {
+    if (appliedCoupon) {
+      databaseService.validateCoupon(appliedCoupon.code, cartItems).then(res => {
+        if (res.valid) {
+          setPromoDiscount(res.discount);
+        } else {
+          setPromoDiscount(0);
+          setAppliedCoupon(null);
+        }
+      });
+    }
+  }, [appliedCoupon, cartItems]);
   
   const [step, setStep] = useState(1);
   
@@ -236,8 +253,8 @@ export const CheckoutPage: React.FC = () => {
   const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
   const discountAmount = subtotal * (userDiscount / 100);
   const discountedSubtotal = subtotal - discountAmount;
-  const total = discountedSubtotal + selectedShipping.price;
-  const vatAmount = total * 0.2; // 25% VAT included in the final price (Base * 1.25 = Total => VAT = Total - Total/1.25 = Total * 0.2)
+  const total = Math.max(0, discountedSubtotal - promoDiscount) + selectedShipping.price;
+  const vatAmount = total * 0.2;
 
   useEffect(() => {
     if (step === 2 && selectedPayment.id === 'stripe' && !stripeClientSecret) {
@@ -266,6 +283,9 @@ export const CheckoutPage: React.FC = () => {
               shippingCost: selectedShipping.price,
               total,
               profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
+              couponId: appliedCoupon?.id,
+              couponCode: appliedCoupon?.code,
+              promoDiscount: promoDiscount,
               status: 'awaiting_payment',
               payment: {
                 method: 'stripe',
@@ -374,6 +394,9 @@ export const CheckoutPage: React.FC = () => {
         shippingCost: selectedShipping.price,
         total,
         profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
+        couponId: appliedCoupon?.id,
+        couponCode: appliedCoupon?.code,
+        promoDiscount: promoDiscount,
         status: orderStatus,
         payment: {
           method: selectedPayment.id,
@@ -823,6 +846,12 @@ export const CheckoutPage: React.FC = () => {
                     <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
                       <span>{t('dashboard_discount')} ({formatLabel(user?.rank || '')}) -{userDiscount}%</span>
                       <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {promoDiscount > 0 && (
+                    <div className="flex justify-between text-xs sm:text-sm text-red-500">
+                      <span>Promo Code ({appliedCoupon?.code})</span>
+                      <span className="font-mono">-€{promoDiscount.toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs sm:text-sm">

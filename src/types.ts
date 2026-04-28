@@ -222,6 +222,9 @@ export interface Order {
   total: number;
   profit: number;
   pointsEarned?: number;
+  couponId?: string;
+  couponCode?: string;
+  promoDiscount?: number;
   status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'awaiting_payment';
   cancelRequested?: boolean;
   cancelRequestedAt?: string;
@@ -378,6 +381,19 @@ export interface SiteSettings {
 
   // 3D Live Demo
   liveDemoModelUrl?: string;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  productId?: string;
+  categoryId?: string;
+  minOrderAmount?: number;
+  expiresAt?: string | null;
+  active: boolean;
+  createdAt?: string;
 }
 
 export interface AuditLog {
