@@ -41,6 +41,9 @@ export async function runAllMigrations(pool: Pool): Promise<MigrationResult[]> {
  */
 async function migrateSchema(pool: Pool): Promise<MigrationResult> {
   const tasks = [
+    // Extensions
+    "CREATE EXTENSION IF NOT EXISTS \"pgcrypto\"",
+    
     // Products
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS attachment_slot TEXT",
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT",

@@ -271,25 +271,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const user = getUser(req);
       if (!user || user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
 
-      const logs = await pool.query(`
-        SELECT 
-          id, 
-          user_id as "userId", 
-          user_email as "userEmail", 
-          user_name as "userName", 
-          action, 
-          resource_type as "resourceType", 
-          resource_id as "resourceId", 
-          details, 
-          ip_address as "ipAddress", 
-          user_agent as "userAgent", 
-          severity, 
-          timestamp 
-        FROM audit_logs 
-        ORDER BY timestamp DESC 
-        LIMIT 200
-      `);
-      return res.status(200).json(logs.rows);
+      try {
+        const logs = await pool.query(`
+          SELECT 
+            id, 
+            user_id as "userId", 
+            user_email as "userEmail", 
+            user_name as "userName", 
+            action, 
+            resource_type as "resourceType", 
+            resource_id as "resourceId", 
+            details, 
+            ip_address as "ipAddress", 
+            user_agent as "userAgent", 
+            severity, 
+            timestamp 
+          FROM audit_logs 
+          ORDER BY timestamp DESC 
+          LIMIT 200
+        `);
+        return res.status(200).json(logs.rows);
+      } catch (err: any) {
+        // If table doesn't exist yet, return empty array instead of 500
+        if (err.message.includes('relation "audit_logs" does not exist')) {
+          return res.status(200).json([]);
+        }
+        throw err;
+      }
     }
 
     // ── Loyalty Recalculate ──────────────────────────────────────────────────
