@@ -52,33 +52,55 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     ]
   };
 
-  const [formData, setFormData] = useState<Partial<Product>>(() => {
-    if (!initialData) return baseDefaults;
+  const normalizeInitialData = (data: Product | null): Partial<Product> => {
+    if (!data) return baseDefaults;
+
+    // Map snake_case from DB to camelCase for the form
+    const normalized: any = { 
+      ...data,
+      category: data.category || data.category_id || '',
+      subcategory: data.subcategory || '',
+      categoryFilters: data.categoryFilters || (data as any).category_filters || {},
+      model3D: data.model3D || (data as any).model_3d_url || '',
+      variantsGroupId: data.variantsGroupId || (data as any).variants_group_id || '',
+      mountType: data.mountType || (data as any).mount_type || '',
+      attachmentSlot: data.attachmentSlot || (data as any).attachment_slot || '',
+      compatibleIds: data.compatibleIds || (data as any).compatible_ids || [],
+      compatibleWeapons: data.compatibleWeapons || (data as any).compatible_ids || [], // Map compatible_ids to compatibleWeapons for the form
+      longDescription: data.longDescription || (data as any).long_description || '',
+      nameHr: data.nameHr || (data as any).name_hr || '',
+      descriptionHr: data.descriptionHr || (data as any).description_hr || '',
+      longDescriptionHr: data.longDescriptionHr || (data as any).long_description_hr || ''
+    };
 
     // If initialData exists but characteristics are empty, provide defaults
-    const data = { ...initialData };
-    if (!data.characteristics || data.characteristics.length === 0) {
-      data.characteristics = [
+    if (!normalized.characteristics || normalized.characteristics.length === 0) {
+      normalized.characteristics = [
         { emoji: '🛡️', label: 'durability', value: 'high' },
         { emoji: '⚡', label: 'handling', value: 'medium' },
         { emoji: '🎯', label: 'precision', value: 'elite' }
       ];
     }
-    return data;
-  });
+
+    // Determine category hierarchy
+    const catId = normalized.category;
+    const foundCat = categories.find(c => c.id === catId);
+    
+    if (foundCat && foundCat.parent) {
+      // If the category_id is a subcategory, split it
+      normalized.category = foundCat.parent;
+      normalized.subcategory = foundCat.id;
+    }
+
+    return normalized;
+  };
+
+  const [formData, setFormData] = useState<Partial<Product>>(() => normalizeInitialData(initialData));
 
   // Keep formData in sync with initialData when it changes
   useEffect(() => {
-    if (initialData) {
-      setFormData({
-        ...initialData,
-        category: initialData.category || initialData.category_id || '',
-        subcategory: initialData.subcategory || ''
-      });
-    } else {
-      setFormData(baseDefaults);
-    }
-  }, [initialData]);
+    setFormData(normalizeInitialData(initialData));
+  }, [initialData, categories]);
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [combinedImages, setCombinedImages] = useState<(string | File)[]>(() => {
     const existingImages = initialData?.images || [];
@@ -168,8 +190,10 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   };
 
   useEffect(() => {
-    if (formData.category) {
-      setActiveCategory(categories.find((c: any) => c.id === formData.category) || null);
+    // Priority: Subcategory filters -> Category filters
+    const targetCatId = formData.subcategory || formData.category;
+    if (targetCatId) {
+      setActiveCategory(categories.find((c: any) => c.id === targetCatId) || null);
     } else {
       setActiveCategory(null);
     }
@@ -181,7 +205,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         input.removeAttribute('required');
       }
     });
-  }, [formData.category, categories, formData.name]); // Re-run when crucial fields change
+  }, [formData.category, formData.subcategory, categories, formData.name]); // Re-run when crucial fields change
 
   const handleCategoryFilterChange = (filterId: string, value: any) => {
     setFormData({
