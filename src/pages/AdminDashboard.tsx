@@ -145,24 +145,22 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleRunMigrations = async () => {
-    confirmAction('This will run all pending database and storage migrations. Continue?', async () => {
-      setIsMigrating(true);
-      try {
-        const res = await databaseService.runMigrations();
-        if (res.success) {
-          setMigrationResults(res.results);
-          showNotification('Migrations executed successfully');
-          loadAllData();
-        } else {
-          showNotification(res.error || 'Migration failed', 'error');
-        }
-      } catch (err) {
-        console.error('Migration failed:', err);
-        showNotification('Migration failed', 'error');
-      } finally {
-        setIsMigrating(false);
+    setIsMigrating(true);
+    try {
+      const res = await databaseService.runMigrations();
+      if (res.success) {
+        setMigrationResults(res.results);
+        showNotification('Migrations executed successfully');
+        loadAllData();
+      } else {
+        showNotification(res.error || 'Migration failed', 'error');
       }
-    });
+    } catch (err) {
+      console.error('Migration failed:', err);
+      showNotification('Migration failed', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
   };
 
   useEffect(() => {
@@ -243,45 +241,39 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const deleteProduct = async (id: string) => {
-    confirmAction('Are you sure you want to delete this product?', async () => {
-      try {
-        await databaseService.deleteProduct(id);
-        setProducts(products.filter(p => p.id !== id));
-        showNotification('Product deleted successfully');
-        fetchAuditLogs();
-      } catch (err) {
-        console.error('Failed to delete product', err);
-        showNotification('Failed to delete product', 'error');
-      }
-    });
+    try {
+      await databaseService.deleteProduct(id);
+      setProducts(products.filter(p => p.id !== id));
+      showNotification('Product deleted successfully');
+      fetchAuditLogs();
+    } catch (err) {
+      console.error('Failed to delete product', err);
+      showNotification('Failed to delete product', 'error');
+    }
   };
 
   const deletePost = async (id: string) => {
-    confirmAction('Are you sure you want to delete this post?', async () => {
-      try {
-        await databaseService.deleteBlogPost(id);
-        setBlogPosts(blogPosts.filter(p => p.id !== id));
-        showNotification('Post deleted successfully');
-        fetchAuditLogs();
-      } catch (err) {
-        console.error('Failed to delete post', err);
-        showNotification('Failed to delete post', 'error');
-      }
-    });
+    try {
+      await databaseService.deleteBlogPost(id);
+      setBlogPosts(blogPosts.filter(p => p.id !== id));
+      showNotification('Post deleted successfully');
+      fetchAuditLogs();
+    } catch (err) {
+      console.error('Failed to delete post', err);
+      showNotification('Failed to delete post', 'error');
+    }
   };
 
   const deleteMessage = async (id: string) => {
-    confirmAction('Are you sure you want to delete this message?', async () => {
-      try {
-        await databaseService.deleteMessage(id);
-        setMessages(messages.filter(m => m.id !== id));
-        showNotification('Message deleted successfully');
-        fetchAuditLogs();
-      } catch (err) {
-        console.error('Failed to delete message', err);
-        showNotification('Failed to delete message', 'error');
-      }
-    });
+    try {
+      await databaseService.deleteMessage(id);
+      setMessages(messages.filter(m => m.id !== id));
+      showNotification('Message deleted successfully');
+      fetchAuditLogs();
+    } catch (err) {
+      console.error('Failed to delete message', err);
+      showNotification('Failed to delete message', 'error');
+    }
   };
 
   const filteredProducts = products.filter(p => {
@@ -920,11 +912,16 @@ export const AdminDashboard: React.FC = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    confirmDialog.onConfirm();
-                    setConfirmDialog(null);
+                  onClick={async () => {
+                    const btn = document.activeElement as HTMLButtonElement;
+                    if (btn) btn.disabled = true;
+                    try {
+                      await confirmDialog.onConfirm();
+                    } finally {
+                      setConfirmDialog(null);
+                    }
                   }}
-                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20"
+                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
                 >
                   Confirm
                 </button>
