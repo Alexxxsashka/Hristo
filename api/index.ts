@@ -469,6 +469,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const body = req.body || {};
       const id = body.id;
       const name = body.name;
+      const nameHr = body.nameHr || body.name_hr || null;
       const slug = body.slug || body.id;
       const imageUrl = body.image_url || body.image || null;
       const parentId = body.parent_id || body.parent || null;
@@ -480,16 +481,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       try {
         await pool.query(
-          `INSERT INTO categories (id, name, slug, image_url, parent_id, filters, discount) 
-           VALUES ($1,$2,$3,$4,$5,$6,$7) 
+          `INSERT INTO categories (id, name, name_hr, slug, image_url, parent_id, filters, discount) 
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
            ON CONFLICT (id) DO UPDATE SET 
              name = EXCLUDED.name, 
+             name_hr = EXCLUDED.name_hr,
              slug = EXCLUDED.slug, 
              image_url = EXCLUDED.image_url, 
              parent_id = EXCLUDED.parent_id, 
              filters = EXCLUDED.filters,
              discount = EXCLUDED.discount`,
-          [finalId, name, slug, imageUrl, parentId, JSON.stringify(filters), discount]
+          [finalId, name, nameHr, slug, imageUrl, parentId, JSON.stringify(filters), discount]
         );
 
         await logAudit(pool, {

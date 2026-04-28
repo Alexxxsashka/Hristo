@@ -52,6 +52,8 @@ async function migrateSchema(pool: Pool): Promise<MigrationResult> {
     
     // Categories
     "ALTER TABLE categories ADD COLUMN IF NOT EXISTS filters JSONB DEFAULT '[]'",
+    "ALTER TABLE categories ADD COLUMN IF NOT EXISTS name_hr TEXT",
+    "ALTER TABLE categories ADD COLUMN IF NOT EXISTS discount INTEGER DEFAULT 0",
     
     // Orders
     "ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT",
