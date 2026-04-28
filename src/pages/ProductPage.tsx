@@ -19,6 +19,7 @@ import { formatLabel } from '../utils/formatText';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Heart } from 'lucide-react';
+import { ProductPageSkeleton } from '../components/Skeleton';
 
 const RedIcon = ({ emoji, size = 24 }: { emoji: string; size?: number }) => {
   const iconMap: Record<string, any> = {
@@ -99,7 +100,7 @@ export const ProductPage: React.FC = () => {
     fetchProduct();
   }, [id, slug]);
 
-  if (loading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">{t('loading')}</div>;
+  if (loading) return <ProductPageSkeleton />;
   if (!product) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">{t('product_not_found')}</div>;
 
   const categoryObj = categories.find(c => c.id === product.category);

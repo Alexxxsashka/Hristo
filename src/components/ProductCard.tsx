@@ -112,7 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className={`group relative bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-red-600/50 hover:shadow-2xl hover:shadow-red-600/5 transition-all duration-500 ${
+        className={`group relative bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-red-600/50 hover:shadow-2xl hover:shadow-red-600/5 transition-all duration-500 hover-lift ${
           viewMode === 'list' ? 'flex flex-col md:flex-row w-full' : ''
         }`}
       >

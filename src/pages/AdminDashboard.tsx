@@ -85,9 +85,11 @@ import { ReportModal } from '../components/admin/ReportModal';
 import { AuditManager } from '../components/admin/AuditManager';
 import { CouponManager } from '../components/admin/CouponManager';
 import { AuditLog } from '../types';
+import { DashboardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -286,9 +288,25 @@ export const AdminDashboard: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex text-zinc-900">
-      <aside className="w-64 bg-white border-r border-zinc-200 flex flex-col">
-        <div className="p-6 border-b border-zinc-100">
+    <div className="min-h-screen bg-zinc-50 flex text-zinc-900 relative">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <aside className={`
+        fixed inset-y-0 left-0 z-[120] w-64 bg-white border-r border-zinc-200 flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">
               <Settings className="text-white w-6 h-6" />
@@ -298,16 +316,19 @@ export const AdminDashboard: React.FC = () => {
               <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">Control Panel</span>
             </div>
           </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <SidebarItem
             icon={<LayoutDashboard size={20} />}
             label="Dashboard"
             description="Overview of your store stats"
             showHelp={showHelp}
             active={activeTab === 'dashboard'}
-            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<ShoppingBag size={20} />}
@@ -315,7 +336,7 @@ export const AdminDashboard: React.FC = () => {
             description="Fulfillment & Invoices"
             showHelp={showHelp}
             active={activeTab === 'orders'}
-            onClick={() => { setActiveTab('orders'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('orders'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Tag size={20} />}
@@ -323,7 +344,7 @@ export const AdminDashboard: React.FC = () => {
             description="Manage promo codes"
             showHelp={showHelp}
             active={activeTab === 'coupons'}
-            onClick={() => { setActiveTab('coupons'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('coupons'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Package size={20} />}
@@ -331,7 +352,7 @@ export const AdminDashboard: React.FC = () => {
             description="Manage your inventory"
             showHelp={showHelp}
             active={activeTab === 'products'}
-            onClick={() => { setActiveTab('products'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('products'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Layers size={20} />}
@@ -339,7 +360,7 @@ export const AdminDashboard: React.FC = () => {
             description="Organize your shop"
             showHelp={showHelp}
             active={activeTab === 'categories'}
-            onClick={() => { setActiveTab('categories'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('categories'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<FileText size={20} />}
@@ -347,7 +368,7 @@ export const AdminDashboard: React.FC = () => {
             description="Write news & articles"
             showHelp={showHelp}
             active={activeTab === 'blog'}
-            onClick={() => { setActiveTab('blog'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('blog'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<MessageSquare size={20} />}
@@ -355,7 +376,7 @@ export const AdminDashboard: React.FC = () => {
             description="Customer inquiries"
             showHelp={showHelp}
             active={activeTab === 'messages'}
-            onClick={() => { setActiveTab('messages'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('messages'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Shield size={20} />}
@@ -363,7 +384,7 @@ export const AdminDashboard: React.FC = () => {
             description="Legal & info pages"
             showHelp={showHelp}
             active={activeTab === 'policies'}
-            onClick={() => { setActiveTab('policies'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('policies'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
 
           <SidebarItem
@@ -372,7 +393,7 @@ export const AdminDashboard: React.FC = () => {
             description="Site branding & configuration"
             showHelp={showHelp}
             active={activeTab === 'settings'}
-            onClick={() => { setActiveTab('settings'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('settings'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
 
 
@@ -380,7 +401,7 @@ export const AdminDashboard: React.FC = () => {
             icon={<Shield size={18} />}
             label="Audit"
             active={activeTab === 'audit'}
-            onClick={() => { setActiveTab('audit'); setSearchQuery(''); }}
+            onClick={() => { setActiveTab('audit'); setSearchQuery(''); setIsSidebarOpen(false); }}
           />
 
         </nav>
@@ -409,26 +430,55 @@ export const AdminDashboard: React.FC = () => {
       </aside>
 
       <main className="flex-1 overflow-y-auto">
-        <header className="bg-white border-b border-zinc-200 px-8 py-6 sticky top-0 z-10 flex items-center justify-between">
-          <div className="flex flex-col">
-            <h2 className="text-2xl font-black text-zinc-900 uppercase tracking-tighter">
-              {editingProduct ? 'Edit Product' : activeTab}
-            </h2>
-            {showHelp && (
-              <span className="text-xs text-zinc-400 font-medium mt-1">
-                {activeTab === 'dashboard' && 'Quick overview of your store performance'}
-                {activeTab === 'orders' && 'Manage fulfillment and customer invoices'}
-                {activeTab === 'products' && 'List of all items available in your shop'}
-                {activeTab === 'add' && 'Form to create or update product details'}
-                {activeTab === 'categories' && 'Manage how products are grouped'}
-                {activeTab === 'blog' && 'Manage news and articles for your customers'}
-                {activeTab === 'messages' && 'Read and reply to customer messages'}
-                {activeTab === 'policies' && 'Edit legal documents and information pages'}
-                {activeTab === 'audit' && 'Security Registry of system events'}
-              </span>
-            )}
+        <header className="bg-white border-b border-zinc-200 px-4 sm:px-8 py-4 sm:py-6 sticky top-0 z-50 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="flex flex-col">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 uppercase tracking-tighter">
+                {editingProduct ? 'Edit Product' : activeTab}
+              </h2>
+              {showHelp && (
+                <span className="hidden sm:inline text-xs text-zinc-400 font-medium mt-1">
+                  {activeTab === 'dashboard' && 'Quick overview of your store performance'}
+                  {activeTab === 'orders' && 'Manage fulfillment and customer invoices'}
+                  {activeTab === 'products' && 'List of all items available in your shop'}
+                  {activeTab === 'add' && 'Form to create or update product details'}
+                  {activeTab === 'categories' && 'Manage how products are grouped'}
+                  {activeTab === 'blog' && 'Manage news and articles for your customers'}
+                  {activeTab === 'messages' && 'Read and reply to customer messages'}
+                  {activeTab === 'policies' && 'Edit legal documents and information pages'}
+                  {activeTab === 'audit' && 'Security Registry of system events'}
+                </span>
+              )}
+            </div>
           </div>
 
+          <div className="flex-1 max-w-md hidden md:block">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search products, orders..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-zinc-900 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors hidden sm:block">
+              <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} onClick={() => loadAllData()} />
+            </button>
+            <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-600 font-bold border border-zinc-200">
+              {user?.username?.[0]?.toUpperCase() || 'A'}
+            </div>
+          </div>
         </header>
 
         <div className="p-8">
@@ -441,31 +491,37 @@ export const AdminDashboard: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-8"
               >
-                <BIAnalytics orders={orders} users={users_list} />
+                {isLoading ? (
+                  <DashboardSkeleton />
+                ) : (
+                  <>
+                    <BIAnalytics orders={orders} users={users_list} />
 
-                <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
-                  <div className="relative z-10 max-w-2xl">
-                    <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Welcome to Admin Panel</h3>
-                    <p className="text-zinc-400 leading-relaxed mb-8">
-                      This is where you manage your entire store. If you're new, we recommend turning on <b>Help Mode</b> in the sidebar to see explanations for each section.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <QuickLink
-                        title="Add New Product"
-                        desc="Start selling something new"
-                        onClick={() => setActiveTab('add')}
-                        icon={<Plus size={18} />}
-                      />
-                      <QuickLink
-                        title="Check Messages"
-                        desc="See what customers are asking"
-                        onClick={() => setActiveTab('messages')}
-                        icon={<MessageSquare size={18} />}
-                      />
+                    <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
+                      <div className="relative z-10 max-w-2xl">
+                        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Welcome to Admin Panel</h3>
+                        <p className="text-zinc-400 leading-relaxed mb-8">
+                          This is where you manage your entire store. If you're new, we recommend turning on <b>Help Mode</b> in the sidebar to see explanations for each section.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <QuickLink
+                            title="Add New Product"
+                            desc="Start selling something new"
+                            onClick={() => setActiveTab('add')}
+                            icon={<Plus size={18} />}
+                          />
+                          <QuickLink
+                            title="Check Messages"
+                            desc="See what customers are asking"
+                            onClick={() => setActiveTab('messages')}
+                            icon={<MessageSquare size={18} />}
+                          />
+                        </div>
+                      </div>
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-800 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50" />
                     </div>
-                  </div>
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-800 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50" />
-                </div>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -570,61 +626,69 @@ export const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
-                      {filteredProducts.map(product => (
-                        <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400">
-                                <Package size={20} />
+                      {isLoading ? (
+                        [...Array(5)].map((_, i) => (
+                          <tr key={i}>
+                            <td colSpan={6} className="px-0 py-0">
+                              <TableRowSkeleton columns={6} />
+                            </td>
+                          </tr>
+                        ))
+                      ) : filteredProducts.length > 0 ? (
+                        filteredProducts.map(product => (
+                          <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-400">
+                                  <Package size={20} />
+                                </div>
+                                <div>
+                                  <div className="font-bold text-zinc-900">{product.name}</div>
+                                  <div className="text-xs text-zinc-500 truncate max-w-[200px]">{product.description}</div>
+                                </div>
                               </div>
-                              <div>
-                                <div className="font-bold text-zinc-900">{product.name}</div>
-                                <div className="text-xs text-zinc-500 truncate max-w-[200px]">{product.description}</div>
+                            </td>
+                            <td className="px-6 py-4 text-sm font-mono text-zinc-500">{product.sku || '-'}</td>
+                            <td className="px-6 py-4">
+                              <div className={`font-bold ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-zinc-900'}`}>
+                                {product.stock}
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-mono text-zinc-500">{product.sku || '-'}</td>
-                          <td className="px-6 py-4">
-                            <div className={`font-bold ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-zinc-900'}`}>
-                              {product.stock}
-                            </div>
-                            {product.stock <= (product.minStockLevel || 0) && (
-                              <div className="text-[10px] text-red-500 font-bold uppercase">Low Stock</div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-zinc-600 font-medium">€{product.price}</td>
-                          <td className="px-6 py-4">
-                            {product.discount ? (
-                              <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-bold">
-                                -{product.discount}%
-                              </span>
-                            ) : (
-                              <span className="text-zinc-400 text-xs">-</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-
-                              <button
-                                onClick={() => {
-                                  setEditingProduct(product);
-                                  setActiveTab('add');
-                                }}
-                                className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
-                              >
-                                <Edit size={18} />
-                              </button>
-                              <button
-                                onClick={() => confirmAction(`Are you sure you want to delete the product "${product.name}"?`, () => deleteProduct(product.id))}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                      {filteredProducts.length === 0 && (
+                              {product.stock <= (product.minStockLevel || 0) && (
+                                <div className="text-[10px] text-red-500 font-bold uppercase">Low Stock</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-zinc-600 font-medium">€{product.price}</td>
+                            <td className="px-6 py-4">
+                              {product.discount ? (
+                                <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-bold">
+                                  -{product.discount}%
+                                </span>
+                              ) : (
+                                <span className="text-zinc-400 text-xs">-</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    setActiveTab('add');
+                                  }}
+                                  className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={() => confirmAction(`Are you sure you want to delete the product "${product.name}"?`, () => deleteProduct(product.id))}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
                         <tr>
                           <td colSpan={6} className="px-6 py-20 text-center">
                             <div className="flex flex-col items-center justify-center text-zinc-400">

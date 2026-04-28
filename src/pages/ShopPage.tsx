@@ -8,6 +8,8 @@ import { useParams, Link } from 'react-router-dom';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { SEO } from '../components/SEO';
+import { ProductCardSkeleton } from '../components/Skeleton';
+
 
 const QuickPreviewModal = lazy(() => import('../components/QuickPreviewModal').then(m => ({ default: m.QuickPreviewModal })));
 
