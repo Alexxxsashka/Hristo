@@ -115,15 +115,9 @@ export const AdminDashboard: React.FC = () => {
   const [isProductReportModalOpen, setIsProductReportModalOpen] = useState(false);
   const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isInitialized } = useAuthStore();
 
-  useEffect(() => {
-    loadAllData();
-    
-    // 🕵️ Audit Real-time Polling (Every 10 seconds to catch actions from other admins)
-    const auditInterval = setInterval(fetchAuditLogs, 10000);
-    return () => clearInterval(auditInterval);
-  }, []);
+
 
   const loadAllData = async () => {
     setIsLoading(true);
@@ -152,13 +146,17 @@ export const AdminDashboard: React.FC = () => {
 
 
   useEffect(() => {
-    if (user?.role !== 'admin') {
+    // Wait until Firebase has restored the auth state
+    if (!isInitialized) return;
+    if (!user || user.role !== 'admin') {
       navigate('/login');
       return;
     }
 
     loadAllData();
 
+    // 🕵️ Audit Real-time Polling (Every 10 seconds)
+    const auditInterval = setInterval(fetchAuditLogs, 10000);
 
     // Auto-refresh orders and products in the background every 30 seconds
     const interval = setInterval(() => {
@@ -166,8 +164,11 @@ export const AdminDashboard: React.FC = () => {
       fetchProducts();
     }, 30000);
 
-    return () => clearInterval(interval);
-  }, [user, navigate]);
+    return () => {
+      clearInterval(auditInterval);
+      clearInterval(interval);
+    };
+  }, [user, navigate, isInitialized]);
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });

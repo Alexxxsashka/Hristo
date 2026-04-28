@@ -31,9 +31,9 @@ export const CouponManager: React.FC = () => {
         databaseService.getProducts(),
         databaseService.getCategories()
       ]);
-      setCoupons(cRes);
-      setProducts(pRes);
-      setCategories(catRes);
+      setCoupons(cRes || []);
+      setProducts((pRes as any) || []);
+      setCategories(catRes || []);
     } catch (err) {
       console.error('Failed to fetch data:', err);
     } finally {
