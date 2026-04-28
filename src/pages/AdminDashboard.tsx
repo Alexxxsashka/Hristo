@@ -109,6 +109,7 @@ export const AdminDashboard: React.FC = () => {
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [isProductReportModalOpen, setIsProductReportModalOpen] = useState(false);
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
@@ -907,23 +908,30 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex gap-4">
                 <button
                   onClick={() => setConfirmDialog(null)}
-                  className="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-bold transition-all"
+                  disabled={isConfirmingAction}
+                  className="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-bold transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={async () => {
-                    const btn = document.activeElement as HTMLButtonElement;
-                    if (btn) btn.disabled = true;
+                    setIsConfirmingAction(true);
                     try {
                       await confirmDialog.onConfirm();
                     } finally {
+                      setIsConfirmingAction(false);
                       setConfirmDialog(null);
                     }
                   }}
-                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
+                  disabled={isConfirmingAction}
+                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Confirm
+                  {isConfirmingAction ? (
+                    <>
+                      <RefreshCw size={18} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : 'Confirm'}
                 </button>
               </div>
             </motion.div>
