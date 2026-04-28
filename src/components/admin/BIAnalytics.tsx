@@ -117,11 +117,30 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   const chartData = timeRange === 'weekly' ? getDailyData() : getMonthlyData();
   const totalNewUsersInPeriod = chartData.reduce((acc, curr) => acc + curr.users, 0);
 
+  // Calculate category distribution based on actual units sold
+  const categoryCounts = orders.reduce((acc, order) => {
+    order.items.forEach(item => {
+      const cat = (item.category || '').toLowerCase();
+      const qty = Number(item.quantity) || 0;
+      
+      if (cat.includes('rifle')) {
+        acc.rifles += qty;
+      } else if (cat.includes('pistol')) {
+        acc.pistols += qty;
+      } else if (cat.includes('gear')) {
+        acc.gear += qty;
+      } else {
+        acc.other += qty;
+      }
+    });
+    return acc;
+  }, { rifles: 0, pistols: 0, gear: 0, other: 0 });
+
   const categoryData = [
-    { name: 'Rifles', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('rifle'))).length },
-    { name: 'Pistols', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('pistol'))).length },
-    { name: 'Gear', value: orders.filter(o => o.items.some(i => i.category?.toLowerCase().includes('gear'))).length },
-    { name: 'Other', value: orders.filter(o => o.items.every(i => !i.category || !['rifle', 'pistol', 'gear'].some(cat => i.category?.toLowerCase().includes(cat)))).length },
+    { name: 'Rifles', value: categoryCounts.rifles },
+    { name: 'Pistols', value: categoryCounts.pistols },
+    { name: 'Gear', value: categoryCounts.gear },
+    { name: 'Other', value: categoryCounts.other },
   ];
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
