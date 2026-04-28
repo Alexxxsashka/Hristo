@@ -2316,7 +2316,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       );
       
       await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'CREATE', 'COUPON', id, `Created coupon: ${code}`]);
+        [`log-${Date.now()}`, (req as any).user.id, 'CREATE', 'COUPON', id, `Created coupon: ${code}`]);
 
       res.status(201).json({ success: true, id });
     } catch (error) {
@@ -2333,7 +2333,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       );
 
       await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'UPDATE', 'COUPON', req.params.id, `Updated coupon: ${code}`]);
+        [`log-${Date.now()}`, (req as any).user.id, 'UPDATE', 'COUPON', req.params.id, `Updated coupon: ${code}`]);
 
       res.json({ success: true });
     } catch (error) {
@@ -2346,7 +2346,7 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]);
       
       await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'DELETE', 'COUPON', req.params.id, `Deleted coupon`]);
+        [`log-${Date.now()}`, (req as any).user.id, 'DELETE', 'COUPON', req.params.id, `Deleted coupon`]);
 
       res.json({ success: true });
     } catch (error) {
