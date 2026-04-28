@@ -75,6 +75,8 @@ const initSchema = async () => {
       ALTER TABLE products ADD COLUMN IF NOT EXISTS mount_type TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS variants_group_id TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS model TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS landing_cost DECIMAL;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS msrp DECIMAL;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS discount INTEGER DEFAULT 0;

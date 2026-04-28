@@ -718,6 +718,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS name_hr TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS description_hr TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS model TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -775,7 +777,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ),
           p.mountType || null,
           p.attachmentSlot || null,
-          p.variantsGroupId || null
+          p.variantsGroupId || null,
+          p.landingCost || p.landing_cost || 0,
+          p.msrp || 0,
+          p.discount || 0,
+          p.currency || 'EUR'
         ];
 
         console.log(`[DB] Product save payload:`, JSON.stringify(p, null, 2));
@@ -785,16 +791,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             price, stock, image_url, images, model_3d_url, has_3d, characteristics, 
             variants, variant_attributes, category_filters, 
             name_hr, description_hr, long_description_hr, status,
-            compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot, variants_group_id
+            compatible_ids, compatible_module_categories, socket_point, slots, mount_type, attachment_slot, variants_group_id,
+            landing_cost, msrp, discount, currency
           )
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'active',$27,$28,$29,$30,$31,$32,$33)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'active',$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37)
            ON CONFLICT (id) DO UPDATE SET 
             name=$6, description=$7, long_description=$8, price=$14, stock=$15, image_url=$16, images=$17, 
             model_3d_url=$18, has_3d=$19, characteristics=$20, variants=$21, 
             variant_attributes=$22, category_filters=$23, 
             name_hr=$24, description_hr=$25, long_description_hr=$26,
             brand=$12, model=$13, sku=$3, barcode=$4, type=$9, category_id=$10, subcategory=$11,
-            compatible_ids=$27, compatible_module_categories=$28, socket_point=$29, slots=$30, mount_type=$31, attachment_slot=$32, variants_group_id=$33`,
+            compatible_ids=$27, compatible_module_categories=$28, socket_point=$29, slots=$30, mount_type=$31, attachment_slot=$32, variants_group_id=$33,
+            landing_cost=$34, msrp=$35, discount=$36, currency=$37`,
           productData
         );
 
@@ -889,6 +897,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS name_hr TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS description_hr TEXT");
         await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS long_description_hr TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS model TEXT");
+        await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS subcategory TEXT");
         await pool.query(`
           CREATE TABLE IF NOT EXISTS product_compatibility (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -949,7 +959,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ),
           p.mountType || null,
           p.attachmentSlot || null,
-          p.variantsGroupId || null
+          p.variantsGroupId || null,
+          p.landingCost || p.landing_cost || 0,
+          p.msrp || 0,
+          p.discount || 0,
+          p.currency || 'EUR'
         ];
 
         const r = await pool.query(
@@ -960,7 +974,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name_hr=$15, description_hr=$16, long_description_hr=$17,
             brand=$18, model=$19, sku=$20, barcode=$21, type=$22, status=$23,
             category_id=$24, subcategory=$25,
-            compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31, variants_group_id=$32
+            compatible_ids=$26, compatible_module_categories=$27, socket_point=$28, slots=$29, mount_type=$30, attachment_slot=$31, variants_group_id=$32,
+            landing_cost=$33, msrp=$34, discount=$35, currency=$36
            WHERE id = $1 OR slug = $1
            RETURNING id`,
           productData
