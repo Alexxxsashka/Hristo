@@ -377,6 +377,14 @@ const initSchema = async () => {
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS team_name TEXT');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS addresses JSONB DEFAULT \'[]\'');
 
+    // 15. Indexes for performance
+    await client.query('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_inventory_logs_product ON inventory_logs(product_id)');
+
     console.log('✅ Database schema initialized/verified');
   } catch (err) {
     console.error('❌ Database schema initialization error:', err);

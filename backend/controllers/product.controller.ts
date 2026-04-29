@@ -36,6 +36,45 @@ export const getProducts = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+export const getProduct = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id;
+    const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    const p = result.rows[0];
+    const mapped = {
+      ...p,
+      category: p.category_id,
+      image: p.image_url,
+      images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
+      model3D: p.model_3d_url,
+      has3D: !!p.model_3d_url,
+      categoryFilters: typeof p.category_filters === 'string' ? JSON.parse(p.category_filters) : (p.category_filters || {}),
+      variantAttributes: typeof p.variant_attributes === 'string' ? JSON.parse(p.variant_attributes) : (p.variant_attributes || []),
+      variants: typeof p.variants === 'string' ? JSON.parse(p.variants) : (p.variants || []),
+      characteristics: typeof p.characteristics === 'string' ? JSON.parse(p.characteristics) : (p.characteristics || []),
+      socketPoint: typeof p.socket_point === 'string' ? JSON.parse(p.socket_point) : (p.socket_point || [0,0,0]),
+      compatibleIds: typeof p.compatible_ids === 'string' ? JSON.parse(p.compatible_ids) : (p.compatible_ids || []),
+      slots: typeof p.slots === 'string' ? JSON.parse(p.slots) : (p.slots || []),
+      compatibleModuleCategories: typeof p.compatible_module_categories === 'string' ? JSON.parse(p.compatible_module_categories) : (p.compatible_module_categories || []),
+      nameHr: p.name_hr,
+      descriptionHr: p.description_hr,
+      longDescription: p.long_description,
+      longDescriptionHr: p.long_description_hr,
+      model3DName: p.model3d_name,
+      landingCost: p.landing_cost,
+    };
+    res.json({ success: true, data: mapped });
+  } catch (error) {
+    console.error('getProduct error:', error);
+    res.status(500).json({ success: false, error: 'Database error' });
+  }
+};
+
 export const createProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const p = req.body.product ? JSON.parse(req.body.product) : req.body;
@@ -53,7 +92,7 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
       }
     }
 
-    const id = p.id || `prod-${Date.now()}`;
+    const id = req.params.id || p.id || `prod-${Date.now()}`;
     const uid = p.uid || id;
     const finalSlug = p.slug || (p.name ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
 
@@ -170,7 +209,7 @@ export const getCategories = async (req: AuthenticatedRequest, res: Response) =>
 export const saveCategory = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const cat = req.body;
-    const id = cat.id || `cat-${Date.now()}`;
+    const id = req.params.id || cat.id || `cat-${Date.now()}`;
     const slug = cat.slug || cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
     const query = `

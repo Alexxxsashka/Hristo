@@ -7,8 +7,14 @@ const router = Router();
 
 router.get('/', productController.getProducts);
 router.get('/categories', productController.getCategories);
+router.get('/:id', productController.getProduct);
 
 router.post('/', authenticateAdmin, uploadMemory.fields([
+  { name: "modelFile", maxCount: 1 },
+  { name: "imageFile", maxCount: 1 }
+]), productController.createProduct);
+
+router.put('/:id', authenticateAdmin, uploadMemory.fields([
   { name: "modelFile", maxCount: 1 },
   { name: "imageFile", maxCount: 1 }
 ]), productController.createProduct);
