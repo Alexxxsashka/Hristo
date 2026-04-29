@@ -287,9 +287,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
             setUploadingFile('3D Model');
             try {
-              const extension = modelFile.name.split('.').pop();
               const originalName = modelFile.name;
-              const safeName = `model_${Date.now()}.${extension}`;
+              const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
               modelUrl = await databaseService.uploadFile(modelFile, `products/3d/${safeName}`, (p) => setUploadProgress(p));
               modelName = originalName;
               console.log('3D model uploaded successfully:', modelUrl);
@@ -312,8 +311,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               setUploadingFile(`Image ${i + 1}`);
               setUploadProgress(0);
               try {
-                const extension = item.name.split('.').pop();
-                const safeName = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
+                const originalName = item.name;
+                const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
                 const url = await databaseService.uploadFile(item, `products/2d/${safeName}`, (p) => setUploadProgress(p));
                 finalImageUrls.push(url);
                 console.log(`Image ${i + 1} uploaded successfully:`, url);

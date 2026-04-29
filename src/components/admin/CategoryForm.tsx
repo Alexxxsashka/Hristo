@@ -74,8 +74,9 @@ export const CategoryForm = ({
   const handleFileUpload = async (file: File) => {
     try {
       if (newCat.image) await databaseService.deleteFile(newCat.image);
-      const extension = file.name.split('.').pop();
-      const path = `categories/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${extension}`;
+      const originalName = file.name;
+      const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
+      const path = `categories/${safeName}`;
       const url = await databaseService.uploadFile(file, path);
       handleFieldChange('image', url);
       onNotify('Image uploaded successfully');

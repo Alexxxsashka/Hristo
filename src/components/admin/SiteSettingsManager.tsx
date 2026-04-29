@@ -88,8 +88,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
   const handleFileUpload = async (file: File, folder: string, previousUrl?: string) => {
     if (previousUrl) await databaseService.deleteFile(previousUrl);
-    const extension = file.name.split('.').pop();
-    const path = `site/${folder}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${extension}`;
+    const originalName = file.name;
+    const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
+    const path = `site/${folder}/${safeName}`;
     return await databaseService.uploadFile(file, path, (p) => setUploadProgress(p));
   };
 

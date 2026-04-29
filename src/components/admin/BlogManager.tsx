@@ -72,8 +72,8 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
         let imageUrl = editingPost?.image || '';
         if (imageFile) {
-          const extension = imageFile.name.split('.').pop();
-          const safeName = `blog_${Date.now()}.${extension}`;
+          const originalName = imageFile.name;
+          const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
           imageUrl = await databaseService.uploadFile(imageFile, `blog/images/${safeName}`);
         }
 
