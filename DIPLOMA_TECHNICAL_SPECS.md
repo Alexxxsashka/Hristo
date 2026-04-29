@@ -1,63 +1,63 @@
-# Technical Specifications: Hristo Airsoft E-Commerce Platform
+# Технічні характеристики: Платформа електронної комерції Hristo Airsoft
 
-## 1. System Overview
-The **Hristo** platform is a high-performance, industrial-grade e-commerce solution tailored for the airsoft industry. It integrates advanced 3D visualization, real-time business analytics, and a robust Enterprise Resource Planning (ERP) subsystem. The architecture is designed for extreme scalability and zero-downtime deployments using a modern serverless stack.
+## 1. Огляд системи
+Платформа **Hristo** — це високопродуктивне рішення для електронної комерції промислового рівня, розроблене спеціально для індустрії страйкболу (airsoft). Вона інтегрує передову 3D-візуалізацію, бізнес-аналітику в реальному часі та надійну підсистему планування ресурсів підприємства (ERP). Архітектура розрахована на екстремальну масштабованість та розгортання без простоїв з використанням сучасного серверного стеку.
 
-## 2. Core Architectural Components
-### 2.1. Frontend Architecture
-- **Framework**: React 18.x with Vite for high-speed HMR and optimized builds.
-- **State Management**: Zustand for lightweight, high-performance global state (Auth, Cart, Settings).
-- **Styling Engine**: Vanilla CSS with TailwindCSS utilities, emphasizing a "Tactical Dark" aesthetic with glassmorphism and motion-optimized components (Framer Motion).
-- **3D Engine**: Three.js and React Three Fiber (R3F) for real-time GLTF/GLB model rendering and interactive configuration.
+## 2. Основні архітектурні компоненти
+### 2.1. Архітектура фронтенду
+- **Фреймворк**: React 18.x з Vite для високошвидкісного HMR (Hot Module Replacement) та оптимізованої збірки.
+- **Управління станом**: Zustand для легкого та високопродуктивного управління глобальним станом (автентифікація, кошик, налаштування).
+- **Стилізація**: Vanilla CSS з утилітами TailwindCSS, що підкреслюють естетику "Tactical Dark" з використанням ефектів матового скла (glassmorphism) та компонентів, оптимізованих для анімації (Framer Motion).
+- **3D-движок**: Three.js та React Three Fiber (R3F) для рендерингу GLTF/GLB моделей у реальному часі та інтерактивної конфігурації.
 
-### 2.2. Backend & Database
-- **Runtime**: Node.js Serverless Functions (Vercel).
-- **Database**: PostgreSQL (Neon) with optimized indexing for full-text search and complex relational queries.
-- **Persistence Layer**: Custom database service abstraction for seamless interaction between frontend and API.
-- **Asset Storage**: Vercel Blob Store (Online-only policy) for dynamic imagery, 3D models, and documents, eliminating local filesystem dependency.
+### 2.2. Бекенд та база даних
+- **Середовище виконання**: Serverless-функції Node.js (Vercel).
+- **База даних**: PostgreSQL (Neon) з оптимізованим індексуванням для повнотекстового пошуку та складних реляційних запитів.
+- **Рівень персистентності**: Кастомна абстракція сервісу бази даних для безшовної взаємодії між фронтендом та API.
+- **Зберігання активів**: Vercel Blob Store (політика "лише онлайн") для динамічних зображень, 3D-моделей та документів, що виключає залежність від локальної файлової системи.
 
-## 3. Unique Functional Systems
-### 3.1. Advanced 3D Weapon Configurator
-The platform's standout feature is an interactive 3D configurator that allows users to:
-- Load high-fidelity 4K textured models.
-- Apply real-time modifications (attachments, camos, internal parts).
-- Calculate real-time compatibility and pricing based on selected components.
-- Save and share unique "builds" via persistent database records.
+## 3. Унікальні функціональні системи
+### 3.1. Розширений 3D-конфігуратор зброї
+Визначною особливістю платформи є інтерактивний 3D-конфігуратор, який дозволяє користувачам:
+- Завантажувати високодеталізовані моделі з 4K текстурами.
+- Застосовувати модифікації в реальному часі (аксесуари, камуфляжі, внутрішні деталі).
+- Розраховувати сумісність та ціну в реальному часі залежно від обраних компонентів.
+- Зберігати та ділитися унікальними "збірками" через записи в базі даних.
 
-### 3.2. Real-Time BI Analytics (Business Intelligence)
-The administrative dashboard features a proprietary BI engine that provides:
-- **Revenue Analytics**: Daily/Weekly/Monthly revenue tracking with trend analysis.
-- **Sales Velocity**: Real-time monitoring of order frequency and stock depletion rates.
-- **Inventory Health**: Automated low-stock alerts and SKU performance metrics.
-- **Aggregation**: Server-side SQL aggregations to minimize frontend overhead and ensure data accuracy.
+### 3.2. Бізнес-аналітика в реальному часі (BI Analytics)
+Адміністративна панель містить власний BI-движок, який забезпечує:
+- **Аналітика доходів**: Відстеження щоденних, щотижневих та щомісячних доходів з аналізом трендів.
+- **Швидкість продажів**: Моніторинг частоти замовлень та швидкості вичерпання складських запасів у реальному часі.
+- **Стан запасів**: Автоматичні сповіщення про низький рівень залишків та показники ефективності SKU.
+- **Агрегація**: Серверна SQL-агрегація для мінімізації навантаження на фронтенд та забезпечення точності даних.
 
-### 3.3. ERP & Warehouse Management Subsystem
-Integrated inventory management including:
-- **Multi-Warehouse Support**: Tracking stock across different physical locations.
-- **Purchase Order (PO) Management**: Automated workflows for receiving stock from suppliers.
-- **Inventory Logging**: Comprehensive audit trail of every stock movement (adjustment, sale, reception).
-- **Supplier Relations**: Centralized database for tactical gear providers.
+### 3.3. Підсистема ERP та управління складом
+Інтегроване управління запасами, що включає:
+- **Підтримка декількох складів**: Відстеження запасів у різних фізичних місцях.
+- **Управління замовленнями на закупівлю (PO)**: Автоматизовані робочі процеси для отримання товарів від постачальників.
+- **Журналювання запасів**: Повний аудит кожного руху товару (коригування, продаж, отримання).
+- **Відносини з постачальниками**: Централізована база даних постачальників тактичного спорядження.
 
-### 3.4. Administrative Audit & Traceability
-A high-security audit system captures every administrative action:
-- **Event Logging**: Detailed logs of user edits, product deletions, and settings changes.
-- **User Accountability**: Association of each event with the specific administrator ID.
-- **Real-time Monitoring**: Polling-based live feed of system activities.
+### 3.4. Адміністративний аудит та простежуваність
+Система аудиту високого рівня безпеки фіксує кожну адміністративну дію:
+- **Логування подій**: Детальні журнали редагування користувачів, видалення товарів та зміни налаштувань.
+- **Підзвітність користувачів**: Асоціація кожної події з ідентифікатором конкретного адміністратора.
+- **Моніторинг у реальному часі**: Опитування (polling) для отримання живого потоку системних активностей.
 
-### 3.5. Dynamic Site Settings Engine
-A centralized configuration system allows administrators to control the entire storefront without code changes:
-- **Hero & Promo Management**: Real-time updates to banners, videos, and CTA links.
-- **SEO Orchestration**: Dynamic management of meta tags, titles, and social graph descriptions.
-- **Asset Swapping**: Online-only logo and branding management via the Site Settings Manager.
+### 3.5. Динамічний движок налаштувань сайту
+Централізована система конфігурації дозволяє адміністраторам керувати всією вітриною без змін у коді:
+- **Управління банерами та промо**: Оновлення банерів, відео та посилань CTA в реальному часі.
+- **SEO-оркестрація**: Динамічне управління мета-тегами, заголовками та описами соціальних графів.
+- **Управління брендами**: Керування логотипами та брендингом через менеджер налаштувань сайту.
 
-## 4. Technical Innovations
-- **Online-Only Asset Integrity**: A hardened policy ensuring no local fallbacks exist, forcing the system to rely exclusively on cloud-based, versioned assets.
-- **Image Optimization Engine**: Automatic client-side WebP compression and resizing before upload to minimize bandwidth and storage costs.
-- **Responsive Modal Framework**: A standardized, CSS-flex based layout system for complex administrative modals, ensuring full accessibility and scrollability on any viewport.
-- **Multilingual Integration**: A context-aware translation system supporting deep internationalization across categories, product descriptions, and transactional emails.
+## 4. Технічні інновації
+- **Цілісність активів "Лише онлайн"**: Жорстка політика, що гарантує відсутність локальних копій активів, змушуючи систему покладатися виключно на хмарні версіоновані ресурси.
+- **Движок оптимізації зображень**: Автоматичне стиснення у формат WebP та зміна розміру на стороні клієнта перед завантаженням для мінімізації трафіку та витрат на зберігання.
+- **Стандартизована фреймворк-система модальних вікон**: Адаптивна система макетів на основі CSS Flex для складних адміністративних інтерфейсів, що забезпечує повну доступність та зручність прокрутки на будь-яких екранах.
+- **Багатомовна інтеграція**: Система перекладів, що враховує контекст і підтримує глибоку інтернаціоналізацію категорій, описів товарів та транзакційних листів.
 
-## 5. Security & Stability
-- **Authentication**: JWT (JSON Web Token) with secure HTTP-only cookie-like behavior in localStorage (Zustand persist).
-- **Authorization**: Role-Based Access Control (RBAC) enforced at both the UI and API levels.
-- **Payment Integrity**: Stripe integration for PCI-compliant transaction processing.
-- **Database Safety**: Connection pooling (via Neon/Postgres) and parameterized queries to prevent SQL injection and connection exhaustion.
+## 5. Безпека та стабільність
+- **Автентифікація**: JWT (JSON Web Token) з безпечною поведінкою, аналогічною HTTP-only cookies, у локальному сховищі (Zustand persist).
+- **Авторизація**: Управління доступом на основі ролей (RBAC), що впроваджено як на рівні інтерфейсу, так і на рівні API.
+- **Цілісність платежів**: Інтеграція зі Stripe для обробки транзакцій відповідно до стандартів PCI.
+- **Безпека бази даних**: Пул з'єднань (через Neon/Postgres) та параметризовані запити для запобігання SQL-ін'єкціям та вичерпанню ліміту з'єднань.
