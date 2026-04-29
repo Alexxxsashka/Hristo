@@ -9,8 +9,8 @@ import { WEAPON_SLOTS } from '../../constants';
 import { formatEnum, formatModelName } from '../../utils/format';
 import { syncManager } from '../../utils/sync';
 
-export const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify, onConfirm }: { 
-  initialData: Product | null, 
+export const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify, onConfirm }: {
+  initialData: Product | null,
   categories: Category[],
   weapons: Product[],
   showHelp?: boolean,
@@ -59,7 +59,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     if (!data) return baseDefaults;
 
     // Map snake_case from DB to camelCase for the form
-    const normalized: any = { 
+    const normalized: any = {
       ...data,
       category: data.category || data.category_id || '',
       subcategory: data.subcategory || '',
@@ -88,7 +88,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
     // Determine category hierarchy
     const catId = normalized.category;
     const foundCat = categories.find(c => c.id === catId);
-    
+
     if (foundCat && foundCat.parent) {
       // If the category_id is a subcategory, split it
       normalized.category = foundCat.parent;
@@ -228,7 +228,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('[ProductForm Debug] Form submit triggered');
-    
+
     // Validate all fields
     const errors: Record<string, string> = {};
     Object.keys(formData).forEach(key => {
@@ -238,12 +238,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         errors[key] = error;
       }
     });
-    
+
     if (Object.keys(errors).length > 0) {
       console.log('[ProductForm Debug] Submission blocked by custom validation errors');
       setFieldErrors(errors);
       onNotify('Please fix the validation errors / Molimo ispravite pogreške', 'error');
-      
+
       // Smooth scroll to the first error
       const firstErrorKey = Object.keys(errors)[0];
       const element = document.querySelector(`[name="${firstErrorKey}"], .error-${firstErrorKey}`);
@@ -278,7 +278,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
           if (modelFile) {
             console.log('Uploading 3D model...', modelFile.name);
-            
+
             // If there was an existing model, delete it to save space
             if (initialData?.model3D) {
               console.log('Deleting old 3D model...', initialData.model3D);
@@ -319,7 +319,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               } catch (uploadErr) {
                 console.error(`Image ${i + 1} upload failed:`, uploadErr);
                 onNotify(`Failed to upload image ${i + 1}: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
-                setIsSubmitting(false);
+                setIsSubmitting(false); Н
                 setUploadingFile(null);
                 return;
               }
@@ -341,7 +341,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
           console.log('Saving product to database...', productToSave);
           await saveProductStore(productToSave as any);
-          
+
           // Permanently delete orphaned blobs from storage after successful DB save
           if (deletedBlobs.length > 0) {
             console.log(`Cleaning up ${deletedBlobs.length} orphaned blobs...`);
@@ -513,7 +513,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
     const cartesian = (...args: any[][]) => args.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
     const attributeOptions = formData.variantAttributes.map(attr => attr.options.map(opt => ({ [attr.name]: opt })));
-    
+
     let combinations = attributeOptions[0].map(opt => [opt]);
     for (let i = 1; i < attributeOptions.length; i++) {
       combinations = cartesian(combinations, attributeOptions[i]);
@@ -534,14 +534,14 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 max-w-4xl mx-auto"
     >
-      <form 
-        onSubmit={handleSubmit} 
-        noValidate 
+      <form
+        onSubmit={handleSubmit}
+        noValidate
         onInvalid={(e) => {
           console.log('[ProductForm Debug] Native browser validation BLOCKED:', e.target);
           e.preventDefault();
@@ -553,18 +553,17 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Name</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">The name of the item as it will appear in the shop.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.name}
               onChange={e => handleFieldChange('name', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
+                }`}
               maxLength={255}
             />
             <AnimatePresence>
               {fieldErrors.name && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -579,13 +578,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Brand</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Manufacturer or brand name (e.g. Tokyo Marui).</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.brand}
               onChange={e => handleFieldChange('brand', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.brand ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.brand ? 'border-red-500' : 'border-zinc-200'
+                }`}
               maxLength={100}
             />
             {fieldErrors.brand && (
@@ -595,13 +593,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Price (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Selling price in Euros.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.price}
               onChange={e => handleFieldChange('price', Number(e.target.value))}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.price ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.price ? 'border-red-500' : 'border-zinc-200'
+                }`}
               min="0"
               max="999999.99"
               step="0.01"
@@ -613,10 +610,10 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Discount (%)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Percentage discount (0-100).</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.discount || 0}
-              onChange={e => setFormData({...formData, discount: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, discount: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
               min="0"
               max="100"
@@ -628,15 +625,14 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Product Type</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Determines how the item is handled in the 3D configurator.</p>}
-            <select 
+            <select
               value={formData.type}
               onChange={e => {
-                setFormData({...formData, type: e.target.value as any});
+                setFormData({ ...formData, type: e.target.value as any });
                 if (fieldErrors.type) setFieldErrors(prev => ({ ...prev, type: '' }));
               }}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.type ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.type ? 'border-red-500' : 'border-zinc-200'
+                }`}
             >
               <option value="">Select Type</option>
               <option value="weapon">Weapon</option>
@@ -674,13 +670,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">SKU / Article</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Unique inventory identifier.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.sku || ''}
               onChange={e => handleFieldChange('sku', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${
-                fieldErrors.sku ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${fieldErrors.sku ? 'border-red-500' : 'border-zinc-200'
+                }`}
               maxLength={50}
               placeholder="e.g. SA-E01-PRO"
             />
@@ -691,13 +686,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Barcode</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">EAN-13 or other barcode for scanning.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.barcode || ''}
               onChange={e => handleFieldChange('barcode', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${
-                fieldErrors.barcode ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 font-mono ${fieldErrors.barcode ? 'border-red-500' : 'border-zinc-200'
+                }`}
               placeholder="e.g. 5901234567890"
             />
             {fieldErrors.barcode && (
@@ -707,8 +701,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Variants Group ID</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Link different colors of the same product.</p>}
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formData.variantsGroupId || ''}
               onChange={e => handleFieldChange('variantsGroupId', e.target.value)}
               className="w-full px-4 py-3 bg-zinc-50 border rounded-xl border-zinc-200 outline-none focus:ring-2 focus:ring-zinc-900 font-mono"
@@ -718,20 +712,20 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Landing Cost (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Actual cost including shipping/customs.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.landingCost || 0}
-              onChange={e => setFormData({...formData, landingCost: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, landingCost: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">MSRP (€)</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Manufacturer's Suggested Retail Price.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.msrp || 0}
-              onChange={e => setFormData({...formData, msrp: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, msrp: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
@@ -741,13 +735,12 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Total Stock</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Aggregated stock across all warehouses.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.stock}
               onChange={e => handleFieldChange('stock', Number(e.target.value))}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.stock ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.stock ? 'border-red-500' : 'border-zinc-200'
+                }`}
               min="0"
               max="999999"
             />
@@ -758,10 +751,10 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Min. Stock Level</label>
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Threshold for low stock alerts.</p>}
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={formData.minStockLevel || 0}
-              onChange={e => setFormData({...formData, minStockLevel: Number(e.target.value)})}
+              onChange={e => setFormData({ ...formData, minStockLevel: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
@@ -770,15 +763,14 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Category</label>
-            <select 
+            <select
               value={formData.category}
               onChange={e => {
-                setFormData({...formData, category: e.target.value, subcategory: '', categoryFilters: {}});
+                setFormData({ ...formData, category: e.target.value, subcategory: '', categoryFilters: {} });
                 if (fieldErrors.category) setFieldErrors(prev => ({ ...prev, category: '' }));
               }}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                fieldErrors.category ? 'border-red-500' : 'border-zinc-200'
-              }`}
+              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${fieldErrors.category ? 'border-red-500' : 'border-zinc-200'
+                }`}
             >
               <option value="">Select Category</option>
               {categories.filter(c => !c.parent).map(c => (
@@ -791,9 +783,9 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-zinc-700">Subcategory</label>
-            <select 
+            <select
               value={formData.subcategory}
-              onChange={e => setFormData({...formData, subcategory: e.target.value})}
+              onChange={e => setFormData({ ...formData, subcategory: e.target.value })}
               className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900"
             >
               <option value="">Select Subcategory</option>
@@ -859,8 +851,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="space-y-6 p-6 bg-zinc-50 rounded-2xl border border-zinc-200">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Attributes & Variants</h3>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={generateVariants}
               className="text-[10px] font-bold text-zinc-500 hover:text-zinc-900 uppercase tracking-widest transition-colors"
             >
@@ -872,22 +864,22 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-4">
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Step 1: Define Attributes (e.g. Color, Size)</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Attribute Name (e.g. Color)"
                 value={newAttributeName}
                 onChange={e => setNewAttributeName(e.target.value)}
                 className="px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none text-sm"
               />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Options (comma separated)"
                 value={newAttributeOptions}
                 onChange={e => setNewAttributeOptions(e.target.value)}
                 className="px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none text-sm"
               />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={addAttribute}
                 className="px-4 py-2 bg-zinc-900 text-white rounded-xl font-bold text-xs"
               >
@@ -910,15 +902,15 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Step 2: Manage Variants & Stock</label>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={addVariant}
                 className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest hover:underline"
               >
                 + Add Manual Variant
               </button>
             </div>
-            
+
             <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
               {formData.variants?.map((variant, index) => (
                 <div key={variant.id} className="p-4 bg-white border border-zinc-200 rounded-xl space-y-4">
@@ -928,7 +920,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                       <X size={16} />
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {formData.variantAttributes?.map(attr => (
                       <div key={attr.name} className="space-y-1">
@@ -947,8 +939,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     ))}
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-zinc-400 uppercase">Stock</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={variant.stock}
                         onChange={e => updateVariant(index, 'stock', Number(e.target.value))}
                         className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
@@ -956,8 +948,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-zinc-400 uppercase">Price Override (€)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={variant.price || ''}
                         onChange={e => updateVariant(index, 'price', e.target.value ? Number(e.target.value) : undefined)}
                         placeholder="Optional"
@@ -979,12 +971,11 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="space-y-2">
           <label className="text-sm font-semibold text-zinc-700">Short Description</label>
           {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Brief summary of the product (appears in lists).</p>}
-          <textarea 
+          <textarea
             value={formData.description}
             onChange={e => handleFieldChange('description', e.target.value)}
-            className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none ${
-              fieldErrors.description ? 'border-red-500' : 'border-zinc-200'
-            }`}
+            className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-24 resize-none ${fieldErrors.description ? 'border-red-500' : 'border-zinc-200'
+              }`}
             maxLength={2000}
           />
           {fieldErrors.description && (
@@ -995,9 +986,9 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="space-y-2">
           <label className="text-sm font-semibold text-zinc-700">Long Description</label>
           {showHelp && <p className="text-[10px] text-zinc-400 font-medium">Detailed history, story, or technical deep-dive (appears in product card).</p>}
-          <textarea 
+          <textarea
             value={formData.longDescription || ''}
-            onChange={e => setFormData({...formData, longDescription: e.target.value})}
+            onChange={e => setFormData({ ...formData, longDescription: e.target.value })}
             className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-48 resize-none"
             placeholder="Write the detailed description here..."
           />
@@ -1006,8 +997,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="space-y-4">
           <label className="text-sm font-semibold text-zinc-700">Tags</label>
           <div className="flex gap-2">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={newTag}
               onChange={e => setNewTag(e.target.value)}
               placeholder="Add tag..."
@@ -1032,31 +1023,31 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         <div className="space-y-4">
           <label className="text-sm font-semibold text-zinc-700">Characteristics</label>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <select 
+            <select
               value={newChar.emoji}
-              onChange={e => setNewChar({...newChar, emoji: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, emoji: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             >
               {['🎯', '🔫', '🛡️', '🔋', '📦', '⚖️', '📏', '💨', '🔊', '🔦', '🔭', '🧤', '🪖', '🎒', '🛠️', '⚙️', '⚡', '🌡️', '💧'].map(e => (
                 <option key={e} value={e}>{e}</option>
               ))}
             </select>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Label (e.g. Weight)"
               value={newChar.label}
-              onChange={e => setNewChar({...newChar, label: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, label: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Value (e.g. 2.5kg)"
               value={newChar.value}
-              onChange={e => setNewChar({...newChar, value: e.target.value})}
+              onChange={e => setNewChar({ ...newChar, value: e.target.value })}
               className="px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={addCharacteristic}
               className="px-4 py-2 bg-zinc-900 text-white rounded-xl font-bold"
             >
@@ -1086,15 +1077,15 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {combinedImages.map((item, index) => (
               <div key={index} className="relative group aspect-square bg-zinc-50 border border-zinc-200 rounded-2xl overflow-hidden">
-                <img 
-                  src={typeof item === 'string' ? item : URL.createObjectURL(item)} 
-                  alt={`Preview ${index}`} 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={typeof item === 'string' ? item : URL.createObjectURL(item)}
+                  alt={`Preview ${index}`}
+                  className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   {index > 0 && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         const newImages = [...combinedImages];
                         [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
@@ -1112,8 +1103,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     </button>
                   )}
                   {index < combinedImages.length - 1 && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         const newImages = [...combinedImages];
                         [newImages[index + 1], newImages[index]] = [newImages[index], newImages[index + 1]];
@@ -1130,8 +1121,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                       <ArrowDown size={14} />
                     </button>
                   )}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       const item = combinedImages[index];
                       if (typeof item === 'string') {
@@ -1161,11 +1152,11 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <label className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-200 rounded-2xl hover:border-zinc-400 transition-all cursor-pointer bg-zinc-50">
               <Plus size={24} className="text-zinc-400" />
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Add Image</span>
-              <input 
-                type="file" 
-                accept="image/*" 
+              <input
+                type="file"
+                accept="image/*"
                 multiple
-                className="hidden" 
+                className="hidden"
                 onChange={e => {
                   const files = Array.from(e.target.files || []);
                   setCombinedImages([...combinedImages, ...files]);
@@ -1185,10 +1176,10 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                   <span className="text-zinc-500 font-medium">
                     {modelFile ? modelFile.name : formatModelName(formData.model3DName || formData.model3D)}
                   </span>
-                  <input 
-                    type="file" 
-                    accept=".glb" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept=".glb"
+                    className="hidden"
                     onChange={e => setModelFile(e.target.files?.[0] || null)}
                   />
                 </label>
@@ -1200,7 +1191,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                         setModelFile(null);
                       } else if (formData.model3D) {
                         setDeletedBlobs(prev => [...prev, formData.model3D!]);
-                        setFormData({...formData, model3D: '', model3DName: ''});
+                        setFormData({ ...formData, model3D: '', model3DName: '' });
                       }
                     }}
                     className="p-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition-all"
@@ -1226,9 +1217,9 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Mount Type</label>
-              <select 
+              <select
                 value={formData.mountType || ''}
-                onChange={e => setFormData({...formData, mountType: e.target.value})}
+                onChange={e => setFormData({ ...formData, mountType: e.target.value })}
                 className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl outline-none"
               >
                 <option value="">Select Mount Type</option>
@@ -1243,7 +1234,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
             <div className="space-y-4">
               <label className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Compatible Weapons</label>
               <div className="flex gap-2">
-                <select 
+                <select
                   value={newCompatibleWeapon}
                   onChange={e => setNewCompatibleWeapon(e.target.value)}
                   className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl outline-none"
@@ -1256,8 +1247,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     ))
                   }
                 </select>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={addCompatibleWeapon}
                   disabled={!newCompatibleWeapon}
                   className="px-4 py-2 bg-zinc-900 text-white rounded-xl font-bold disabled:opacity-50"
@@ -1284,21 +1275,21 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
 
         <div className="flex items-center justify-end gap-4 pt-8 border-t border-zinc-100">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={onCancel}
             className="px-8 py-4 text-zinc-600 font-bold hover:bg-zinc-100 rounded-xl transition-all"
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSubmitting}
             className="flex items-center gap-2 px-12 py-4 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20 disabled:opacity-50 relative overflow-hidden"
           >
             {isSubmitting && (
-              <div 
-                className="absolute bottom-0 left-0 h-1 bg-white/30 transition-all duration-300" 
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-white/30 transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             )}
