@@ -978,9 +978,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
         </AnimatePresence>
       </main>
 
-      {/* Upload Progress Modal */}
       {saving && uploadProgress > 0 && (
-        <div className="fixed inset-0 z-[200] bg-zinc-900/80 backdrop-blur-xl flex items-center justify-center p-8">
+        <div className="fixed inset-0 z-[200] bg-zinc-900/80 backdrop-blur-xl overflow-y-auto p-4 md:p-8 flex justify-center items-center">
+          <div className="min-h-full flex items-center justify-center py-8 w-full max-w-md">
           <div className="w-full max-w-md space-y-8 text-center">
             <div className="relative w-24 h-24 mx-auto">
               <div className="absolute inset-0 bg-red-600/20 rounded-full animate-ping" />
@@ -1004,6 +1004,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                 <span>{Math.round(uploadProgress)}% COMPLETED</span>
                 <span>STATUS: ACTIVE</span>
               </div>
+            </div>
             </div>
           </div>
         </div>
