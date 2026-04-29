@@ -34,122 +34,125 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   const [timeRange, setTimeRange] = React.useState<'weekly' | 'monthly'>('weekly');
 
   // Calculate basic metrics
-  const totalRevenue = orders.reduce((acc, curr) => {
-    const total = typeof curr.total === 'string' ? parseFloat(curr.total) : Number(curr.total);
-    return acc + (isNaN(total) ? 0 : total);
-  }, 0);
-  const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-  
-  // Real conversion rate: (orders / total visitors/users)
-  const conversionRate = users.length > 0 ? (orders.length / users.length) * 100 : 0;
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
-  const completedOrders = orders.filter(o => o.status === 'delivered').length;
+  const { totalRevenue, avgOrderValue, conversionRate, pendingOrders, completedOrders } = React.useMemo(() => {
+    const revenue = orders.reduce((acc, curr) => {
+      const total = typeof curr.total === 'string' ? parseFloat(curr.total) : Number(curr.total);
+      return acc + (isNaN(total) ? 0 : total);
+    }, 0);
+    
+    return {
+      totalRevenue: revenue,
+      avgOrderValue: orders.length > 0 ? revenue / orders.length : 0,
+      conversionRate: users.length > 0 ? (orders.length / users.length) * 100 : 0,
+      pendingOrders: orders.filter(o => o.status === 'pending').length,
+      completedOrders: orders.filter(o => o.status === 'delivered').length
+    };
+  }, [orders, users]);
 
-  // Prepare real chart data (last 7 days)
-  const getDailyData = () => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const now = new Date();
-    const result = [];
+  // Prepare real chart data
+  const chartData = React.useMemo(() => {
+    const getDailyData = () => {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const now = new Date();
+      const result = [];
 
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(now.getDate() - i);
-      const dayName = days[d.getDay()];
-      const dayStart = new Date(d.setHours(0,0,0,0)).getTime();
-      const dayEnd = new Date(d.setHours(23,59,59,999)).getTime();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        const dayName = days[d.getDay()];
+        const dayStart = new Date(d.setHours(0,0,0,0)).getTime();
+        const dayEnd = new Date(d.setHours(23,59,59,999)).getTime();
 
-      const dayOrders = orders.filter(o => {
-        const date = new Date(o.createdAt).getTime();
-        return date >= dayStart && date <= dayEnd;
-      });
+        const dayOrders = orders.filter(o => {
+          const date = new Date(o.createdAt).getTime();
+          return date >= dayStart && date <= dayEnd;
+        });
 
-      const revenue = dayOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-      
-      const newUsers = users.filter(u => {
-        const date = new Date(u.created_at).getTime();
-        return date >= dayStart && date <= dayEnd;
-      }).length;
+        const revenue = dayOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+        
+        const newUsers = users.filter(u => {
+          const date = new Date(u.created_at).getTime();
+          return date >= dayStart && date <= dayEnd;
+        }).length;
 
-      result.push({
-        name: dayName,
-        revenue,
-        orders: dayOrders.length,
-        users: newUsers
-      });
-    }
-    return result;
-  };
-
-  // Prepare monthly data (last 6 months)
-  const getMonthlyData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const now = new Date();
-    const result = [];
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = months[d.getMonth()];
-      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
-      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
-
-      const monthOrders = orders.filter(o => {
-        const date = new Date(o.createdAt).getTime();
-        return date >= monthStart && date <= monthEnd;
-      });
-
-      const revenue = monthOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-      
-      const newUsers = users.filter(u => {
-        const date = new Date(u.created_at).getTime();
-        return date >= monthStart && date <= monthEnd;
-      }).length;
-
-      result.push({
-        name: monthName,
-        revenue,
-        orders: monthOrders.length,
-        users: newUsers
-      });
-    }
-    return result;
-  };
-
-  const chartData = timeRange === 'weekly' ? getDailyData() : getMonthlyData();
-  const totalNewUsersInPeriod = chartData.reduce((acc, curr) => acc + curr.users, 0);
-
-  // Calculate category distribution based on actual units sold
-  const categoryCounts = orders.reduce((acc, order) => {
-    order.items?.forEach(item => {
-      const cat = (item.category || '').toLowerCase();
-      const name = (item.name || '').toLowerCase();
-      const qty = Number(item.quantity) || 0;
-      
-      // Robust matching including IDs, English names, and Croatian names
-      const isRifle = cat.includes('rifle') || cat.includes('pušk') || cat.includes('aeg') || cat.includes('sniper') || name.includes('rifle') || name.includes('puška');
-      const isPistol = cat.includes('pistol') || cat.includes('pištolj') || name.includes('pistol') || name.includes('pištolj');
-      const isGear = cat.includes('gear') || cat.includes('oprema') || cat.includes('accessory') || cat.includes('optic') || cat.includes('mag') || cat.includes('part') || cat.includes('protection') || cat.includes('uniform') || cat.includes('ammo') || cat.includes('gas') || cat.includes('battery') || name.includes('gear') || name.includes('oprema');
-
-      if (isRifle) {
-        acc.rifles += qty;
-      } else if (isPistol) {
-        acc.pistols += qty;
-      } else if (isGear) {
-        acc.gear += qty;
-      } else {
-        acc.other += qty;
+        result.push({
+          name: dayName,
+          revenue,
+          orders: dayOrders.length,
+          users: newUsers
+        });
       }
-    });
-    return acc;
-  }, { rifles: 0, pistols: 0, gear: 0, other: 0 });
+      return result;
+    };
 
-  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+    const getMonthlyData = () => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const now = new Date();
+      const result = [];
 
-  const categoryData = [
-    { name: 'Rifles', value: categoryCounts.rifles, color: COLORS[0] },
-    { name: 'Pistols', value: categoryCounts.pistols, color: COLORS[1] },
-    { name: 'Gear', value: categoryCounts.gear, color: COLORS[2] },
-    { name: 'Other', value: categoryCounts.other, color: COLORS[3] },
-  ].filter(item => item.value > 0);
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthName = months[d.getMonth()];
+        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
+
+        const monthOrders = orders.filter(o => {
+          const date = new Date(o.createdAt).getTime();
+          return date >= monthStart && date <= monthEnd;
+        });
+
+        const revenue = monthOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+        
+        const newUsers = users.filter(u => {
+          const date = new Date(u.created_at).getTime();
+          return date >= monthStart && date <= monthEnd;
+        }).length;
+
+        result.push({
+          name: monthName,
+          revenue,
+          orders: monthOrders.length,
+          users: newUsers
+        });
+      }
+      return result;
+    };
+
+    return timeRange === 'weekly' ? getDailyData() : getMonthlyData();
+  }, [orders, users, timeRange]);
+
+  const totalNewUsersInPeriod = React.useMemo(() => 
+    chartData.reduce((acc, curr) => acc + curr.users, 0)
+  , [chartData]);
+
+  // Calculate category distribution
+  const categoryData = React.useMemo(() => {
+    const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+    const counts = orders.reduce((acc, order) => {
+      order.items?.forEach(item => {
+        const cat = (item.category || '').toLowerCase();
+        const name = (item.name || '').toLowerCase();
+        const qty = Number(item.quantity) || 0;
+        
+        const isRifle = cat.includes('rifle') || cat.includes('pušk') || cat.includes('aeg') || cat.includes('sniper') || name.includes('rifle') || name.includes('puška');
+        const isPistol = cat.includes('pistol') || cat.includes('pištolj') || name.includes('pistol') || name.includes('pištolj');
+        const isGear = cat.includes('gear') || cat.includes('oprema') || cat.includes('accessory') || cat.includes('optic') || cat.includes('mag') || cat.includes('part') || cat.includes('protection') || cat.includes('uniform') || cat.includes('ammo') || cat.includes('gas') || cat.includes('battery') || name.includes('gear') || name.includes('oprema');
+
+        if (isRifle) acc.rifles += qty;
+        else if (isPistol) acc.pistols += qty;
+        else if (isGear) acc.gear += qty;
+        else acc.other += qty;
+      });
+      return acc;
+    }, { rifles: 0, pistols: 0, gear: 0, other: 0 });
+
+    return [
+      { name: 'Rifles', value: counts.rifles, color: COLORS[0] },
+      { name: 'Pistols', value: counts.pistols, color: COLORS[1] },
+      { name: 'Gear', value: counts.gear, color: COLORS[2] },
+      { name: 'Other', value: counts.other, color: COLORS[3] },
+    ].filter(item => item.value > 0);
+  }, [orders]);
 
   return (
     <div className="space-y-8">

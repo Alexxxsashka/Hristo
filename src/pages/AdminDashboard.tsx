@@ -118,21 +118,47 @@ export const AdminDashboard: React.FC = () => {
   const { user, logout, isInitialized } = useAuthStore();
 
   const isDataLoading = React.useRef(false);
-  const loadAllData = async () => {
+  const loadAllData = async (force = false) => {
     if (isDataLoading.current) return;
+    
+    // Only show global skeleton on first load or if explicitly forced
+    const isFirstLoad = products.length === 0 && orders.length === 0;
+    if (isFirstLoad || force) {
+      setIsLoading(true);
+    }
+    
     isDataLoading.current = true;
-    setIsLoading(true);
+    
     try {
-      await Promise.all([
-        fetchProducts().catch(e => console.error('Failed to fetch products:', e)),
-        fetchCategories().catch(e => console.error('Failed to fetch categories:', e)),
-        fetchBlogPosts().catch(e => console.error('Failed to fetch blog posts:', e)),
-        fetchPolicies().catch(e => console.error('Failed to fetch policies:', e)),
-        fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
-        databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
-        databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e)),
-        fetchAuditLogs().catch(e => console.error('Failed to fetch audit logs:', e))
-      ]);
+      // Load data in parallel, but allow each to update state as it completes
+      const tasks = [
+        fetchProducts(),
+        fetchCategories(),
+        fetchBlogPosts(),
+        fetchPolicies(),
+        fetchOrdersInternal(),
+        databaseService.getUsers().then(u => setUsersList(u || [])),
+        databaseService.getMessages().then(m => setMessages(m || [])),
+        fetchAuditLogs()
+      ];
+
+      if (isFirstLoad || force) {
+        // Wait for most critical data for the initial view (Dashboard stats)
+        await Promise.all([
+          fetchProducts().catch(() => {}),
+          fetchOrdersInternal().catch(() => {}),
+          databaseService.getUsers().then(u => setUsersList(u || [])).catch(() => {})
+        ]);
+        setIsLoading(false);
+        
+        // Let the rest finish in background
+        Promise.all(tasks).catch(e => console.error('Background loading error:', e));
+      } else {
+        // Regular background refresh
+        await Promise.all(tasks);
+      }
+    } catch (e) {
+      console.error('Data loading error:', e);
     } finally {
       setIsLoading(false);
       isDataLoading.current = false;
@@ -159,11 +185,11 @@ export const AdminDashboard: React.FC = () => {
 
     loadAllData();
 
-    const auditInterval = setInterval(fetchAuditLogs, 30000);
+    const auditInterval = setInterval(fetchAuditLogs, 10000);
     const interval = setInterval(() => {
       fetchOrdersInternal();
       fetchProducts();
-    }, 60000);
+    }, 20000);
 
     return () => {
       clearInterval(auditInterval);
@@ -422,10 +448,10 @@ export const AdminDashboard: React.FC = () => {
                     <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Store Performance Overview</p>
                   </div>
                   <button 
-                    onClick={loadAllData}
-                    className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-zinc-900 hover:border-zinc-900 transition-all shadow-sm"
+                    onClick={() => loadAllData(true)}
+                    className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-900/20 active:scale-95"
                   >
-                    <RefreshCw size={18} className={isDataLoading.current ? 'animate-spin' : ''} />
+                    <RefreshCw size={18} />
                   </button>
                 </div>
 
