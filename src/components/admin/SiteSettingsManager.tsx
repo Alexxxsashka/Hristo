@@ -43,6 +43,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 }) => {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -87,7 +89,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
   }, []);
 
   const handleFileUpload = async (file: File, folder: string, previousUrl?: string) => {
-    if (previousUrl) await databaseService.deleteFile(previousUrl);
+    if (previousUrl) setDeletedBlobs(prev => [...prev, previousUrl]);
     const originalName = file.name;
     const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
     const path = `site/${folder}/${safeName}`;
@@ -95,7 +97,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
   };
 
   const handleFileDelete = async (url: string) => {
-    if (url) await databaseService.deleteFile(url);
+    if (url) setDeletedBlobs(prev => [...prev, url]);
   };
 
   const handleSave = async () => {
@@ -106,44 +108,47 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
       // Handle simple image uploads
       if (pendingLogo) {
-        if (settings.logoUrl) await databaseService.deleteFile(settings.logoUrl);
-        finalSettings.logoUrl = await handleFileUpload(pendingLogo, 'branding');
+        finalSettings.logoUrl = await handleFileUpload(pendingLogo, 'branding', settings.logoUrl);
         setPendingLogo(null);
       }
 
       if (pendingHero) {
-        if (settings.heroImageUrl) await databaseService.deleteFile(settings.heroImageUrl);
-        finalSettings.heroImageUrl = await handleFileUpload(pendingHero, 'hero');
+        finalSettings.heroImageUrl = await handleFileUpload(pendingHero, 'hero', settings.heroImageUrl);
         setPendingHero(null);
       }
 
       if (pendingAboutImage) {
-        if (settings.aboutUsImage) await databaseService.deleteFile(settings.aboutUsImage);
-        finalSettings.aboutUsImage = await handleFileUpload(pendingAboutImage, 'about');
+        finalSettings.aboutUsImage = await handleFileUpload(pendingAboutImage, 'about', settings.aboutUsImage);
         setPendingAboutImage(null);
       }
 
       if (pendingHeroFeatureImage) {
-        if (settings.heroFeatureImage) await databaseService.deleteFile(settings.heroFeatureImage);
-        finalSettings.heroFeatureImage = await handleFileUpload(pendingHeroFeatureImage, 'hero-feature');
+        finalSettings.heroFeatureImage = await handleFileUpload(pendingHeroFeatureImage, 'hero-feature', settings.heroFeatureImage);
         setPendingHeroFeatureImage(null);
       }
 
       if (pendingHeroFeatureVideo) {
-        if (settings.heroFeatureVideo) await databaseService.deleteFile(settings.heroFeatureVideo);
-        finalSettings.heroFeatureVideo = await handleFileUpload(pendingHeroFeatureVideo, 'hero-feature');
+        finalSettings.heroFeatureVideo = await handleFileUpload(pendingHeroFeatureVideo, 'hero-feature', settings.heroFeatureVideo);
         setPendingHeroFeatureVideo(null);
       }
 
       if (pendingLiveDemoModel) {
-        if (settings.liveDemoModelUrl) await databaseService.deleteFile(settings.liveDemoModelUrl);
-        finalSettings.liveDemoModelUrl = await handleFileUpload(pendingLiveDemoModel, 'live-demo');
+        finalSettings.liveDemoModelUrl = await handleFileUpload(pendingLiveDemoModel, 'live-demo', settings.liveDemoModelUrl);
         setPendingLiveDemoModel(null);
       }
 
       await databaseService.updateSiteSettings(finalSettings);
+      
+      // Cleanup orphaned blobs
+      if (deletedBlobs.length > 0) {
+        for (const url of deletedBlobs) {
+          try { await databaseService.deleteFile(url); } catch (e) {}
+        }
+      }
+
       useSettingsStore.getState().updateSettings(finalSettings);
       setSettings(finalSettings);
+      setDeletedBlobs([]);
       onNotify('Site configuration updated successfully!', 'success');
       if (onUpdate) onUpdate();
     } catch (err) {

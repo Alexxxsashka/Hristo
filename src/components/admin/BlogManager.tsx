@@ -16,6 +16,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
 
   const validateField = (field: string, value: any) => {
     let error = '';
@@ -75,6 +76,11 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           const originalName = imageFile.name;
           const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
           imageUrl = await databaseService.uploadFile(imageFile, `blog/images/${safeName}`);
+          
+          // Queue old image for deletion
+          if (editingPost?.image) {
+            setDeletedBlobs(prev => [...prev, editingPost.image!]);
+          }
         }
 
         const postToSave = {
@@ -84,9 +90,18 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
         };
 
         await databaseService.saveBlogPost(postToSave as any);
+        
+        // Final cleanup of orphaned blobs
+        if (deletedBlobs.length > 0) {
+          for (const url of deletedBlobs) {
+            try { await databaseService.deleteFile(url); } catch (e) {}
+          }
+        }
+
         setIsEditing(false);
         setEditingPost(null);
         setImageFile(null);
+        setDeletedBlobs([]);
         setFieldErrors({});
         onUpdate();
         onNotify('Post saved successfully');

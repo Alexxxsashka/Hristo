@@ -39,6 +39,7 @@ export const CategoryForm = ({
 
   const saveCategoryStore = useShopStore(state => state.saveCategory);
   const deleteCategoryStore = useShopStore(state => state.deleteCategory);
+  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
 
   useEffect(() => {
     if (initialData) {
@@ -73,7 +74,7 @@ export const CategoryForm = ({
 
   const handleFileUpload = async (file: File) => {
     try {
-      if (newCat.image) await databaseService.deleteFile(newCat.image);
+      if (newCat.image) setDeletedBlobs(prev => [...prev, newCat.image!]);
       const originalName = file.name;
       const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
       const path = `categories/${safeName}`;
@@ -88,14 +89,9 @@ export const CategoryForm = ({
 
   const handleFileDelete = async () => {
     if (!newCat.image) return;
-    try {
-      await databaseService.deleteFile(newCat.image);
-      handleFieldChange('image', '');
-      onNotify('Image removed successfully');
-    } catch (err) {
-      console.error('Delete failed:', err);
-      onNotify('Failed to remove image', 'error');
-    }
+    setDeletedBlobs(prev => [...prev, newCat.image!]);
+    handleFieldChange('image', '');
+    onNotify('Image removed from form (will be deleted on save)');
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -119,6 +115,14 @@ export const CategoryForm = ({
       async () => {
         try {
           await saveCategoryStore(newCat as any);
+          
+          // Cleanup orphaned blobs
+          if (deletedBlobs.length > 0) {
+            for (const url of deletedBlobs) {
+              try { await databaseService.deleteFile(url); } catch (e) {}
+            }
+          }
+
           onNotify(editingCat ? 'Category updated' : 'Category added');
           onSuccess();
         } catch (err) {
