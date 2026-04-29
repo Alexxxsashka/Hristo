@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { handleUpload, type HandleUploadBody } from '@vercel/blob';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { AuthenticatedRequest } from '../types/index.js';
 import { deleteFromVercelBlob } from '../services/storage.service.js';
 
