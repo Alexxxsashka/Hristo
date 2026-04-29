@@ -1,0 +1,1 @@
+const s=t=>t?t.replace(/[_-]/g," ").toLowerCase().replace(/\b\w/g,e=>e.toUpperCase()):"",c=t=>{if(!t)return"Upload GLB Model";if(!t.startsWith("http"))return t;try{const o=decodeURIComponent(t).split("/");return o[o.length-1].split("?")[0]||"Model Attached"}catch{return"Model Attached"}};export{c as a,s as f};

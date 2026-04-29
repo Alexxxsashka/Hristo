@@ -810,7 +810,7 @@ export const Configurator3DV12: React.FC = () => {
   return (
     <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
       <Canvas 
-        shadows 
+        shadows={{ type: THREE.PCFShadowMap }} 
         dpr={[1, 2]} 
         performance={{ min: 0.5 }} 
         onPointerMissed={() => setSelectedSlotId(null)}

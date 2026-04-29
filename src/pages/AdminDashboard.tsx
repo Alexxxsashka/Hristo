@@ -44,7 +44,9 @@ import {
   ArrowDown,
   Globe,
   Tag,
-  Menu
+  Menu,
+  History,
+  Ticket
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
@@ -71,8 +73,6 @@ import {
   Cell
 } from 'recharts';
 
-
-
 import { generateOrdersReport, generateProductsReport } from '../utils/reportGenerator';
 import { BIAnalytics } from '../components/admin/BIAnalytics';
 import { BlogManager } from '../components/admin/BlogManager';
@@ -93,7 +93,6 @@ import { DashboardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -117,8 +116,6 @@ export const AdminDashboard: React.FC = () => {
   const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const navigate = useNavigate();
   const { user, logout, isInitialized } = useAuthStore();
-
-
 
   const isDataLoading = React.useRef(false);
   const loadAllData = async () => {
@@ -151,10 +148,7 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-
-
   useEffect(() => {
-    // Wait until Firebase has restored the auth state
     if (!isInitialized) return;
     
     const isAdmin = user?.role === 'admin';
@@ -165,10 +159,7 @@ export const AdminDashboard: React.FC = () => {
 
     loadAllData();
 
-    // 🕵️ Audit Real-time Polling (Every 30 seconds - reduced frequency to prevent noise)
     const auditInterval = setInterval(fetchAuditLogs, 30000);
-
-    // Auto-refresh orders and products in the background every 60 seconds
     const interval = setInterval(() => {
       fetchOrdersInternal();
       fetchProducts();
@@ -299,10 +290,8 @@ export const AdminDashboard: React.FC = () => {
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-
   return (
     <div className="min-h-screen bg-zinc-50 flex text-zinc-900 relative">
-      {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -338,100 +327,66 @@ export const AdminDashboard: React.FC = () => {
           <SidebarItem
             icon={<LayoutDashboard size={20} />}
             label="Dashboard"
-            description="Overview of your store stats"
-            showHelp={showHelp}
             active={activeTab === 'dashboard'}
-            onClick={() => { setActiveTab('dashboard'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<ShoppingBag size={20} />}
             label="Orders"
-            description="Fulfillment & Invoices"
-            showHelp={showHelp}
             active={activeTab === 'orders'}
-            onClick={() => { setActiveTab('orders'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('orders'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
-            icon={<Tag size={20} />}
+            icon={<Ticket size={20} />}
             label="Coupons"
-            description="Manage promo codes"
-            showHelp={showHelp}
             active={activeTab === 'coupons'}
-            onClick={() => { setActiveTab('coupons'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Package size={20} />}
             label="Products"
-            description="Manage your inventory"
-            showHelp={showHelp}
             active={activeTab === 'products'}
-            onClick={() => { setActiveTab('products'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('products'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Layers size={20} />}
             label="Categories"
-            description="Organize your shop"
-            showHelp={showHelp}
             active={activeTab === 'categories'}
-            onClick={() => { setActiveTab('categories'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<FileText size={20} />}
             label="Blog"
-            description="Write news & articles"
-            showHelp={showHelp}
             active={activeTab === 'blog'}
-            onClick={() => { setActiveTab('blog'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('blog'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<MessageSquare size={20} />}
             label="Messages"
-            description="Customer inquiries"
-            showHelp={showHelp}
             active={activeTab === 'messages'}
-            onClick={() => { setActiveTab('messages'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('messages'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Shield size={20} />}
             label="Policies"
-            description="Legal & info pages"
-            showHelp={showHelp}
             active={activeTab === 'policies'}
-            onClick={() => { setActiveTab('policies'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('policies'); setIsSidebarOpen(false); }}
           />
-
           <SidebarItem
             icon={<Globe size={20} />}
             label="Website"
-            description="Site branding & configuration"
-            showHelp={showHelp}
             active={activeTab === 'settings'}
-            onClick={() => { setActiveTab('settings'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
           />
-
-
           <SidebarItem
-            icon={<Shield size={18} />}
+            icon={<History size={20} />}
             label="Audit"
             active={activeTab === 'audit'}
-            onClick={() => { setActiveTab('audit'); setSearchQuery(''); setIsSidebarOpen(false); }}
+            onClick={() => { setActiveTab('audit'); setIsSidebarOpen(false); }}
           />
-
         </nav>
 
         <div className="p-4 border-t border-zinc-100 space-y-2">
-          <button
-            onClick={() => setShowHelp(!showHelp)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest ${showHelp ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-              }`}
-          >
-            <div className="flex items-center gap-3">
-              <Settings size={16} />
-              {showHelp ? 'Help Mode: ON' : 'Help Mode: OFF'}
-            </div>
-            {showHelp && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />}
-          </button>
-
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-xs uppercase tracking-widest"
@@ -442,79 +397,48 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <header className="bg-white border-b border-zinc-200 px-4 sm:px-8 py-4 sm:py-6 sticky top-0 z-50 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 text-zinc-500 hover:text-zinc-900 transition-colors"
-            >
-              <Menu size={24} />
-            </button>
-            <div className="flex flex-col">
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 uppercase tracking-tighter">
-                {editingProduct ? 'Edit Product' : activeTab}
-              </h2>
-              {showHelp && (
-                <span className="hidden sm:inline text-xs text-zinc-400 font-medium mt-1">
-                  {activeTab === 'dashboard' && 'Quick overview of your store performance'}
-                  {activeTab === 'orders' && 'Manage fulfillment and customer invoices'}
-                  {activeTab === 'products' && 'List of all items available in your shop'}
-                  {activeTab === 'add' && 'Form to create or update product details'}
-                  {activeTab === 'categories' && 'Manage how products are grouped'}
-                  {activeTab === 'blog' && 'Manage news and articles for your customers'}
-                  {activeTab === 'messages' && 'Read and reply to customer messages'}
-                  {activeTab === 'policies' && 'Edit legal documents and information pages'}
-                  {activeTab === 'audit' && 'Security Registry of system events'}
-                </span>
-              )}
-            </div>
-          </div>
+      <main className="flex-1 overflow-y-auto custom-scrollbar relative">
+        {/* Floating Mobile Toggle */}
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed top-4 left-4 p-3 lg:hidden bg-white/80 backdrop-blur-md border border-zinc-200 rounded-2xl shadow-xl z-50 text-zinc-600"
+        >
+          <Menu size={20} />
+        </button>
 
-          <div className="flex-1 max-w-md hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search products, orders..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-zinc-900 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors hidden sm:block">
-              <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} onClick={() => loadAllData()} />
-            </button>
-            <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-600 font-bold border border-zinc-200">
-              {user?.username?.[0]?.toUpperCase() || 'A'}
-            </div>
-          </div>
-        </header>
-
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && (
               <motion.div
                 key="dashboard"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-black text-zinc-900 uppercase tracking-tighter">Dashboard</h2>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Store Performance Overview</p>
+                  </div>
+                  <button 
+                    onClick={loadAllData}
+                    className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-zinc-900 hover:border-zinc-900 transition-all shadow-sm"
+                  >
+                    <RefreshCw size={18} className={isDataLoading.current ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+
                 {isLoading ? (
                   <DashboardSkeleton />
                 ) : (
                   <>
                     <BIAnalytics orders={orders} users={users_list} />
-
                     <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
                       <div className="relative z-10 max-w-2xl">
                         <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Welcome to Admin Panel</h3>
                         <p className="text-zinc-400 leading-relaxed mb-8">
-                          This is where you manage your entire store. If you're new, we recommend turning on <b>Help Mode</b> in the sidebar to see explanations for each section.
+                          This is where you manage your entire store.
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <QuickLink
@@ -557,11 +481,20 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'products' && (
               <motion.div
                 key="products"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-black text-zinc-900 uppercase tracking-tighter">Inventory</h2>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Manage Products & Stock</p>
+                  </div>
+                </div>
+
+                {/* Product Controls */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
                   <div className="flex items-center gap-4 flex-1">
                     <div className="relative flex-1 max-w-md">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />

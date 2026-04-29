@@ -95,6 +95,7 @@ export const useAuthStore = create<AuthState>()(
         onAuthStateChanged(auth, async (firebaseUser) => {
           try {
             if (firebaseUser) {
+              const token = await firebaseUser.getIdToken();
               let userData: any = null;
               try {
                 userData = await databaseService.getUserProfile(firebaseUser.uid);
@@ -117,7 +118,6 @@ export const useAuthStore = create<AuthState>()(
                 discountLevel: userData?.discountLevel || 0
               };
               
-              const token = await firebaseUser.getIdToken();
               set({ user, token, isAuthenticated: true, isInitialized: true });
             } else {
               set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
