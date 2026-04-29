@@ -8,6 +8,17 @@ import { testConnection } from "../backend/services/db.service.js";
 let isConnected = false;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.hrdatabase_DATABASE_URL ||
+    process.env.hrdatabase_POSTGRES_URL;
+
+  if (!connectionString) {
+    console.error('Missing Neon database connection string. Set DATABASE_URL or POSTGRES_URL.');
+    return res.status(500).json({ error: 'Missing DATABASE_URL or POSTGRES_URL env var for Neon DB.' });
+  }
+
   // 1. Ensure DB connection and run migrations
   if (!isConnected) {
     try {

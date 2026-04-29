@@ -8,24 +8,14 @@ const createPool = () => {
     process.env.hrdatabase_DATABASE_URL || 
     process.env.hrdatabase_POSTGRES_URL;
 
-  const sslEnabled = process.env.DB_SSL === 'true' || !!connectionString;
-
-  if (connectionString) {
-    return new pg.Pool({
-      connectionString,
-      connectionTimeoutMillis: 10000,
-      ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
-    });
+  if (!connectionString) {
+    throw new Error('Missing Neon database connection string. Set DATABASE_URL or POSTGRES_URL.');
   }
-  
+
   return new pg.Pool({
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "postgres",
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432"),
-    database: process.env.DB_NAME || "postgres",
+    connectionString,
     connectionTimeoutMillis: 10000,
-    ...(process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : {}),
+    ssl: { rejectUnauthorized: false },
   });
 };
 
