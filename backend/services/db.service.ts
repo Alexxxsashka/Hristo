@@ -6,14 +6,15 @@ const createPool = () => {
     process.env.DATABASE_URL || 
     process.env.POSTGRES_URL || 
     process.env.hrdatabase_DATABASE_URL || 
-    process.env.hrdatabase_POSTGRES_URL ||
-    "postgresql://neondb_owner:npg_sztAkW5QeI3g@ep-old-mountain-anc6z8ky-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require";
+    process.env.hrdatabase_POSTGRES_URL;
+
+  const sslEnabled = process.env.DB_SSL === 'true' || !!connectionString;
 
   if (connectionString) {
     return new pg.Pool({
       connectionString,
       connectionTimeoutMillis: 10000,
-      ssl: { rejectUnauthorized: false },
+      ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
     });
   }
   
@@ -24,7 +25,7 @@ const createPool = () => {
     port: parseInt(process.env.DB_PORT || "5432"),
     database: process.env.DB_NAME || "postgres",
     connectionTimeoutMillis: 10000,
-    ssl: { rejectUnauthorized: false },
+    ...(process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: false } } : {}),
   });
 };
 
@@ -35,7 +36,12 @@ const initSchema = async () => {
   const client = await pool.connect();
   try {
     await client.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
-    await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+
+    try {
+      await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+    } catch (err: any) {
+      console.warn('⚠️ Optional extension uuid-ossp is unavailable, continuing without it:', err.message);
+    }
 
     // 1. Users
     await client.query(`
