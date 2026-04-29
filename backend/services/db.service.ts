@@ -1,11 +1,13 @@
 import pg from 'pg';
+import { seedDatabase } from './seed.service.js';
 
 const createPool = () => {
   const connectionString = 
     process.env.DATABASE_URL || 
     process.env.POSTGRES_URL || 
     process.env.hrdatabase_DATABASE_URL || 
-    process.env.hrdatabase_POSTGRES_URL;
+    process.env.hrdatabase_POSTGRES_URL ||
+    "postgresql://neondb_owner:npg_sztAkW5QeI3g@ep-old-mountain-anc6z8ky-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require";
 
   if (connectionString) {
     return new pg.Pool({
@@ -347,6 +349,7 @@ export const testConnection = async () => {
     const res = await pool.query('SELECT NOW()');
     console.log('✅ Cloud DB Connected at:', res.rows[0].now);
     await initSchema();
+    await seedDatabase();
   } catch (err: any) {
     console.error('❌ Cloud DB Connection Error:', err.message);
     throw err;

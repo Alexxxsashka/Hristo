@@ -17,12 +17,18 @@ export const getPosts = async (req: AuthenticatedRequest, res: Response) => {
     params.push(limit, (Number(page) - 1) * Number(limit));
 
     const result = await pool.query(queryStr, params);
+    const mapped = result.rows.map(p => ({
+      ...p,
+      image: p.image_url,
+      readTime: p.read_time
+    }));
+    
     const countRes = await pool.query('SELECT COUNT(*) FROM blog_posts' + (category ? ' WHERE category = $1' : ''), category ? [category] : []);
     const total = parseInt(countRes.rows[0].count);
 
     res.json({
       success: true,
-      data: result.rows,
+      data: mapped,
       pagination: {
         total,
         page: Number(page),

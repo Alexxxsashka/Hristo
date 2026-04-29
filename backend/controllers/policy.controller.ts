@@ -5,7 +5,13 @@ import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
 export const getPolicies = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await pool.query('SELECT * FROM policies');
-    res.json({ success: true, data: result.rows });
+    const mapped = result.rows.map(p => ({
+      ...p,
+      lastUpdated: p.last_updated,
+      titleHr: p.title_hr,
+      contentHr: p.content_hr
+    }));
+    res.json({ success: true, data: mapped });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
   }
@@ -15,7 +21,13 @@ export const getPolicyById = async (req: AuthenticatedRequest, res: Response) =>
   try {
     const result = await pool.query('SELECT * FROM policies WHERE id = $1', [req.params.id]);
     if (result.rows.length > 0) {
-      res.json({ success: true, data: result.rows[0] });
+      const p = result.rows[0];
+      res.json({ success: true, data: {
+        ...p,
+        lastUpdated: p.last_updated,
+        titleHr: p.title_hr,
+        contentHr: p.content_hr
+      }});
     } else {
       res.status(404).json({ success: false, error: "Policy not found" });
     }

@@ -138,7 +138,37 @@ export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
     }
     
     const result = await pool.query(query, params);
-    res.json({ success: true, data: result.rows });
+    
+    // Fetch items for each order
+    const ordersWithItems = await Promise.all(result.rows.map(async (o) => {
+      const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [o.id]);
+      return {
+        ...o,
+        orderNumber: o.order_number,
+        userId: o.user_id,
+        createdAt: o.created_at,
+        updatedAt: o.updated_at,
+        discountAmount: o.discount_amount,
+        shippingCost: o.shipping_cost,
+        payment: {
+          method: o.payment_method,
+          status: o.payment_status,
+          amount: o.total,
+          currency: 'EUR'
+        },
+        shipping: {
+          ...JSON.parse(o.shipping_address || '{}'),
+          cost: o.shipping_cost
+        },
+        items: itemsResult.rows.map(i => ({
+          ...i,
+          productId: i.product_id,
+          selectedVariant: i.variant_info ? JSON.parse(i.variant_info) : undefined
+        }))
+      };
+    }));
+
+    res.json({ success: true, data: ordersWithItems });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
   }

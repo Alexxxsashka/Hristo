@@ -11,7 +11,19 @@ export const getProducts = async (req: AuthenticatedRequest, res: Response) => {
       category: p.category_id,
       image: p.image_url,
       model3D: p.model_3d_url,
-      has3D: !!p.model_3d_url
+      has3D: !!p.model_3d_url,
+      categoryFilters: p.category_filters || {},
+      variantAttributes: p.variant_attributes || [],
+      variants: p.variants || [],
+      characteristics: p.characteristics || [],
+      socketPoint: p.socket_point,
+      compatibleIds: p.compatible_ids,
+      nameHr: p.name_hr,
+      descriptionHr: p.description_hr,
+      longDescription: p.long_description,
+      longDescriptionHr: p.long_description_hr,
+      model3DName: p.model3d_name,
+      landingCost: p.landing_cost,
     }));
     res.json({ success: true, data: mapped });
   } catch (error) {
@@ -86,7 +98,14 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response) =>
 export const getCategories = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await pool.query('SELECT * FROM categories');
-    res.json({ success: true, data: result.rows });
+    const mapped = result.rows.map(c => ({
+      ...c,
+      image: c.image_url,
+      parent: c.parent_id,
+      nameHr: c.name_hr,
+      compatibleModuleCategories: c.compatible_module_categories,
+    }));
+    res.json({ success: true, data: mapped });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
   }
