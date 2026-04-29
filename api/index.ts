@@ -1,6 +1,9 @@
+import * as dotenv from 'dotenv';
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { app } from "../backend/app.js";
 import { testConnection } from "../backend/services/db.service.js";
+
+dotenv.config();
 
 // Vercel serverless function doesn't need to call .listen()
 // It just needs to export the handler or the app.
@@ -24,9 +27,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       await testConnection(); // This now calls runMigrations internally
       isConnected = true;
-    } catch (error) {
-      console.error("DB connection/migration failed in Vercel handler:", error);
-      return res.status(500).json({ error: "Internal Server Error (DB/Migration)" });
+    } catch (error: any) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("DB connection/migration failed in Vercel handler:", message, error);
+      return res.status(500).json({ error: `Internal Server Error (DB/Migration): ${message}` });
     }
   }
 

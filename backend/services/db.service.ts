@@ -1,12 +1,37 @@
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import pg from 'pg';
 import { seedDatabase } from './seed.service.js';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const readRawEnvConnectionString = (): string | null => {
+  const envPath = path.resolve(__dirname, '..', '..', '.env');
+  if (!fs.existsSync(envPath)) return null;
+
+  const lines = fs.readFileSync(envPath, 'utf8')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return null;
+  const firstLine = lines[0];
+  if (firstLine.includes('=')) return null;
+  return firstLine;
+};
 
 const createPool = () => {
   const connectionString = 
     process.env.DATABASE_URL || 
     process.env.POSTGRES_URL || 
     process.env.hrdatabase_DATABASE_URL || 
-    process.env.hrdatabase_POSTGRES_URL;
+    process.env.hrdatabase_POSTGRES_URL ||
+    readRawEnvConnectionString();
 
   if (!connectionString) {
     throw new Error('Missing Neon database connection string. Set DATABASE_URL or POSTGRES_URL.');
