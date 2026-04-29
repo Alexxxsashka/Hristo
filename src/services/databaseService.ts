@@ -299,66 +299,6 @@ export const databaseService = {
     if (!res.ok) throw new Error('Failed to send message');
   },
 
-  async getMessages() {
-    const res = await fetch('/api/admin/messages', {
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
-    });
-    return await this._handleResponse(res) || [];
-  },
-
-  async getUsers() {
-    const res = await fetch('/api/admin/users', {
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
-    });
-    return await this._handleResponse(res) || [];
-  },
-
-  async saveMessage(message: any) {
-    const url = message.id ? `/api/admin/messages/${message.id}` : '/api/admin/messages';
-    const method = message.id ? 'PUT' : 'POST';
-    const res = await fetch(url, {
-      method,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getToken()}`
-      },
-      body: JSON.stringify(message)
-    });
-    if (!res.ok) throw new Error('Failed to save message');
-  },
-
-  async deleteMessage(id: string) {
-    const res = await fetch(`/api/admin/messages/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
-    });
-    if (!res.ok) throw new Error('Failed to delete message');
-  },
-
-  // User Profile
-  async getUserProfile(uid: string): Promise<UserProfile | null> {
-    const res = await fetch(`/api/users/${uid}`, {
-      headers: { 'Authorization': `Bearer ${this.getToken()}` }
-    });
-    return res.ok ? await res.json() : null;
-  },
-
-  async saveUserProfile(uid: string, data: Partial<UserProfile>): Promise<void> {
-    await this.updateProfile(uid, data);
-  },
-
-  async updateProfile(userId: string, data: Partial<UserProfile>): Promise<void> {
-    const res = await fetch(`/api/users/${userId}`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getToken()}`
-      },
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Failed to update profile');
-  },
-
   // Orders
   async createOrder(orderData: any) {
     const res = await fetch('/api/orders', {
@@ -841,6 +781,10 @@ export const databaseService = {
     return await this._handleResponse(res);
   },
 
+  async saveUserProfile(uid: string, data: Partial<UserProfile>): Promise<void> {
+    await this.updateProfile(uid, data);
+  },
+
   async updateProfile(id: string, data: Partial<UserProfile>) {
     const res = await fetch(`/api/users/${id}`, {
       method: 'PUT',
@@ -860,6 +804,20 @@ export const databaseService = {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
     return await this._handleResponse(res) || [];
+  },
+
+  async saveMessage(message: any) {
+    const url = message.id ? `/api/admin/messages/${message.id}` : '/api/admin/messages';
+    const method = message.id ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify(message)
+    });
+    if (!res.ok) throw new Error('Failed to save message');
   },
 
   async deleteMessage(id: string) {
