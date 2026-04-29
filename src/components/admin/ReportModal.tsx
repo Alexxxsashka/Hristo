@@ -25,13 +25,14 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onGen
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl border border-zinc-200"
-          >
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] overflow-y-auto p-4 md:p-8 flex justify-center items-center">
+          <div className="min-h-full flex items-center justify-center py-8 w-full max-w-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[32px] w-full overflow-hidden shadow-2xl border border-zinc-200 my-auto"
+            >
             <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center text-white">
@@ -102,7 +103,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onGen
                 Download PDF
               </button>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       )}
     </AnimatePresence>

@@ -253,13 +253,14 @@ export const CouponManager: React.FC = () => {
       {/* Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-xl bg-white rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200"
-            >
+          <div className="fixed inset-0 z-[100] overflow-y-auto p-4 md:p-8 bg-black/60 backdrop-blur-md flex justify-center items-center">
+            <div className="min-h-full flex items-center justify-center py-8 w-full max-w-xl">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="w-full bg-white rounded-[40px] shadow-2xl overflow-hidden border border-zinc-200 my-auto"
+              >
               <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-black uppercase tracking-tighter text-zinc-900">
@@ -429,8 +430,9 @@ export const CouponManager: React.FC = () => {
 
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
     </div>
   );
 };

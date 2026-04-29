@@ -725,14 +725,15 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct, onUpd
         )}
       </AnimatePresence>
 
-      {/* Warehouse Modal */}
       {showWarehouseModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl w-full max-w-md overflow-hidden"
-          >
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] overflow-y-auto p-4 md:p-8 flex justify-center items-center">
+          <div className="min-h-full flex items-center justify-center py-8 w-full max-w-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl w-full overflow-hidden shadow-2xl my-auto"
+            >
             <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-900 text-white">
               <h3 className="text-xl font-black uppercase tracking-tighter">New Warehouse</h3>
               <button onClick={() => setShowWarehouseModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-all">
@@ -782,18 +783,21 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct, onUpd
                 ) : 'Create Warehouse'}
               </button>
             </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       )}
 
       {/* Supplier Modal */}
       {showSupplierModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl w-full max-w-lg overflow-hidden"
-          >
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] overflow-y-auto p-4 md:p-8 flex justify-center items-center">
+          <div className="min-h-full flex items-center justify-center py-8 w-full max-w-lg">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl w-full overflow-hidden shadow-2xl my-auto"
+            >
             <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-900 text-white">
               <h3 className="text-xl font-black uppercase tracking-tighter">New Supplier</h3>
               <button onClick={() => setShowSupplierModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-all">
@@ -845,7 +849,8 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct, onUpd
                 Create Supplier
               </button>
             </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       )}
     </div>
