@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 export const getCoupons = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -20,8 +21,19 @@ export const createCoupon = async (req: AuthenticatedRequest, res: Response) => 
     );
 
     if (req.user) {
-      await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'CREATE', 'COUPON', id, `Created coupon: ${code}`]);
+      await logAudit(
+        'CREATE', 
+        'COUPON', 
+        id, 
+        `Created coupon: ${code}`,
+        AuditSeverity.INFO,
+        { 
+          userId: req.user.id, 
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
     }
 
     res.status(201).json({ success: true, data: { id } });
@@ -39,8 +51,19 @@ export const updateCoupon = async (req: AuthenticatedRequest, res: Response) => 
     );
 
     if (req.user) {
-      await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'UPDATE', 'COUPON', req.params.id, `Updated coupon: ${code}`]);
+      await logAudit(
+        'UPDATE',
+        'COUPON',
+        req.params.id,
+        `Updated coupon: ${code}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
     }
 
     res.json({ success: true });
@@ -54,8 +77,19 @@ export const deleteCoupon = async (req: AuthenticatedRequest, res: Response) => 
     await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]);
     
     if (req.user) {
-      await pool.query('INSERT INTO audit_logs (id, user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5, $6)',
-        [`log-${Date.now()}`, req.user.id, 'DELETE', 'COUPON', req.params.id, `Deleted coupon`]);
+      await logAudit(
+        'DELETE',
+        'COUPON',
+        req.params.id,
+        `Deleted coupon`,
+        AuditSeverity.WARNING,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
     }
 
     res.json({ success: true });

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 export const getSiteSettings = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -81,6 +82,20 @@ export const updateSiteSettings = async (req: AuthenticatedRequest, res: Respons
         `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
         values
       );
+    if (req.user) {
+      await logAudit(
+        'UPDATE_SETTINGS',
+        'SITE',
+        id,
+        `Updated site settings`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
     }
 
     res.json({ success: true });
@@ -105,6 +120,22 @@ export const updateCurrencyRate = async (req: AuthenticatedRequest, res: Respons
       'INSERT INTO currency_rates (code, rate, symbol) VALUES ($1, $2, $3) ON CONFLICT (code) DO UPDATE SET rate = $2, symbol = $3, updated_at = CURRENT_TIMESTAMP',
       [code, rate, symbol]
     );
+
+    if (req.user) {
+      await logAudit(
+        'UPDATE_CURRENCY',
+        'SETTINGS',
+        code,
+        `Updated currency rate for ${code} to ${rate}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });

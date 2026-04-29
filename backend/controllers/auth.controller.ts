@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -142,6 +143,22 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
        WHERE id = $5`,
       [callsign, teamName, username, addresses ? JSON.stringify(addresses) : null, req.params.id]
     );
+
+    if (req.user) {
+      await logAudit(
+        'UPDATE_PROFILE',
+        'USER',
+        req.params.id,
+        `Updated profile for user ${req.params.id}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     res.json({ success: true });
   } catch (error) {
     console.error('updateProfile error:', error);

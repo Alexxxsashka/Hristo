@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { recalculateUserPointsAndRank } from '../services/loyalty.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderData = req.body;
@@ -113,6 +114,21 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     // 5. Trigger loyalty recalculation
     await recalculateUserPointsAndRank(req.user.id);
 
+    // 6. Audit Log
+    await logAudit(
+      'PLACE_ORDER',
+      'ORDER',
+      orderId,
+      `Order placed: ${orderNumber}`,
+      AuditSeverity.INFO,
+      {
+        userId: req.user.id,
+        userName: req.user.displayName || req.user.email,
+        userEmail: req.user.email,
+        ipAddress: req.ip
+      }
+    );
+
     await client.query('COMMIT');
     res.status(201).json({ success: true, data: { id: orderId, orderNumber, status: 'pending' } });
   } catch (error: any) {
@@ -213,6 +229,22 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
       'UPDATE orders SET status = $1, tracking_number = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
       [status, tracking_number, id]
     );
+
+    if (req.user) {
+      await logAudit(
+        'UPDATE_STATUS',
+        'ORDER',
+        id,
+        `Order ${id} status updated to: ${status}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     
     res.json({ success: true });
   } catch (error) {

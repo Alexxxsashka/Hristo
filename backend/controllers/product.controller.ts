@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { uploadToVercelBlob, deleteFromVercelBlob } from '../services/storage.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 export const getProducts = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -88,7 +89,21 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
         JSON.stringify(p.compatibleModuleCategories || []), JSON.stringify(p.socketPoint || [0,0,0]),
         JSON.stringify(p.compatibleIds || []), p.mountType, p.attachment_slot, p.longDescription, p.longDescriptionHr
       ]
-    );
+    if (req.user) {
+      await logAudit(
+        'CREATE/UPDATE',
+        'PRODUCT',
+        id,
+        `Created or updated product: ${p.name}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
 
     res.status(201).json({ success: true, data: { ...p, id, uid, slug: finalSlug } });
   } catch (error) {
@@ -109,6 +124,22 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response) =>
     }
 
     await pool.query('DELETE FROM products WHERE id = $1', [id]);
+    
+    if (req.user) {
+      await logAudit(
+        'DELETE',
+        'PRODUCT',
+        id,
+        `Deleted product: ${id}`,
+        AuditSeverity.WARNING,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
@@ -169,6 +200,22 @@ export const saveCategory = async (req: AuthenticatedRequest, res: Response) => 
     ];
 
     await pool.query(query, params);
+    
+    if (req.user) {
+      await logAudit(
+        'SAVE',
+        'CATEGORY',
+        id,
+        `Saved category: ${cat.name}`,
+        AuditSeverity.INFO,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     res.json({ success: true, data: { ...cat, id, slug } });
   } catch (error) {
     console.error('saveCategory error:', error);
@@ -180,6 +227,22 @@ export const deleteCategory = async (req: AuthenticatedRequest, res: Response) =
   try {
     const id = req.params.id;
     await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+    
+    if (req.user) {
+      await logAudit(
+        'DELETE',
+        'CATEGORY',
+        id,
+        `Deleted category: ${id}`,
+        AuditSeverity.WARNING,
+        {
+          userId: req.user.id,
+          userName: req.user.displayName || req.user.email,
+          userEmail: req.user.email,
+          ipAddress: req.ip
+        }
+      );
+    }
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
