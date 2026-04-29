@@ -73,7 +73,11 @@ export const CategoryForm = ({
 
   const handleFileUpload = async (file: File) => {
     try {
-      if (newCat.image) setDeletedBlobs(prev => [...prev, newCat.image!]);
+      if (newCat.image) {
+        try { await databaseService.deleteFile(newCat.image); } catch (e) {
+          console.warn('[Storage] Failed to delete old image on replace', e);
+        }
+      }
       const originalName = file.name;
       const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
       const path = `categories/${safeName}`;
@@ -88,9 +92,13 @@ export const CategoryForm = ({
 
   const handleFileDelete = async () => {
     if (!newCat.image) return;
-    setDeletedBlobs(prev => [...prev, newCat.image!]);
+    try {
+      await databaseService.deleteFile(newCat.image);
+    } catch (e) {
+      console.warn('[Storage] Failed to delete image', e);
+    }
     handleFieldChange('image', '');
-    onNotify('Image removed from form (will be deleted on save)');
+    onNotify('Image deleted from storage');
   };
 
   const handleAdd = async (e: React.FormEvent) => {

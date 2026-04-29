@@ -135,29 +135,19 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
   const handleSave = async () => {
     onConfirm('Are you sure you want to save all site settings?', async () => {
       setSaving(true);
-      useSettingsStore.getState().updateSettings(settings);
-      setSettings(settings);
-      onNotify('Site configuration updated successfully!', 'success');
-      if (onUpdate) onUpdate();
-    } catch (err) {
-      console.error('Save failed', err);
-      onNotify('Failed to update settings', 'error');
-    } finally {
-      setSaving(false);
-    }
-    });
-  };
-      onNotify('Site configuration updated successfully!', 'success');
-      if (onUpdate) onUpdate();
-    } catch (err) {
-      console.error('Save failed', err);
-      onNotify('Failed to update settings', 'error');
-    } finally {
-      setSaving(false);
-      setUploadProgress(0);
-    }
+      try {
+        await databaseService.updateSiteSettings(settings);
+        useSettingsStore.getState().updateSettings(settings);
+        setSettings(settings);
+        onNotify('Site configuration updated successfully!', 'success');
+        if (onUpdate) onUpdate();
+      } catch (err) {
+        console.error('Save failed', err);
+        onNotify('Failed to update settings', 'error');
+      } finally {
+        setSaving(false);
       }
-    );
+    });
   };
 
   const addHeroSlide = () => {
@@ -645,15 +635,15 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Upload New GLB Model</label>
                     <div className="relative group aspect-video bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 flex flex-col items-center justify-center gap-4">
-                      {pendingLiveDemoModel ? (
+                      {settings.liveDemoModelUrl ? (
                         <div className="flex flex-col items-center gap-2">
                           <CheckCircle2 size={40} className="text-green-500" />
-                          <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">{pendingLiveDemoModel.name}</span>
+                          <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">Model Active</span>
                           <button 
-                            onClick={() => setPendingLiveDemoModel(null)}
+                            onClick={() => handleFileDelete(settings.liveDemoModelUrl, 'liveDemoModelUrl')}
                             className="text-[10px] text-red-600 font-black uppercase tracking-widest hover:underline"
                           >
-                            Remove
+                            Delete Model
                           </button>
                         </div>
                       ) : (
