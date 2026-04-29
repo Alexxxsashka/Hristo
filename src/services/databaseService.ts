@@ -59,12 +59,25 @@ export const databaseService = {
   _categoriesCache: null as Category[] | null,
 
   async _handleResponse(res: Response) {
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (json && typeof json === 'object' && json.success === true && 'data' in json) {
-      return json.data;
+    if (!res.ok) {
+      if (res.status === 403 || res.status === 401) {
+        console.warn(`Auth error (${res.status}) for ${res.url}. Check your admin privileges.`);
+      } else {
+        console.error(`API error (${res.status}) for ${res.url}`);
+      }
+      return null;
     }
-    return json;
+    
+    try {
+      const json = await res.json();
+      if (json && typeof json === 'object' && json.success === true && 'data' in json) {
+        return json.data;
+      }
+      return json;
+    } catch (e) {
+      console.error('Failed to parse JSON response', e);
+      return null;
+    }
   },
 
   async uploadFile(file: File, path: string, onProgress?: (progress: number) => void): Promise<string> {

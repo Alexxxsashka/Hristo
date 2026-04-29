@@ -7,9 +7,9 @@ const router = Router();
 router.post('/validate', couponController.validateCoupon);
 
 // Admin routes
-router.get('/admin', authenticateAdmin, couponController.getCoupons);
-router.post('/admin', authenticateAdmin, couponController.createCoupon);
-router.put('/admin/:id', authenticateAdmin, couponController.updateCoupon);
-router.delete('/admin/:id', authenticateAdmin, couponController.deleteCoupon);
+router.get('/', authenticateAdmin, couponController.getCoupons);
+router.post('/', authenticateAdmin, couponController.createCoupon);
+router.put('/:id', authenticateAdmin, couponController.updateCoupon);
+router.delete('/:id', authenticateAdmin, couponController.deleteCoupon);
 
 export default router;

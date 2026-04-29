@@ -14,6 +14,7 @@ import buildRoutes from './routes/build.routes.js';
 import stripeRoutes from './routes/stripe.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import categoryRoutes from './routes/category.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -91,6 +92,7 @@ app.use('/api/admin/inventory-logs', productRoutes);
 app.use('/api/admin/audit', analyticsRoutes); 
 app.use('/api/admin/audit-logs', analyticsRoutes); 
 app.use('/api/admin/users', authRoutes);
+app.use('/api/admin', uploadRoutes);
 
 // Error Handling
 app.use(notFoundHandler);

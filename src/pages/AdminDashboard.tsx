@@ -120,19 +120,26 @@ export const AdminDashboard: React.FC = () => {
 
 
 
+  const isDataLoading = React.useRef(false);
   const loadAllData = async () => {
+    if (isDataLoading.current) return;
+    isDataLoading.current = true;
     setIsLoading(true);
-    await Promise.all([
-      fetchProducts().catch(e => console.error('Failed to fetch products:', e)),
-      fetchCategories().catch(e => console.error('Failed to fetch categories:', e)),
-      fetchBlogPosts().catch(e => console.error('Failed to fetch blog posts:', e)),
-      fetchPolicies().catch(e => console.error('Failed to fetch policies:', e)),
-      fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
-      databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
-      databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e)),
-      fetchAuditLogs()
-    ]);
-    setIsLoading(false);
+    try {
+      await Promise.all([
+        fetchProducts().catch(e => console.error('Failed to fetch products:', e)),
+        fetchCategories().catch(e => console.error('Failed to fetch categories:', e)),
+        fetchBlogPosts().catch(e => console.error('Failed to fetch blog posts:', e)),
+        fetchPolicies().catch(e => console.error('Failed to fetch policies:', e)),
+        fetchOrdersInternal().catch(e => console.error('Failed to fetch orders:', e)),
+        databaseService.getUsers().then(u => setUsersList(u || [])).catch(e => console.error('Failed to fetch users:', e)),
+        databaseService.getMessages().then(m => setMessages(m || [])).catch(e => console.error('Failed to fetch messages:', e)),
+        fetchAuditLogs().catch(e => console.error('Failed to fetch audit logs:', e))
+      ]);
+    } finally {
+      setIsLoading(false);
+      isDataLoading.current = false;
+    }
   };
 
   const fetchAuditLogs = async () => {
@@ -149,27 +156,29 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     // Wait until Firebase has restored the auth state
     if (!isInitialized) return;
-    if (!user || user.role !== 'admin') {
-      navigate('/login');
+    
+    const isAdmin = user?.role === 'admin';
+    if (!user || !isAdmin) {
+      if (isInitialized) navigate('/login');
       return;
     }
 
     loadAllData();
 
-    // 🕵️ Audit Real-time Polling (Every 10 seconds)
-    const auditInterval = setInterval(fetchAuditLogs, 10000);
+    // 🕵️ Audit Real-time Polling (Every 30 seconds - reduced frequency to prevent noise)
+    const auditInterval = setInterval(fetchAuditLogs, 30000);
 
-    // Auto-refresh orders and products in the background every 30 seconds
+    // Auto-refresh orders and products in the background every 60 seconds
     const interval = setInterval(() => {
       fetchOrdersInternal();
       fetchProducts();
-    }, 30000);
+    }, 60000);
 
     return () => {
       clearInterval(auditInterval);
       clearInterval(interval);
     };
-  }, [user, navigate, isInitialized]);
+  }, [user?.id, user?.role, navigate, isInitialized]);
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });

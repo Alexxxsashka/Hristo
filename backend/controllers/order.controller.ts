@@ -143,10 +143,14 @@ export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
     const ordersWithItems = await Promise.all(result.rows.map(async (o) => {
       const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [o.id]);
       
-      // pg driver automatically parses JSONB columns into objects, but handle string fallback
-      const shippingAddress = typeof o.shipping_address === 'string' 
-        ? JSON.parse(o.shipping_address) 
-        : (o.shipping_address || {});
+      let shippingAddress = {};
+      try {
+        shippingAddress = typeof o.shipping_address === 'string' 
+          ? JSON.parse(o.shipping_address) 
+          : (o.shipping_address || {});
+      } catch (e) {
+        console.warn(`Failed to parse shipping_address for order ${o.id}:`, e);
+      }
 
       return {
         ...o,
@@ -174,9 +178,14 @@ export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
           cost: parseFloat(o.shipping_cost as any) || 0
         },
         items: itemsResult.rows.map(i => {
-          const variantInfo = typeof i.variant_info === 'string'
-            ? JSON.parse(i.variant_info)
-            : i.variant_info;
+          let variantInfo = i.variant_info;
+          try {
+            if (typeof i.variant_info === 'string' && i.variant_info.trim().startsWith('{')) {
+              variantInfo = JSON.parse(i.variant_info);
+            }
+          } catch (e) {
+            console.warn(`Failed to parse variant_info for item ${i.id}:`, e);
+          }
             
           return {
             ...i,

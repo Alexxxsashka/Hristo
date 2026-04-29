@@ -30,7 +30,7 @@ async function verifyFirebaseToken(token: string): Promise<{ uid: string; email?
 
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = (authHeader && authHeader.split(" ")[1]) || (req.query.token as string);
 
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
@@ -57,11 +57,19 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     );
     const dbUser = userResult.rows[0];
 
+    const dbRole = dbUser?.role;
+    const isHardcodedAdmin = firebaseUser.email === 'guardsowh@gmail.com';
+    const role = dbRole === 'admin' || isHardcodedAdmin ? 'admin' : 'user';
+
     req.user = {
       id: firebaseUser.uid,
       email: firebaseUser.email || '',
-      role: dbUser?.role || (firebaseUser.email === 'guardsowh@gmail.com' ? 'admin' : 'user'),
+      role: role,
     };
+    
+    if (role !== 'admin' && req.originalUrl.includes('/admin/')) {
+       console.warn(`Admin access denied for user ${firebaseUser.email} (UID: ${firebaseUser.uid}). Role: ${role}`);
+    }
     next();
   } catch (error) {
     console.error('Auth verification failed:', error);

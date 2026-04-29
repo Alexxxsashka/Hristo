@@ -223,7 +223,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
             </div>
           </div>
           <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={350} minHeight={350}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -271,7 +271,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
         <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
           <h4 className="text-xl font-black uppercase tracking-tighter mb-8">Sales by Category</h4>
           <div className="h-[300px] w-full relative">
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={300} minHeight={300}>
               <PieChart>
                 <Pie
                   data={categoryData}
@@ -319,7 +319,7 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
             </div>
           </div>
           <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={200} minHeight={200}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
                 <XAxis 
