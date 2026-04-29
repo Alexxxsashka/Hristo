@@ -663,7 +663,6 @@ export const AdminDashboard: React.FC = () => {
                 initialData={editingProduct}
                 categories={categories}
                 weapons={products.filter(p => p.type === 'weapon')}
-                showHelp={showHelp}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
                 onSuccess={() => {
@@ -704,7 +703,6 @@ export const AdminDashboard: React.FC = () => {
               <CategoryForm
                 initialData={editingCategory}
                 categories={categories}
-                showHelp={showHelp}
                 onUpdate={() => { fetchCategories(); fetchAuditLogs(); }}
                 onNotify={showNotification}
                 onConfirm={confirmAction}
