@@ -415,7 +415,7 @@ export const databaseService = {
     const res = await fetch('/api/admin/coupons', {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
     });
-    return res.ok ? await res.json() : [];
+    return await this._handleResponse(res) || [];
   },
 
   async saveCoupon(coupon: any) {
