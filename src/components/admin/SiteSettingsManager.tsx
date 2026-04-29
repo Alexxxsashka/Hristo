@@ -159,7 +159,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
   const addHeroSlide = () => {
     const newSlide: HeroSlide = {
       id: `slide-${Date.now()}`,
-      image: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200',
+      image: '',
       title: 'New Dynamic Slide',
       subtitle: 'Premium combat gear ready for deployment',
       ctaText: 'Explore Collection',
@@ -686,7 +686,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                     onClick={() => {
                       const newBanner: PromoBanner = {
                         id: `banner-${Date.now()}`,
-                        image: 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800',
+                        image: '',
                         title: 'New Promo',
                         subtitle: 'Limited time offer description',
                         ctaText: 'Claim Offer',

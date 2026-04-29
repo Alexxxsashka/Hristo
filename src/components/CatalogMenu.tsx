@@ -132,7 +132,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                     {/* Featured/Image */}
                     <div className="relative group overflow-hidden rounded-2xl border border-zinc-800 aspect-video lg:aspect-auto">
                       <img
-                        src={activeCategory.image?.startsWith('http') ? activeCategory.image : (activeCategory.image || 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=800&auto=format&fit=crop')}
+                        src={activeCategory.image?.startsWith('http') ? activeCategory.image : (activeCategory.image || '')}
                         alt={activeCategory.name}
                         className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700"
                       />

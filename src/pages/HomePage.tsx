@@ -111,7 +111,7 @@ const HomePage: React.FC = () => {
               />
             ) : (
               <img 
-                src={activeSlides[currentSlideIndex]?.image || settings?.heroImageUrl || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
+                src={activeSlides[currentSlideIndex]?.image || settings?.heroImageUrl || ""} 
                 className="w-full h-full object-cover"
                 alt="Hero Background"
               />
@@ -260,7 +260,7 @@ const HomePage: React.FC = () => {
               </Link>
             </div>
             <div className="absolute top-0 right-0 w-full md:w-2/3 h-full opacity-10 md:opacity-20 group-hover:opacity-40 transition-opacity">
-              <img src="https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover" alt="Tactical Equipment" referrerPolicy="no-referrer" />
+              <img src="" className="w-full h-full object-cover" alt="Tactical Equipment" referrerPolicy="no-referrer" />
             </div>
           </div>
 
@@ -334,7 +334,7 @@ const HomePage: React.FC = () => {
               <div className="absolute inset-0 bg-red-600/5 rounded-[40px] blur-3xl group-hover:bg-red-600/10 transition-colors" />
               <div className="w-full h-full relative z-10">
                 <Suspense fallback={<div className="w-full h-full bg-zinc-900/50 rounded-[40px] animate-pulse flex items-center justify-center"><div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
-                  <ModelViewer modelPath={settings?.liveDemoModelUrl || "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"} />
+                  <ModelViewer modelPath={settings?.liveDemoModelUrl || ""} />
                 </Suspense>
                 
                 {/* Interaction Hint */}
@@ -399,7 +399,7 @@ const HomePage: React.FC = () => {
           {(settings?.featuredCategoriesList || []).filter(c => c.active).map((cat) => {
             const actualCategory = categories.find(c => c.id === cat.categoryId);
             const categoryName = cat.customName || actualCategory?.name || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
-            const categoryImage = actualCategory?.image || (cat as any).customImage || 'https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=800';
+            const categoryImage = actualCategory?.image || (cat as any).customImage || "";
             const count = (Array.isArray(products) ? products : []).filter(p => p.category === cat.categoryId).length;
             return (
               <Link 
@@ -506,7 +506,7 @@ const HomePage: React.FC = () => {
                 className="relative aspect-video rounded-[40px] overflow-hidden group shadow-2xl"
               >
                 <img 
-                  src={settings.aboutUsImage || "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?q=80&w=1200"} 
+                  src={settings.aboutUsImage || ""} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   alt="About Section"
                 />
