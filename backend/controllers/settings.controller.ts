@@ -49,6 +49,8 @@ export const updateSiteSettings = async (req: AuthenticatedRequest, res: Respons
       if (key === 'id' || key.startsWith('_')) return;
       
       const normalizedKey = normalize(key);
+      if (normalizedKey === 'updatedat' || normalizedKey === 'createdat') return;
+
       const colInfo = colMap.get(normalizedKey);
       
       if (colInfo) {
