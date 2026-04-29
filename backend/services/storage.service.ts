@@ -7,14 +7,17 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure data and models directories exist
+// Ensure data and models directories exist in development only
 const dataDir = path.resolve(process.cwd(), "data");
-const modelsDir = process.env.NODE_ENV === "production" 
+const modelsDir = process.env.NODE_ENV === "production"
   ? path.resolve(process.cwd(), "build", "models")
   : path.resolve(process.cwd(), "public", "models");
 
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-if (!fs.existsSync(modelsDir)) fs.mkdirSync(modelsDir, { recursive: true });
+const useLocalStorage = process.env.NODE_ENV !== "production";
+if (useLocalStorage) {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(modelsDir)) fs.mkdirSync(modelsDir, { recursive: true });
+}
 
 // Multer configuration for local file uploads (fallback/legacy)
 const localDiskStorage = multer.diskStorage({
