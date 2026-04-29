@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { Category } from '../../types';
+import { useShopStore } from '../../store/shopStore';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
 import { syncManager } from '../../utils/sync';
@@ -35,6 +36,9 @@ export const CategoryForm = ({
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [newSubcatName, setNewSubcatName] = useState('');
+
+  const saveCategoryStore = useShopStore(state => state.saveCategory);
+  const deleteCategoryStore = useShopStore(state => state.deleteCategory);
 
   useEffect(() => {
     if (initialData) {
@@ -113,8 +117,7 @@ export const CategoryForm = ({
       editingCat ? 'Are you sure you want to update this category?' : 'Are you sure you want to create this new category?',
       async () => {
         try {
-          await databaseService.saveCategory(newCat as any);
-          syncManager.broadcast('SYNC_CATEGORIES');
+          await saveCategoryStore(newCat as any);
           onNotify(editingCat ? 'Category updated' : 'Category added');
           onSuccess();
         } catch (err) {
@@ -192,8 +195,7 @@ export const CategoryForm = ({
         parent: editingCat.id,
         id: newSubcatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')
       };
-      await databaseService.saveCategory(subCat as any);
-      syncManager.broadcast('SYNC_CATEGORIES');
+      await saveCategoryStore(subCat as any);
       setNewSubcatName('');
       onUpdate?.();
       onNotify('Subcategory added successfully');
@@ -206,8 +208,7 @@ export const CategoryForm = ({
   const handleDeleteSubcategory = async (id: string) => {
     onConfirm('Are you sure you want to delete this subcategory?', async () => {
       try {
-        await databaseService.deleteCategory(id);
-        syncManager.broadcast('SYNC_CATEGORIES');
+        await deleteCategoryStore(id);
         onUpdate?.();
         onNotify('Subcategory deleted successfully');
       } catch (err) {

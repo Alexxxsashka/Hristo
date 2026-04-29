@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload, X, Save, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { databaseService } from '../../services/databaseService';
+import { useShopStore } from '../../store/shopStore';
 import { Product, Category, Characteristic, ProductVariant, ProductAttribute } from '../../types';
 import { WEAPON_SLOTS } from '../../constants';
 import { formatEnum, formatModelName } from '../../utils/format';
@@ -98,6 +99,8 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
   };
 
   const [formData, setFormData] = useState<Partial<Product>>(() => normalizeInitialData(initialData));
+
+  const saveProductStore = useShopStore(state => state.saveProduct);
 
   // Keep formData in sync with initialData when it changes
   useEffect(() => {
@@ -338,7 +341,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           };
 
           console.log('Saving product to database...', productToSave);
-          await databaseService.saveProduct(productToSave as any);
+          await saveProductStore(productToSave as any);
           
           // Permanently delete orphaned blobs from storage after successful DB save
           if (deletedBlobs.length > 0) {
@@ -353,7 +356,6 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           }
 
           console.log('Product saved successfully!');
-          syncManager.broadcast('SYNC_PRODUCTS');
           onNotify('Product saved successfully!');
           onSuccess();
         } catch (err) {

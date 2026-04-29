@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus, Trash2, Edit, ChevronRight, Layers, LayoutGrid } from 'lucide-react';
 import { Category } from '../../types';
 import { databaseService } from '../../services/databaseService';
+import { useShopStore } from '../../store/shopStore';
 import { syncManager } from '../../utils/sync';
 
 export const CategoryManager = ({ 
@@ -20,11 +21,12 @@ export const CategoryManager = ({
   onEditCategory: (cat: Category) => void
 }) => {
 
+  const deleteCategory = useShopStore(state => state.deleteCategory);
+
   const handleDelete = async (id: string) => {
     onConfirm('Delete this category?', async () => {
       try {
-        await databaseService.deleteCategory(id);
-        syncManager.broadcast('SYNC_CATEGORIES');
+        await deleteCategory(id);
         onUpdate();
         onNotify('Category deleted successfully');
       } catch (err) {
