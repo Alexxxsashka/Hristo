@@ -10,6 +10,7 @@ export const handleVercelBlobUpload = async (req: AuthenticatedRequest, res: Res
     const jsonResponse = await handleUpload({
       body,
       request: req,
+      token: process.env.HR_STORAGE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN,
       onBeforeGenerateToken: async (pathname) => {
         // authenticateAdmin middleware already checks this, but we can double check here
         if (!req.user || req.user.role !== 'admin') {
