@@ -240,13 +240,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
       {/* Order Details Modal */}
       <AnimatePresence>
         {selectedOrder && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-[40px] w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
-            >
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] overflow-y-auto p-4 md:p-8 flex justify-center items-center">
+            <div className="min-h-full flex items-center justify-center py-8">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                className="bg-white rounded-[40px] w-full max-w-5xl max-h-[90vh] shadow-2xl relative flex flex-col my-auto overflow-hidden"
+              >
               <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-900 text-white">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
@@ -440,8 +441,9 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
 
       <ReportModal 
         isOpen={isReportModalOpen}
