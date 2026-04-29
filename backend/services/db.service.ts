@@ -37,6 +37,8 @@ const createPool = () => {
     throw new Error('Missing Neon database connection string. Set DATABASE_URL or POSTGRES_URL.');
   }
 
+  console.log('🔌 Neon DB connection: DATABASE_URL set =', !!process.env.DATABASE_URL);
+
   return new pg.Pool({
     connectionString,
     connectionTimeoutMillis: 10000,
@@ -50,7 +52,11 @@ const initSchema = async () => {
   console.log('🚀 Initializing database schema...');
   const client = await pool.connect();
   try {
-    await client.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
+    try {
+      await client.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
+    } catch (err: any) {
+      console.warn('⚠️ Optional extension pgcrypto is unavailable, continuing without it:', err.message);
+    }
 
     try {
       await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
