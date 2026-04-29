@@ -123,7 +123,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       AuditSeverity.INFO,
       {
         userId: req.user.id,
-        userName: req.user.displayName || req.user.email,
+        userName: req.user.username || req.user.email,
         userEmail: req.user.email,
         ipAddress: req.ip
       }

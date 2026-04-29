@@ -82,6 +82,8 @@ export const updateSiteSettings = async (req: AuthenticatedRequest, res: Respons
         `INSERT INTO site_settings (id, ${cols.join(', ')}) VALUES ($1, ${placeholders.join(', ')})`,
         values
       );
+    }
+
     if (req.user) {
       await logAudit(
         'UPDATE_SETTINGS',
@@ -91,7 +93,7 @@ export const updateSiteSettings = async (req: AuthenticatedRequest, res: Respons
         AuditSeverity.INFO,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -103,6 +105,7 @@ export const updateSiteSettings = async (req: AuthenticatedRequest, res: Respons
     res.status(500).json({ success: false, error: err.message || 'Database error' });
   }
 };
+
 
 export const getCurrencyRates = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -130,7 +133,7 @@ export const updateCurrencyRate = async (req: AuthenticatedRequest, res: Respons
         AuditSeverity.INFO,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }

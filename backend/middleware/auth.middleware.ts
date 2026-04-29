@@ -65,7 +65,9 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       id: firebaseUser.uid,
       email: firebaseUser.email || '',
       role: role,
+      username: dbUser?.username || firebaseUser.email?.split('@')[0]
     };
+
     
     if (role !== 'admin' && req.originalUrl.includes('/admin/')) {
        console.warn(`Admin access denied for user ${firebaseUser.email} (UID: ${firebaseUser.uid}). Role: ${role}`);

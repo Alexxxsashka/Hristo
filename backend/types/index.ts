@@ -4,7 +4,10 @@ export interface UserPayload {
   id: string;
   email: string;
   role: 'admin' | 'user';
+  username?: string;
+  displayName?: string;
 }
+
 
 export interface AuthenticatedRequest extends Request {
   user?: UserPayload;

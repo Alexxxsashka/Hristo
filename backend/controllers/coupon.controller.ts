@@ -29,7 +29,7 @@ export const createCoupon = async (req: AuthenticatedRequest, res: Response) => 
         AuditSeverity.INFO,
         { 
           userId: req.user.id, 
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -59,7 +59,7 @@ export const updateCoupon = async (req: AuthenticatedRequest, res: Response) => 
         AuditSeverity.INFO,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -85,7 +85,7 @@ export const deleteCoupon = async (req: AuthenticatedRequest, res: Response) => 
         AuditSeverity.WARNING,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }

@@ -89,7 +89,9 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
         JSON.stringify(p.compatibleModuleCategories || []), JSON.stringify(p.socketPoint || [0,0,0]),
         JSON.stringify(p.compatibleIds || []), p.mountType, p.attachment_slot, p.longDescription, p.longDescriptionHr
       ]
+    );
     if (req.user) {
+
       await logAudit(
         'CREATE/UPDATE',
         'PRODUCT',
@@ -98,7 +100,7 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
         AuditSeverity.INFO,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -134,7 +136,7 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response) =>
         AuditSeverity.WARNING,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -210,7 +212,7 @@ export const saveCategory = async (req: AuthenticatedRequest, res: Response) => 
         AuditSeverity.INFO,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
@@ -237,7 +239,7 @@ export const deleteCategory = async (req: AuthenticatedRequest, res: Response) =
         AuditSeverity.WARNING,
         {
           userId: req.user.id,
-          userName: req.user.displayName || req.user.email,
+          userName: req.user.username || req.user.email,
           userEmail: req.user.email,
           ipAddress: req.ip
         }
