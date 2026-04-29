@@ -52,11 +52,18 @@ export const uploadToVercelBlob = async (file: Express.Multer.File, folder: stri
 };
 
 export const deleteFromVercelBlob = async (url: string) => {
-  if (!url || !url.includes('blob.vercel-storage.com')) return;
+  if (!url || !url.includes('blob.vercel-storage.com')) {
+    console.log(`[Storage] Skipping deletion - not a Vercel Blob URL: ${url}`);
+    return;
+  }
   try {
     const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      console.error("[Storage] Missing Blob token for deletion!");
+      return;
+    }
     await del(url, { token });
-    console.log(`[Storage] Deleted: ${url}`);
+    console.log(`[Storage] Successfully deleted: ${url}`);
   } catch (e) {
     console.error(`[Storage] Failed to delete: ${url}`, e);
   }

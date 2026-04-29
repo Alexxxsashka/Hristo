@@ -39,7 +39,6 @@ export const CategoryForm = ({
 
   const saveCategoryStore = useShopStore(state => state.saveCategory);
   const deleteCategoryStore = useShopStore(state => state.deleteCategory);
-  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
 
   useEffect(() => {
     if (initialData) {
@@ -114,11 +113,16 @@ export const CategoryForm = ({
       editingCat ? 'Are you sure you want to update this category?' : 'Are you sure you want to create this new category?',
       async () => {
         try {
+          const urlsToDelete: string[] = [];
+          if (editingCat && editingCat.image && editingCat.image !== newCat.image) {
+            urlsToDelete.push(editingCat.image);
+          }
+
           await saveCategoryStore(newCat as any);
           
           // Cleanup orphaned blobs
-          if (deletedBlobs.length > 0) {
-            for (const url of deletedBlobs) {
+          if (urlsToDelete.length > 0) {
+            for (const url of urlsToDelete) {
               try { await databaseService.deleteFile(url); } catch (e) {}
             }
           }

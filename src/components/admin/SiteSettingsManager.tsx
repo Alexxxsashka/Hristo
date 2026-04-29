@@ -43,19 +43,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 }) => {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  const [isSaving, setIsSaving] = useState(false);
-  const [deletedBlobs, setDeletedBlobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
-  // Pending uploads
-  const [pendingLogo, setPendingLogo] = useState<File | null>(null);
-  const [pendingHero, setPendingHero] = useState<File | null>(null);
-  const [pendingAboutImage, setPendingAboutImage] = useState<File | null>(null);
-  const [pendingHeroFeatureImage, setPendingHeroFeatureImage] = useState<File | null>(null);
-  const [pendingHeroFeatureVideo, setPendingHeroFeatureVideo] = useState<File | null>(null);
-  const [pendingLiveDemoModel, setPendingLiveDemoModel] = useState<File | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
@@ -88,67 +78,75 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
     fetchData();
   }, []);
 
-  const handleFileUpload = async (file: File, folder: string, previousUrl?: string) => {
-    if (previousUrl) setDeletedBlobs(prev => [...prev, previousUrl]);
-    const originalName = file.name;
-    const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
-    const path = `site/${folder}/${safeName}`;
-    return await databaseService.uploadFile(file, path, (p) => setUploadProgress(p));
+  const handleFileUpload = async (file: File, folder: string, field?: keyof SiteSettings, oldUrlOverride?: string) => {
+    setSaving(true);
+    setUploadProgress(0);
+    try {
+      const originalName = file.name;
+      const safeName = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
+      const path = `site/${folder}/${safeName}`;
+      
+      const newUrl = await databaseService.uploadFile(file, path, (p) => setUploadProgress(p));
+      const oldUrl = field ? settings[field] as string : oldUrlOverride;
+      
+      if (field) {
+        // Update DB and state immediately for primary fields
+        const updatedSettings = { ...settings, [field]: newUrl };
+        await databaseService.updateSiteSettings(updatedSettings);
+        useSettingsStore.getState().updateSettings(updatedSettings);
+        setSettings(updatedSettings);
+      }
+      
+      // Delete old file if it exists
+      if (oldUrl && oldUrl !== newUrl) {
+        try {
+          await databaseService.deleteFile(oldUrl);
+        } catch (e) {
+          console.warn(`[Storage] Failed to delete old asset: ${oldUrl}`, e);
+        }
+      }
+      
+      onNotify('Asset updated successfully', 'success');
+      return newUrl;
+    } catch (err) {
+      console.error(`[Storage] Failed to update asset`, err);
+      onNotify('Failed to update asset', 'error');
+      throw err;
+    } finally {
+      setSaving(false);
+      setUploadProgress(0);
+    }
   };
 
-  const handleFileDelete = async (url: string) => {
-    if (url) setDeletedBlobs(prev => [...prev, url]);
+  const handleFileDelete = async (url: string, field?: keyof SiteSettings) => {
+    try {
+      await databaseService.deleteFile(url);
+      if (field) {
+        const updatedSettings = { ...settings, [field]: '' };
+        await databaseService.updateSiteSettings(updatedSettings);
+        useSettingsStore.getState().updateSettings(updatedSettings);
+        setSettings(updatedSettings);
+      }
+    } catch (e) {
+      console.warn(`[Storage] Immediate delete failed: ${url}`, e);
+    }
   };
 
   const handleSave = async () => {
     onConfirm('Are you sure you want to save all site settings?', async () => {
       setSaving(true);
-    try {
-      let finalSettings = { ...settings };
-
-      // Handle simple image uploads
-      if (pendingLogo) {
-        finalSettings.logoUrl = await handleFileUpload(pendingLogo, 'branding', settings.logoUrl);
-        setPendingLogo(null);
-      }
-
-      if (pendingHero) {
-        finalSettings.heroImageUrl = await handleFileUpload(pendingHero, 'hero', settings.heroImageUrl);
-        setPendingHero(null);
-      }
-
-      if (pendingAboutImage) {
-        finalSettings.aboutUsImage = await handleFileUpload(pendingAboutImage, 'about', settings.aboutUsImage);
-        setPendingAboutImage(null);
-      }
-
-      if (pendingHeroFeatureImage) {
-        finalSettings.heroFeatureImage = await handleFileUpload(pendingHeroFeatureImage, 'hero-feature', settings.heroFeatureImage);
-        setPendingHeroFeatureImage(null);
-      }
-
-      if (pendingHeroFeatureVideo) {
-        finalSettings.heroFeatureVideo = await handleFileUpload(pendingHeroFeatureVideo, 'hero-feature', settings.heroFeatureVideo);
-        setPendingHeroFeatureVideo(null);
-      }
-
-      if (pendingLiveDemoModel) {
-        finalSettings.liveDemoModelUrl = await handleFileUpload(pendingLiveDemoModel, 'live-demo', settings.liveDemoModelUrl);
-        setPendingLiveDemoModel(null);
-      }
-
-      await databaseService.updateSiteSettings(finalSettings);
-      
-      // Cleanup orphaned blobs
-      if (deletedBlobs.length > 0) {
-        for (const url of deletedBlobs) {
-          try { await databaseService.deleteFile(url); } catch (e) {}
-        }
-      }
-
-      useSettingsStore.getState().updateSettings(finalSettings);
-      setSettings(finalSettings);
-      setDeletedBlobs([]);
+      useSettingsStore.getState().updateSettings(settings);
+      setSettings(settings);
+      onNotify('Site configuration updated successfully!', 'success');
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Save failed', err);
+      onNotify('Failed to update settings', 'error');
+    } finally {
+      setSaving(false);
+    }
+    });
+  };
       onNotify('Site configuration updated successfully!', 'success');
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -280,9 +278,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Website Logo</label>
                     <div className="relative group aspect-square max-w-[200px] bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl flex items-center justify-center overflow-hidden transition-all hover:border-zinc-900">
-                      {(pendingLogo || settings.logoUrl) ? (
+                      {settings.logoUrl ? (
                         <img 
-                          src={pendingLogo ? URL.createObjectURL(pendingLogo) : settings.logoUrl} 
+                          src={settings.logoUrl} 
                           alt="Logo" 
                           className="w-full h-full object-contain p-6" 
                         />
@@ -295,7 +293,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                           <Upload size={20} />
-                          <input type="file" className="hidden" accept="image/*" onChange={e => setPendingLogo(e.target.files?.[0] || null)} />
+                          <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'branding', 'logoUrl')} />
                         </label>
                       </div>
                     </div>
@@ -417,9 +415,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       <div className="space-y-4">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Image</label>
                         <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
-                          {(pendingHeroFeatureImage || settings.heroFeatureImage) ? (
+                          {settings.heroFeatureImage ? (
                             <img 
-                              src={pendingHeroFeatureImage ? URL.createObjectURL(pendingHeroFeatureImage) : settings.heroFeatureImage} 
+                              src={settings.heroFeatureImage} 
                               alt="Hero Feature" 
                               className="w-full h-full object-cover" 
                             />
@@ -432,7 +430,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                           <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                               <Upload size={20} />
-                              <input type="file" className="hidden" accept="image/*" onChange={e => setPendingHeroFeatureImage(e.target.files?.[0] || null)} />
+                              <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'hero-feature', 'heroFeatureImage')} />
                             </label>
                           </div>
                         </div>
@@ -441,7 +439,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       <div className="space-y-4">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Video</label>
                         <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
-                          {(pendingHeroFeatureVideo || settings.heroFeatureVideo) ? (
+                          {settings.heroFeatureVideo ? (
                             <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
                               <Video size={32} className="text-white" />
                               <span className="absolute bottom-4 text-[8px] text-white font-bold uppercase tracking-widest">Video Selected</span>
@@ -455,7 +453,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                           <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                               <Upload size={20} />
-                              <input type="file" className="hidden" accept="video/*" onChange={e => setPendingHeroFeatureVideo(e.target.files?.[0] || null)} />
+                              <input type="file" className="hidden" accept="video/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'hero-feature', 'heroFeatureVideo')} />
                             </label>
                           </div>
                         </div>
@@ -501,7 +499,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                     onUploadMedia={async (file) => {
                       const isVideo = slide.mediaType === 'video';
                       const currentUrl = isVideo ? slide.videoUrl : slide.image;
-                      const url = await handleFileUpload(file, 'hero-banners', currentUrl);
+                      const url = await handleFileUpload(file, 'hero-banners', undefined, currentUrl);
                       if (isVideo) {
                         updateHeroSlide(slide.id, { videoUrl: url });
                       } else {
@@ -511,7 +509,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                     onRemoveMedia={async () => {
                       const isVideo = slide.mediaType === 'video';
                       const currentUrl = isVideo ? slide.videoUrl : slide.image;
-                      if (currentUrl) await handleFileDelete(currentUrl);
+                      if (currentUrl) await handleFileDelete(currentUrl, 'heroSlides' as any);
                       if (isVideo) {
                         updateHeroSlide(slide.id, { videoUrl: '' });
                       } else {
@@ -590,9 +588,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Section Image</label>
                     <div className="relative group aspect-video bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900">
-                      {(pendingAboutImage || settings.aboutUsImage) ? (
+                      {settings.aboutUsImage ? (
                         <img 
-                          src={pendingAboutImage ? URL.createObjectURL(pendingAboutImage) : settings.aboutUsImage} 
+                          src={settings.aboutUsImage} 
                           alt="About" 
                           className="w-full h-full object-cover" 
                         />
@@ -605,7 +603,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                           <Upload size={20} />
-                          <input type="file" className="hidden" accept="image/*" onChange={e => setPendingAboutImage(e.target.files?.[0] || null)} />
+                          <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'about', 'aboutUsImage')} />
                         </label>
                       </div>
                     </div>
@@ -671,7 +669,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                             type="file" 
                             className="hidden" 
                             accept=".glb,.gltf" 
-                            onChange={e => setPendingLiveDemoModel(e.target.files?.[0] || null)} 
+                            onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'live-demo', 'liveDemoModelUrl')} 
                           />
                         </label>
                       </div>
@@ -731,7 +729,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       onUploadMedia={async (file) => {
                         const isVideo = banner.mediaType === 'video';
                         const currentUrl = isVideo ? banner.videoUrl : banner.image;
-                        const url = await handleFileUpload(file, 'banners', currentUrl);
+                        const url = await handleFileUpload(file, 'banners', undefined, currentUrl);
                         setSettings({
                           ...settings,
                           promoBanners: (Array.isArray(settings.promoBanners) ? settings.promoBanners : []).map(b => b.id === banner.id ? { ...b, [isVideo ? 'videoUrl' : 'image']: url } : b)
