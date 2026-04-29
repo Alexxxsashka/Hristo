@@ -142,35 +142,56 @@ export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
     // Fetch items for each order
     const ordersWithItems = await Promise.all(result.rows.map(async (o) => {
       const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [o.id]);
+      
+      // pg driver automatically parses JSONB columns into objects, but handle string fallback
+      const shippingAddress = typeof o.shipping_address === 'string' 
+        ? JSON.parse(o.shipping_address) 
+        : (o.shipping_address || {});
+
       return {
         ...o,
+        // Ensure numbers are numbers (pg returns DECIMAL as string)
+        total: parseFloat(o.total as any) || 0,
+        subtotal: parseFloat(o.subtotal as any) || 0,
+        tax: parseFloat(o.tax as any) || 0,
+        discountAmount: parseFloat(o.discount_amount as any) || 0,
+        shippingCost: parseFloat(o.shipping_cost as any) || 0,
+        profit: parseFloat(o.profit as any) || 0,
+        
         orderNumber: o.order_number,
         userId: o.user_id,
         createdAt: o.created_at,
         updatedAt: o.updated_at,
-        discountAmount: o.discount_amount,
-        shippingCost: o.shipping_cost,
+        
         payment: {
           method: o.payment_method,
           status: o.payment_status,
-          amount: o.total,
+          amount: parseFloat(o.total as any) || 0,
           currency: 'EUR'
         },
         shipping: {
-          ...JSON.parse(o.shipping_address || '{}'),
-          cost: o.shipping_cost
+          ...shippingAddress,
+          cost: parseFloat(o.shipping_cost as any) || 0
         },
-        items: itemsResult.rows.map(i => ({
-          ...i,
-          productId: i.product_id,
-          selectedVariant: i.variant_info ? JSON.parse(i.variant_info) : undefined
-        }))
+        items: itemsResult.rows.map(i => {
+          const variantInfo = typeof i.variant_info === 'string'
+            ? JSON.parse(i.variant_info)
+            : i.variant_info;
+            
+          return {
+            ...i,
+            price: parseFloat(i.price as any) || 0,
+            productId: i.product_id,
+            selectedVariant: variantInfo || undefined
+          };
+        })
       };
     }));
 
     res.json({ success: true, data: ordersWithItems });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
+  } catch (error: any) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ success: false, error: error.message || 'Database error' });
   }
 };
 

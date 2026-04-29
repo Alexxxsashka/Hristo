@@ -297,7 +297,22 @@ const initSchema = async () => {
       )
     `);
 
-    // 11. Audit Logs
+    // 11. Inventory Logs
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS inventory_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        product_id TEXT REFERENCES products(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        change_amount INTEGER NOT NULL,
+        previous_balance INTEGER NOT NULL,
+        new_balance INTEGER NOT NULL,
+        reason TEXT,
+        reference_id TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // 12. Audit Logs
     await client.query(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -318,7 +333,7 @@ const initSchema = async () => {
       )
     `);
 
-    // 12. Policies
+    // 13. Policies
     await client.query(`
       CREATE TABLE IF NOT EXISTS policies (
         id TEXT PRIMARY KEY,
@@ -331,7 +346,7 @@ const initSchema = async () => {
       )
     `);
 
-    // 13. Saved Builds
+    // 14. Saved Builds
     await client.query(`
       CREATE TABLE IF NOT EXISTS saved_builds (
         id TEXT PRIMARY KEY,
