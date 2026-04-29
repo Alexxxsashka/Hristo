@@ -7,7 +7,7 @@ import { contactSchema } from '../validation/contact.schema.js';
 const router = Router();
 
 router.post('/', validate(contactSchema), contactController.sendMessage);
-router.get('/admin', authenticateAdmin, contactController.getMessages);
-router.delete('/admin/:id', authenticateAdmin, contactController.deleteMessage);
+router.get('/', authenticateAdmin, contactController.getMessages);
+router.delete('/:id', authenticateAdmin, contactController.deleteMessage);
 
 export default router;

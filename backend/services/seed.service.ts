@@ -12,7 +12,9 @@ const categories = [
       { id: 'power_source', label: 'Power Source', type: 'select', options: ['AEG (Electric)', 'GBB (Gas)', 'CO2', 'Spring', 'HPA'] },
       { id: 'blowback', label: 'Blowback', type: 'boolean' },
       { id: 'fps', label: 'FPS', type: 'select', options: ['< 300', '300 - 350', '350 - 400', '400 - 450', '> 450'] }
-    ]
+    ],
+    slots: ["optic", "muzzle", "underbarrel", "side_rail"],
+    compatible_module_categories: ["optics", "muzzles", "grips", "lights"]
   },
   { 
     id: "aeg_rifles", name: "AEG Rifles", name_hr: "AEG Puške", slug: "aeg-rifles", parent_id: "weapons",
@@ -33,6 +35,15 @@ const categories = [
     ]
   },
   { 
+    id: "optics", name: "Optics & Sights", name_hr: "Optika i nišani", slug: "optics-sights", parent_id: null,
+    filters: [
+      { id: 'type', label: 'Optic Type', type: 'select', options: ['Red Dot', 'Scope', 'LPVO', 'Holographic', 'Magnifier'] },
+      { id: 'magnification', label: 'Magnification', type: 'select', options: ['1x', '1-4x', '1-6x', '3-9x', '4x Fixed'] }
+    ],
+    slots: ["mount"],
+    compatible_module_categories: ["mounts"]
+  },
+  { 
     id: "clothing", name: "Clothing & Apparel", name_hr: "Odjeća i obuća", slug: "clothing-apparel", parent_id: null,
     filters: [
       { id: 'size', label: 'Size', type: 'select', options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'] },
@@ -43,16 +54,31 @@ const categories = [
 
 const products = [
   { 
-    name: "Specna Arms SA-E04 EDGE", slug: "sa-e04-edge", brand: "Specna Arms", price: 249, type: "weapon", category_id: "aeg_rifles", 
+    name: "Specna Arms SA-E04 EDGE", name_hr: "Specna Arms SA-E04 EDGE", slug: "sa-e04-edge", 
+    brand: "Specna Arms", price: 249, type: "weapon", category_id: "aeg_rifles", 
     image: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&q=80", 
-    description: "Full metal AEG with MOSFET X-ASR.", stock: 12,
+    description: "Full metal AEG with MOSFET X-ASR.", 
+    description_hr: "Potpuno metalni AEG s MOSFET-om X-ASR.", 
+    stock: 12,
     category_filters: { fire_mode: "Full Auto", material: "Full Metal", power_source: "AEG (Electric)", fps: "350 - 400" }
   },
   { 
-    name: "Tokyo Marui Hi-Capa 5.1 GBB", slug: "tm-hi-capa-51", brand: "Tokyo Marui", price: 185, type: "weapon", category_id: "pistols", 
+    name: "Tokyo Marui Hi-Capa 5.1 GBB", name_hr: "Tokyo Marui Hi-Capa 5.1 GBB", slug: "tm-hi-capa-51", 
+    brand: "Tokyo Marui", price: 185, type: "weapon", category_id: "pistols", 
     image: "https://images.unsplash.com/photo-1595164539573-047fa1a48c3b?auto=format&fit=crop&q=80", 
-    description: "The most popular airsoft pistol in the world.", stock: 20,
+    description: "The most popular airsoft pistol in the world.", 
+    description_hr: "Najpopularniji airsoft pištolj na svijetu.", 
+    stock: 20,
     category_filters: { action: "Blowback (GBB)", optics_ready: false }
+  },
+  {
+    name: "Vector Optics Maverick 1x22 GenII", name_hr: "Vector Optics Maverick 1x22 GenII", slug: "vo-maverick-gen2",
+    brand: "Vector Optics", price: 65, type: "module", category_id: "optics",
+    image: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&q=80",
+    description: "Compact red dot sight with QD mount.",
+    description_hr: "Kompaktni crveni nišan s QD nosačem.",
+    stock: 45,
+    category_filters: { type: "Red Dot", magnification: "1x" }
   }
 ];
 
@@ -69,8 +95,15 @@ export const seedDatabase = async () => {
     // Categories
     for (const cat of categories) {
       await pool.query(
-        "INSERT INTO categories (id, name, name_hr, slug, filters) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING",
-        [cat.id, cat.name, cat.name_hr, cat.slug, JSON.stringify(cat.filters || [])]
+        `INSERT INTO categories (id, name, name_hr, slug, filters, slots, compatible_module_categories) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7) 
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          cat.id, cat.name, cat.name_hr, cat.slug, 
+          JSON.stringify(cat.filters || []), 
+          JSON.stringify(cat.slots || []), 
+          JSON.stringify(cat.compatible_module_categories || [])
+        ]
       );
     }
 
@@ -85,9 +118,16 @@ export const seedDatabase = async () => {
       const pid = generateId();
       const sku = `SKU-${prod.brand.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 10000)}`;
       await pool.query(
-        `INSERT INTO products (id, uid, sku, slug, name, description, type, category_id, brand, price, stock, status, image_url, category_filters)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', $12, $13)`,
-        [pid, pid, sku, prod.slug, prod.name, prod.description, prod.type, prod.category_id, prod.brand, prod.price, prod.stock, prod.image, JSON.stringify(prod.category_filters)]
+        `INSERT INTO products (
+          id, uid, sku, slug, name, name_hr, description, description_hr, type, 
+          category_id, brand, price, stock, status, image_url, category_filters
+        )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'active', $14, $15)`,
+        [
+          pid, pid, sku, prod.slug, prod.name, prod.name_hr, prod.description, prod.description_hr, 
+          prod.type, prod.category_id, prod.brand, prod.price, prod.stock, prod.image, 
+          JSON.stringify(prod.category_filters)
+        ]
       );
     }
 
@@ -103,3 +143,4 @@ export const seedDatabase = async () => {
     console.error('❌ Seeding failed:', err);
   }
 };
+

@@ -824,5 +824,50 @@ export const databaseService = {
     } catch {
       return [];
     }
+  },
+
+  // Users Management
+  async getUsers(): Promise<any[]> {
+    const res = await fetch('/api/admin/users', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return await this._handleResponse(res) || [];
+  },
+
+  async getUserProfile(id: string): Promise<UserProfile | null> {
+    const res = await fetch(`/api/users/${id}`, {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return await this._handleResponse(res);
+  },
+
+  async updateProfile(id: string, data: Partial<UserProfile>) {
+    const res = await fetch(`/api/users/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Failed to update profile');
+    return await res.json();
+  },
+
+  // Messages / Contact
+  async getMessages(): Promise<any[]> {
+    const res = await fetch('/api/admin/messages', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return await this._handleResponse(res) || [];
+  },
+
+  async deleteMessage(id: string) {
+    const res = await fetch(`/api/admin/messages/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete message');
   }
 };
+
