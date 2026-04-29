@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Product, Category, FilterState } from '../types';
 import { databaseService } from '../services/databaseService';
+import { syncManager } from '../utils/sync';
 
 interface ShopState {
   products: Product[];
@@ -20,6 +21,10 @@ interface ShopState {
   setViewMode: (mode: 'grid' | 'list') => void;
   setCurrentPage: (page: number) => void;
   setItemsPerPage: (count: number) => void;
+  saveProduct: (product: any) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  saveCategory: (category: any) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
 }
 
 const initialFilters: FilterState = {
@@ -179,4 +184,37 @@ export const useShopStore = create<ShopState>((set, get) => ({
   setViewMode: (mode) => set({ viewMode: mode }),
   setCurrentPage: (page) => set({ currentPage: page }),
   setItemsPerPage: (count) => set({ itemsPerPage: count, currentPage: 1 }),
+  saveProduct: async (productData: any) => {
+    await databaseService.saveProduct(productData);
+    const data = await databaseService.getProducts();
+    set({ products: data as Product[] });
+    syncManager.broadcast('SYNC_PRODUCTS');
+  },
+  deleteProduct: async (id: string) => {
+    await databaseService.deleteProduct(id);
+    set((state) => ({ products: state.products.filter(p => p.id !== id) }));
+    syncManager.broadcast('SYNC_PRODUCTS');
+  },
+  saveCategory: async (categoryData: any) => {
+    await databaseService.saveCategory(categoryData);
+    const data = await databaseService.getCategories();
+    set({ categories: data as Category[] });
+    syncManager.broadcast('SYNC_CATEGORIES');
+  },
+  deleteCategory: async (id: string) => {
+    await databaseService.deleteCategory(id);
+    set((state) => ({ categories: state.categories.filter(c => c.id !== id) }));
+    syncManager.broadcast('SYNC_CATEGORIES');
+  },
 }));
+
+// Subscribe to global sync events
+if (typeof window !== 'undefined') {
+  syncManager.subscribe((type) => {
+    if (type === 'SYNC_PRODUCTS') {
+      useShopStore.getState().fetchProducts();
+    } else if (type === 'SYNC_CATEGORIES') {
+      useShopStore.getState().fetchCategories();
+    }
+  });
+}

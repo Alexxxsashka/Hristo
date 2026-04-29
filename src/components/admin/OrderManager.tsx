@@ -27,6 +27,7 @@ import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
 import { generateOrdersReport, generateSingleOrderInvoice, exportOrdersToCSV } from '../../utils/reportGenerator';
 import { ReportModal } from './ReportModal';
+import { syncManager } from '../../utils/sync';
 
 
 
@@ -66,6 +67,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
     onConfirm(`Are you sure you want to update the status of order #${orderId} to ${newStatus}?`, async () => {
       try {
         await databaseService.updateOrderStatus(orderId, newStatus, undefined, 'Admin');
+        syncManager.broadcast('SYNC_ORDERS');
         onNotify(`Order status updated to ${newStatus}`);
         onUpdate(); // Refresh the main orders list automatically
         if (selectedOrder?.id === orderId) {

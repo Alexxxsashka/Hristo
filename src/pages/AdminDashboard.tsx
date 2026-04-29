@@ -50,12 +50,16 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
+import { useShopStore } from '../store/shopStore';
+import { useOrderStore } from '../store/orderStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
 import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
 import { databaseService } from '../services/databaseService';
 import { formatEnum, formatModelName } from '../utils/format';
 import { formatLabel } from '../utils/formatText';
 import { NoImage } from '../components/NoImage';
+import { syncManager } from '../utils/sync';
 import {
   BarChart,
   Bar,
@@ -94,12 +98,13 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { products, categories, fetchProducts, fetchCategories, deleteProduct: deleteProductStore } = useShopStore();
+  const { orders, fetchOrders } = useOrderStore();
+  const { settings, fetchSettings } = useSettingsStore();
+  
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [users_list, setUsersList] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -108,6 +113,7 @@ export const AdminDashboard: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'shipped'>('all');
   const [indexedSearch, setIndexedSearch] = useState('');
+
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
@@ -121,7 +127,6 @@ export const AdminDashboard: React.FC = () => {
   const loadAllData = async (force = false) => {
     if (isDataLoading.current) return;
     
-    // Only show global skeleton on first load or if explicitly forced
     const isFirstLoad = products.length === 0 && orders.length === 0;
     if (isFirstLoad || force) {
       setIsLoading(true);
@@ -130,33 +135,17 @@ export const AdminDashboard: React.FC = () => {
     isDataLoading.current = true;
     
     try {
-      // Load data in parallel, but allow each to update state as it completes
-      const tasks = [
+      await Promise.all([
         fetchProducts(),
         fetchCategories(),
         fetchBlogPosts(),
         fetchPolicies(),
-        fetchOrdersInternal(),
+        fetchOrders(),
+        fetchSettings(),
         databaseService.getUsers().then(u => setUsersList(u || [])),
         databaseService.getMessages().then(m => setMessages(m || [])),
         fetchAuditLogs()
-      ];
-
-      if (isFirstLoad || force) {
-        // Wait for most critical data for the initial view (Dashboard stats)
-        await Promise.all([
-          fetchProducts().catch(() => {}),
-          fetchOrdersInternal().catch(() => {}),
-          databaseService.getUsers().then(u => setUsersList(u || [])).catch(() => {})
-        ]);
-        setIsLoading(false);
-        
-        // Let the rest finish in background
-        Promise.all(tasks).catch(e => console.error('Background loading error:', e));
-      } else {
-        // Regular background refresh
-        await Promise.all(tasks);
-      }
+      ]);
     } catch (e) {
       console.error('Data loading error:', e);
     } finally {
@@ -187,7 +176,7 @@ export const AdminDashboard: React.FC = () => {
 
     const auditInterval = setInterval(fetchAuditLogs, 10000);
     const interval = setInterval(() => {
-      fetchOrdersInternal();
+      fetchOrders();
       fetchProducts();
     }, 20000);
 
@@ -204,24 +193,6 @@ export const AdminDashboard: React.FC = () => {
 
   const confirmAction = (message: string, onConfirm: () => void) => {
     setConfirmDialog({ message, onConfirm });
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const p = await databaseService.getProducts();
-      setProducts(p as Product[] || []);
-    } catch (err) {
-      console.error('Failed to fetch products', err);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const c = await databaseService.getCategories();
-      setCategories(c || []);
-    } catch (err) {
-      console.error('Failed to fetch categories', err);
-    }
   };
 
   const fetchBlogPosts = async () => {
@@ -242,15 +213,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const fetchOrdersInternal = async () => {
-    try {
-      const o = await databaseService.getAllOrders();
-      setOrders(o || []);
-    } catch (err) {
-      console.error('Failed to fetch orders', err);
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -258,8 +220,7 @@ export const AdminDashboard: React.FC = () => {
 
   const deleteProduct = async (id: string) => {
     try {
-      await databaseService.deleteProduct(id);
-      setProducts(products.filter(p => p.id !== id));
+      await deleteProductStore(id);
       showNotification('Product deleted successfully');
       fetchAuditLogs();
     } catch (err) {
@@ -499,7 +460,7 @@ export const AdminDashboard: React.FC = () => {
                   orders={orders}
                   onNotify={showNotification}
                   onConfirm={confirmAction}
-                  onUpdate={() => { fetchOrdersInternal(); fetchAuditLogs(); }}
+                  onUpdate={() => { fetchOrders(); fetchAuditLogs(); }}
                 />
               </motion.div>
             )}

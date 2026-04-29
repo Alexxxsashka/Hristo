@@ -4,6 +4,7 @@ import { X, Check, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { Category } from '../../types';
 import { databaseService } from '../../services/databaseService';
 import { formatEnum } from '../../utils/format';
+import { syncManager } from '../../utils/sync';
 
 export const CategoryForm = ({ 
   initialData, 
@@ -113,6 +114,7 @@ export const CategoryForm = ({
       async () => {
         try {
           await databaseService.saveCategory(newCat as any);
+          syncManager.broadcast('SYNC_CATEGORIES');
           onNotify(editingCat ? 'Category updated' : 'Category added');
           onSuccess();
         } catch (err) {
@@ -191,6 +193,7 @@ export const CategoryForm = ({
         id: newSubcatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')
       };
       await databaseService.saveCategory(subCat as any);
+      syncManager.broadcast('SYNC_CATEGORIES');
       setNewSubcatName('');
       onUpdate?.();
       onNotify('Subcategory added successfully');
@@ -204,6 +207,7 @@ export const CategoryForm = ({
     onConfirm('Are you sure you want to delete this subcategory?', async () => {
       try {
         await databaseService.deleteCategory(id);
+        syncManager.broadcast('SYNC_CATEGORIES');
         onUpdate?.();
         onNotify('Subcategory deleted successfully');
       } catch (err) {

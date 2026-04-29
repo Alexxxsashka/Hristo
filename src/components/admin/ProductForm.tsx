@@ -6,6 +6,7 @@ import { databaseService } from '../../services/databaseService';
 import { Product, Category, Characteristic, ProductVariant, ProductAttribute } from '../../types';
 import { WEAPON_SLOTS } from '../../constants';
 import { formatEnum, formatModelName } from '../../utils/format';
+import { syncManager } from '../../utils/sync';
 
 export const ProductForm = ({ initialData, categories, weapons, showHelp, onSuccess, onCancel, onNotify, onConfirm }: { 
   initialData: Product | null, 
@@ -352,6 +353,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           }
 
           console.log('Product saved successfully!');
+          syncManager.broadcast('SYNC_PRODUCTS');
           onNotify('Product saved successfully!');
           onSuccess();
         } catch (err) {
