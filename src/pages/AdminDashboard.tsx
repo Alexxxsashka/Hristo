@@ -816,15 +816,6 @@ export const AdminDashboard: React.FC = () => {
               />
             )}
 
-            {activeTab === 'orders' && (
-              <OrderManager 
-                orders={orders}
-                onUpdate={() => { fetchOrdersInternal(); fetchAuditLogs(); }}
-                onNotify={showNotification} 
-                onConfirm={confirmAction}
-              />
-            )}
-
             {activeTab === 'coupons' && (
               <CouponManager />
             )}
