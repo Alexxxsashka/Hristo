@@ -108,13 +108,3 @@ export const authenticateAdmin = async (req: AuthenticatedRequest, res: Response
   });
 };
 
-export const authenticateAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  await authenticateToken(req, res, () => {
-    if (req.user && req.user.role === "admin") {
-      next();
-    } else {
-      console.warn(`Admin access denied for user: ${req.user?.email}. Role: ${req.user?.role}`);
-      res.status(403).json({ error: "Admin access required" });
-    }
-  });
-};

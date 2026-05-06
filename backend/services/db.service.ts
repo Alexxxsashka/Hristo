@@ -17,7 +17,7 @@ const readRawEnvConnectionString = (): string | null => {
   const lines = fs.readFileSync(envPath, 'utf8')
     .split(/\r?\n/)
     .map(line => line.trim())
-    .filter(Boolean);
+    .filter(line => line && !line.startsWith('#'));
 
   if (lines.length === 0) return null;
   const firstLine = lines[0];
