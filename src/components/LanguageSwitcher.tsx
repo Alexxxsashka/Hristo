@@ -9,8 +9,8 @@ export const LanguageSwitcher: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const languages = [
-    { code: 'EN', label: 'English', flag: '🇬🇧' },
-    { code: 'HR', label: 'Hrvatski', flag: '🇭🇷' }
+    { code: 'EN', label: 'English', flag: 'https://flagcdn.com/w40/gb.png' },
+    { code: 'HR', label: 'Hrvatski', flag: 'https://flagcdn.com/w40/hr.png' }
   ] as const;
 
   const currentLang = languages.find(l => l.code === language) || languages[0];
@@ -34,7 +34,7 @@ export const LanguageSwitcher: React.FC = () => {
       >
         <Globe size={14} className="text-white/50 group-hover:text-white transition-colors" />
         <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-white uppercase">
-          <span>{currentLang.flag}</span>
+          <img src={currentLang.flag} alt={currentLang.label} className="w-4 h-3 object-cover rounded-sm" />
           <span>{currentLang.code}</span>
         </div>
         <ChevronDown 
@@ -65,7 +65,7 @@ export const LanguageSwitcher: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm">{lang.flag}</span>
+                  <img src={lang.flag} alt={lang.label} className="w-5 h-3.5 object-cover rounded-sm" />
                   <span className="text-[10px] font-black uppercase tracking-widest">{lang.label}</span>
                 </div>
                 {language === lang.code && (
