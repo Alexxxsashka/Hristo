@@ -279,10 +279,10 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
           if (modelFile) {
             console.log('Uploading 3D model...', modelFile.name);
 
-            // If there was an existing model, delete it to save space
-            if (initialData?.model3D) {
-              console.log('Deleting old 3D model...', initialData.model3D);
-              await databaseService.deleteFile(initialData.model3D);
+            // If there was an existing model, mark it for deletion
+            if (formData.model3D) {
+              console.log('Marking old 3D model for deletion...', formData.model3D);
+              setDeletedBlobs(prev => [...prev, formData.model3D!]);
             }
 
             setUploadingFile('3D Model');
@@ -1180,7 +1180,14 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
                     type="file"
                     accept=".glb"
                     className="hidden"
-                    onChange={e => setModelFile(e.target.files?.[0] || null)}
+                    onChange={e => {
+                      const file = e.target.files?.[0] || null;
+                      if (file && formData.model3D) {
+                        setDeletedBlobs(prev => [...prev, formData.model3D!]);
+                        setFormData(prev => ({ ...prev, model3D: '', model3DName: '' }));
+                      }
+                      setModelFile(file);
+                    }}
                   />
                 </label>
                 {(modelFile || formData.model3D) && (
