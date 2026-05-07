@@ -97,19 +97,19 @@ export const Navbar: React.FC = () => {
         </div>
       )}
       {/* Top Bar */}
-      <div className="bg-zinc-950 border-b border-zinc-900 py-2 hidden md:block">
-        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
+      <div className="bg-red-700/90 backdrop-blur-md border-b border-white/10 py-2 hidden md:block">
+        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-widest text-white/90 uppercase">
           <div className="flex gap-6">
             <div className="flex items-center gap-2">
-              <Truck size={12} className="text-red-600" />
+              <Truck size={12} className="text-white" />
               {t('free_shipping_over')}
             </div>
             <div className="flex items-center gap-2">
-              <Clock size={12} className="text-red-600" />
+              <Clock size={12} className="text-white" />
               {t('same_day_dispatch')}
             </div>
             <div className="flex items-center gap-2">
-              <ShieldCheck size={12} className="text-red-600" />
+              <ShieldCheck size={12} className="text-white" />
               {t('secure_payments')}
             </div>
           </div>
@@ -117,11 +117,11 @@ export const Navbar: React.FC = () => {
             <Link to="/about" className="hover:text-zinc-50 transition-colors">{t('about_us')}</Link>
             <Link to="/contact" className="hover:text-zinc-50 transition-colors">{t('contact')}</Link>
             <Link to="/shipping" className="hover:text-zinc-50 transition-colors">{t('shipping')}</Link>
-            <div className="h-3 w-px bg-zinc-800 mx-2" />
+            <div className="h-3 w-px bg-white/20 mx-2" />
             {isAuthenticated ? (
               <div className="flex items-center gap-4 relative group/user">
-                <Link to="/account" className="hover:text-zinc-50 transition-colors flex items-center gap-2">
-                  <User size={12} className="text-red-600" />
+                <Link to="/account" className="hover:text-white transition-colors flex items-center gap-2">
+                  <User size={12} className="text-white" />
                   {user?.callsign || user?.username}
                 </Link>
                 
@@ -284,7 +284,7 @@ export const Navbar: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-zinc-950 border-b border-zinc-800 overflow-hidden"
+              className="lg:hidden bg-red-600 border-b border-white/10 overflow-hidden"
             >
               <div className="px-4 py-8 space-y-6">
                 {!isHomePage && (
@@ -295,9 +295,9 @@ export const Navbar: React.FC = () => {
                         placeholder={t('search_placeholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 pl-12 pr-4 text-zinc-200"
+                        className="w-full bg-red-700 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/50"
                       />
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={20} />
                     </form>
                   </div>
                 )}

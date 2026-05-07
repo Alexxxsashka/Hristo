@@ -12,7 +12,7 @@
   --card-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.05);
   --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --header-bg: #09090b; /* Zinc 950 */
+  --header-bg: #dc2626; /* Red 600 */
 
   /* Tailwind v4 variable mapping (to avoid @theme warning) */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
