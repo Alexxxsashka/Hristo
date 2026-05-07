@@ -222,12 +222,12 @@ const HomePage: React.FC = () => {
                  </div>
                ) : (
                  <div className="w-full h-full flex flex-col items-center justify-center text-center p-12 space-y-6">
-                    <div className="w-24 h-24 bg-red-600 rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
+                    <div className="w-24 h-24 bg-[#ab1017] rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
                       <Maximize2 size={40} className="text-white" />
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-2xl font-black uppercase tracking-tighter">Next-Gen Interface</h3>
-                      <p className="text-zinc-400 font-medium text-sm">Industrial grade tactile response <br /> & modular engineering</p>
+                      <p className="text-[var(--text-secondary)] font-medium text-sm">Industrial grade tactile response <br /> & modular engineering</p>
                     </div>
                  </div>
                )}
