@@ -143,10 +143,10 @@ export const ConfiguratorPageV12: React.FC = () => {
           opacity: (showHUD || isSelectionScreen) ? 1 : 0
         }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="h-16 border-b border-zinc-800 flex items-center justify-between px-4 sm:px-8 bg-zinc-950/50 backdrop-blur-xl z-50 absolute top-0 left-0 w-full"
+        className="h-16 border-b border-zinc-800 flex items-center justify-between px-4 sm:px-8 bg-[#09090b]/50 backdrop-blur-xl z-50 absolute top-0 left-0 w-full"
       >
         <div className="flex items-center gap-4 sm:gap-8">
-          <Link to={isSelectionScreen ? "/" : "/configurator"} className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
+          <Link to={isSelectionScreen ? "/" : "/configurator"} className="p-2 hover:bg-[#18181b] rounded-lg transition-colors text-zinc-400 hover:text-white">
             <ArrowLeft size={20} />
           </Link>
           <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
@@ -178,7 +178,7 @@ export const ConfiguratorPageV12: React.FC = () => {
           {!isSelectionScreen && (
             <button 
               onClick={() => setIsCompModalOpen(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-zinc-900 border border-zinc-800 hover:border-red-600/50 rounded-lg transition-all text-zinc-400 hover:text-red-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#18181b] border border-zinc-800 hover:border-red-600/50 rounded-lg transition-all text-zinc-400 hover:text-red-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest"
             >
               <ShieldCheck size={16} />
               <span className="hidden xs:inline">{t('check_compatibility')}</span>

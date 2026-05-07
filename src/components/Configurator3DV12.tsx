@@ -234,7 +234,7 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
   const currentPart = selectedParts[fullSlotId];
 
   return (
-    <div className="bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 rounded-xl shadow-2xl w-56 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto p-2 pointer-events-auto custom-scrollbar">
+    <div className="bg-[#18181b]/95 backdrop-blur-2xl border border-zinc-800 rounded-xl shadow-2xl w-56 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto p-2 pointer-events-auto custom-scrollbar">
       <div className="flex items-center justify-between mb-2 px-2 py-1">
         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Select Module</span>
         <button onClick={onClose} className="p-2 -mr-2 text-zinc-500 hover:text-white"><X size={14} /></button>
@@ -808,7 +808,7 @@ export const Configurator3DV12: React.FC = () => {
   }, [toggleMarkers, toggleHUD, toggleFullscreen]);
   
   return (
-    <div className="w-full h-full bg-zinc-950 relative overflow-hidden group/config">
+    <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
       <Canvas 
         shadows={{ type: THREE.PCFShadowMap }} 
         dpr={[1, 2]} 

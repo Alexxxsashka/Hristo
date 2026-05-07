@@ -61,7 +61,7 @@ export const PricePanel: React.FC = () => {
   };
 
   return (
-    <div className="h-auto md:h-24 bg-zinc-950 border-t border-zinc-800 px-4 sm:px-8 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="h-auto md:h-24 bg-[#09090b] border-t border-zinc-800 px-4 sm:px-8 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center justify-between w-full md:w-auto md:gap-12">
         <div>
           <p className="text-zinc-500 text-[8px] md:text-[10px] uppercase font-bold tracking-widest mb-1">{t('total_configuration_price')}</p>
@@ -82,7 +82,7 @@ export const PricePanel: React.FC = () => {
       <div className="grid grid-cols-2 md:flex md:items-center gap-2 sm:gap-4 w-full md:w-auto">
         <button 
           onClick={() => setIsSaveModalOpen(true)}
-          className={`col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 ${isSaving ? 'text-emerald-500' : 'text-zinc-400 hover:text-white'} transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-zinc-900 md:bg-transparent rounded-xl md:rounded-none`}
+          className={`col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 ${isSaving ? 'text-emerald-500' : 'text-zinc-400 hover:text-white'} transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[#18181b] md:bg-transparent rounded-xl md:rounded-none`}
         >
           {isSaving ? <Check size={18} /> : <Save size={18} />}
           {isSaving ? t('saved') : t('save')}
@@ -97,7 +97,7 @@ export const PricePanel: React.FC = () => {
 
         <button 
           onClick={resetConfiguration}
-          className="col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 text-zinc-400 hover:text-white transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-zinc-900 md:bg-transparent rounded-xl md:rounded-none"
+          className="col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 text-zinc-400 hover:text-white transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[#18181b] md:bg-transparent rounded-xl md:rounded-none"
         >
           <RotateCcw size={18} />
           {t('reset')}
