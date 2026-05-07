@@ -63,32 +63,28 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     );
     
     const dbUser = userResult.rows[0];
+    const userEmail = decoded.email || dbUser?.email;
+    
+    // Force admin for the primary developer/admin email
+    let finalRole = dbUser?.role || decoded.role || 'user';
+    if (userEmail === 'guardsowh@gmail.com') {
+      finalRole = 'admin';
+    }
     
     // Auto-create user in DB if they exist in Firebase but not yet in our SQL DB
-    // This handles the "first-time login" scenario for social auth
     if (!dbUser && decoded.email) {
-       // Hardcoded admin check
-       const role = decoded.email === 'guardsowh@gmail.com' ? 'admin' : 'user';
-       
        await pool.query(
          'INSERT INTO users (id, email, role, username) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING',
-         [decoded.id, decoded.email, role, decoded.username]
+         [decoded.id, decoded.email, finalRole, decoded.username]
        );
-       
-       req.user = {
-         id: decoded.id,
-         email: decoded.email,
-         role: role,
-         username: decoded.username
-       };
-    } else {
-      req.user = {
-        id: dbUser?.id || decoded.id,
-        email: dbUser?.email || decoded.email,
-        role: dbUser?.role || (decoded.email === 'guardsowh@gmail.com' ? 'admin' : decoded.role),
-        username: dbUser?.username || decoded.username
-      };
     }
+
+    req.user = {
+      id: decoded.id,
+      email: userEmail,
+      role: finalRole,
+      username: dbUser?.username || decoded.username
+    };
 
     next();
   } catch (error: any) {
