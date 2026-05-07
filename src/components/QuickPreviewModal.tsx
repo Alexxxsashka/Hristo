@@ -49,12 +49,15 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
   const [selectedAttributes, setSelectedAttributes] = React.useState<Record<string, string>>({});
   const [selectedVariant, setSelectedVariant] = React.useState<any>(null);
 
+  const [imgError, setImgError] = React.useState(false);
+
   React.useEffect(() => {
     // Reset selection when product changes or modal closes
     if (!isOpen) {
       setSelectedAttributes({});
       setSelectedVariant(null);
     }
+    setImgError(false);
   }, [isOpen, product?.id]);
 
   if (!product) return null;
@@ -84,7 +87,6 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                   <ModelViewer modelPath={product.model3D?.startsWith('http') ? product.model3D : (product.model3D || product.model)} />
                 ) : (
                   (() => {
-                    const [imgError, setImgError] = React.useState(false);
                     const mainImage = product.images && product.images.length > 0 
                       ? product.images[0] 
                       : (product.image?.startsWith('http') ? product.image : product.image);

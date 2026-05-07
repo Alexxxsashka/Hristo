@@ -156,7 +156,7 @@ const HomePage: React.FC = () => {
               )}
             </h1>
 
-            <p className="text-zinc-300 text-sm sm:text-base md:text-xl leading-relaxed mb-10 max-w-xl font-medium mx-auto lg:mx-0 drop-shadow-lg">
+            <p className="text-[var(--text-secondary)] text-sm sm:text-base md:text-xl leading-relaxed mb-10 max-w-xl font-medium mx-auto lg:mx-0 drop-shadow-lg">
               {activeSlides[currentSlideIndex]?.subtitle || settings?.heroSubtitle || t('hero_desc')}
             </p>
             

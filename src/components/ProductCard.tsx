@@ -38,6 +38,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [imgError, setImgError] = useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [product.id]);
 
   const variantAttributes = (product as any).variantAttributes || (product as any).variant_attributes || [];
   const variants = product.variants || [];
@@ -125,7 +130,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             viewMode === 'list' ? 'w-full md:w-64 aspect-square md:aspect-auto' : 'aspect-square'
           }`}>
             {(() => {
-              const [imgError, setImgError] = useState(false);
               const mainImage = product.images && product.images.length > 0 
                 ? product.images[0] 
                 : (product.image?.startsWith('http') ? product.image : product.image);

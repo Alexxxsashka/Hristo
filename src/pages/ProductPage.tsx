@@ -63,6 +63,7 @@ export const ProductPage: React.FC = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     if (product?.variants && product.variants.length > 0) {
@@ -180,7 +181,6 @@ export const ProductPage: React.FC = () => {
                 <ModelViewer modelPath={product.model3D?.startsWith('http') ? product.model3D : (product.model3D || product.model)} />
               ) : (
                 (() => {
-                  const [imgError, setImgError] = useState(false);
                   const mainImage = previewImage || (product.images && product.images.length > 0 ? product.images[0] : (product.image?.startsWith('http') ? product.image : product.image));
 
                   if (!mainImage || imgError) {
