@@ -7,6 +7,11 @@ export const handleVercelBlobUpload = async (req: AuthenticatedRequest, res: Res
   const body = req.body as HandleUploadBody;
 
   try {
+    console.log('--- Vercel Blob Upload Request ---');
+    console.log('Path:', body.payload?.pathname);
+    console.log('Type:', body.type);
+    console.log('User:', req.user?.email);
+
     const jsonResponse = await handleUpload({
       body,
       request: req,
@@ -18,9 +23,14 @@ export const handleVercelBlobUpload = async (req: AuthenticatedRequest, res: Res
         }
 
         return {
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/octet-stream', 'model/gltf-binary'],
+          allowedContentTypes: [
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp', 
+            'application/octet-stream', 'model/gltf-binary', 'model/gltf+json', 
+            'application/json', 'application/x-zip-compressed'
+          ],
           tokenPayload: JSON.stringify({
             userId: req.user.id,
+            pathname: pathname
           }),
         };
       },
