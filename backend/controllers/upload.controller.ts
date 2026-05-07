@@ -8,8 +8,10 @@ export const handleVercelBlobUpload = async (req: AuthenticatedRequest, res: Res
 
   try {
     console.log('--- Vercel Blob Upload Request ---');
-    console.log('Path:', body.payload?.pathname);
     console.log('Type:', body.type);
+    if (body.type === 'blob.generate-client-token') {
+      console.log('Path:', body.payload.pathname);
+    }
     console.log('User:', req.user?.email);
 
     const jsonResponse = await handleUpload({
