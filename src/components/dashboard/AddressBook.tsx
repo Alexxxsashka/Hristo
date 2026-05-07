@@ -91,8 +91,8 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
     <div className="space-y-6">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black tracking-tighter uppercase">{t('address_book')}</h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] mt-1">{t('manage_shipping_billing')}</p>
+          <h2 className="text-3xl font-black tracking-tighter uppercase text-[var(--text-primary)]">{t('address_book')}</h2>
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-[10px] mt-1">{t('manage_shipping_billing')}</p>
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
@@ -104,21 +104,21 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {profile?.addressBook?.map(address => (
-          <div key={address.id} className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 relative group">
+          <div key={address.id} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-6 relative group shadow-sm">
             {address.isDefault && (
-              <span className="absolute top-4 right-4 px-2 py-0.5 bg-red-600 text-white text-[8px] font-black uppercase rounded">{t('default')}</span>
+              <span className="absolute top-4 right-4 px-2 py-0.5 bg-red-600 text-white text-[8px] font-black uppercase rounded shadow-lg shadow-red-600/20">{t('default')}</span>
             )}
-            <h3 className="font-black uppercase tracking-widest text-xs text-zinc-500 mb-4">{address.label}</h3>
+            <h3 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-4">{address.label}</h3>
             <div className="space-y-1">
-              <p className="font-black text-lg tracking-tighter uppercase">{address.fullName}</p>
-              <p className="text-sm text-zinc-400">{address.address}</p>
-              <p className="text-sm text-zinc-400">{address.city}</p>
-              <p className="text-sm text-zinc-400">{address.phone}</p>
+              <p className="font-black text-lg tracking-tighter uppercase text-[var(--text-primary)]">{address.fullName}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{address.address}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{address.city}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{address.phone}</p>
             </div>
             <div className="mt-6 flex gap-2">
               <button 
                 onClick={() => handleEdit(address)}
-                className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-700 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all"
+                className="flex-1 py-2 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] text-[10px] font-black uppercase tracking-widest rounded-lg transition-all"
               >
                 {t('edit')}
               </button>
@@ -132,8 +132,8 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
           </div>
         ))}
         {(!profile?.addressBook || profile.addressBook.length === 0) && (
-          <div className="md:col-span-2 text-center py-12 bg-zinc-900/30 border border-zinc-800 rounded-3xl">
-            <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{t('no_addresses_found')}</p>
+          <div className="md:col-span-2 text-center py-12 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl shadow-sm">
+            <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">{t('no_addresses_found')}</p>
           </div>
         )}
       </div>
@@ -143,60 +143,60 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 w-full max-w-md shadow-2xl"
+            className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 w-full max-w-md shadow-2xl"
           >
-            <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">
+            <h3 className="text-2xl font-black uppercase tracking-tighter mb-6 text-[var(--text-primary)]">
               {editingAddress ? t('edit_address') : t('add_new_address')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('label')} (e.g. Home, Office)</label>
+                <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('label')} (e.g. Home, Office)</label>
                 <input 
                   type="text" 
                   required
                   value={label}
                   onChange={e => setLabel(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('full_name')}</label>
+                <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('full_name')}</label>
                 <input 
                   type="text" 
                   required
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('address')}</label>
+                <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('address')}</label>
                 <input 
                   type="text" 
                   required
                   value={address}
                   onChange={e => setAddress(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('city')}</label>
+                <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('city')}</label>
                 <input 
                   type="text" 
                   required
                   value={city}
                   onChange={e => setCity(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('phone')}</label>
+                <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('phone')}</label>
                 <input 
                   type="tel" 
                   required
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
               <div className="flex items-center gap-3 py-2">
@@ -205,9 +205,9 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   id="isDefault"
                   checked={isDefault}
                   onChange={e => setIsDefault(e.target.checked)}
-                  className="w-4 h-4 rounded border-zinc-800 bg-zinc-950 text-red-600 focus:ring-red-600"
+                  className="w-4 h-4 rounded border-[var(--border-color)] bg-[var(--bg-tertiary)] text-red-600 focus:ring-red-600"
                 />
-                <label htmlFor="isDefault" className="text-xs font-bold uppercase tracking-widest text-zinc-400 cursor-pointer">
+                <label htmlFor="isDefault" className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] cursor-pointer">
                   {t('set_as_default_address')}
                 </label>
               </div>
@@ -215,7 +215,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                 <button 
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 bg-zinc-800 text-zinc-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-zinc-700 transition-all"
+                  className="flex-1 py-3 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-color)] font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-[var(--bg-secondary)] transition-all"
                 >
                   {t('cancel')}
                 </button>

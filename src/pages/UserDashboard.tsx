@@ -149,10 +149,10 @@ export const UserDashboard: React.FC = () => {
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all group ${
                         activeTab === item.id 
                           ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
-                          : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                          : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
                       }`}
                     >
-                      <item.icon size={18} className={activeTab === item.id ? 'text-white' : 'text-zinc-500 group-hover:text-red-500'} />
+                      <item.icon size={18} className={activeTab === item.id ? 'text-white' : 'text-[var(--text-secondary)] group-hover:text-red-600'} />
                       {item.label}
                       {activeTab === item.id && <ChevronRight size={14} className="ml-auto" />}
                     </button>
@@ -211,19 +211,19 @@ export const UserDashboard: React.FC = () => {
                   <AlertCircle size={28} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tighter">{confirmModal.title}</h3>
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Tactical Confirmation Required</p>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{confirmModal.title}</h3>
+                  <p className="text-[var(--text-secondary)] text-[10px] font-bold uppercase tracking-widest mt-1">Tactical Confirmation Required</p>
                 </div>
               </div>
               
-              <p className="text-zinc-300 text-sm leading-relaxed mb-8 font-medium">
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-8 font-medium">
                 {confirmModal.message}
               </p>
               
               <div className="flex gap-4">
                 <button 
                   onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                  className="flex-1 px-6 py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all border border-zinc-700"
+                  className="flex-1 px-6 py-4 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all border border-[var(--border-color)]"
                 >
                   {t('cancel')}
                 </button>

@@ -85,8 +85,8 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-3xl font-black tracking-tighter uppercase">{t('security_and_auth')}</h2>
-        <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] mt-1">{t('protect_account_manage_access')}</p>
+        <h2 className="text-3xl font-black tracking-tighter uppercase text-[var(--text-primary)]">{t('security_and_auth')}</h2>
+        <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-[10px] mt-1">{t('protect_account_manage_access')}</p>
       </header>
 
       {securityMessage && (
@@ -103,32 +103,32 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center">
               <Lock className="text-red-600" size={24} />
             </div>
             <div>
-              <h3 className="font-black uppercase tracking-widest text-sm">{t('password')}</h3>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{t('last_changed_recently')}</p>
+              <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('password')}</h3>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('last_changed_recently')}</p>
             </div>
           </div>
           <button 
             onClick={handlePasswordReset}
-            className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            className="w-full py-3 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
           >
             {t('change_password')}
           </button>
         </div>
 
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center">
               <Smartphone className="text-red-600" size={24} />
             </div>
             <div>
-              <h3 className="font-black uppercase tracking-widest text-sm">{t('two_factor_auth')}</h3>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+              <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('two_factor_auth')}</h3>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
                 {t('status')}: <span className={user?.isMfaEnabled ? 'text-green-500' : 'text-red-500'}>
                   {user?.isMfaEnabled ? t('enabled') : t('disabled')}
                 </span>
@@ -137,28 +137,28 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
           </div>
           <button 
             onClick={() => setSecurityMessage({ type: 'error', text: 'MFA setup requires phone verification. Please contact support for assistance.' })}
-            className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            className="w-full py-3 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
           >
             {user?.isMfaEnabled ? t('manage_mfa') : t('enable_mfa')}
           </button>
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-8">
-        <h3 className="font-black uppercase tracking-widest text-sm mb-6">{t('linked_accounts')}</h3>
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
+        <h3 className="font-black uppercase tracking-widest text-sm mb-6 text-[var(--text-primary)]">{t('linked_accounts')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center justify-between p-4 bg-zinc-950 rounded-2xl border border-zinc-800">
+          <div className="flex items-center justify-between p-4 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)] shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center overflow-hidden">
                 {googleLogo ? (
                   <img src={googleLogo} alt="Google" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
                 ) : (
-                  <Shield size={20} className="text-zinc-400" />
+                  <Shield size={20} className="text-[var(--text-secondary)]" />
                 )}
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest">Google</p>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]">Google</p>
+                <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
                   {user?.linkedProviders.includes('google.com') ? t('connected') : t('not_connected')}
                 </p>
               </div>
@@ -173,21 +173,21 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
             ) : (
               <button 
                 onClick={() => handleLinkProvider('google')}
-                className="text-[10px] font-black text-zinc-400 hover:text-white uppercase tracking-widest"
+                className="text-[10px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest"
               >
                 {t('link')}
               </button>
             )}
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-zinc-950 rounded-2xl border border-zinc-800">
+          <div className="flex items-center justify-between p-4 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)] shadow-sm">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">
-                <Shield size={20} className="text-zinc-400" />
+              <div className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center">
+                <Shield size={20} className="text-[var(--text-secondary)]" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest">Apple</p>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]">Apple</p>
+                <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
                   {user?.linkedProviders.includes('apple.com') ? t('connected') : t('not_connected')}
                 </p>
               </div>
@@ -202,7 +202,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
             ) : (
               <button 
                 onClick={() => handleLinkProvider('apple')}
-                className="text-[10px] font-black text-zinc-400 hover:text-white uppercase tracking-widest"
+                className="text-[10px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest"
               >
                 {t('link')}
               </button>
@@ -211,12 +211,12 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
         </div>
       </div>
 
-      <div className="bg-red-600/5 border border-red-600/20 rounded-3xl p-8">
+      <div className="bg-red-600/5 border border-red-600/20 rounded-3xl p-8 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
           <AlertCircle className="text-red-600" size={24} />
-          <h3 className="font-black uppercase tracking-widest text-sm">{t('danger_zone')}</h3>
+          <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('danger_zone')}</h3>
         </div>
-        <p className="text-sm text-zinc-400 mb-6">{t('delete_account_warning')}</p>
+        <p className="text-sm text-[var(--text-secondary)] mb-6">{t('delete_account_warning')}</p>
         
         {!showDeleteConfirm ? (
           <button 
@@ -233,7 +233,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
               value={deletePassword}
               onChange={e => setDeletePassword(e.target.value)}
               placeholder={t('confirm_password')}
-              className="w-full bg-zinc-950 border border-red-600/50 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+              className="w-full bg-[var(--bg-tertiary)] border border-red-600/50 rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
             />
             {deleteError && <p className="text-red-500 text-[10px] font-bold uppercase">{deleteError}</p>}
             <div className="flex gap-3">
@@ -246,7 +246,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
               </button>
               <button 
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3 bg-zinc-800 text-zinc-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-zinc-700 transition-all"
+                className="flex-1 py-3 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-color)] font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-[var(--bg-secondary)] transition-all"
               >
                 {t('cancel')}
               </button>

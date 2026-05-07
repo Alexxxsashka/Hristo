@@ -47,12 +47,12 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
     <div className="space-y-6">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black tracking-tighter uppercase">{t('service_and_repairs')}</h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] mt-1">{t('track_weapon_upgrades')}</p>
+          <h2 className="text-3xl font-black tracking-tighter uppercase text-[var(--text-primary)]">{t('service_and_repairs')}</h2>
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-[10px] mt-1">{t('track_weapon_upgrades')}</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px] rounded-xl border border-zinc-700 hover:bg-zinc-700 transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] font-black uppercase tracking-widest text-[10px] rounded-xl border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-all shadow-sm"
         >
           <Plus size={14} /> {t('request_service')}
         </button>
@@ -61,15 +61,15 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
       {requests.length > 0 ? (
         <div className="space-y-4">
           {requests.map(request => (
-            <div key={request.id} className="bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden">
-              <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+            <div key={request.id} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl overflow-hidden shadow-sm">
+              <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-800">
+                  <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center border border-[var(--border-color)]">
                     <Wrench className="text-red-600" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-black uppercase tracking-tighter text-lg">{request.weaponName}</h3>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('ticket')} #{request.id.toUpperCase()}</p>
+                    <h3 className="font-black uppercase tracking-tighter text-lg text-[var(--text-primary)]">{request.weaponName}</h3>
+                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('ticket')} #{request.id.toUpperCase()}</p>
                   </div>
                 </div>
                 <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase ${
@@ -82,12 +82,12 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                 <div className="space-y-4">
                   {request.updates.map((update, idx) => (
                     <div key={idx} className="flex gap-4">
-                      <div className="w-px bg-zinc-800 relative">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-600" />
+                      <div className="w-px bg-[var(--border-color)] relative">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
                       </div>
                       <div className="pb-4">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">{update.date}</p>
-                        <p className="text-sm text-zinc-300">{update.message}</p>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{update.date}</p>
+                        <p className="text-sm text-[var(--text-primary)] font-medium">{update.message}</p>
                       </div>
                     </div>
                   ))}
@@ -97,10 +97,10 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
           ))}
         </div>
       ) : (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-12 text-center">
-          <Wrench className="mx-auto text-zinc-800 mb-4" size={64} />
-          <h3 className="text-xl font-black uppercase tracking-tighter mb-2">{t('no_active_service_tickets')}</h3>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-6">{t('need_upgrade_repair')}</p>
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-12 text-center shadow-sm">
+          <Wrench className="mx-auto text-[var(--text-secondary)] opacity-20 mb-4" size={64} />
+          <h3 className="text-xl font-black uppercase tracking-tighter mb-2 text-[var(--text-primary)]">{t('no_active_service_tickets')}</h3>
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs mb-6">{t('need_upgrade_repair')}</p>
           <button 
             onClick={() => setShowModal(true)}
             className="inline-flex items-center gap-2 px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all"
@@ -118,35 +118,35 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 w-full max-w-md"
+              className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 w-full max-w-md shadow-2xl"
             >
-              <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">{t('request_service')}</h3>
+              <h3 className="text-2xl font-black uppercase tracking-tighter mb-6 text-[var(--text-primary)]">{t('request_service')}</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('weapon_name')}</label>
+                  <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('weapon_name')}</label>
                   <input 
                     required
                     type="text" 
                     value={weaponName}
                     onChange={e => setWeaponName(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('service_description')}</label>
+                  <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('service_description')}</label>
                   <textarea 
                     required
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={4}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-red-600 transition-colors resize-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors resize-none"
                   />
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button 
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 py-4 bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-zinc-700 transition-all"
+                    className="flex-1 py-4 bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border-color)] font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-[var(--bg-secondary)] transition-all"
                   >
                     {t('cancel')}
                   </button>
