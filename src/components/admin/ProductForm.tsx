@@ -319,7 +319,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
               } catch (uploadErr) {
                 console.error(`Image ${i + 1} upload failed:`, uploadErr);
                 onNotify(`Failed to upload image ${i + 1}: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`, 'error');
-                setIsSubmitting(false); Н
+                setIsSubmitting(false);
                 setUploadingFile(null);
                 return;
               }
