@@ -98,7 +98,7 @@ export const ArticlePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pb-20">
+    <div className="min-h-screen bg-zinc-950 pb-20">
       <SEO 
         title={post.title}
         description={post.excerpt}
@@ -114,7 +114,7 @@ export const ArticlePage: React.FC = () => {
 
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-end pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10" />
         {post.image?.startsWith('http') ? (
           <img 
             src={post.image} 

@@ -165,7 +165,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <nav className="bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800">
+      <nav className="bg-[var(--header-bg)] backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
           <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             {settings?.logoUrl ? (
@@ -176,7 +176,7 @@ export const Navbar: React.FC = () => {
                 referrerPolicy="no-referrer"
               />
             ) : settings ? (
-              <span className="text-xl font-black text-white tracking-tighter">HRISTO<span className="text-red-600">.</span></span>
+              <span className="text-xl font-black text-white tracking-tighter">HRISTO<span className="text-white/50">.</span></span>
             ) : (
               <div className="h-8 sm:h-10 md:h-12 w-24 sm:w-32 bg-zinc-900 animate-pulse rounded-lg" />
             )}
@@ -184,7 +184,7 @@ export const Navbar: React.FC = () => {
 
           <button
             onClick={() => setIsCatalogOpen(true)}
-            className="hidden lg:flex items-center justify-center gap-2 w-[140px] h-10 bg-red-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all group shrink-0"
+            className="hidden lg:flex items-center justify-center gap-2 w-[140px] h-10 bg-white text-red-600 font-black uppercase tracking-widest text-[11px] rounded-xl shadow-lg shadow-black/10 hover:bg-zinc-100 transition-all group shrink-0"
           >
             <LayoutGrid size={18} className="group-hover:rotate-90 transition-transform duration-300" />
             {t('catalog')}
@@ -197,7 +197,7 @@ export const Navbar: React.FC = () => {
                 key={link.to}
                 to={link.to} 
                 className={`text-[11px] font-black tracking-widest transition-colors uppercase flex items-center gap-2 whitespace-nowrap ${
-                  link.highlight ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-zinc-50'
+                  link.highlight ? 'text-white hover:text-zinc-200' : 'text-white/80 hover:text-white'
                 }`}
               >
                 {link.label}
@@ -226,9 +226,9 @@ export const Navbar: React.FC = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchOpen(true)}
                     onBlur={() => setIsSearchOpen(false)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 h-9 pl-10 pr-4 text-xs text-zinc-200 focus:outline-none focus:border-red-600 transition-all duration-300"
+                    className="w-full bg-black/10 border border-white/10 rounded-xl py-2 h-9 pl-10 pr-4 text-xs text-white placeholder:text-white/50 focus:outline-none focus:bg-black/20 transition-all duration-300"
                   />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={16} />
                 </form>
               </motion.div>
             )}
@@ -239,12 +239,12 @@ export const Navbar: React.FC = () => {
               {!isHomePage && (
                 <button 
                   onClick={toggleSearch}
-                  className="p-2 text-zinc-400 hover:text-zinc-50 transition-colors md:hidden"
+                  className="p-2 text-white/80 hover:text-white transition-colors md:hidden"
                 >
                   <Search size={20} />
                 </button>
               )}
-              <Link to="/compare" className="relative p-2 text-zinc-400 hover:text-zinc-50 transition-colors hidden sm:block">
+              <Link to="/compare" className="relative p-2 text-white/80 hover:text-white transition-colors hidden sm:block">
                 <GitCompare size={20} />
                 {compareProducts.length > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-zinc-950">
@@ -252,7 +252,7 @@ export const Navbar: React.FC = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/wishlist" className="relative p-2 text-zinc-400 hover:text-zinc-50 transition-colors hidden sm:block">
+              <Link to="/wishlist" className="relative p-2 text-white/80 hover:text-white transition-colors hidden sm:block">
                 <Heart size={20} />
                 {wishlistItems.length > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-zinc-950">
@@ -270,7 +270,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Toggle */}
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-zinc-400 hover:text-white transition-colors lg:hidden"
+              className="p-2 text-white/80 hover:text-white transition-colors lg:hidden"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

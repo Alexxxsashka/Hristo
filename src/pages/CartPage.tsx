@@ -113,7 +113,7 @@ export const CartPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-24">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-24">
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-8 md:py-12">
         <AnimatePresence mode="wait">
           {cartItems.length === 0 ? (

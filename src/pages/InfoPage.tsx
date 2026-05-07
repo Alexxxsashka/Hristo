@@ -56,7 +56,7 @@ export const InfoPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -64,7 +64,7 @@ export const InfoPage: React.FC = () => {
 
   if (!policy) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center space-y-6">
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center space-y-6">
         <h2 className="text-4xl font-black text-white uppercase tracking-tighter">{t('product_not_found') || 'Page not found'}</h2>
       </div>
     );
@@ -75,7 +75,7 @@ export const InfoPage: React.FC = () => {
   const displayContent = isHr && policy.content_hr ? policy.content_hr : policy.content;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] py-20 px-8">
+    <div className="min-h-screen bg-zinc-950 py-20 px-8">
       <div className="max-w-4xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

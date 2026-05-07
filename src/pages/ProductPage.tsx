@@ -141,7 +141,7 @@ export const ProductPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 flex flex-col pt-32">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-32">
       <SEO 
         title={language === 'HR' && product.nameHr ? product.nameHr : product.name}
         description={language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
@@ -405,7 +405,7 @@ export const ProductPage: React.FC = () => {
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('total_price') || 'Total'}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-xl p-1 shadow-inner h-14 w-40">
+                  <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl p-1 shadow-inner h-14 w-40">
                     <button 
                       onClick={() => setQuantity(q => Math.max(1, q - 1))}
                       className="w-12 h-full flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"

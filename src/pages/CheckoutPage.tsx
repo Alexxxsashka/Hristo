@@ -432,7 +432,7 @@ export const CheckoutPage: React.FC = () => {
 
   if (cartItems.length === 0 && step !== 4) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-8">
         <h2 className="text-2xl font-bold text-white mb-4">{t('cart_empty')}</h2>
         <Link to="/shop" className="px-8 py-3 bg-red-600 text-white rounded-xl font-bold uppercase tracking-widest">
           {t('go_to_shop')}
@@ -442,7 +442,7 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-24">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-24">
       {/* Header */}
       <header className="h-16 sm:h-20 border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-xl sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3 md:gap-6">

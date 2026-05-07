@@ -81,7 +81,7 @@ export const SocialLogin: React.FC = () => {
           <div className="w-full border-t border-zinc-800"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[#0a0a0a] px-2 text-zinc-500">Or continue with</span>
+          <span className="bg-zinc-950 px-2 text-zinc-500">Or continue with</span>
         </div>
       </div>
 

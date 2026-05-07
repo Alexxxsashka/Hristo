@@ -85,7 +85,7 @@ const HomePage: React.FC = () => {
   const bestsellers = products.slice(4, 8);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <SEO />
 
       {/* Hero Section */}
@@ -99,7 +99,7 @@ const HomePage: React.FC = () => {
             transition={{ duration: 1 }}
             className="absolute inset-0"
           >
-            <div className="absolute inset-0 bg-[#0a0a0a]/60 z-10" />
+            <div className="absolute inset-0 bg-zinc-950/60 z-10" />
             {activeSlides[currentSlideIndex]?.mediaType === 'video' && activeSlides[currentSlideIndex]?.videoUrl ? (
               <video 
                 src={activeSlides[currentSlideIndex].videoUrl}
@@ -119,7 +119,7 @@ const HomePage: React.FC = () => {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent z-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-20" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,#dc262610,transparent_60%)] z-20" />
 
         <div className="max-w-7xl mx-auto relative w-full z-30 px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center py-12 lg:py-0">
@@ -413,7 +413,7 @@ const HomePage: React.FC = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-40 group-hover:opacity-60"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
                   <span className="text-[10px] font-black text-red-600 tracking-widest uppercase mb-2 block">
                     {count} {count === 1 ? t('product') : t('products')}

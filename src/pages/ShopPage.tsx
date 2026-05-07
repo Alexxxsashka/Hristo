@@ -4,7 +4,7 @@ const CategorySidebar = lazy(() => import('../components/CategorySidebar').then(
 import { ProductCard } from '../components/ProductCard';
 import { Search, SlidersHorizontal, Grid, List, ChevronDown, Clock, Truck, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { SEO } from '../components/SEO';
@@ -16,6 +16,7 @@ const QuickPreviewModal = lazy(() => import('../components/QuickPreviewModal').t
 export const ShopPage: React.FC = () => {
   const { t } = useTranslation();
   const { category, subcategory } = useParams();
+  const location = useLocation();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [selectedQuickView, setSelectedQuickView] = React.useState<any>(null);
 
@@ -92,7 +93,7 @@ export const ShopPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-32 md:pt-44 pb-24">
+    <div className="min-h-screen bg-zinc-950 pt-32 md:pt-44 pb-24">
       <SEO 
         title={activeCategory ? `${activeCategory.name} | Hristo` : t('shop_title')}
         description={activeCategory ? `Browse our ${activeCategory.name} collection. ${activeCategory.name} high-quality products.` : "Browse our extensive collection of airsoft weapons, attachments, and tactical gear."}
@@ -107,7 +108,7 @@ export const ShopPage: React.FC = () => {
               alt={activeCategory.name}
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
             <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 md:bottom-12 md:left-12">
               <span className="text-red-600 text-[8px] sm:text-[10px] font-black tracking-[0.3em] uppercase mb-1 sm:mb-4 block">{t('category_label')}</span>
               <h1 className="text-2xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-white">{activeCategory.name}</h1>
@@ -379,3 +380,5 @@ export const ShopPage: React.FC = () => {
     </div>
   );
 };
+
+export default ShopPage;

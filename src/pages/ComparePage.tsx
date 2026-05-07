@@ -89,7 +89,7 @@ export const ComparePage: React.FC = () => {
 
   if (compareProducts.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-8">
         <SEO 
           title={t('product_comparison')} 
           description="Compare your favorite airsoft guns and gear side by side." 
@@ -117,7 +117,7 @@ export const ComparePage: React.FC = () => {
   const seoDesc = `Detailed comparison of ${productNames}. Technical specs, pricing, and compatibility information for professional airsoft equipment.`;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 pb-24">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-24">
       <SEO 
         title={seoTitle}
         description={seoDesc}

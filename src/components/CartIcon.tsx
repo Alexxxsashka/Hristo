@@ -12,17 +12,17 @@ export const CartIcon: React.FC = () => {
   return (
     <Link 
       to="/cart" 
-      className="flex items-center gap-3 px-4 py-2 bg-zinc-900 border border-zinc-800 hover:border-red-600/50 rounded-lg transition-all text-zinc-400 hover:text-white group"
+      className="flex items-center gap-3 px-4 py-2 bg-white border border-white/10 hover:bg-zinc-100 rounded-xl transition-all text-red-600 group shadow-lg shadow-black/5"
     >
       <div className="relative">
-        <ShoppingCart size={18} className="group-hover:text-red-500 transition-colors" />
+        <ShoppingCart size={18} className="text-red-600" />
         {itemCount > 0 && (
-          <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-600 text-white text-[10px] font-black flex items-center justify-center rounded-full animate-in zoom-in">
+          <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-600 text-white text-[10px] font-black flex items-center justify-center rounded-full animate-in zoom-in border border-white">
             {itemCount}
           </span>
         )}
       </div>
-      <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline-block w-[70px] text-center">
+      <span className="text-xs font-black uppercase tracking-widest hidden sm:inline-block w-[70px] text-center">
         {t('cart')}
       </span>
     </Link>

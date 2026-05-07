@@ -808,7 +808,7 @@ export const Configurator3DV12: React.FC = () => {
   }, [toggleMarkers, toggleHUD, toggleFullscreen]);
   
   return (
-    <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
+    <div className="w-full h-full bg-zinc-950 relative overflow-hidden group/config">
       <Canvas 
         shadows={{ type: THREE.PCFShadowMap }} 
         dpr={[1, 2]} 

@@ -10,7 +10,7 @@ export const WishlistPage: React.FC = () => {
   const { items } = useWishlistStore();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-32 pb-24">
+    <div className="min-h-screen bg-zinc-950 pt-32 pb-24">
       <SEO 
         title="My Wishlist"
         description="View and manage your favorite airsoft products."
