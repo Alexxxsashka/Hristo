@@ -52,8 +52,10 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ modelPath }) => {
             makeDefault 
             autoRotate 
             autoRotateSpeed={0.5} 
-            minDistance={0.5}
+            minDistance={1.5}
             maxDistance={5}
+            enableDamping={true}
+            dampingFactor={0.05}
           />
         </Suspense>
         <Environment preset="city" />
