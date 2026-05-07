@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, Settings, LogIn, UserPlus, Menu, X, Search, Heart, ShieldCheck, Truck, Clock, GitCompare, LayoutGrid, LayoutDashboard, Package, Crosshair, TrendingUp, Zap } from 'lucide-react';
 import { CartIcon } from './CartIcon';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeToggle } from './ThemeToggle';
 import { CatalogMenu } from './CatalogMenu';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useCompareStore } from '../store/compareStore';
@@ -113,13 +114,13 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-4 items-center">
-            <Link to="/about" className="hover:text-white transition-colors">{t('about_us')}</Link>
-            <Link to="/contact" className="hover:text-white transition-colors">{t('contact')}</Link>
-            <Link to="/shipping" className="hover:text-white transition-colors">{t('shipping')}</Link>
+            <Link to="/about" className="hover:text-zinc-50 transition-colors">{t('about_us')}</Link>
+            <Link to="/contact" className="hover:text-zinc-50 transition-colors">{t('contact')}</Link>
+            <Link to="/shipping" className="hover:text-zinc-50 transition-colors">{t('shipping')}</Link>
             <div className="h-3 w-px bg-zinc-800 mx-2" />
             {isAuthenticated ? (
               <div className="flex items-center gap-4 relative group/user">
-                <Link to="/account" className="hover:text-white transition-colors flex items-center gap-2">
+                <Link to="/account" className="hover:text-zinc-50 transition-colors flex items-center gap-2">
                   <User size={12} className="text-red-600" />
                   {user?.callsign || user?.username}
                 </Link>
@@ -156,7 +157,7 @@ export const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <Link to="/login" className="hover:text-white transition-colors">{t('login')}</Link>
+                <Link to="/login" className="hover:text-zinc-50 transition-colors">{t('login')}</Link>
                 <Link to="/register" className="text-red-500 hover:text-red-400 transition-colors">{t('join')}</Link>
               </div>
             )}
@@ -164,7 +165,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <nav className="bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-zinc-800">
+      <nav className="bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
           <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             {settings?.logoUrl ? (
@@ -196,7 +197,7 @@ export const Navbar: React.FC = () => {
                 key={link.to}
                 to={link.to} 
                 className={`text-[11px] font-black tracking-widest transition-colors uppercase flex items-center gap-2 whitespace-nowrap ${
-                  link.highlight ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-white'
+                  link.highlight ? 'text-red-500 hover:text-red-400' : 'text-zinc-400 hover:text-zinc-50'
                 }`}
               >
                 {link.label}
@@ -238,12 +239,12 @@ export const Navbar: React.FC = () => {
               {!isHomePage && (
                 <button 
                   onClick={toggleSearch}
-                  className="p-2 text-zinc-400 hover:text-white transition-colors md:hidden"
+                  className="p-2 text-zinc-400 hover:text-zinc-50 transition-colors md:hidden"
                 >
                   <Search size={20} />
                 </button>
               )}
-              <Link to="/compare" className="relative p-2 text-zinc-400 hover:text-white transition-colors hidden sm:block">
+              <Link to="/compare" className="relative p-2 text-zinc-400 hover:text-zinc-50 transition-colors hidden sm:block">
                 <GitCompare size={20} />
                 {compareProducts.length > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-zinc-950">
@@ -251,7 +252,7 @@ export const Navbar: React.FC = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/wishlist" className="relative p-2 text-zinc-400 hover:text-white transition-colors hidden sm:block">
+              <Link to="/wishlist" className="relative p-2 text-zinc-400 hover:text-zinc-50 transition-colors hidden sm:block">
                 <Heart size={20} />
                 {wishlistItems.length > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-zinc-950">
@@ -260,7 +261,8 @@ export const Navbar: React.FC = () => {
                 )}
               </Link>
               <CartIcon />
-              <div className="hidden sm:block">
+              <div className="hidden sm:flex items-center gap-2">
+                <ThemeToggle />
                 <LanguageSwitcher />
               </div>
             </div>
@@ -317,7 +319,7 @@ export const Navbar: React.FC = () => {
                       to={link.to} 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={`p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-base font-black uppercase tracking-tighter transition-colors flex items-center justify-between ${
-                        link.highlight ? 'text-red-500 border-red-500/20' : 'text-zinc-400 hover:text-white'
+                        link.highlight ? 'text-red-500 border-red-500/20' : 'text-zinc-400 hover:text-zinc-50'
                       }`}
                     >
                       {link.label}
@@ -332,7 +334,10 @@ export const Navbar: React.FC = () => {
 
                 <div className="pt-6 border-t border-zinc-800 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <LanguageSwitcher />
+                    <div className="flex items-center gap-2">
+                      <ThemeToggle />
+                      <LanguageSwitcher />
+                    </div>
                     <div className="flex gap-4">
                       <Link to="/compare" className="flex items-center gap-2 text-zinc-400 font-bold">
                         <GitCompare size={20} /> {t('compare')}

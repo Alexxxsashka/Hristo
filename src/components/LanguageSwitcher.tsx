@@ -33,7 +33,7 @@ export const LanguageSwitcher: React.FC = () => {
         className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-full px-4 py-2 hover:bg-zinc-800 transition-all group"
       >
         <Globe size={14} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
-        <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-white uppercase">
+        <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-zinc-50 uppercase">
           <span>{currentLang.flag}</span>
           <span>{currentLang.code}</span>
         </div>

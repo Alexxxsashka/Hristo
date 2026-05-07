@@ -6,6 +6,7 @@ import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingCompare } from './components/FloatingCompare';
 import { ToastContainer } from './components/Toast';
+import { useThemeStore } from './store/themeStore';
 
 // Lazy load pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -58,10 +59,10 @@ function AppContent() {
   const isConfigurator = location.pathname.toLowerCase().includes('/configurator');
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+    <div className="flex flex-col min-h-screen bg-zinc-950">
       {!isConfigurator && <Navbar />}
       <main className={`flex-grow flex flex-col ${isConfigurator ? '' : 'pt-20'}`}>
-        <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
@@ -112,10 +113,19 @@ function AppContent() {
 
 export default function App() {
   const { initialize } = useAuthStore();
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [theme]);
 
   return (
     <Router>
