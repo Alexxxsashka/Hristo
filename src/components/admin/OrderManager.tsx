@@ -81,14 +81,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'processing': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'paid': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'awaiting_payment': return 'bg-zinc-100 text-zinc-500 border-zinc-200';
-      case 'shipped': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
-      case 'delivered': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-zinc-100 text-zinc-700 border-zinc-200';
+      case 'pending': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+      case 'processing': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      case 'paid': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+      case 'awaiting_payment': return 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)]';
+      case 'shipped': return 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
+      case 'delivered': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+      case 'cancelled': return 'bg-red-500/10 text-red-600 border-red-500/20';
+      default: return 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)]';
     }
   };
 
@@ -108,42 +108,42 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] shadow-sm">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50" size={18} />
             <input 
               type="text" 
               placeholder="Search orders, email, or customer..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-[#ab1017] transition-all"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50" size={18} />
             <select 
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="pl-12 pr-10 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 appearance-none font-bold text-xs uppercase tracking-widest"
+              className="pl-12 pr-10 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-[#ab1017] appearance-none font-bold text-xs uppercase tracking-widest cursor-pointer"
             >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="all" className="bg-[var(--bg-secondary)]">All Status</option>
+              <option value="pending" className="bg-[var(--bg-secondary)]">Pending</option>
+              <option value="processing" className="bg-[var(--bg-secondary)]">Processing</option>
+              <option value="shipped" className="bg-[var(--bg-secondary)]">Shipped</option>
+              <option value="delivered" className="bg-[var(--bg-secondary)]">Delivered</option>
+              <option value="cancelled" className="bg-[var(--bg-secondary)]">Cancelled</option>
             </select>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsReportModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-red-600/20"
+            className="flex items-center gap-2 px-6 py-3 bg-[#ab1017] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-[#ab1017]/20"
           >
             <FileText size={16} />
             Generate Report (PDF)
           </button>
           <button 
             onClick={() => exportOrdersToCSV(filteredOrders)}
-            className="px-6 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-secondary)] transition-all border border-[var(--border-color)]"
+            className="px-6 py-3 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all border border-[var(--border-color)]"
           >
             Export CSV
           </button>
@@ -152,7 +152,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
 
       <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] overflow-hidden shadow-sm">
         <table className="w-full text-left">
-          <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
+          <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)]">
             <tr>
               <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Order ID</th>
               <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Customer</th>
@@ -164,21 +164,21 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
           </thead>
           <tbody className="divide-y divide-[var(--border-color)]">
             {filteredOrders.map(order => (
-              <tr key={order.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors group">
+              <tr key={order.id} className="hover:bg-[var(--bg-primary)] transition-colors group">
                 <td className="px-6 py-4">
-                  <span className="font-mono text-xs font-bold text-[var(--text-secondary)]">#{order.id.slice(-8).toUpperCase()}</span>
+                  <span className="font-mono text-xs font-bold text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-opacity">#{order.id.slice(-8).toUpperCase()}</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-bold text-[var(--text-primary)]">{order.shipping?.fullName || 'N/A'}</div>
-                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{order.shipping?.email || 'N/A'}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">{order.shipping?.email || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-[var(--text-secondary)]">{new Date(order.createdAt).toLocaleDateString()}</div>
-                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-black text-[var(--text-primary)]">€{order.total.toFixed(2)}</div>
-                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{order.items.length} items</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">{order.items.length} items</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
@@ -190,14 +190,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => setSelectedOrder(order)}
-                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-xl transition-all"
+                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-transparent hover:border-[var(--border-color)] rounded-xl transition-all"
                       title="View Details"
                     >
                       <Eye size={18} />
                     </button>
                     <button 
                       onClick={() => generateSingleOrderInvoice(order)}
-                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-xl transition-all" 
+                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-transparent hover:border-[var(--border-color)] rounded-xl transition-all" 
                       title="Print Local Invoice"
                     >
                       <FileText size={18} />
@@ -216,7 +216,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                         navigator.clipboard.writeText(order.id);
                         onNotify('Order ID copied to clipboard');
                       }}
-                      className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all"
+                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] border border-transparent hover:border-[var(--border-color)] rounded-xl transition-all"
                       title="Copy Order ID"
                     >
                       <MoreVertical size={18} />
@@ -228,8 +228,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
             {filteredOrders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-20 text-center">
-                  <div className="flex flex-col items-center justify-center text-zinc-400">
-                    <ShoppingBag size={48} className="mb-4 opacity-20" />
+                  <div className="flex flex-col items-center justify-center text-[var(--text-secondary)] opacity-20">
+                    <ShoppingBag size={48} className="mb-4" />
                     <p className="font-black uppercase tracking-widest text-xs">No orders found</p>
                   </div>
                 </td>
@@ -256,7 +256,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
               className="relative w-full max-w-5xl bg-[var(--bg-secondary)] rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] z-[101] border border-[var(--border-color)]"
             >
-              <div className="p-8 border-b border-[var(--border-color)] flex items-center justify-between bg-red-600 text-white">
+              <div className="p-8 border-b border-[var(--border-color)] flex items-center justify-between bg-[#ab1017] text-white">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
                     <ShoppingBag size={24} />
@@ -278,7 +278,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-8">
                     {/* Items Section */}
-                    <div className="bg-[var(--bg-tertiary)] rounded-3xl p-6 border border-[var(--border-color)]">
+                    <div className="bg-[var(--bg-primary)] rounded-3xl p-6 border border-[var(--border-color)]">
                       <h4 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-6 flex items-center gap-2">
                         <Package size={16} />
                         Order Items ({selectedOrder.items.length})
@@ -333,8 +333,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                             onClick={() => handleUpdateStatus(selectedOrder.id, status as Order['status'])}
                             className={`px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
                               selectedOrder.status === status 
-                                ? 'bg-red-600 text-white border-red-600 shadow-lg' 
-                                : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-red-600/50'
+                                ? 'bg-[#ab1017] text-white border-[#ab1017] shadow-lg' 
+                                : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[#ab1017]/50'
                             }`}
                           >
                             {formatEnum(status)}
@@ -353,12 +353,12 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                       </h4>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center text-[var(--text-secondary)]">
+                          <div className="w-10 h-10 bg-[var(--bg-primary)] rounded-xl flex items-center justify-center text-[var(--text-secondary)]">
                             <User size={20} />
                           </div>
                           <div>
                             <div className="font-bold text-sm text-[var(--text-primary)]">{selectedOrder.shipping?.fullName || 'Guest'}</div>
-                            <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Customer ID: {selectedOrder.userId || 'Guest'}</div>
+                            <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">Customer ID: {selectedOrder.userId || 'Guest'}</div>
                           </div>
                         </div>
                         <div className="space-y-2 pt-4 border-t border-[var(--border-color)]">
@@ -392,31 +392,33 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                     </div>
 
                     {/* Payment Summary */}
-                    <div className="bg-zinc-900 text-white rounded-3xl p-6 shadow-xl">
-                      <h4 className="font-black uppercase tracking-widest text-[10px] text-zinc-500 mb-6 flex items-center gap-2">
+                    <div className="bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#ab1017]/10 blur-[60px] rounded-full" />
+                      <h4 className="font-black uppercase tracking-widest text-[10px] opacity-40 mb-6 flex items-center gap-2 relative z-10">
                         <CreditCard size={16} />
                         Payment Summary
                       </h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                      <div className="space-y-3 relative z-10">
+                        <div className="flex justify-between text-xs font-bold opacity-60 uppercase tracking-widest">
                           <span>Subtotal</span>
-                          <span className="text-white">€{(selectedOrder.total - (selectedOrder.shippingCost || 0)).toFixed(2)}</span>
+                          <span className="text-[var(--text-primary)]">€{(selectedOrder.total - (selectedOrder.shippingCost || 0)).toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                        <div className="flex justify-between text-xs font-bold opacity-60 uppercase tracking-widest">
                           <span>Shipping</span>
-                          <span className="text-white">€{(selectedOrder.shippingCost || 0).toFixed(2)}</span>
+                          <span className="text-[var(--text-primary)]">€{(selectedOrder.shippingCost || 0).toFixed(2)}</span>
                         </div>
-                        <div className="pt-4 border-t border-zinc-800 flex justify-between items-end">
-                          <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Total Amount</span>
-                          <span className="text-3xl font-black text-emerald-400">€{selectedOrder.total.toFixed(2)}</span>
+                        <div className="pt-4 border-t border-[var(--border-color)] opacity-20" />
+                        <div className="flex justify-between items-end">
+                          <span className="text-xs font-black uppercase tracking-widest opacity-40">Total Amount</span>
+                          <span className="text-3xl font-black text-emerald-500">€{selectedOrder.total.toFixed(2)}</span>
                         </div>
-                        <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl border border-zinc-700">
+                        <div className="mt-6 flex items-center gap-2 px-3 py-2 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)]">
                           {selectedOrder.payment?.method === 'stripe' ? <CreditCard size={14} className="text-emerald-500" /> : <Wallet size={14} className="text-amber-500" />}
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
                             {selectedOrder.payment?.status === 'paid' ? 'Verified Payment' : 'Payment Outstanding'}
                             {' via ' + (selectedOrder.payment?.method === 'cod' ? 'Cash on Delivery' : (selectedOrder.payment?.method?.toUpperCase() || 'UNKNOWN'))}
                           </span>
-                          <div className={`ml-auto w-2 h-2 rounded-full ${selectedOrder.payment?.status === 'paid' ? 'bg-emerald-500' : 'bg-amber-500 pulse'}`} />
+                          <div className={`ml-auto w-2 h-2 rounded-full ${selectedOrder.payment?.status === 'paid' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
                         </div>
                       </div>
                     </div>
@@ -424,7 +426,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 </div>
               </div>
 
-              <div className="p-8 bg-[var(--bg-tertiary)] border-t border-[var(--border-color)] flex items-center justify-between">
+              <div className="p-8 bg-[var(--bg-primary)] border-t border-[var(--border-color)] flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                     <Calendar size={16} />
@@ -434,14 +436,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 <div className="flex gap-3">
                   <button 
                     onClick={() => generateSingleOrderInvoice(selectedOrder)}
-                    className="px-6 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all"
+                    className="px-6 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all"
                   >
                     Download Invoice
                   </button>
                   <button 
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'shipped')}
                     disabled={selectedOrder.status === 'shipped' || selectedOrder.status === 'delivered'}
-                    className="px-8 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all disabled:opacity-50 shadow-lg shadow-red-600/20"
+                    className="px-8 py-3 bg-[#ab1017] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[#ab1017]/20"
                   >
                     Mark as Shipped
                   </button>

@@ -7,10 +7,10 @@ interface ModelViewerProps {
 }
 
 const Model = ({ path }: { path: string }) => {
-  if (!path) return null;
   const fullPath = (path.startsWith('http') || path.startsWith('/models/')) 
     ? path 
     : `/models/${path}`;
+  
   const { scene } = useGLTF(fullPath);
   return <primitive object={scene} />;
 };

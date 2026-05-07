@@ -147,11 +147,11 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm"
+        className="bg-[var(--bg-secondary)] p-8 rounded-2xl border border-[var(--border-color)] shadow-sm"
       >
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-bold">{editingPost?.id ? 'Edit Post' : 'Create New Post'}</h3>
-          <button onClick={() => { setIsEditing(false); setFieldErrors({}); }} className="p-2 hover:bg-zinc-100 rounded-full">
+          <h3 className="text-xl font-bold text-[var(--text-primary)]">{editingPost?.id ? 'Edit Post' : 'Create New Post'}</h3>
+          <button onClick={() => { setIsEditing(false); setFieldErrors({}); }} className="p-2 hover:bg-[var(--bg-primary)] rounded-full transition-colors text-[var(--text-secondary)]">
             <X size={20} />
           </button>
         </div>
@@ -164,13 +164,13 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Title</label>
+              <label className="text-sm font-bold text-[var(--text-secondary)]">Title</label>
               <input 
                 type="text" 
                 value={editingPost?.title || ''}
                 onChange={e => handleFieldChange('title', e.target.value)}
-                className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                  fieldErrors.title ? 'border-red-500' : 'border-zinc-200'
+                className={`w-full px-4 py-3 bg-[var(--bg-primary)] border rounded-xl outline-none focus:ring-2 focus:ring-[#ab1017] text-[var(--text-primary)] ${
+                  fieldErrors.title ? 'border-red-500' : 'border-[var(--border-color)]'
                 }`}
               />
               <AnimatePresence>
@@ -182,23 +182,23 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
               </AnimatePresence>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Slug</label>
+              <label className="text-sm font-bold text-[var(--text-secondary)]">Slug</label>
               <input 
                 type="text" 
                 value={editingPost?.slug || ''}
                 onChange={e => setEditingPost({ ...editingPost, slug: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl outline-none text-[var(--text-primary)]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Category</label>
+              <label className="text-sm font-bold text-[var(--text-secondary)]">Category</label>
               <select 
                 value={editingPost?.category || ''}
                 onChange={e => setEditingPost({ ...editingPost, category: e.target.value as any })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none"
+                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl outline-none text-[var(--text-primary)]"
               >
                 <option value="">Select Category</option>
                 {BLOG_CATEGORIES.map(cat => (
@@ -207,13 +207,13 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Author</label>
+              <label className="text-sm font-bold text-[var(--text-secondary)]">Author</label>
               <input 
                 type="text" 
                 value={editingPost?.author || ''}
                 onChange={e => handleFieldChange('author', e.target.value)}
-                className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 ${
-                  fieldErrors.author ? 'border-red-500' : 'border-zinc-200'
+                className={`w-full px-4 py-3 bg-[var(--bg-primary)] border rounded-xl outline-none focus:ring-2 focus:ring-[#ab1017] text-[var(--text-primary)] ${
+                  fieldErrors.author ? 'border-red-500' : 'border-[var(--border-color)]'
                 }`}
               />
               <AnimatePresence>
@@ -227,21 +227,21 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-zinc-700">Excerpt</label>
+            <label className="text-sm font-bold text-[var(--text-secondary)]">Excerpt</label>
             <textarea 
               value={editingPost?.excerpt || ''}
               onChange={e => setEditingPost({ ...editingPost, excerpt: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none h-20 resize-none"
+              className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl outline-none h-20 resize-none text-[var(--text-primary)]"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-zinc-700">Content (Markdown supported)</label>
+            <label className="text-sm font-bold text-[var(--text-secondary)]">Content (Markdown supported)</label>
             <textarea 
               value={editingPost?.content || ''}
               onChange={e => handleFieldChange('content', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 h-64 resize-none ${
-                fieldErrors.content ? 'border-red-500' : 'border-zinc-200'
+              className={`w-full px-4 py-3 bg-[var(--bg-primary)] border rounded-xl outline-none focus:ring-2 focus:ring-[#ab1017] h-64 resize-none text-[var(--text-primary)] ${
+                fieldErrors.content ? 'border-red-500' : 'border-[var(--border-color)]'
               }`}
             />
             <AnimatePresence>
@@ -254,11 +254,11 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-zinc-700">Cover Image</label>
+            <label className="text-sm font-bold text-[var(--text-secondary)]">Cover Image</label>
             <div className="flex items-center gap-4">
-              <label className="flex-1 flex items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-zinc-200 rounded-2xl hover:border-zinc-400 transition-all cursor-pointer bg-zinc-50">
-                <Upload size={24} className="text-zinc-400" />
-                <span className="text-zinc-500 font-medium">
+              <label className="flex-1 flex items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-[var(--border-color)] rounded-2xl hover:border-[#ab1017]/50 transition-all cursor-pointer bg-[var(--bg-primary)]">
+                <Upload size={24} className="text-[var(--text-secondary)] opacity-50" />
+                <span className="text-[var(--text-secondary)] font-medium">
                   {imageFile ? imageFile.name : (editingPost?.image || 'Click to upload cover image')}
                 </span>
                 <input 
@@ -271,18 +271,18 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-6 border-t border-zinc-100">
+          <div className="flex justify-end gap-4 pt-6 border-t border-[var(--border-color)]">
             <button 
               type="button" 
               onClick={() => { setIsEditing(false); setFieldErrors({}); }}
-              className="px-8 py-3 text-zinc-600 font-bold hover:bg-zinc-100 rounded-xl transition-all"
+              className="px-8 py-3 text-[var(--text-secondary)] font-bold hover:bg-[var(--bg-primary)] rounded-xl transition-all"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="px-12 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20 disabled:opacity-50"
+              className="px-12 py-3 bg-[#ab1017] text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[#ab1017]/20 disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : 'Save Post'}
             </button>
@@ -300,7 +300,7 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
             setEditingPost({ title: '', slug: '', category: BLOG_CATEGORIES[0], author: '', excerpt: '', content: '' });
             setIsEditing(true);
           }}
-          className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-900/20"
+          className="flex items-center gap-2 px-6 py-3 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-xl font-bold hover:bg-[#ab1017] hover:text-white transition-all shadow-lg shadow-black/10"
         >
           <Plus size={20} />
           New Post
@@ -309,12 +309,12 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map(post => (
-          <div key={post.id} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden group hover:shadow-xl transition-all">
-            <div className="aspect-video relative overflow-hidden bg-zinc-100">
+          <div key={post.id} className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] overflow-hidden group hover:shadow-xl transition-all">
+            <div className="aspect-video relative overflow-hidden bg-[var(--bg-primary)]">
               {post.image ? (
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)] opacity-30">
                   <Upload size={32} />
                 </div>
               )}
@@ -324,13 +324,13 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
                     setEditingPost(post);
                     setIsEditing(true);
                   }}
-                  className="p-2 bg-white/90 backdrop-blur text-zinc-900 rounded-lg hover:bg-white transition-all shadow-lg"
+                  className="p-2 bg-[var(--bg-secondary)]/90 backdrop-blur text-[var(--text-primary)] rounded-lg hover:bg-[#ab1017] hover:text-white transition-all shadow-lg"
                 >
                   <Edit size={16} />
                 </button>
                 <button 
                   onClick={() => handleDelete(post.id)}
-                  className="p-2 bg-white/90 backdrop-blur text-red-600 rounded-lg hover:bg-white transition-all shadow-lg"
+                  className="p-2 bg-[var(--bg-secondary)]/90 backdrop-blur text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-lg"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -338,21 +338,21 @@ export const BlogManager = ({ posts, onUpdate, onNotify, onConfirm }: {
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <span className="px-2 py-1 bg-zinc-100 text-zinc-600 rounded text-[10px] font-bold uppercase tracking-widest">
+                <span className="px-2 py-1 bg-[var(--bg-primary)] text-[var(--text-secondary)] rounded text-[10px] font-bold uppercase tracking-widest">
                   {post.category}
                 </span>
-                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest flex items-center gap-1 opacity-60">
                   <Calendar size={10} />
                   {new Date(post.date).toLocaleDateString()}
                 </span>
               </div>
-              <h4 className="font-bold text-lg line-clamp-2">{post.title}</h4>
-              <p className="text-sm text-zinc-500 line-clamp-3">{post.excerpt}</p>
-              <div className="flex items-center gap-2 pt-4 border-t border-zinc-50">
-                <div className="w-6 h-6 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] text-white font-bold">
+              <h4 className="font-bold text-lg line-clamp-2 text-[var(--text-primary)]">{post.title}</h4>
+              <p className="text-sm text-[var(--text-secondary)] line-clamp-3">{post.excerpt}</p>
+              <div className="flex items-center gap-2 pt-4 border-t border-[var(--border-color)]">
+                <div className="w-6 h-6 rounded-full bg-[#ab1017] flex items-center justify-center text-[10px] text-white font-bold">
                   {post.author[0]}
                 </div>
-                <span className="text-xs font-bold text-zinc-700">{post.author}</span>
+                <span className="text-xs font-bold text-[var(--text-secondary)]">{post.author}</span>
               </div>
             </div>
           </div>

@@ -70,21 +70,21 @@ export const AuditManager = ({ logs, onRefresh }: {
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-zinc-900 uppercase tracking-tighter leading-none mb-2 flex items-center gap-4">
-            <Shield size={36} className="text-red-600" />
+          <h2 className="text-4xl font-black text-[var(--text-primary)] uppercase tracking-tighter leading-none mb-2 flex items-center gap-4">
+            <Shield size={36} className="text-[#ab1017]" />
             Security Audit Trail
           </h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-[0.2em] text-[10px]">Registry of all system events and administrative vectors</p>
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-[0.2em] text-[10px]">Registry of all system events and administrative vectors</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="px-6 py-3 bg-white border border-zinc-200 rounded-2xl shadow-sm">
-            <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Events</div>
-            <div className="text-2xl font-black text-zinc-900 leading-none">{logs.length}</div>
+          <div className="px-6 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-sm">
+            <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">Total Events</div>
+            <div className="text-2xl font-black text-[var(--text-primary)] leading-none">{logs.length}</div>
           </div>
           <button 
             onClick={onRefresh}
-            className="p-4 bg-zinc-900 text-white rounded-2xl hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-900/20 group active:scale-95"
+            className="p-4 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-2xl hover:bg-[#ab1017] hover:text-white transition-all shadow-xl shadow-black/10 group active:scale-95"
           >
             <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-500" />
           </button>
@@ -94,41 +94,41 @@ export const AuditManager = ({ logs, onRefresh }: {
       {/* Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2 relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-zinc-900 transition-colors" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-[var(--text-primary)] transition-colors opacity-50" size={18} />
           <input 
             type="text" 
             placeholder="Search by user, action or payload..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-bold text-sm"
+            className="w-full pl-12 pr-4 py-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl outline-none focus:ring-2 focus:ring-[#ab1017] transition-all font-bold text-sm text-[var(--text-primary)]"
           />
         </div>
         
         <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50" size={18} />
           <select 
             value={severityFilter}
             onChange={e => setSeverityFilter(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-zinc-200 rounded-2xl outline-none appearance-none font-bold text-xs uppercase tracking-widest cursor-pointer hover:border-zinc-300 transition-all"
+            className="w-full pl-12 pr-4 py-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl outline-none appearance-none font-bold text-xs uppercase tracking-widest cursor-pointer hover:border-[#ab1017]/30 transition-all text-[var(--text-primary)]"
           >
-            <option value="all">All Severities</option>
-            <option value="critical">Critical</option>
-            <option value="error">Error</option>
-            <option value="warning">Warning</option>
-            <option value="info">Info</option>
+            <option value="all" className="bg-[var(--bg-secondary)]">All Severities</option>
+            <option value="critical" className="bg-[var(--bg-secondary)]">Critical</option>
+            <option value="error" className="bg-[var(--bg-secondary)]">Error</option>
+            <option value="warning" className="bg-[var(--bg-secondary)]">Warning</option>
+            <option value="info" className="bg-[var(--bg-secondary)]">Info</option>
           </select>
         </div>
 
         <div className="relative">
-          <Database className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+          <Database className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50" size={18} />
           <select 
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-zinc-200 rounded-2xl outline-none appearance-none font-bold text-xs uppercase tracking-widest cursor-pointer hover:border-zinc-300 transition-all"
+            className="w-full pl-12 pr-4 py-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl outline-none appearance-none font-bold text-xs uppercase tracking-widest cursor-pointer hover:border-[#ab1017]/30 transition-all text-[var(--text-primary)]"
           >
-            <option value="all">All Resources</option>
+            <option value="all" className="bg-[var(--bg-secondary)]">All Resources</option>
             {uniqueTypes.map(t => (
-              <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+              <option key={t} value={t} className="bg-[var(--bg-secondary)]">{t.charAt(0).toUpperCase() + t.slice(1)}</option>
             ))}
           </select>
         </div>
@@ -138,50 +138,50 @@ export const AuditManager = ({ logs, onRefresh }: {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Table View */}
         <div className="xl:col-span-2 space-y-4">
-          <div className="bg-white rounded-[32px] border border-zinc-200 overflow-hidden shadow-sm">
+          <div className="bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-zinc-50 border-b border-zinc-100">
+                <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)]">
                   <tr>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Timestamp</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Operator</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Action</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Severity</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 text-right">Ops</th>
+                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Timestamp</th>
+                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Operator</th>
+                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Action</th>
+                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Severity</th>
+                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] text-right">Ops</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-50">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {filteredLogs.map(log => (
                     <motion.tr 
                       layout
                       key={log.id} 
                       onClick={() => setSelectedLog(log)}
-                      className={`group cursor-pointer hover:bg-zinc-50 transition-colors ${selectedLog?.id === log.id ? 'bg-zinc-50' : ''}`}
+                      className={`group cursor-pointer hover:bg-[var(--bg-primary)] transition-colors ${selectedLog?.id === log.id ? 'bg-[var(--bg-primary)]' : ''}`}
                     >
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
-                          <Clock size={14} className="text-zinc-300" />
+                          <Clock size={14} className="text-[var(--text-secondary)] opacity-30" />
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold text-zinc-900">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                            <span className="text-[10px] font-bold text-zinc-400">{new Date(log.timestamp).toLocaleDateString()}</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)] opacity-50">{new Date(log.timestamp).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-zinc-100 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                          <div className="w-8 h-8 bg-[var(--bg-primary)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] group-hover:bg-[#ab1017] group-hover:text-white transition-all opacity-60 group-hover:opacity-100">
                             <User size={14} />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold text-zinc-900">{log.userName}</span>
-                            <span className="text-[10px] text-zinc-400 truncate max-w-[120px]">{log.userEmail}</span>
+                            <span className="text-xs font-bold text-[var(--text-primary)]">{log.userName}</span>
+                            <span className="text-[10px] text-[var(--text-secondary)] opacity-50 truncate max-w-[120px]">{log.userEmail}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900">{log.action}</span>
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">{log.resourceType} #{log.resourceId?.slice(0, 8)}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">{log.action}</span>
+                          <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-tighter opacity-50">{log.resourceType} #{log.resourceId?.slice(0, 8)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -191,7 +191,7 @@ export const AuditManager = ({ logs, onRefresh }: {
                         </div>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <div className="p-2 text-zinc-300 group-hover:text-zinc-900 transition-colors">
+                        <div className="p-2 text-[var(--text-secondary)] opacity-30 group-hover:opacity-100 group-hover:text-[var(--text-primary)] transition-all">
                           <ChevronRight size={18} />
                         </div>
                       </td>
@@ -200,8 +200,8 @@ export const AuditManager = ({ logs, onRefresh }: {
                   {filteredLogs.length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-6 py-32 text-center">
-                        <div className="flex flex-col items-center gap-4 text-zinc-200">
-                          <Terminal size={64} className="opacity-10" />
+                        <div className="flex flex-col items-center gap-4 text-[var(--text-secondary)] opacity-10">
+                          <Terminal size={64} />
                           <p className="text-sm font-black uppercase tracking-widest">No audit signals matched the current filters</p>
                         </div>
                       </td>
@@ -222,17 +222,17 @@ export const AuditManager = ({ logs, onRefresh }: {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="bg-white rounded-[32px] border border-zinc-200 overflow-hidden shadow-2xl shadow-zinc-900/5"
+                className="bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] overflow-hidden shadow-2xl shadow-black/5"
               >
-                <div className="p-8 bg-zinc-900 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-[60px] rounded-full" />
+                <div className="p-8 bg-[var(--text-primary)] text-[var(--bg-primary)] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#ab1017]/10 blur-[60px] rounded-full" />
                   <div className="relative z-10 space-y-4">
                     <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${getSeverityStyle(selectedLog.severity)}`}>
                       {getSeverityIcon(selectedLog.severity)}
                       {selectedLog.severity}
                     </div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">{selectedLog.action}</h3>
-                    <div className="flex items-center gap-4 text-xs font-bold text-zinc-400">
+                    <div className="flex items-center gap-4 text-xs font-bold opacity-60">
                       <span className="flex items-center gap-2"><Clock size={14} /> {new Date(selectedLog.timestamp).toLocaleString()}</span>
                     </div>
                   </div>
@@ -241,34 +241,34 @@ export const AuditManager = ({ logs, onRefresh }: {
                 <div className="p-8 space-y-8">
                   {/* Operator Info */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Operator Integrity</h4>
-                    <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-zinc-900">
+                    <h4 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">Operator Integrity</h4>
+                    <div className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl shadow-sm flex items-center justify-center text-[var(--text-primary)]">
                         <User size={20} />
                       </div>
                       <div>
-                        <div className="font-bold text-zinc-900">{selectedLog.userName}</div>
-                        <div className="text-xs text-zinc-500 font-medium">{selectedLog.userEmail}</div>
-                        <div className="text-[10px] text-zinc-400 mt-1 font-mono">ID: {selectedLog.userId}</div>
+                        <div className="font-bold text-[var(--text-primary)]">{selectedLog.userName}</div>
+                        <div className="text-xs text-[var(--text-secondary)] font-medium">{selectedLog.userEmail}</div>
+                        <div className="text-[10px] text-[var(--text-secondary)] mt-1 font-mono opacity-50">ID: {selectedLog.userId}</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Context Info */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Contextual Vectors</h4>
+                    <h4 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">Contextual Vectors</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">IP Address</div>
-                        <div className="text-xs font-mono font-bold text-zinc-900 flex items-center gap-2">
-                          <Globe size={12} className="text-zinc-300" />
+                      <div className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)]">
+                        <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1 opacity-50">IP Address</div>
+                        <div className="text-xs font-mono font-bold text-[var(--text-primary)] flex items-center gap-2">
+                          <Globe size={12} className="opacity-30" />
                           {selectedLog.ipAddress || 'Internal Net'}
                         </div>
                       </div>
-                      <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Resource</div>
-                        <div className="text-xs font-bold text-zinc-900 flex items-center gap-2 capitalize">
-                          <Database size={12} className="text-zinc-300" />
+                      <div className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)]">
+                        <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1 opacity-50">Resource</div>
+                        <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2 capitalize">
+                          <Database size={12} className="opacity-30" />
                           {selectedLog.resourceType}
                         </div>
                       </div>
@@ -277,9 +277,9 @@ export const AuditManager = ({ logs, onRefresh }: {
 
                   {/* Payload Info */}
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Event Payload</h4>
-                    <div className="p-6 bg-zinc-900 rounded-2xl border border-zinc-800 font-mono text-[11px] text-emerald-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
-                      <div className="flex items-center gap-2 text-zinc-500 mb-4 pb-4 border-b border-zinc-800">
+                    <h4 className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">Event Payload</h4>
+                    <div className="p-6 bg-[#0a0a0a] rounded-2xl border border-white/5 font-mono text-[11px] text-emerald-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                      <div className="flex items-center gap-2 text-white/20 mb-4 pb-4 border-b border-white/5">
                         <Terminal size={14} />
                         <span className="font-bold tracking-widest uppercase text-[10px]">Registry Output</span>
                       </div>
@@ -289,12 +289,12 @@ export const AuditManager = ({ logs, onRefresh }: {
                 </div>
               </motion.div>
             ) : (
-              <div className="bg-zinc-50 rounded-[32px] border-2 border-dashed border-zinc-200 h-[600px] flex flex-col items-center justify-center text-center p-12">
-                <div className="w-20 h-20 bg-white rounded-full shadow-xl flex items-center justify-center text-zinc-200 mb-6 border border-zinc-100">
+              <div className="bg-[var(--bg-primary)] rounded-[32px] border-2 border-dashed border-[var(--border-color)] h-[600px] flex flex-col items-center justify-center text-center p-12">
+                <div className="w-20 h-20 bg-[var(--bg-secondary)] rounded-full shadow-xl flex items-center justify-center text-[var(--text-secondary)] mb-6 border border-[var(--border-color)] opacity-20">
                   <Activity size={32} />
                 </div>
-                <h4 className="text-zinc-900 font-black uppercase tracking-tighter text-xl">Registry Monitor</h4>
-                <p className="text-zinc-400 text-sm font-medium mt-2">Select a vector from the audit trail to analyze deep-packet event details and administrative footprint.</p>
+                <h4 className="text-[var(--text-primary)] font-black uppercase tracking-tighter text-xl">Registry Monitor</h4>
+                <p className="text-[var(--text-secondary)] text-sm font-medium mt-2">Select a vector from the audit trail to analyze deep-packet event details and administrative footprint.</p>
               </div>
             )}
           </AnimatePresence>

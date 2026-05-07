@@ -155,11 +155,36 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
   }, [orders]);
 
   return (
-    <div className="space-y-8">
-      {/* Top Stats */}
+    <div className="space-y-8 pb-12">
+      {/* Time Range Selector */}
+      <div className="flex items-center justify-between bg-[var(--bg-secondary)] p-4 rounded-[28px] border border-[var(--border-color)] shadow-sm">
+        <div className="flex items-center gap-4 ml-2">
+          <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center text-[var(--text-primary)] border border-[var(--border-color)]">
+            <Activity size={20} />
+          </div>
+          <h2 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)]">Intelligence Core</h2>
+        </div>
+        <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)]">
+          {(['weekly', 'monthly'] as const).map((r) => (
+            <button
+              key={r}
+              onClick={() => setTimeRange(r)}
+              className={`px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                timeRange === r 
+                ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-lg border border-[var(--border-color)]' 
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-50'
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Primary Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title="Total Revenue" 
+          title="Gross Revenue" 
           value={`€${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
           trend="Real-time" 
           isUp={true} 
@@ -167,9 +192,9 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
           color="emerald"
         />
         <StatCard 
-          title="Total Users" 
+          title="Active Users" 
           value={users.length.toString()} 
-          trend={`+${totalNewUsersInPeriod} this ${timeRange === 'weekly' ? 'week' : '6 months'}`} 
+          trend={`+${totalNewUsersInPeriod} this period`} 
           isUp={true} 
           icon={<Users size={20} />} 
           color="blue"
@@ -177,9 +202,9 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
         <StatCard 
           title="Avg. Order Value" 
           value={`€${avgOrderValue.toFixed(2)}`} 
-          trend="Based on all orders" 
-          isUp={totalRevenue > 0} 
-          icon={<Activity size={20} />} 
+          trend="Per Transaction" 
+          isUp={true} 
+          icon={<ShoppingBag size={20} />} 
           color="amber"
         />
         <StatCard 
@@ -193,77 +218,58 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Revenue Chart */}
-        <div className="lg:col-span-2 bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
+        {/* Revenue Chart */}
+        <div className="lg:col-span-2 bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] p-8 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h4 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">Revenue Overview</h4>
-              <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mt-1">
-                {timeRange === 'weekly' ? 'Weekly' : 'Monthly'} performance tracking
-              </p>
+              <h3 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">Revenue Stream</h3>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">Visualizing fiscal performance</p>
             </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setTimeRange('weekly')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  timeRange === 'weekly' 
-                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
-                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]'
-                }`}
-              >
-                Weekly
-              </button>
-              <button 
-                onClick={() => setTimeRange('monthly')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  timeRange === 'monthly' 
-                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
-                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]'
-                }`}
-              >
-                Monthly
-              </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                Live Feed
+              </div>
             </div>
           </div>
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height={350} minHeight={350}>
-              <AreaChart data={chartData}>
+          
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#ab1017" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#ab1017" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }}
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
-                  dx={-10}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }}
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    borderRadius: '16px', 
-                    border: 'none', 
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                    backgroundColor: 'var(--bg-secondary)', 
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                     fontSize: '12px',
-                    fontWeight: '700',
-                    backgroundColor: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)'
-                  }} 
+                    fontWeight: 'bold'
+                  }}
                   itemStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="revenue" 
-                  stroke="#10b981" 
+                  stroke="#ab1017" 
                   strokeWidth={4}
                   fillOpacity={1} 
                   fill="url(#colorRevenue)" 
@@ -273,86 +279,130 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
           </div>
         </div>
 
-        {/* Category Distribution */}
-        <div className="bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
-          <h4 className="text-xl font-black uppercase tracking-tighter mb-8 text-[var(--text-primary)]">Sales by Category</h4>
-          <div className="h-[300px] w-full relative">
-            <ResponsiveContainer width="100%" height={300} minHeight={300}>
+        {/* Traffic Sources */}
+        <div className="bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] p-8 shadow-sm">
+          <h3 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)] mb-8">Inventory Mix</h3>
+          <div className="h-[300px] relative">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={categoryData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
+                  innerRadius={70}
                   outerRadius={100}
-                  paddingAngle={8}
+                  paddingAngle={5}
                   dataKey="value"
+                  stroke="none"
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'var(--bg-secondary)', 
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '16px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-[var(--text-primary)]">{orders.reduce((acc, o) => acc + (o.items || []).reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), 0).toLocaleString()}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Total Units Sold</span>
+              <span className="text-2xl font-black text-[var(--text-primary)]">
+                {orders.reduce((acc, o) => acc + (o.items || []).reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), 0)}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] opacity-60">Total Units</span>
             </div>
           </div>
-          <div className="mt-8 space-y-3">
-            {categoryData.map((item, idx) => (
+          <div className="space-y-4 mt-8">
+            {categoryData.map((item) => (
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs font-bold text-[var(--text-secondary)]">{item.name}</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest opacity-60">{item.name}</span>
                 </div>
-                <span className="text-xs font-black text-[var(--text-primary)]">{item.value}</span>
+                <span className="text-sm font-black text-[var(--text-primary)]">{item.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Customer Growth Real Data */}
-        <div className="bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Customer Growth */}
+        <div className="bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] p-8 shadow-sm">
           <div className="flex items-center justify-between mb-8">
-            <h4 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">Customer Growth</h4>
-            <div className="flex items-center gap-2 text-emerald-500">
-              <Users size={16} />
-              <span className="text-xs font-black">+{totalNewUsersInPeriod} New This {timeRange === 'weekly' ? 'Week' : 'Period'}</span>
+            <div>
+              <h3 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">User Velocity</h3>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">Acquisition rate tracking</p>
+            </div>
+            <div className="flex items-center gap-2 text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+              <Users size={14} />
+              <span className="text-[10px] font-black uppercase tracking-widest">+{totalNewUsersInPeriod} New</span>
             </div>
           </div>
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height={200} minHeight={200}>
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }}
                 />
                 <Tooltip 
-                  cursor={{ fill: 'var(--bg-tertiary)' }}
+                  cursor={{ fill: 'var(--bg-tertiary)', opacity: 0.4 }}
                   contentStyle={{ 
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-                    backgroundColor: 'var(--bg-secondary)',
-                    color: 'var(--text-primary)'
+                    backgroundColor: 'var(--bg-secondary)', 
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
                   }}
-                  itemStyle={{ color: 'var(--text-primary)' }}
                 />
-                <Bar dataKey="users" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={30} />
+                <Bar dataKey="users" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Order Status Summary */}
+        <div className="bg-[var(--bg-secondary)] rounded-[32px] border border-[var(--border-color)] p-8 shadow-sm">
+          <h3 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)] mb-8">Operational Flow</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <StatusBox 
+              title="Pending" 
+              count={pendingOrders} 
+              icon={<Clock size={20} className="text-amber-500" />} 
+              color="amber"
+            />
+            <StatusBox 
+              title="Completed" 
+              count={completedOrders} 
+              icon={<CheckCircle size={20} className="text-emerald-500" />} 
+              color="emerald"
+            />
+            <div className="col-span-2 p-6 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-[var(--text-primary)] border border-[var(--border-color)]">
+                  <Activity size={20} />
+                </div>
+                <div>
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] opacity-60">Success Rate</h5>
+                  <div className="text-xl font-black text-[var(--text-primary)]">{((completedOrders / (orders.length || 1)) * 100).toFixed(1)}%</div>
+                </div>
+              </div>
+              <TrendingUp size={20} className="text-emerald-500 opacity-50" />
+            </div>
           </div>
         </div>
       </div>
@@ -363,62 +413,47 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
 const StatCard = ({ title, value, trend, isUp, icon, color }: any) => (
   <motion.div 
     whileHover={{ y: -5 }}
-    className="bg-[var(--bg-secondary)] p-6 rounded-[32px] border border-[var(--border-color)] shadow-sm relative overflow-hidden group transition-colors duration-300"
+    className="bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm relative overflow-hidden group transition-all"
   >
-    <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10 group-hover:scale-150 transition-transform duration-500 ${
+    <div className={`absolute top-0 right-0 w-32 h-32 rounded-full opacity-5 -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150 ${
       color === 'emerald' ? 'bg-emerald-500' : 
       color === 'blue' ? 'bg-blue-500' : 
       color === 'amber' ? 'bg-amber-500' : 'bg-violet-500'
     }`} />
     
-    <div className="flex items-center justify-between mb-4">
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-tertiary)] ${
+    <div className="flex items-center justify-between mb-6">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--bg-tertiary)] border border-[var(--border-color)] ${
         color === 'emerald' ? 'text-emerald-500' : 
         color === 'blue' ? 'text-blue-500' : 
         color === 'amber' ? 'text-amber-500' : 'text-violet-500'
       }`}>
         {icon}
       </div>
-      <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isUp ? 'text-emerald-500' : 'text-red-500'}`}>
+      <div className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${
+        isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+      }`}>
         {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
         {trend}
       </div>
     </div>
     
     <div className="space-y-1">
-      <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">{title}</h5>
-      <div className="text-2xl font-black text-[var(--text-primary)]">{value}</div>
+      <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] opacity-60">{title}</h5>
+      <div className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">{value}</div>
     </div>
   </motion.div>
 );
 
-const StatusBox = ({ title, count, icon, bgColor, borderColor }: any) => (
-  <div className={`p-6 rounded-2xl border ${bgColor} ${borderColor} flex items-center justify-between`}>
+const StatusBox = ({ title, count, icon, color }: any) => (
+  <div className="p-6 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between group hover:border-[var(--text-primary)] transition-all">
     <div className="flex items-center gap-4">
-      <div className="w-10 h-10 bg-[var(--bg-primary)] rounded-xl flex items-center justify-center shadow-sm">
+      <div className="w-10 h-10 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center shadow-sm border border-[var(--border-color)]">
         {icon}
       </div>
       <div>
-        <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">{title}</h5>
+        <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] opacity-60">{title}</h5>
         <div className="text-xl font-black text-[var(--text-primary)]">{count}</div>
       </div>
     </div>
-    <ChevronRight size={16} className="text-[var(--text-secondary)]" />
   </div>
-);
-
-const ChevronRight = ({ size, className }: any) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="m9 18 6-6-6-6"/>
-  </svg>
 );

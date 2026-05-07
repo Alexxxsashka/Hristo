@@ -243,9 +243,9 @@ export const CategoryForm = ({
       className="bg-[var(--bg-secondary)] p-8 rounded-2xl border border-[var(--border-color)] shadow-sm"
     >
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold">{editingCat ? 'Edit Category' : 'Add New Category'}</h3>
+        <h3 className="text-lg font-bold text-[var(--text-primary)]">{editingCat ? 'Edit Category' : 'Add New Category'}</h3>
         {showHelp && (
-          <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-bold uppercase tracking-widest">
+          <div className="px-4 py-2 bg-[var(--bg-tertiary)] text-blue-500 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-[var(--border-color)]">
             Categories help organize your products and define 3D behavior
           </div>
         )}
@@ -281,7 +281,7 @@ export const CategoryForm = ({
                 </motion.p>
               )}
             </AnimatePresence>
-            {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
+            {showHelp && <p className="text-[10px] text-[var(--text-secondary)] font-medium px-1 opacity-60">Visible name of the category.</p>}
           </div>
           <div className="w-1/3 space-y-1">
             <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Structural Role</label>
@@ -334,9 +334,10 @@ export const CategoryForm = ({
             )}
           </AnimatePresence>
           <div className="w-24 space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Disc %</label>
             <input
               type="number"
-              placeholder="Disc %"
+              placeholder="0"
               value={newCat.discount || 0}
               onChange={e => setNewCat({ ...newCat, discount: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl outline-none text-xs font-bold"
@@ -346,7 +347,7 @@ export const CategoryForm = ({
           </div>
           <div className="w-1/4 space-y-1">
             <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Category Backdrop</label>
-            <div className="relative group h-[52px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all hover:border-[var(--text-primary)]">
+            <div className="relative group h-[52px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all hover:border-[#ab1017]">
               {newCat.image ? (
                 <img 
                   src={newCat.image} 
@@ -388,42 +389,42 @@ export const CategoryForm = ({
 
         {/* Subcategories */}
         {editingCat && !newCat.parent && (
-          <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+          <div className="space-y-4 p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)]">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Subcategories</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Subcategories</label>
             </div>
             
             <div className="space-y-2">
               {categories.filter(c => c.parent === editingCat.id).map(subCat => (
-                <div key={subCat.id} className="flex items-center justify-between p-3 bg-white border border-zinc-200 rounded-xl">
+                <div key={subCat.id} className="flex items-center justify-between p-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-200 overflow-hidden flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] overflow-hidden flex items-center justify-center">
                       {subCat.image ? (
                         <img src={subCat.image} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <ImageIcon size={14} className="text-zinc-300" />
+                        <ImageIcon size={14} className="text-[var(--text-secondary)] opacity-30" />
                       )}
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-zinc-900">{subCat.name}</div>
-                      <div className="text-[10px] text-zinc-400 font-mono">{subCat.id}</div>
+                      <div className="text-sm font-bold text-[var(--text-primary)]">{subCat.name}</div>
+                      <div className="text-[10px] text-[var(--text-secondary)] font-mono opacity-60">{subCat.id}</div>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleDeleteSubcategory(subCat.id)}
-                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-[var(--text-secondary)] hover:text-red-600 hover:bg-red-600/10 rounded-lg transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
                 </div>
               ))}
               {categories.filter(c => c.parent === editingCat.id).length === 0 && (
-                <p className="text-center py-2 text-xs text-zinc-400 italic">No subcategories found.</p>
+                <p className="text-center py-2 text-xs text-[var(--text-secondary)] italic opacity-60">No subcategories found.</p>
               )}
             </div>
 
-            <div className="flex gap-2 mt-4 pt-4 border-t border-zinc-200">
+            <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border-color)]">
               <input
                 type="text"
                 placeholder="New subcategory name..."
@@ -435,13 +436,13 @@ export const CategoryForm = ({
                     handleAddInlineSubcategory();
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm outline-none focus:border-zinc-900 transition-colors"
+                className="flex-1 px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl text-sm text-[var(--text-primary)] outline-none focus:border-[#ab1017] transition-colors"
               />
               <button
                 type="button"
                 onClick={handleAddInlineSubcategory}
                 disabled={!newSubcatName.trim()}
-                className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-800 transition-colors"
+                className="px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ab1017] hover:text-white transition-colors"
               >
                 Add Sub
               </button>
@@ -450,13 +451,13 @@ export const CategoryForm = ({
         )}
 
         {/* Category Filters */}
-        <div className="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+        <div className="space-y-4 p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)]">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Category-Specific Filters</label>
+            <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Category-Specific Filters</label>
             <button 
               type="button" 
               onClick={addFilter}
-              className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-zinc-800 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#ab1017] text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:opacity-90 transition-all shadow-lg shadow-[#ab1017]/20"
             >
               <Check size={14} />
               Add Filter
@@ -465,7 +466,7 @@ export const CategoryForm = ({
 
           <div className="space-y-4">
             {newCat.filters?.map((filter, fIndex) => (
-              <div key={filter.id} className="p-4 bg-white border border-zinc-200 rounded-xl space-y-4">
+              <div key={filter.id} className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl space-y-4">
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <input
@@ -473,14 +474,14 @@ export const CategoryForm = ({
                       placeholder="Filter Label (e.g. Color)"
                       value={filter.label || (filter as any).name || ''}
                       onChange={e => updateFilter(fIndex, 'label', e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] outline-none focus:border-[#ab1017]"
                     />
                   </div>
                   <div className="w-32">
                     <select
                       value={filter.type}
                       onChange={e => updateFilter(fIndex, 'type', e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] outline-none focus:border-[#ab1017]"
                     >
                       <option value="select">Select</option>
                       <option value="range">Range</option>
@@ -490,20 +491,20 @@ export const CategoryForm = ({
                   <button 
                     type="button" 
                     onClick={() => removeFilter(fIndex)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="p-2 text-red-600 hover:bg-red-600/10 rounded-lg transition-colors"
                   >
                     <X size={16} />
                   </button>
                 </div>
 
                 {filter.type === 'select' && (
-                  <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
+                  <div className="space-y-2 pl-4 border-l-2 border-[var(--border-color)]">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Options</span>
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Options</span>
                       <button 
                         type="button" 
                         onClick={() => addOption(fIndex)}
-                        className="text-[10px] font-bold text-blue-600 hover:underline"
+                        className="text-[10px] font-bold text-blue-500 hover:underline"
                       >
                         + Add Option
                       </button>
@@ -515,13 +516,13 @@ export const CategoryForm = ({
                             type="text"
                             value={opt}
                             onChange={e => updateOption(fIndex, oIndex, e.target.value)}
-                            className="flex-1 px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs outline-none"
+                            className="flex-1 px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] outline-none focus:border-[#ab1017]"
                             placeholder="Option value"
                           />
                           <button 
                             type="button" 
                             onClick={() => removeOption(fIndex, oIndex)}
-                            className="p-1.5 text-zinc-400 hover:text-red-600"
+                            className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 opacity-60 hover:opacity-100"
                           >
                             <X size={14} />
                           </button>
@@ -533,7 +534,7 @@ export const CategoryForm = ({
               </div>
             ))}
             {(!newCat.filters || newCat.filters.length === 0) && (
-              <p className="text-center py-4 text-xs text-zinc-400 italic">No custom filters defined for this category.</p>
+              <p className="text-center py-4 text-xs text-[var(--text-secondary)] italic opacity-60">No custom filters defined for this category.</p>
             )}
           </div>
         </div>
@@ -542,11 +543,11 @@ export const CategoryForm = ({
           <button 
             type="button" 
             onClick={onCancel}
-            className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-xl font-bold"
+            className="px-6 py-3 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] rounded-xl font-bold hover:bg-[var(--bg-primary)] transition-all"
           >
             Cancel
           </button>
-          <button type="submit" className="px-8 py-3 bg-zinc-900 text-white rounded-xl font-bold shadow-lg shadow-zinc-900/20">
+          <button type="submit" className="px-8 py-3 bg-[#ab1017] text-white rounded-xl font-bold shadow-lg shadow-[#ab1017]/20 hover:opacity-90 transition-all">
             {editingCat ? 'Update Category' : 'Add Category'}
           </button>
         </div>
