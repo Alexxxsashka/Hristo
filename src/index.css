@@ -1,38 +1,7 @@
 @import "tailwindcss";
 
-/* @tailwind base; */
-/* @tailwind components; */
-/* @tailwind utilities; */
-
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  --color-zinc-950: var(--zinc-950);
-  --color-zinc-900: var(--zinc-900);
-  --color-zinc-800: var(--zinc-800);
-  --color-zinc-700: var(--zinc-700);
-  --color-zinc-600: var(--zinc-600);
-  --color-zinc-500: var(--zinc-500);
-  --color-zinc-400: var(--zinc-400);
-  --color-zinc-300: var(--zinc-300);
-  --color-zinc-200: var(--zinc-200);
-  --color-zinc-100: var(--zinc-100);
-  --color-zinc-50: var(--zinc-50);
-
-  @keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  @keyframes bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  --animate-spin-slow: spin-slow 8s linear infinite;
-  --animate-bounce-slow: bounce-slow 3s ease-in-out infinite;
-}
-
 :root {
+  /* Brand Colors & Variables */
   --bg-primary: #0a0a0a;
   --bg-secondary: #000000;
   --bg-tertiary: #18181b; /* zinc-900 */
@@ -45,6 +14,23 @@
   --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   --header-bg: #09090b; /* Zinc 950 */
 
+  /* Tailwind v4 variable mapping (to avoid @theme warning) */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-600: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-50: #fafafa;
+
+  /* Base Zinc variables for theme switching */
   --zinc-950: #09090b;
   --zinc-900: #18181b;
   --zinc-800: #27272a;
@@ -82,6 +68,19 @@
   --zinc-200: #27272a;
   --zinc-100: #18181b;
   --zinc-50: #09090b;
+
+  /* Update Tailwind colors for light theme */
+  --color-zinc-950: var(--zinc-950);
+  --color-zinc-900: var(--zinc-900);
+  --color-zinc-800: var(--zinc-800);
+  --color-zinc-700: var(--zinc-700);
+  --color-zinc-600: var(--zinc-600);
+  --color-zinc-500: var(--zinc-500);
+  --color-zinc-400: var(--zinc-400);
+  --color-zinc-300: var(--zinc-300);
+  --color-zinc-200: var(--zinc-200);
+  --color-zinc-100: var(--zinc-100);
+  --color-zinc-50: var(--zinc-50);
 }
 
 @layer base {
