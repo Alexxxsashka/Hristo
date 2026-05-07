@@ -97,7 +97,7 @@ export const Navbar: React.FC = () => {
         </div>
       )}
       {/* Top Bar */}
-      <div className="bg-red-700/90 backdrop-blur-md border-b border-white/10 py-2 hidden md:block">
+      <div className="bg-[#ab1017] border-b border-white/10 py-2 hidden md:block">
         <div className="max-w-7xl mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-widest text-white/90 uppercase">
           <div className="flex gap-6">
             <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export const Navbar: React.FC = () => {
               >
                 {link.label}
                 {link.highlight && (
-                  <span className="px-1.5 py-0.5 bg-red-600 text-white text-[8px] rounded-sm animate-pulse">
+                  <span className="px-1.5 py-0.5 bg-white text-[#ab1017] text-[8px] rounded-sm animate-pulse">
                     {t('live')}
                   </span>
                 )}
@@ -284,7 +284,7 @@ export const Navbar: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-red-600 border-b border-white/10 overflow-hidden"
+              className="lg:hidden bg-[#ab1017] border-b border-white/10 overflow-hidden"
             >
               <div className="px-4 py-8 space-y-6">
                 {!isHomePage && (
@@ -295,7 +295,7 @@ export const Navbar: React.FC = () => {
                         placeholder={t('search_placeholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-red-700 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/50"
+                        className="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/50"
                       />
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={20} />
                     </form>
@@ -308,7 +308,7 @@ export const Navbar: React.FC = () => {
                       setIsCatalogOpen(true);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-between p-4 bg-red-600 text-white font-black uppercase tracking-widest text-sm rounded-2xl shadow-lg shadow-red-600/20"
+                    className="w-full flex items-center justify-between p-4 bg-white text-[#ab1017] font-black uppercase tracking-widest text-sm rounded-2xl shadow-lg shadow-black/20"
                   >
                     {t('catalog')}
                     <LayoutGrid size={20} />

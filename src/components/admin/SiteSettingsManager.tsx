@@ -185,7 +185,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
   if (loading) return (
     <div className="flex items-center justify-center p-20">
-      <div className="w-12 h-12 border-4 border-zinc-900 border-t-red-600 rounded-full animate-spin" />
+      <div className="w-12 h-12 border-4 border-[var(--text-secondary)] border-t-red-600 rounded-full animate-spin" />
     </div>
   );
 
@@ -194,8 +194,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
       {/* Navigation Sidebar */}
       <aside className="w-64 space-y-2 sticky top-24 h-fit">
         <div className="mb-8 px-4">
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-zinc-900 leading-none mb-2">Website</h2>
-          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Configuration Engine</p>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)] leading-none mb-2">Website</h2>
+          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Configuration Engine</p>
         </div>
 
         <TabButton 
@@ -239,7 +239,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-900/20 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 disabled:opacity-50"
           >
             {saving ? 'Saving...' : <><Save size={16} /> Save Config</>}
           </button>
@@ -258,16 +258,16 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
               className="space-y-8"
             >
               <SectionHeader 
-                icon={<Globe className="text-zinc-900" />} 
+                icon={<Globe className="text-[var(--text-primary)]" />} 
                 title="Global Branding" 
                 subtitle="Primary identity and announcement system" 
               />
 
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm space-y-10">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Website Logo</label>
-                    <div className="relative group aspect-square max-w-[200px] bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl flex items-center justify-center overflow-hidden transition-all hover:border-zinc-900">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Website Logo</label>
+                    <div className="relative group aspect-square max-w-[200px] bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-color)] rounded-3xl flex items-center justify-center overflow-hidden transition-all hover:border-red-600">
                       {settings.logoUrl ? (
                         <img 
                           src={settings.logoUrl} 
@@ -275,13 +275,13 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                           className="w-full h-full object-contain p-6" 
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-2 text-zinc-300">
+                        <div className="flex flex-col items-center gap-2 text-[var(--text-secondary)] opacity-30">
                           <ImageIcon size={32} />
                           <span className="text-xs font-bold uppercase tracking-widest">No Logo</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                      <div className="absolute inset-0 bg-red-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label className="p-3 bg-white text-red-600 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                           <Upload size={20} />
                           <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'branding', 'logoUrl')} />
                         </label>
@@ -291,33 +291,33 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Announcement Bar</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Announcement Bar</label>
                       <input 
                         type="text" 
                         value={settings.announcement || ''}
                         onChange={e => setSettings({ ...settings, announcement: e.target.value })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
                         placeholder="e.g. SUMMER SALE: UP TO 30% OFF!"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Banner CTA Link</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Banner CTA Link</label>
                       <input 
                         type="text" 
                         value={settings.announcementLink || ''}
                         onChange={e => setSettings({ ...settings, announcementLink: e.target.value })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
                         placeholder="/shop/summer-collection"
                       />
                     </div>
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => setSettings({ ...settings, showAnnouncement: !settings.showAnnouncement })}
-                        className={`w-12 h-6 rounded-full transition-all relative ${settings.showAnnouncement ? 'bg-red-600' : 'bg-zinc-200'}`}
+                        className={`w-12 h-6 rounded-full transition-all relative ${settings.showAnnouncement ? 'bg-red-600' : 'bg-[var(--border-color)]'}`}
                       >
                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${settings.showAnnouncement ? 'left-7' : 'left-1'}`} />
                       </button>
-                      <span className="text-xs font-bold uppercase tracking-widest text-zinc-700">Display globally</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Display globally</span>
                     </div>
                   </div>
                 </div>
@@ -335,43 +335,43 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
             >
               <div className="flex items-center justify-between mb-8">
                 <SectionHeader 
-                  icon={<Monitor className="text-zinc-900" />} 
+                  icon={<Monitor className="text-[var(--text-primary)]" />} 
                   title="Hero Slideshow" 
                   subtitle="Dynamic primary visuals and CTAs" 
                 />
                 
                 <button 
                   onClick={addHeroSlide}
-                  className="flex items-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-zinc-900/20"
+                  className="flex items-center gap-2 px-8 py-4 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-red-600/20"
                 >
                   <Plus size={16} /> Add Slide
                 </button>
               </div>
 
               {/* Hero Fallback Content */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
-                <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3 mb-8">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
+                <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3 mb-8">
                   <Monitor size={20} className="text-red-600" />
                   Hero Text Content
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Main Title</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Main Title</label>
                     <input 
                       type="text" 
                       value={settings.heroTitle || ''}
                       onChange={e => setSettings({ ...settings, heroTitle: e.target.value })}
-                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
                       placeholder="Build your ultimate arsenal"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Subtitle Text</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Subtitle Text</label>
                     <input 
                       type="text" 
                       value={settings.heroSubtitle || ''}
                       onChange={e => setSettings({ ...settings, heroSubtitle: e.target.value })}
-                      className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                      className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
                       placeholder="Explore our curated collection of professional airsoft weapons..."
                     />
                   </div>
@@ -379,9 +379,9 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
               </div>
 
               {/* Hero Feature Media Section - Dedicated Card */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3">
                     <Zap size={20} className="text-red-600" />
                     Hero Feature Media (Right Graphic)
                   </h3>
@@ -390,11 +390,11 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Media Type</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Media Type</label>
                       <select 
                         value={settings.heroFeatureMediaType || 'image'}
                         onChange={e => setSettings({ ...settings, heroFeatureMediaType: e.target.value as 'image' | 'video' })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all"
                       >
                         <option value="image">Image</option>
                         <option value="video">Video</option>
@@ -403,8 +403,8 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
                     {settings.heroFeatureMediaType === 'image' ? (
                       <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Image</label>
-                        <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Feature Image</label>
+                        <div className="relative group aspect-square w-48 bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-color)] rounded-3xl overflow-hidden transition-all hover:border-red-600 mx-auto">
                           {settings.heroFeatureImage ? (
                             <img 
                               src={settings.heroFeatureImage} 
@@ -412,13 +412,13 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                               className="w-full h-full object-cover" 
                             />
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-300">
+                            <div className="flex flex-col items-center justify-center h-full gap-2 text-[var(--text-secondary)] opacity-30">
                               <ImageIcon size={32} />
                               <span className="text-xs font-bold uppercase tracking-widest">No Image</span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                          <div className="absolute inset-0 bg-red-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label className="p-3 bg-white text-red-600 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                               <Upload size={20} />
                               <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'hero-feature', 'heroFeatureImage')} />
                             </label>
@@ -427,21 +427,21 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Feature Video</label>
-                        <div className="relative group aspect-square w-48 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 mx-auto">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Feature Video</label>
+                        <div className="relative group aspect-square w-48 bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-color)] rounded-3xl overflow-hidden transition-all hover:border-red-600 mx-auto">
                           {settings.heroFeatureVideo ? (
                             <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
                               <Video size={32} className="text-white" />
                               <span className="absolute bottom-4 text-[8px] text-white font-bold uppercase tracking-widest">Video Selected</span>
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-300">
+                            <div className="flex flex-col items-center justify-center h-full gap-2 text-[var(--text-secondary)] opacity-30">
                               <Video size={32} />
                               <span className="text-xs font-bold uppercase tracking-widest">No Video</span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                          <div className="absolute inset-0 bg-red-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label className="p-3 bg-white text-red-600 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                               <Upload size={20} />
                               <input type="file" className="hidden" accept="video/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'hero-feature', 'heroFeatureVideo')} />
                             </label>
@@ -451,24 +451,24 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                     )}
                   </div>
 
-                  <div className="bg-zinc-50 rounded-[32px] p-8 flex flex-col justify-center border border-zinc-100 relative overflow-hidden group">
+                  <div className="bg-[var(--bg-tertiary)] rounded-[32px] p-8 flex flex-col justify-center border border-[var(--border-color)] relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
                       <Zap size={120} />
                     </div>
-                    <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-900 mb-4 flex items-center gap-2">
+                    <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--text-primary)] mb-4 flex items-center gap-2">
                       <Info size={14} className="text-red-600" />
                       Visual Instructions
                     </h4>
                     <div className="space-y-4">
-                      <p className="text-[11px] text-zinc-500 font-bold leading-relaxed uppercase tracking-wide">
+                      <p className="text-[11px] text-[var(--text-secondary)] font-bold leading-relaxed uppercase tracking-wide">
                         This media appears in the decorative block on the right side of the main hero section.
                       </p>
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-700">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
                           Image: Transparent PNG/WebP (Best)
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-700">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
                           Video: Short looping MP4 (Muted)
                         </div>
@@ -510,11 +510,11 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                 ))}
 
                 {(Array.isArray(settings.heroSlides) ? settings.heroSlides : []).length === 0 && (
-                  <div className="p-20 text-center bg-white border border-zinc-200 border-dashed rounded-[32px]">
-                    <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Monitor size={32} className="text-zinc-200" />
+                  <div className="p-20 text-center bg-[var(--bg-secondary)] border border-[var(--border-color)] border-dashed rounded-[32px]">
+                    <div className="w-16 h-16 bg-[var(--bg-primary)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Monitor size={32} className="text-[var(--text-secondary)] opacity-20" />
                     </div>
-                    <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">No slides configured. Default static hero will be used.</p>
+                    <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">No slides configured. Default static hero will be used.</p>
                   </div>
                 )}
               </div>
@@ -536,10 +536,10 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
               />
 
               {/* About Us Section */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
-                    <Info size={20} className="text-zinc-400" />
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3">
+                    <Info size={20} className="text-[var(--text-secondary)] opacity-50" />
                     About Us Section
                   </h3>
                 </div>
@@ -547,37 +547,37 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Section Title</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Section Title</label>
                       <input 
                         type="text" 
                         value={settings.aboutUsTitle || ''}
                         onChange={e => setSettings({ ...settings, aboutUsTitle: e.target.value })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Paragraph Content</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Paragraph Content</label>
                       <textarea 
                         rows={6}
                         value={settings.aboutUsText || ''}
                         onChange={e => setSettings({ ...settings, aboutUsText: e.target.value })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none resize-none"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none resize-none focus:ring-2 focus:ring-red-600 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Learn More Link</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Learn More Link</label>
                       <input 
                         type="text" 
                         value={settings.aboutUsLink || ''}
                         onChange={e => setSettings({ ...settings, aboutUsLink: e.target.value })}
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Section Image</label>
-                    <div className="relative group aspect-video bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Section Image</label>
+                    <div className="relative group aspect-video bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-color)] rounded-3xl overflow-hidden transition-all hover:border-red-600">
                       {settings.aboutUsImage ? (
                         <img 
                           src={settings.aboutUsImage} 
@@ -585,27 +585,27 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                           className="w-full h-full object-cover" 
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-300">
+                        <div className="flex flex-col items-center justify-center h-full gap-2 text-[var(--text-secondary)] opacity-30">
                           <ImageIcon size={32} />
                           <span className="text-xs font-bold uppercase tracking-widest">No Image</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                      <div className="absolute inset-0 bg-red-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label className="p-3 bg-white text-red-600 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                           <Upload size={20} />
                           <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'about', 'aboutUsImage')} />
                         </label>
                       </div>
                     </div>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-center mt-2">Recommended: 1920x1080px WebP</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest text-center mt-2">Recommended: 1920x1080px WebP</p>
                   </div>
                 </div>
               </div>
               
               {/* 3D Live Demo Section */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3">
                     <Zap size={20} className="text-red-600" />
                     3D Live Demo Model
                   </h3>
@@ -613,32 +613,32 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-6">
-                    <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 mb-2">Current Model Path</h4>
-                      <p className="text-xs font-mono text-zinc-500 break-all bg-white p-3 rounded-lg border border-zinc-200">
+                    <div className="p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)]">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] mb-2">Current Model Path</h4>
+                      <p className="text-xs font-mono text-[var(--text-secondary)] break-all bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-color)]">
                         {settings.liveDemoModelUrl || 'Using default Khronos Helmet'}
                       </p>
                     </div>
                     
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Manual URL Override</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Manual URL Override</label>
                       <input 
                         type="text" 
                         value={settings.liveDemoModelUrl || ''}
                         onChange={e => setSettings({ ...settings, liveDemoModelUrl: e.target.value })}
                         placeholder="https://example.com/model.glb"
-                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:border-zinc-900 transition-all font-medium"
+                        className="w-full px-6 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:border-red-600 transition-all font-medium"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Upload New GLB Model</label>
-                    <div className="relative group aspect-video bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-3xl overflow-hidden transition-all hover:border-zinc-900 flex flex-col items-center justify-center gap-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Upload New GLB Model</label>
+                    <div className="relative group aspect-video bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-color)] rounded-3xl overflow-hidden transition-all hover:border-red-600 flex flex-col items-center justify-center gap-4">
                       {settings.liveDemoModelUrl ? (
                         <div className="flex flex-col items-center gap-2">
-                          <CheckCircle2 size={40} className="text-green-500" />
-                          <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">Model Active</span>
+                          <CheckCircle2 size={40} className="text-emerald-500" />
+                          <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]">Model Active</span>
                           <button 
                             onClick={() => handleFileDelete(settings.liveDemoModelUrl, 'liveDemoModelUrl')}
                             className="text-[10px] text-red-600 font-black uppercase tracking-widest hover:underline"
@@ -647,13 +647,13 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                           </button>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center gap-2 text-zinc-300">
+                        <div className="flex flex-col items-center gap-2 text-[var(--text-secondary)] opacity-30">
                           <Upload size={40} />
                           <span className="text-xs font-bold uppercase tracking-widest">Select .GLB File</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label className="p-3 bg-white text-zinc-900 rounded-xl cursor-pointer hover:scale-110 transition-transform">
+                      <div className="absolute inset-0 bg-red-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label className="p-3 bg-white text-red-600 rounded-xl cursor-pointer hover:scale-110 transition-transform">
                           <Upload size={20} />
                           <input 
                             type="file" 
@@ -664,16 +664,16 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                         </label>
                       </div>
                     </div>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-center mt-2">Maximum file size: 50MB. Recommended: Optimized GLB.</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest text-center mt-2">Maximum file size: 50MB. Recommended: Optimized GLB.</p>
                   </div>
                 </div>
               </div>
 
               {/* Promo Banner Editor */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
-                    <Tag size={20} className="text-zinc-400" />
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3">
+                    <Tag size={20} className="text-[var(--text-secondary)] opacity-50" />
                     Floating Promo Banner
                   </h3>
                   <button 
@@ -685,12 +685,12 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                         subtitle: 'Limited time offer description',
                         ctaText: 'Claim Offer',
                         ctaLink: '/shop',
-                        bgColor: '#dc2626',
+                        bgColor: '#ab1017',
                         active: true
                       };
                       setSettings({ ...settings, promoBanners: [...(Array.isArray(settings.promoBanners) ? settings.promoBanners : []), newBanner] });
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest"
+                    className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-600/20"
                   >
                     <Plus size={16} /> Add Banner
                   </button>
@@ -740,10 +740,10 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
               </div>
 
               {/* Featured Categories Editor */}
-              <div className="bg-white border border-zinc-200 rounded-[32px] p-8 shadow-sm">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tighter text-zinc-900 flex items-center gap-3">
-                    <Layout size={20} className="text-zinc-400" />
+                  <h3 className="text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center gap-3">
+                    <Layout size={20} className="text-[var(--text-secondary)] opacity-50" />
                     Featured Categories
                   </h3>
                   <button 
@@ -755,7 +755,7 @@ export const SiteSettingsManager = ({ onNotify, onUpdate, onConfirm }: {
                       };
                       setSettings({ ...settings, featuredCategoriesList: [...(Array.isArray(settings.featuredCategoriesList) ? settings.featuredCategoriesList : []), newCat] });
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest"
+                    className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-600/20"
                   >
                     <Plus size={16} /> Add Category
                   </button>

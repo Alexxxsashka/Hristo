@@ -240,7 +240,7 @@ export const CategoryForm = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm"
+      className="bg-[var(--bg-secondary)] p-8 rounded-2xl border border-[var(--border-color)] shadow-sm"
     >
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold">{editingCat ? 'Edit Category' : 'Add New Category'}</h3>
@@ -263,8 +263,8 @@ export const CategoryForm = ({
               placeholder="Category Name"
               value={newCat.name}
               onChange={e => handleFieldChange('name', e.target.value)}
-              className={`w-full px-4 py-3 bg-zinc-50 border rounded-xl outline-none ${
-                fieldErrors.name ? 'border-red-500' : 'border-zinc-200'
+              className={`w-full px-4 py-3 bg-[var(--bg-primary)] border rounded-xl outline-none text-[var(--text-primary)] ${
+                fieldErrors.name ? 'border-red-500' : 'border-[var(--border-color)]'
               }`}
               maxLength={100}
             />
@@ -284,13 +284,13 @@ export const CategoryForm = ({
             {showHelp && <p className="text-[10px] text-zinc-400 font-medium px-1">Visible name of the category.</p>}
           </div>
           <div className="w-1/3 space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Structural Role</label>
-            <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-200">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Structural Role</label>
+            <div className="flex gap-2 p-1 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border-color)]">
                <button 
                 type="button" 
                 onClick={() => handleFieldChange('parent', null)}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                  !newCat.parent ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+                  !newCat.parent ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
                >
                  Main
@@ -304,7 +304,7 @@ export const CategoryForm = ({
                   }
                 }}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                  newCat.parent ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+                  newCat.parent ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
                >
                  Sub
@@ -320,11 +320,11 @@ export const CategoryForm = ({
                 exit={{ opacity: 0, width: 0 }}
                 className="w-48 space-y-1 overflow-hidden"
               >
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Parent Category</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Parent Category</label>
                 <select
                   value={newCat.parent}
                   onChange={e => setNewCat({ ...newCat, parent: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
+                  className="w-full px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl outline-none text-[var(--text-primary)] text-xs font-bold"
                 >
                   {categories.filter(c => !c.parent && c.id !== editingCat?.id).map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -339,14 +339,14 @@ export const CategoryForm = ({
               placeholder="Disc %"
               value={newCat.discount || 0}
               onChange={e => setNewCat({ ...newCat, discount: Number(e.target.value) })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-xs font-bold"
+              className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl outline-none text-xs font-bold"
               min="0"
               max="100"
             />
           </div>
           <div className="w-1/4 space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Category Backdrop</label>
-            <div className="relative group h-[52px] bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden transition-all hover:border-zinc-900">
+            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] px-1">Category Backdrop</label>
+            <div className="relative group h-[52px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all hover:border-[var(--text-primary)]">
               {newCat.image ? (
                 <img 
                   src={newCat.image} 
@@ -354,12 +354,12 @@ export const CategoryForm = ({
                   className="w-full h-full object-cover opacity-80" 
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-zinc-300">
+                <div className="flex items-center justify-center h-full text-[var(--text-secondary)] opacity-30">
                   <ImageIcon size={20} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <label className="p-1.5 bg-white text-zinc-900 rounded-lg cursor-pointer hover:scale-110 transition-transform">
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <label className="p-1.5 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-lg cursor-pointer hover:scale-110 transition-transform">
                   <Upload size={14} />
                   <input 
                     type="file" 

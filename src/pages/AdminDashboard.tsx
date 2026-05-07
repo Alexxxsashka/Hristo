@@ -278,7 +278,7 @@ export const AdminDashboard: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex text-zinc-900 relative">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex text-[var(--text-primary)] relative transition-colors duration-300">
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -292,20 +292,20 @@ export const AdminDashboard: React.FC = () => {
       </AnimatePresence>
 
       <aside className={`
-        fixed inset-y-0 left-0 z-[120] w-64 bg-white border-r border-zinc-200 flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0
+        fixed inset-y-0 left-0 z-[120] w-64 bg-[var(--admin-sidebar-bg)] border-r border-white/10 flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+        <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
               <Settings className="text-white w-6 h-6" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-zinc-900 leading-none">Admin</span>
-              <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">Control Panel</span>
+              <span className="font-bold text-xl text-white leading-none">Admin</span>
+              <span className="text-[10px] text-white/70 font-bold uppercase tracking-widest mt-1">Control Panel</span>
             </div>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-white/70 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -373,10 +373,10 @@ export const AdminDashboard: React.FC = () => {
           />
         </nav>
 
-        <div className="p-4 border-t border-zinc-100 space-y-2">
+        <div className="p-4 border-t border-white/10 space-y-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-xs uppercase tracking-widest"
+            className="w-full flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 rounded-xl transition-all font-bold text-xs uppercase tracking-widest"
           >
             <LogOut size={16} />
             Logout
@@ -388,7 +388,7 @@ export const AdminDashboard: React.FC = () => {
         {/* Floating Mobile Toggle */}
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="fixed top-4 left-4 p-3 lg:hidden bg-white/80 backdrop-blur-md border border-zinc-200 rounded-2xl shadow-xl z-50 text-zinc-600"
+          className="fixed top-4 left-4 p-3 lg:hidden bg-[var(--bg-secondary)]/80 backdrop-blur-md border border-[var(--border-color)] rounded-2xl shadow-xl z-50 text-[var(--text-secondary)]"
         >
           <Menu size={20} />
         </button>
@@ -405,12 +405,12 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-3xl font-black text-zinc-900 uppercase tracking-tighter">Dashboard</h2>
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Store Performance Overview</p>
+                    <h2 className="text-3xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Dashboard</h2>
+                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">Store Performance Overview</p>
                   </div>
                   <button 
                     onClick={() => loadAllData(true)}
-                    className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-900/20 active:scale-95"
+                    className="p-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 active:scale-95"
                   >
                     <RefreshCw size={18} />
                   </button>
@@ -421,10 +421,10 @@ export const AdminDashboard: React.FC = () => {
                 ) : (
                   <>
                     <BIAnalytics orders={orders} users={users_list} />
-                    <div className="bg-zinc-900 text-white p-8 rounded-[32px] relative overflow-hidden">
+                    <div className="bg-[var(--bg-secondary)] text-[var(--text-primary)] p-8 rounded-[32px] border border-[var(--border-color)] relative overflow-hidden shadow-sm">
                       <div className="relative z-10 max-w-2xl">
                         <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Welcome to Admin Panel</h3>
-                        <p className="text-zinc-400 leading-relaxed mb-8">
+                        <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
                           This is where you manage your entire store.
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -442,7 +442,7 @@ export const AdminDashboard: React.FC = () => {
                           />
                         </div>
                       </div>
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-800 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50" />
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-red-600 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-5" />
                     </div>
                   </>
                 )}
@@ -475,30 +475,30 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-3xl font-black text-zinc-900 uppercase tracking-tighter">Inventory</h2>
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Manage Products & Stock</p>
+                    <h2 className="text-3xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Inventory</h2>
+                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">Manage Products & Stock</p>
                   </div>
                 </div>
 
                 {/* Product Controls */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] shadow-sm">
                   <div className="flex items-center gap-4 flex-1">
                     <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                       <input
                         type="text"
                         placeholder="Search products, brand, or SKU..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all font-medium"
+                        className="w-full pl-12 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all font-medium"
                       />
                     </div>
                     <div className="relative">
-                      <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                       <select
                         value={productFilter}
                         onChange={e => setProductFilter(e.target.value as any)}
-                        className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
+                        className="pl-12 pr-10 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
                       >
                         <option value="all">All Products</option>
                         <option value="out_of_stock">Out of Stock</option>
@@ -506,11 +506,11 @@ export const AdminDashboard: React.FC = () => {
                       </select>
                     </div>
                     <div className="relative">
-                      <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                       <select
                         value={categoryFilter}
                         onChange={e => setCategoryFilter(e.target.value)}
-                        className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
+                        className="pl-12 pr-10 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 appearance-none font-bold text-xs uppercase tracking-widest min-w-[160px]"
                       >
                         <option value="all">All Categories</option>
                         {categories.filter(c => !c.parent).map(mainCat => (
@@ -529,7 +529,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsProductReportModalOpen(true)}
-                      className="flex items-center gap-2 px-6 py-3 bg-zinc-100 text-zinc-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all border border-zinc-200"
+                      className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-secondary)] transition-all border border-[var(--border-color)]"
                     >
                       <FileText size={16} />
                       Report (PDF)
@@ -539,26 +539,26 @@ export const AdminDashboard: React.FC = () => {
                         setEditingProduct(null);
                         setActiveTab('add');
                       }}
-                      className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-zinc-900/20"
+                      className="flex items-center gap-2 px-8 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-red-600/20"
                     >
                       <Plus size={18} />
                       Add Product
                     </button>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+                <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm">
                   <table className="w-full text-left">
-                    <thead className="bg-zinc-50 border-b border-zinc-200">
+                    <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
                       <tr>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Product</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">SKU</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Stock</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Price</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700">Discount</th>
-                        <th className="px-6 py-4 font-semibold text-zinc-700 text-right">Actions</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)]">Product</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)]">SKU</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)]">Stock</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)]">Price</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)]">Discount</th>
+                        <th className="px-6 py-4 font-semibold text-[var(--text-secondary)] text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-[var(--border-color)]">
                       {isLoading ? (
                         [...Array(5)].map((_, i) => (
                           <tr key={i}>
@@ -569,10 +569,10 @@ export const AdminDashboard: React.FC = () => {
                         ))
                       ) : filteredProducts.length > 0 ? (
                         filteredProducts.map(product => (
-                          <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
+                          <tr key={product.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-400 relative">
+                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] relative">
                                   {product.image || (product.images && product.images.length > 0) ? (
                                     <img 
                                       src={product.images && product.images.length > 0 ? product.images[0] : product.image} 
@@ -584,28 +584,28 @@ export const AdminDashboard: React.FC = () => {
                                   )}
                                 </div>
                                 <div>
-                                  <div className="font-bold text-zinc-900">{product.name}</div>
-                                  <div className="text-xs text-zinc-500 truncate max-w-[200px]">{product.description}</div>
+                                  <div className="font-bold text-[var(--text-primary)]">{product.name}</div>
+                                  <div className="text-xs text-[var(--text-secondary)] truncate max-w-[200px]">{product.description}</div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm font-mono text-zinc-500">{product.sku || '-'}</td>
+                            <td className="px-6 py-4 text-sm font-mono text-[var(--text-secondary)]">{product.sku || '-'}</td>
                             <td className="px-6 py-4">
-                              <div className={`font-bold ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-zinc-900'}`}>
+                              <div className={`font-bold ${product.stock <= (product.minStockLevel || 0) ? 'text-red-600' : 'text-[var(--text-primary)]'}`}>
                                 {product.stock}
                               </div>
                               {product.stock <= (product.minStockLevel || 0) && (
                                 <div className="text-[10px] text-red-500 font-bold uppercase">Low Stock</div>
                               )}
                             </td>
-                            <td className="px-6 py-4 text-zinc-600 font-medium">€{product.price}</td>
+                            <td className="px-6 py-4 text-[var(--text-secondary)] font-medium">€{product.price}</td>
                             <td className="px-6 py-4">
                               {product.discount ? (
                                 <span className="px-2 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-bold">
                                   -{product.discount}%
                                 </span>
                               ) : (
-                                <span className="text-zinc-400 text-xs">-</span>
+                                <span className="text-[var(--text-secondary)] opacity-50 text-xs">-</span>
                               )}
                             </td>
                             <td className="px-6 py-4 text-right">
@@ -615,7 +615,7 @@ export const AdminDashboard: React.FC = () => {
                                     setEditingProduct(product);
                                     setActiveTab('add');
                                   }}
-                                  className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
+                                  className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-all"
                                 >
                                   <Edit size={18} />
                                 </button>
@@ -632,7 +632,7 @@ export const AdminDashboard: React.FC = () => {
                       ) : (
                         <tr>
                           <td colSpan={6} className="px-6 py-20 text-center">
-                            <div className="flex flex-col items-center justify-center text-zinc-400">
+                            <div className="flex flex-col items-center justify-center text-[var(--text-secondary)]">
                               <Package size={48} className="mb-4 opacity-20" />
                               <p className="font-black uppercase tracking-widest text-xs">No products found</p>
                             </div>
@@ -713,15 +713,15 @@ export const AdminDashboard: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl border border-zinc-200">
+                <div className="flex items-center justify-between mb-6 bg-[var(--bg-secondary)] p-4 rounded-2xl border border-[var(--border-color)]">
                   <div className="relative w-80">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                     <input
                       type="text"
                       placeholder="Search articles..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all text-sm font-bold"
+                      className="w-full pl-12 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl outline-none focus:ring-2 focus:ring-red-600 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
@@ -805,15 +805,15 @@ export const AdminDashboard: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-zinc-900 border border-zinc-800 p-8 rounded-[32px] max-w-md w-full shadow-2xl"
+              className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-[32px] max-w-md w-full shadow-2xl"
             >
-              <h3 className="text-xl font-bold text-white mb-4">Confirm Action</h3>
-              <p className="text-zinc-400 mb-8 leading-relaxed font-medium">{confirmDialog.message}</p>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">Confirm Action</h3>
+              <p className="text-[var(--text-secondary)] mb-8 leading-relaxed font-medium">{confirmDialog.message}</p>
               <div className="flex gap-4">
                 <button
                   onClick={() => setConfirmDialog(null)}
                   disabled={isConfirmingAction}
-                  className="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl font-bold transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl font-bold transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -828,7 +828,7 @@ export const AdminDashboard: React.FC = () => {
                     }
                   }}
                   disabled={isConfirmingAction}
-                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-red-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isConfirmingAction ? (
                     <>
@@ -864,8 +864,8 @@ const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { 
   <button
     onClick={onClick}
     className={`w-full flex flex-col gap-1 px-4 py-3 rounded-xl transition-all group ${active
-      ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20'
-      : 'text-zinc-500 hover:bg-zinc-100'
+      ? 'bg-white/20 text-white shadow-xl backdrop-blur-md'
+      : 'text-[var(--admin-sidebar-text)] hover:bg-white/10 hover:text-white'
       }`}
   >
     <div className="flex items-center gap-3 w-full">
@@ -874,7 +874,7 @@ const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { 
       {active && <ChevronRight size={14} className="ml-auto opacity-50" />}
     </div>
     {showHelp && description && (
-      <span className={`text-[10px] text-left font-medium transition-all ${active ? 'text-zinc-400' : 'text-zinc-400'}`}>
+      <span className={`text-[10px] text-left font-medium transition-all ${active ? 'text-white/90' : 'text-white/50'}`}>
         {description}
       </span>
     )}
@@ -884,14 +884,14 @@ const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { 
 const QuickLink = ({ title, desc, onClick, icon }: { title: string, desc: string, onClick: () => void, icon: any }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition-all text-left group"
+    className="flex items-center gap-4 p-4 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl transition-all text-left group"
   >
-    <div className="w-10 h-10 bg-zinc-700 group-hover:bg-zinc-600 rounded-xl flex items-center justify-center text-white transition-all">
+    <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white transition-all shadow-lg shadow-red-600/20">
       {icon}
     </div>
     <div>
-      <div className="font-bold text-sm text-white">{title}</div>
-      <div className="text-xs text-zinc-400">{desc}</div>
+      <div className="font-bold text-sm text-[var(--text-primary)]">{title}</div>
+      <div className="text-xs text-[var(--text-secondary)]">{desc}</div>
     </div>
   </button>
 );

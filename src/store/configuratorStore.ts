@@ -72,7 +72,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     set({ 
       activeProduct: product, 
       selectedParts: {}, 
-      totalPrice: Number(product.price),
+      totalPrice: Number(product.price) || 0,
       selectedSlotId: null,
       showMarkers: true,
       showHUD: true,
@@ -127,7 +127,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   resetConfiguration: () => {
     const { activeProduct } = get();
     if (activeProduct) {
-      set({ selectedParts: {}, totalPrice: Number(activeProduct.price) });
+      set({ selectedParts: {}, totalPrice: Number(activeProduct.price) || 0 });
     }
   },
 
@@ -139,7 +139,8 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       return acc + (Number(part?.price) || 0);
     }, 0);
 
-    set({ totalPrice: Number(activeProduct.price) + partsPrice });
+    const basePrice = Number(activeProduct.price) || 0;
+    set({ totalPrice: basePrice + partsPrice });
   },
 
   saveBuild: async (name) => {

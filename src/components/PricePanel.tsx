@@ -61,28 +61,28 @@ export const PricePanel: React.FC = () => {
   };
 
   return (
-    <div className="h-auto md:h-24 bg-[#09090b] border-t border-zinc-800 px-4 sm:px-8 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="h-auto md:h-24 bg-[var(--bg-secondary)] border-t border-[var(--border-color)] px-4 sm:px-8 py-4 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors duration-300">
       <div className="flex items-center justify-between w-full md:w-auto md:gap-12">
         <div>
-          <p className="text-zinc-500 text-[8px] md:text-[10px] uppercase font-bold tracking-widest mb-1">{t('total_configuration_price')}</p>
+          <p className="text-[var(--text-secondary)] text-[8px] md:text-[10px] uppercase font-bold tracking-widest mb-1">{t('total_configuration_price')}</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl md:text-3xl font-black text-white font-mono">€{totalPrice.toLocaleString()}</span>
+            <span className="text-2xl md:text-3xl font-black text-[var(--text-primary)] font-mono">€{totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             <span className="text-red-500 text-[10px] md:text-xs font-bold uppercase">EUR</span>
           </div>
         </div>
         
-        <div className="hidden md:block h-10 w-px bg-zinc-800" />
+        <div className="hidden md:block h-10 w-px bg-[var(--border-color)]" />
         
         <div className="text-right md:text-left">
-          <p className="text-zinc-500 text-[8px] md:text-[10px] uppercase font-bold tracking-widest mb-1">{t('active_attachments')}</p>
-          <p className="text-lg md:text-xl font-bold text-zinc-300">{partsCount}</p>
+          <p className="text-[var(--text-secondary)] text-[8px] md:text-[10px] uppercase font-bold tracking-widest mb-1">{t('active_attachments')}</p>
+          <p className="text-lg md:text-xl font-bold text-[var(--text-primary)]">{partsCount}</p>
         </div>
       </div>
       
       <div className="grid grid-cols-2 md:flex md:items-center gap-2 sm:gap-4 w-full md:w-auto">
         <button 
           onClick={() => setIsSaveModalOpen(true)}
-          className={`col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 ${isSaving ? 'text-emerald-500' : 'text-zinc-400 hover:text-white'} transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[#18181b] md:bg-transparent rounded-xl md:rounded-none`}
+          className={`col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 ${isSaving ? 'text-emerald-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'} transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[var(--bg-tertiary)] md:bg-transparent rounded-xl md:rounded-none`}
         >
           {isSaving ? <Check size={18} /> : <Save size={18} />}
           {isSaving ? t('saved') : t('save')}
@@ -97,7 +97,7 @@ export const PricePanel: React.FC = () => {
 
         <button 
           onClick={resetConfiguration}
-          className="col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 text-zinc-400 hover:text-white transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[#18181b] md:bg-transparent rounded-xl md:rounded-none"
+          className="col-span-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-[10px] md:text-sm font-bold uppercase tracking-wider bg-[var(--bg-tertiary)] md:bg-transparent rounded-xl md:rounded-none"
         >
           <RotateCcw size={18} />
           {t('reset')}

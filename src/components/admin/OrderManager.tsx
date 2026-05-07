@@ -105,24 +105,24 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] shadow-sm">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
             <input 
               type="text" 
               placeholder="Search orders, email, or customer..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 transition-all"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
             <select 
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="pl-12 pr-10 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:ring-2 focus:ring-zinc-900 appearance-none font-bold text-xs uppercase tracking-widest"
+              className="pl-12 pr-10 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-2xl outline-none focus:ring-2 focus:ring-red-600 appearance-none font-bold text-xs uppercase tracking-widest"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -136,49 +136,49 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsReportModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-zinc-900/20"
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-red-600/20"
           >
             <FileText size={16} />
             Generate Report (PDF)
           </button>
           <button 
             onClick={() => exportOrdersToCSV(filteredOrders)}
-            className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all"
+            className="px-6 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-secondary)] transition-all border border-[var(--border-color)]"
           >
             Export CSV
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm">
+      <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[var(--border-color)] overflow-hidden shadow-sm">
         <table className="w-full text-left">
-          <thead className="bg-zinc-50 border-b border-zinc-200">
+          <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
             <tr>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500">Order ID</th>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500">Customer</th>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500">Date</th>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500">Total</th>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500">Status</th>
-              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-zinc-500 text-right">Actions</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Order ID</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Customer</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Date</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Total</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)]">Status</th>
+              <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-[var(--text-secondary)] text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody className="divide-y divide-[var(--border-color)]">
             {filteredOrders.map(order => (
-              <tr key={order.id} className="hover:bg-zinc-50/50 transition-colors group">
+              <tr key={order.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors group">
                 <td className="px-6 py-4">
-                  <span className="font-mono text-xs font-bold text-zinc-400">#{order.id.slice(-8).toUpperCase()}</span>
+                  <span className="font-mono text-xs font-bold text-[var(--text-secondary)]">#{order.id.slice(-8).toUpperCase()}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-bold text-zinc-900">{order.shipping?.fullName || 'N/A'}</div>
-                  <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{order.shipping?.email || 'N/A'}</div>
+                  <div className="font-bold text-[var(--text-primary)]">{order.shipping?.fullName || 'N/A'}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{order.shipping?.email || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-zinc-600">{new Date(order.createdAt).toLocaleDateString()}</div>
-                  <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  <div className="text-sm text-[var(--text-secondary)]">{new Date(order.createdAt).toLocaleDateString()}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-black text-zinc-900">€{order.total.toFixed(2)}</div>
-                  <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{order.items.length} items</div>
+                  <div className="font-black text-[var(--text-primary)]">€{order.total.toFixed(2)}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{order.items.length} items</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
@@ -190,14 +190,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => setSelectedOrder(order)}
-                      className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all"
+                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-xl transition-all"
                       title="View Details"
                     >
                       <Eye size={18} />
                     </button>
                     <button 
                       onClick={() => generateSingleOrderInvoice(order)}
-                      className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-all" 
+                      className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-xl transition-all" 
                       title="Print Local Invoice"
                     >
                       <FileText size={18} />
@@ -205,7 +205,7 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                     {order.payment?.method === 'stripe' && order.payment?.transactionId && (
                       <button 
                         onClick={() => window.open(`https://dashboard.stripe.com/payments/${order.payment.transactionId}`, '_blank')}
-                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" 
+                        className="p-2 text-emerald-600 hover:bg-emerald-600/10 rounded-xl transition-all" 
                         title="View Stripe Payment"
                       >
                         <CreditCard size={18} />
@@ -254,16 +254,16 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              className="relative w-full max-w-5xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] z-[101]"
+              className="relative w-full max-w-5xl bg-[var(--bg-secondary)] rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] z-[101] border border-[var(--border-color)]"
             >
-              <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-900 text-white">
+              <div className="p-8 border-b border-[var(--border-color)] flex items-center justify-between bg-red-600 text-white">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
                     <ShoppingBag size={24} />
                   </div>
                   <div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter">Order Details</h3>
-                    <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">#{selectedOrder.id.toUpperCase()}</p>
+                    <p className="text-white/60 text-xs font-bold uppercase tracking-widest">#{selectedOrder.id.toUpperCase()}</p>
                   </div>
                 </div>
                 <button 
@@ -278,33 +278,33 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-8">
                     {/* Items Section */}
-                    <div className="bg-zinc-50 rounded-3xl p-6 border border-zinc-100">
-                      <h4 className="font-black uppercase tracking-widest text-xs text-zinc-400 mb-6 flex items-center gap-2">
+                    <div className="bg-[var(--bg-tertiary)] rounded-3xl p-6 border border-[var(--border-color)]">
+                      <h4 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-6 flex items-center gap-2">
                         <Package size={16} />
                         Order Items ({selectedOrder.items.length})
                       </h4>
                       <div className="space-y-4">
                         {selectedOrder.items.map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-zinc-100 shadow-sm">
-                            <div className="w-20 h-20 bg-zinc-100 rounded-xl overflow-hidden shrink-0">
+                          <div key={idx} className="flex items-center gap-4 p-4 bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-color)] shadow-sm">
+                            <div className="w-20 h-20 bg-[var(--bg-primary)] rounded-xl overflow-hidden shrink-0 border border-[var(--border-color)]">
                               {item.image ? (
                                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                                <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)] opacity-30">
                                   <Package size={24} />
                                 </div>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h5 className="font-black text-zinc-900 truncate">{item.name}</h5>
+                              <h5 className="font-black text-[var(--text-primary)] truncate">{item.name}</h5>
                               <div className="flex items-center gap-3 mt-1">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Qty: {item.quantity}</span>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">SKU: {item.sku || 'N/A'}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Qty: {item.quantity}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">SKU: {item.sku || 'N/A'}</span>
                               </div>
                               {item.configuration && typeof item.configuration === 'object' && (
                                 <div className="mt-2 flex flex-wrap gap-1">
                                   {Object.entries(item.configuration).map(([key, val]) => (
-                                    <span key={key} className="px-2 py-0.5 bg-zinc-100 rounded text-[8px] font-bold uppercase text-zinc-500">
+                                    <span key={key} className="px-2 py-0.5 bg-[var(--bg-tertiary)] rounded text-[8px] font-bold uppercase text-[var(--text-secondary)]">
                                       {key}: {String(val)}
                                     </span>
                                   ))}
@@ -312,8 +312,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                               )}
                             </div>
                             <div className="text-right">
-                              <div className="font-black text-zinc-900">€{(item.price * item.quantity).toFixed(2)}</div>
-                              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">€{item.price.toFixed(2)} ea</div>
+                              <div className="font-black text-[var(--text-primary)]">€{(item.price * item.quantity).toFixed(2)}</div>
+                              <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">€{item.price.toFixed(2)} ea</div>
                             </div>
                           </div>
                         ))}
@@ -321,8 +321,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                     </div>
 
                     {/* Order Timeline / Status Update */}
-                    <div className="bg-white rounded-3xl p-6 border border-zinc-200">
-                      <h4 className="font-black uppercase tracking-widest text-xs text-zinc-400 mb-6 flex items-center gap-2">
+                    <div className="bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[var(--border-color)]">
+                      <h4 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-6 flex items-center gap-2">
                         <Clock size={16} />
                         Order Status Management
                       </h4>
@@ -333,8 +333,8 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                             onClick={() => handleUpdateStatus(selectedOrder.id, status as Order['status'])}
                             className={`px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
                               selectedOrder.status === status 
-                                ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg' 
-                                : 'bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200'
+                                ? 'bg-red-600 text-white border-red-600 shadow-lg' 
+                                : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-red-600/50'
                             }`}
                           >
                             {formatEnum(status)}
@@ -346,28 +346,28 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
 
                   <div className="space-y-6">
                     {/* Customer Info */}
-                    <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
-                      <h4 className="font-black uppercase tracking-widest text-xs text-zinc-400 mb-6 flex items-center gap-2">
+                    <div className="bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[var(--border-color)] shadow-sm">
+                      <h4 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-6 flex items-center gap-2">
                         <User size={16} />
                         Customer Information
                       </h4>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-zinc-100 rounded-xl flex items-center justify-center text-zinc-500">
+                          <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center text-[var(--text-secondary)]">
                             <User size={20} />
                           </div>
                           <div>
-                            <div className="font-bold text-sm">{selectedOrder.shipping?.fullName || 'Guest'}</div>
-                            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Customer ID: {selectedOrder.userId || 'Guest'}</div>
+                            <div className="font-bold text-sm text-[var(--text-primary)]">{selectedOrder.shipping?.fullName || 'Guest'}</div>
+                            <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Customer ID: {selectedOrder.userId || 'Guest'}</div>
                           </div>
                         </div>
-                        <div className="space-y-2 pt-4 border-t border-zinc-50">
-                          <div className="flex items-center gap-3 text-zinc-600">
-                            <Mail size={16} className="text-zinc-400" />
+                        <div className="space-y-2 pt-4 border-t border-[var(--border-color)]">
+                          <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                            <Mail size={16} className="text-[var(--text-secondary)] opacity-50" />
                             <span className="text-xs font-medium">{selectedOrder.shipping?.email || 'No email provided'}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-zinc-600">
-                            <Phone size={16} className="text-zinc-400" />
+                          <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                            <Phone size={16} className="text-[var(--text-secondary)] opacity-50" />
                             <span className="text-xs font-medium">{selectedOrder.shipping?.phone || 'No phone provided'}</span>
                           </div>
                         </div>
@@ -375,19 +375,19 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                     </div>
 
                     {/* Shipping Address */}
-                    <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
-                      <h4 className="font-black uppercase tracking-widest text-xs text-zinc-400 mb-6 flex items-center gap-2">
+                    <div className="bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[var(--border-color)] shadow-sm">
+                      <h4 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-6 flex items-center gap-2">
                         <MapPin size={16} />
                         Shipping Address
                       </h4>
                       {selectedOrder.shipping ? (
-                        <div className="text-sm text-zinc-600 space-y-1">
-                          <p className="font-bold text-zinc-900">{selectedOrder.shipping.fullName}</p>
+                        <div className="text-sm text-[var(--text-secondary)] space-y-1">
+                          <p className="font-bold text-[var(--text-primary)]">{selectedOrder.shipping.fullName}</p>
                           <p>{selectedOrder.shipping.address}</p>
                           <p>{selectedOrder.shipping.city}, {selectedOrder.shipping.postalCode}</p>
                         </div>
                       ) : (
-                        <div className="text-sm text-zinc-400 italic">No shipping information available</div>
+                        <div className="text-sm text-[var(--text-secondary)] opacity-50 italic">No shipping information available</div>
                       )}
                     </div>
 
@@ -424,9 +424,9 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 </div>
               </div>
 
-              <div className="p-8 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
+              <div className="p-8 bg-[var(--bg-tertiary)] border-t border-[var(--border-color)] flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 text-zinc-400">
+                  <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                     <Calendar size={16} />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Ordered on {new Date(selectedOrder.createdAt).toLocaleString()}</span>
                   </div>
@@ -434,14 +434,14 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                 <div className="flex gap-3">
                   <button 
                     onClick={() => generateSingleOrderInvoice(selectedOrder)}
-                    className="px-6 py-3 bg-white border border-zinc-200 text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-50 transition-all"
+                    className="px-6 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all"
                   >
                     Download Invoice
                   </button>
                   <button 
                     onClick={() => handleUpdateStatus(selectedOrder.id, 'shipped')}
                     disabled={selectedOrder.status === 'shipped' || selectedOrder.status === 'delivered'}
-                    className="px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all disabled:opacity-50"
+                    className="px-8 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all disabled:opacity-50 shadow-lg shadow-red-600/20"
                   >
                     Mark as Shipped
                   </button>

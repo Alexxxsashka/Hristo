@@ -12,7 +12,25 @@
   --card-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.05);
   --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --header-bg: #dc2626; /* Red 600 */
+  --header-bg: #ab1017;
+  --footer-bg: #ab1017;
+  --admin-sidebar-bg: #ab1017;
+  --admin-topbar-bg: #ab1017;
+  --admin-sidebar-text: rgba(255, 255, 255, 0.7);
+  --admin-sidebar-text-active: #ffffff;
+
+  /* Brand Color Overrides (Tailwind v4) */
+  --color-red-50: #fff1f2;
+  --color-red-100: #ffe4e6;
+  --color-red-200: #fecdd3;
+  --color-red-300: #fda4af;
+  --color-red-400: #fb7185;
+  --color-red-500: #e11d48;
+  --color-red-600: #ab1017; /* Core Brand Red */
+  --color-red-700: #8a0d12;
+  --color-red-800: #6b0a0e;
+  --color-red-900: #4a070a;
+  --color-red-950: #2a0406;
 
   /* Tailwind v4 variable mapping (to avoid @theme warning) */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -45,42 +63,47 @@
 }
 
 .light {
-  --bg-primary: #f8f9fa;
+  --bg-primary: #fdfdfd;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f4f4f5; /* zinc-100 */
-  --text-primary: #09090b; /* zinc-950 */
-  --text-secondary: #52525b; /* zinc-600 */
-  --border-color: #e4e4e7; /* zinc-200 */
+  --text-primary: #000000;
+  --text-secondary: #18181b; /* zinc-900 for better contrast */
+  --border-color: #d1d5db; /* gray-300 */
   --panel-bg: rgba(255, 255, 255, 0.8);
   --card-bg: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(0, 0, 0, 0.05);
   --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-  --header-bg: #dc2626; /* Red 600 */
+  --header-bg: #ab1017;
+  --footer-bg: #ab1017;
+  --admin-sidebar-bg: #ab1017;
+  --admin-topbar-bg: #ab1017;
+  --admin-sidebar-text: rgba(255, 255, 255, 0.8);
+  --admin-sidebar-text-active: #ffffff;
 
-  --zinc-950: #fafafa;
-  --zinc-900: #f4f4f5;
-  --zinc-800: #e4e4e7;
-  --zinc-700: #d4d4d8;
-  --zinc-600: #a1a1aa;
+  --zinc-950: #09090b;
+  --zinc-900: #18181b;
+  --zinc-800: #27272a;
+  --zinc-700: #3f3f46;
+  --zinc-600: #52525b;
   --zinc-500: #71717a;
-  --zinc-400: #52525b;
-  --zinc-300: #3f3f46;
-  --zinc-200: #27272a;
-  --zinc-100: #18181b;
-  --zinc-50: #09090b;
+  --zinc-400: #a1a1aa;
+  --zinc-300: #d4d4d8;
+  --zinc-200: #e4e4e7;
+  --zinc-100: #f4f4f5;
+  --zinc-50: #fafafa;
 
-  /* Update Tailwind colors for light theme */
-  --color-zinc-950: var(--zinc-950);
-  --color-zinc-900: var(--zinc-900);
-  --color-zinc-800: var(--zinc-800);
-  --color-zinc-700: var(--zinc-700);
-  --color-zinc-600: var(--zinc-600);
-  --color-zinc-500: var(--zinc-500);
-  --color-zinc-400: var(--zinc-400);
-  --color-zinc-300: var(--zinc-300);
-  --color-zinc-200: var(--zinc-200);
-  --color-zinc-100: var(--zinc-100);
-  --color-zinc-50: var(--zinc-50);
+  /* Ensure Tailwind colors remain consistent in light theme for text visibility */
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-600: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-50: #fafafa;
 }
 
 @layer base {

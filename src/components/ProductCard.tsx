@@ -113,7 +113,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className={`group relative bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-red-600/50 hover:shadow-2xl hover:shadow-red-600/5 transition-all duration-500 hover-lift ${
+        className={`group relative bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl overflow-hidden hover:border-red-600/50 hover:shadow-2xl hover:shadow-red-600/5 transition-all duration-500 hover-lift shadow-sm ${
           viewMode === 'list' ? 'flex flex-col md:flex-row w-full' : ''
         }`}
       >
@@ -121,7 +121,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           to={`/product/${product.id}/${product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`} 
           className={`block ${viewMode === 'list' ? 'flex flex-col md:flex-row w-full' : ''}`}
         >
-          <div className={`relative overflow-hidden bg-zinc-950 ${
+          <div className={`relative overflow-hidden bg-[var(--bg-primary)] ${
             viewMode === 'list' ? 'w-full md:w-64 aspect-square md:aspect-auto' : 'aspect-square'
           }`}>
             {(() => {
@@ -148,11 +148,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-              <span className="px-3 py-1 bg-zinc-900/80 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-zinc-100 rounded-lg border border-zinc-700">
+              <span className="px-3 py-1 bg-[var(--bg-secondary)]/80 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)] rounded-lg border border-[var(--border-color)]">
                 {product.brand}
               </span>
               {product.stock <= 0 ? (
-                <span className="px-3 py-1 bg-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-lg border border-zinc-700">
+                <span className="px-3 py-1 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] text-[10px] font-black uppercase tracking-widest rounded-lg border border-[var(--border-color)]">
                   Out of Stock
                 </span>
               ) : (
@@ -168,7 +168,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               className={`absolute top-4 right-4 p-2 rounded-xl backdrop-blur-md border transition-all z-10 ${
                 isInWishlist(product.id)
                   ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20'
-                  : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'
+                  : 'bg-[var(--bg-secondary)]/80 border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-red-600/50'
               }`}
             >
               <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
@@ -177,7 +177,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {/* Quick Preview Button */}
             <button
               onClick={handleQuickPreview}
-              className="absolute bottom-4 left-4 right-4 py-3 bg-zinc-900/90 backdrop-blur-xl text-white text-[10px] font-black uppercase tracking-widest rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 shadow-2xl border border-zinc-800 flex items-center justify-center gap-2 hover:bg-red-600 hover:border-red-500"
+              className="absolute bottom-4 left-4 right-4 py-3 bg-[var(--bg-secondary)]/90 backdrop-blur-xl text-[var(--text-primary)] text-[10px] font-black uppercase tracking-widest rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 shadow-2xl border border-[var(--border-color)] flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white hover:border-red-500"
             >
               <Eye size={14} />
               Quick View
@@ -187,45 +187,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className={`p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-between ${viewMode === 'list' ? 'space-y-3 sm:space-y-4 md:space-y-6' : 'space-y-2 md:space-y-4'}`}>
             <div className="space-y-1 md:space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[7px] xs:text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] truncate">
+                <span className="text-[7px] xs:text-[8px] sm:text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] truncate">
                   {product.category}
                 </span>
                 <div className="flex flex-col items-end shrink-0">
-                  <span className={`${viewMode === 'list' ? 'text-base sm:text-lg md:text-2xl' : 'text-xs sm:text-base md:text-xl'} font-black text-white tracking-tighter`}>
+                  <span className={`${viewMode === 'list' ? 'text-base sm:text-lg md:text-2xl' : 'text-xs sm:text-base md:text-xl'} font-black text-[var(--text-primary)] tracking-tighter`}>
                     €{getDiscountedPrice(Number(product.price), product.discount).toFixed(2)}
                   </span>
                   {product.discount > 0 && (
-                    <span className="text-[7px] xs:text-[8px] sm:text-[10px] text-zinc-600 line-through font-bold">
+                    <span className="text-[7px] xs:text-[8px] sm:text-[10px] text-[var(--text-secondary)] line-through font-bold">
                       €{Number(product.price).toFixed(2)}
                     </span>
                   )}
                 </div>
               </div>
-              <h3 className={`${viewMode === 'list' ? 'text-sm sm:text-base md:text-xl' : 'text-[9px] xs:text-[10px] sm:text-xs md:text-sm'} font-bold text-zinc-100 group-hover:text-red-500 transition-colors line-clamp-2 leading-snug uppercase tracking-tight`}>
+              <h3 className={`${viewMode === 'list' ? 'text-sm sm:text-base md:text-xl' : 'text-[9px] xs:text-[10px] sm:text-xs md:text-sm'} font-bold text-[var(--text-primary)] group-hover:text-red-600 transition-colors line-clamp-2 leading-snug uppercase tracking-tight`}>
                 {language === 'HR' && product.nameHr ? product.nameHr : product.name}
               </h3>
               {viewMode === 'list' && (product.description || product.longDescription) && (
                 <div className="space-y-2 mt-1 md:mt-2">
                   {product.description && (
-                    <p className="text-[10px] sm:text-xs md:text-sm text-zinc-500 line-clamp-2 font-medium">
+                    <p className="text-[10px] sm:text-xs md:text-sm text-[var(--text-secondary)] line-clamp-2 font-medium">
                       {language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
                     </p>
                   )}
                   {product.longDescription && (
-                    <p className="text-[9px] sm:text-[10px] md:text-xs text-zinc-600 line-clamp-3 font-medium italic border-l-2 border-zinc-800 pl-3">
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-[var(--text-secondary)] line-clamp-3 font-medium italic border-l-2 border-[var(--border-color)] pl-3">
                       {product.longDescription}
                     </p>
                   )}
                 </div>
               )}
               {variantAttributes.length > 0 && (
-                <div className="space-y-3 py-3 border-t border-zinc-800/50 mt-2">
+                <div className="space-y-3 py-3 border-t border-[var(--border-color)] mt-2">
                   {variantAttributes.map((attr: any) => (
                     <div key={attr.name} className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">{attr.name}</span>
+                        <span className="text-[9px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em]">{attr.name}</span>
                         {selectedAttributes[attr.name] && (
-                          <span className="text-[9px] font-bold text-red-500 uppercase">{selectedAttributes[attr.name]}</span>
+                          <span className="text-[9px] font-bold text-red-600 uppercase">{selectedAttributes[attr.name]}</span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -243,7 +243,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                               className={`h-7 min-w-[28px] px-2 rounded-lg text-[9px] font-black uppercase transition-all border flex items-center justify-center ${
                                 isSelected
                                   ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20 scale-105'
-                                  : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                                  : 'bg-[var(--bg-primary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-red-600/50 hover:text-[var(--text-primary)]'
                               }`}
                             >
                               {opt}
@@ -257,15 +257,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               )}
             </div>
 
-            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 pt-4 border-t border-zinc-800/50 mt-auto">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 pt-4 border-t border-[var(--border-color)] mt-auto">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock <= 0}
                 className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   product.stock <= 0 
-                    ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
+                    ? 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] cursor-not-allowed' 
                     : (variantAttributes.length > 0 && !variantAttributes.every((attr: any) => selectedAttributes[attr.name]))
-                      ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                      ? 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
                       : 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20 active:scale-[0.98]'
                 }`}
               >
@@ -284,8 +284,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   onClick={handleCompare}
                   className={`p-3 xs:p-3.5 rounded-xl border transition-all ${
                     isInCompare(product.id)
-                      ? 'bg-zinc-100 border-white text-black'
-                      : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white'
+                      ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-primary)]'
+                      : 'bg-[var(--bg-primary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-red-600/50 hover:text-red-600'
                   }`}
                   title={t('compare')}
                 >
@@ -295,7 +295,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {(product.has3D) && (
                   <button
                     onClick={handleConfigure}
-                    className="p-3 xs:p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:border-red-600/50 hover:text-red-500 transition-all"
+                    className="p-3 xs:p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-red-600/50 hover:text-red-600 transition-all"
                     title={t('configure')}
                   >
                     <Settings size={16} />
@@ -305,7 +305,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {(Number(product.price) > 0 || (product.variants && product.variants.length > 0)) && (
                   <button 
                     onClick={handleAddToCart}
-                    className="p-3 xs:p-3.5 bg-zinc-950 hover:bg-red-600 text-zinc-500 hover:text-white rounded-xl transition-all border border-zinc-800 hover:border-red-600 shadow-lg active:scale-95"
+                    className="p-3 xs:p-3.5 bg-[var(--bg-primary)] hover:bg-red-600 text-[var(--text-secondary)] hover:text-white rounded-xl transition-all border border-[var(--border-color)] hover:border-red-600 shadow-lg active:scale-95"
                     title={t('add_to_cart')}
                   >
                     <Zap className="w-4 h-4" />

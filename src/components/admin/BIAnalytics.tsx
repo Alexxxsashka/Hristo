@@ -194,11 +194,11 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Revenue Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
+        <div className="lg:col-span-2 bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h4 className="text-xl font-black uppercase tracking-tighter">Revenue Overview</h4>
-              <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mt-1">
+              <h4 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">Revenue Overview</h4>
+              <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mt-1">
                 {timeRange === 'weekly' ? 'Weekly' : 'Monthly'} performance tracking
               </p>
             </div>
@@ -207,8 +207,8 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
                 onClick={() => setTimeRange('weekly')}
                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   timeRange === 'weekly' 
-                    ? 'bg-zinc-900 text-white shadow-lg' 
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]'
                 }`}
               >
                 Weekly
@@ -217,8 +217,8 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
                 onClick={() => setTimeRange('monthly')}
                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   timeRange === 'monthly' 
-                    ? 'bg-zinc-900 text-white shadow-lg' 
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]'
                 }`}
               >
                 Monthly
@@ -234,28 +234,31 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#a1a1aa' }}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#a1a1aa' }}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
                   dx={-10}
                 />
                 <Tooltip 
                   contentStyle={{ 
                     borderRadius: '16px', 
                     border: 'none', 
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
                     fontSize: '12px',
-                    fontWeight: '700'
+                    fontWeight: '700',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)'
                   }} 
+                  itemStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Area 
                   type="monotone" 
@@ -271,8 +274,8 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
-          <h4 className="text-xl font-black uppercase tracking-tighter mb-8">Sales by Category</h4>
+        <div className="bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
+          <h4 className="text-xl font-black uppercase tracking-tighter mb-8 text-[var(--text-primary)]">Sales by Category</h4>
           <div className="h-[300px] w-full relative">
             <ResponsiveContainer width="100%" height={300} minHeight={300}>
               <PieChart>
@@ -293,8 +296,8 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black">{orders.reduce((acc, o) => acc + (o.items || []).reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), 0).toLocaleString()}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Total Units Sold</span>
+              <span className="text-2xl font-black text-[var(--text-primary)]">{orders.reduce((acc, o) => acc + (o.items || []).reduce((sum, i) => sum + (Number(i.quantity) || 0), 0), 0).toLocaleString()}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Total Units Sold</span>
             </div>
           </div>
           <div className="mt-8 space-y-3">
@@ -302,9 +305,9 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs font-bold text-zinc-600">{item.name}</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)]">{item.name}</span>
                 </div>
-                <span className="text-xs font-black text-zinc-900">{item.value}</span>
+                <span className="text-xs font-black text-[var(--text-primary)]">{item.value}</span>
               </div>
             ))}
           </div>
@@ -313,9 +316,9 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Customer Growth Real Data */}
-        <div className="bg-white p-8 rounded-[32px] border border-zinc-200 shadow-sm">
+        <div className="bg-[var(--bg-secondary)] p-8 rounded-[32px] border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between mb-8">
-            <h4 className="text-xl font-black uppercase tracking-tighter">Customer Growth</h4>
+            <h4 className="text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">Customer Growth</h4>
             <div className="flex items-center gap-2 text-emerald-500">
               <Users size={16} />
               <span className="text-xs font-black">+{totalNewUsersInPeriod} New This {timeRange === 'weekly' ? 'Week' : 'Period'}</span>
@@ -324,21 +327,28 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height={200} minHeight={200}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#a1a1aa' }}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#a1a1aa' }}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--text-secondary)' }}
                 />
                 <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                  cursor={{ fill: 'var(--bg-tertiary)' }}
+                  contentStyle={{ 
+                    borderRadius: '12px', 
+                    border: 'none', 
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)'
+                  }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
                 />
                 <Bar dataKey="users" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={30} />
               </BarChart>
@@ -353,19 +363,19 @@ export const BIAnalytics = ({ orders, users = [] }: { orders: Order[], users?: a
 const StatCard = ({ title, value, trend, isUp, icon, color }: any) => (
   <motion.div 
     whileHover={{ y: -5 }}
-    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-sm relative overflow-hidden group"
+    className="bg-[var(--bg-secondary)] p-6 rounded-[32px] border border-[var(--border-color)] shadow-sm relative overflow-hidden group transition-colors duration-300"
   >
-    <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-500 ${
+    <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10 group-hover:scale-150 transition-transform duration-500 ${
       color === 'emerald' ? 'bg-emerald-500' : 
       color === 'blue' ? 'bg-blue-500' : 
       color === 'amber' ? 'bg-amber-500' : 'bg-violet-500'
     }`} />
     
     <div className="flex items-center justify-between mb-4">
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
-        color === 'emerald' ? 'bg-emerald-50 text-emerald-600' : 
-        color === 'blue' ? 'bg-blue-50 text-blue-600' : 
-        color === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-violet-50 text-violet-600'
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-tertiary)] ${
+        color === 'emerald' ? 'text-emerald-500' : 
+        color === 'blue' ? 'text-blue-500' : 
+        color === 'amber' ? 'text-amber-500' : 'text-violet-500'
       }`}>
         {icon}
       </div>
@@ -376,8 +386,8 @@ const StatCard = ({ title, value, trend, isUp, icon, color }: any) => (
     </div>
     
     <div className="space-y-1">
-      <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{title}</h5>
-      <div className="text-2xl font-black text-zinc-900">{value}</div>
+      <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">{title}</h5>
+      <div className="text-2xl font-black text-[var(--text-primary)]">{value}</div>
     </div>
   </motion.div>
 );
@@ -385,15 +395,15 @@ const StatCard = ({ title, value, trend, isUp, icon, color }: any) => (
 const StatusBox = ({ title, count, icon, bgColor, borderColor }: any) => (
   <div className={`p-6 rounded-2xl border ${bgColor} ${borderColor} flex items-center justify-between`}>
     <div className="flex items-center gap-4">
-      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+      <div className="w-10 h-10 bg-[var(--bg-primary)] rounded-xl flex items-center justify-center shadow-sm">
         {icon}
       </div>
       <div>
-        <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{title}</h5>
-        <div className="text-xl font-black text-zinc-900">{count}</div>
+        <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">{title}</h5>
+        <div className="text-xl font-black text-[var(--text-primary)]">{count}</div>
       </div>
     </div>
-    <ChevronRight size={16} className="text-zinc-300" />
+    <ChevronRight size={16} className="text-[var(--text-secondary)]" />
   </div>
 );
 

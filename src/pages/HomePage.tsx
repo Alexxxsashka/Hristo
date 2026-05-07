@@ -85,7 +85,7 @@ const HomePage: React.FC = () => {
   const bestsellers = products.slice(4, 8);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
       <SEO />
 
       {/* Hero Section */}
@@ -249,7 +249,7 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:h-[600px]">
-          <div className="md:col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 relative overflow-hidden group">
+          <div className="md:col-span-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 relative overflow-hidden group shadow-xl">
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
                 <h3 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4">{t('real_time')} <br /> <span className="text-red-600">{t('compatibility')}</span></h3>
@@ -264,27 +264,27 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-red-600 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 flex flex-col justify-between group hover:bg-red-700 transition-colors">
+          <div className="bg-red-600 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 flex flex-col justify-between group hover:bg-red-700 transition-colors shadow-xl">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-8">
               <Maximize2 size={24} className="text-white sm:w-8 sm:h-8" />
             </div>
             <div>
               <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-white mb-4">{t('4k_textures')}</h3>
-              <p className="text-white/80 text-xs sm:text-sm font-medium">{t('4k_textures_desc')}</p>
+              <p className="text-white/90 text-xs sm:text-sm font-medium">{t('4k_textures_desc')}</p>
             </div>
           </div>
 
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 flex flex-col justify-between group hover:border-red-600/50 transition-all">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-800 rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-8 group-hover:bg-red-600/10 transition-colors">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 flex flex-col justify-between group hover:border-red-600/50 transition-all shadow-xl">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-600/10 rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-8 group-hover:bg-red-600/20 transition-colors">
               <LayoutGrid size={24} className="text-red-600 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-white mb-4">{t('modular_system')}</h3>
-              <p className="text-zinc-500 text-xs sm:text-sm font-medium">{t('modular_system_desc')}</p>
+              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)] mb-4">{t('modular_system')}</h3>
+              <p className="text-[var(--text-secondary)] text-xs sm:text-sm font-medium">{t('modular_system_desc')}</p>
             </div>
           </div>
 
-          <div className="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 relative overflow-hidden group">
+          <div className="md:col-span-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 md:p-12 relative overflow-hidden group shadow-xl">
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
                 <h3 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4">{t('one_click_checkout').split(' ')[0]} <br /> <span className="text-red-600">{t('one_click_checkout').split(' ').slice(1).join(' ')}</span></h3>

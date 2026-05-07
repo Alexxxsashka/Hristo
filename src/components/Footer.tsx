@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
   }, [settings, fetchSettings]);
 
   return (
-    <footer className="bg-red-600 border-t border-white/10 pt-16 md:pt-24 pb-8 md:pb-12">
+    <footer className="bg-[#ab1017] border-t border-white/10 pt-16 md:pt-24 pb-8 md:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 md:gap-12 mb-16 md:mb-24">
           {/* Brand Column */}
@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
                   referrerPolicy="no-referrer"
                 />
               ) : settings ? (
-                <span className="text-2xl font-black text-white tracking-tighter">HRISTO<span className="text-red-600">.</span></span>
+                <span className="text-2xl font-black text-white tracking-tighter">HRISTO<span className="text-white">.</span></span>
               ) : (
                 <div className="h-12 w-32 bg-zinc-900 animate-pulse rounded-lg" />
               )}

@@ -118,13 +118,13 @@ export const UserDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 pt-24 pb-12 px-4 sm:px-8">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 pb-12 px-4 sm:px-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
         
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0">
-          <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden sticky top-28">
-            <div className="p-6 border-b border-zinc-800 bg-gradient-to-br from-zinc-800/50 to-transparent">
+          <div className="bg-[var(--bg-secondary)] backdrop-blur-xl border border-[var(--border-color)] rounded-3xl overflow-hidden sticky top-28 shadow-xl">
+            <div className="p-6 border-b border-[var(--border-color)] bg-gradient-to-br from-red-600/5 to-transparent">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/20">
                   <UserIcon className="text-white" size={24} />
@@ -160,7 +160,7 @@ export const UserDashboard: React.FC = () => {
                 ))}
               </ul>
 
-              <div className="mt-8 pt-4 border-t border-zinc-800">
+              <div className="mt-8 pt-4 border-t border-[var(--border-color)]">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all"
@@ -197,12 +197,12 @@ export const UserDashboard: React.FC = () => {
 
       <AnimatePresence>
         {confirmModal.isOpen && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+              className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50" />
               
