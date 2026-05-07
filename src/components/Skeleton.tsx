@@ -120,7 +120,7 @@ export const DashboardSkeleton: React.FC = () => {
 export const ProductPageSkeleton: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-12">
-      <div className="flex gap-2 mb-12">
+      <div className="flex gap-2 mb-8 md:mb-12">
         <Skeleton className="h-4 w-16" />
         <Skeleton className="h-4 w-4" />
         <Skeleton className="h-4 w-24" />
@@ -128,28 +128,28 @@ export const ProductPageSkeleton: React.FC = () => {
         <Skeleton className="h-4 w-32" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
         <div className="space-y-8">
-          <Skeleton className="aspect-square rounded-[40px]" />
-          <div className="grid grid-cols-6 gap-3">
+          <Skeleton className="aspect-square rounded-[32px] sm:rounded-[40px]" />
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="aspect-square rounded-xl" />
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-4 sm:gap-6">
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-[32px]" />
+              <Skeleton key={i} className="h-24 sm:h-32 rounded-[24px] sm:rounded-[32px]" />
             ))}
           </div>
         </div>
 
-        <div className="space-y-12">
+        <div className="space-y-8 md:space-y-12">
           <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-24 w-full" />
-            <div className="flex gap-8">
-              <Skeleton className="h-16 w-32" />
-              <Skeleton className="h-16 w-32" />
+            <Skeleton className="h-16 md:h-24 w-full" />
+            <div className="flex gap-6 md:gap-8">
+              <Skeleton className="h-12 md:h-16 w-32" />
+              <Skeleton className="h-12 md:h-16 w-32" />
             </div>
           </div>
 
@@ -160,11 +160,11 @@ export const ProductPageSkeleton: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-16 rounded-2xl" />
-            <Skeleton className="h-16 rounded-2xl" />
+            <Skeleton className="h-14 md:h-16 rounded-2xl" />
+            <Skeleton className="h-14 md:h-16 rounded-2xl" />
           </div>
 
-          <Skeleton className="h-64 rounded-[40px]" />
+          <Skeleton className="h-64 rounded-[32px] md:rounded-[40px]" />
         </div>
       </div>
     </div>

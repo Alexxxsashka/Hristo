@@ -93,7 +93,7 @@ export const ShopPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-32 md:pt-44 pb-24">
+    <div className="min-h-screen bg-[var(--bg-primary)] pt-32 md:pt-44 pb-24 transition-colors duration-300">
       <SEO 
         title={activeCategory ? `${activeCategory.name} | Hristo` : t('shop_title')}
         description={activeCategory ? `Browse our ${activeCategory.name} collection. ${activeCategory.name} high-quality products.` : "Browse our extensive collection of airsoft weapons, attachments, and tactical gear."}
@@ -101,30 +101,30 @@ export const ShopPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Category Banner */}
         {activeCategory && activeCategory.image && (
-          <div className="relative h-32 sm:h-48 md:h-64 rounded-2xl sm:rounded-[32px] md:rounded-[40px] overflow-hidden mb-6 md:mb-12 border border-zinc-800">
+          <div className="relative h-32 sm:h-48 md:h-64 rounded-2xl sm:rounded-[32px] md:rounded-[40px] overflow-hidden mb-6 md:mb-12 border border-[var(--border-color)]">
             <img 
               src={activeCategory.image} 
               className="w-full h-full object-cover opacity-40"
               alt={activeCategory.name}
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] to-transparent" />
             <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 md:bottom-12 md:left-12">
-              <span className="text-red-600 text-[8px] sm:text-[10px] font-black tracking-[0.3em] uppercase mb-1 sm:mb-4 block">{t('category_label')}</span>
-              <h1 className="text-2xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-white">{activeCategory.name}</h1>
+              <span className="text-[#ab1017] text-[8px] sm:text-[10px] font-black tracking-[0.3em] uppercase mb-1 sm:mb-4 block">{t('category_label')}</span>
+              <h1 className="text-2xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{activeCategory.name}</h1>
             </div>
           </div>
         )}
 
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-[8px] sm:text-[10px] font-black tracking-widest text-zinc-600 uppercase mb-6 sm:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <Link to="/" className="hover:text-white transition-colors">HOME</Link>
+        <div className="flex items-center gap-2 text-[8px] sm:text-[10px] font-black tracking-widest text-[var(--text-secondary)] uppercase mb-6 sm:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide opacity-60">
+          <Link to="/" className="hover:text-[var(--text-primary)] transition-colors">HOME</Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-white transition-colors">SHOP</Link>
+          <Link to="/shop" className="hover:text-[var(--text-primary)] transition-colors">SHOP</Link>
           {category && (
             <>
               <span>/</span>
-              <span className="text-red-600">{category}</span>
+              <span className="text-[#ab1017]">{category}</span>
             </>
           )}
         </div>
@@ -133,9 +133,9 @@ export const ShopPage: React.FC = () => {
           {/* Mobile Filter Toggle */}
           <button 
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="lg:hidden flex items-center justify-center gap-3 w-full py-3.5 bg-zinc-900 border border-zinc-800 rounded-2xl text-[10px] font-black tracking-widest uppercase text-white active:scale-[0.98] transition-all"
+            className="lg:hidden flex items-center justify-center gap-3 w-full py-3.5 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl text-[10px] font-black tracking-widest uppercase text-[var(--text-primary)] active:scale-[0.98] transition-all shadow-sm"
           >
-            <SlidersHorizontal size={16} className="text-red-600" />
+            <SlidersHorizontal size={16} className="text-[#ab1017]" />
             {t('filters_and_categories')}
           </button>
 
@@ -153,15 +153,15 @@ export const ShopPage: React.FC = () => {
                   initial={{ x: '-100%' }}
                   animate={{ x: 0 }}
                   exit={{ x: '-100%' }}
-                  className="absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-zinc-950 border-r border-zinc-800 p-6 sm:p-8 overflow-y-auto"
+                  className="absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-[var(--bg-primary)] border-r border-[var(--border-color)] p-6 sm:p-8 overflow-y-auto"
                 >
                   <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">{activeCategory ? activeCategory.name : t('filters')}</h3>
-                    <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-zinc-500 hover:text-white">
+                    <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-[0.2em]">{activeCategory ? activeCategory.name : t('filters')}</h3>
+                    <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                       <SlidersHorizontal size={20} />
                     </button>
                   </div>
-                  <Suspense fallback={<div className="h-64 bg-zinc-900/50 rounded-2xl animate-pulse" />}>
+                  <Suspense fallback={<div className="h-64 bg-[var(--bg-tertiary)] rounded-2xl animate-pulse" />}>
                     <CategorySidebar />
                   </Suspense>
                 </motion.div>
@@ -171,7 +171,7 @@ export const ShopPage: React.FC = () => {
 
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block">
-            <Suspense fallback={<div className="w-72 h-96 bg-zinc-900/50 rounded-2xl animate-pulse" />}>
+            <Suspense fallback={<div className="w-72 h-96 bg-[var(--bg-tertiary)] rounded-2xl animate-pulse" />}>
               <CategorySidebar />
             </Suspense>
           </div>
@@ -179,33 +179,33 @@ export const ShopPage: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 space-y-4 sm:space-y-8">
             {/* Top Bar */}
-            <div className="relative z-10 bg-zinc-900/50 backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-zinc-800 flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between">
+            <div className="relative z-10 bg-[var(--bg-secondary)] backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-[var(--border-color)] flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between shadow-sm">
               <div className="relative w-full xl:w-96">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
                 <input
                   type="text"
                   placeholder={t('search_products') || 'Search products...'}
                   value={filters.search}
                   onChange={(e) => setFilters({ search: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl sm:rounded-2xl text-sm text-zinc-200 focus:outline-none focus:border-red-600 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4 w-full xl:w-auto">
                 {/* Items Per Page Dropdown */}
                 <div className="relative group min-w-0">
-                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black tracking-widest uppercase text-zinc-400 cursor-pointer hover:border-red-600 transition-all h-full">
-                    <span className="text-zinc-600 hidden xs:inline">SHOW:</span>
-                    <span className="text-white">{itemsPerPage}</span>
-                    <ChevronDown size={14} className="ml-auto text-zinc-600 group-hover:text-red-600 transition-colors" />
+                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black tracking-widest uppercase text-[var(--text-secondary)] cursor-pointer hover:border-[#ab1017] transition-all h-full">
+                    <span className="text-[var(--text-secondary)] opacity-50 hidden xs:inline">SHOW:</span>
+                    <span className="text-[var(--text-primary)]">{itemsPerPage}</span>
+                    <ChevronDown size={14} className="ml-auto text-[var(--text-secondary)] group-hover:text-[#ab1017] transition-colors" />
                   </div>
                   
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl">
                     {[10, 20, 30, 40, 50].map((count) => (
                       <button
                         key={count}
                         onClick={() => setItemsPerPage(count)}
-                        className={`w-full flex items-center justify-center px-4 py-3 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-zinc-900 ${itemsPerPage === count ? 'text-red-600 bg-red-600/5' : 'text-zinc-500'}`}
+                        className={`w-full flex items-center justify-center px-4 py-3 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-[var(--bg-secondary)] ${itemsPerPage === count ? 'text-[#ab1017] bg-[#ab1017]/5' : 'text-[var(--text-secondary)]'}`}
                       >
                         {count}
                       </button>
@@ -214,23 +214,23 @@ export const ShopPage: React.FC = () => {
                 </div>
 
                 <div className="relative group min-w-0">
-                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black tracking-widest uppercase text-zinc-400 cursor-pointer hover:border-red-600 transition-all h-full">
+                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black tracking-widest uppercase text-[var(--text-secondary)] cursor-pointer hover:border-[#ab1017] transition-all h-full">
                     <div className="hidden xs:block">
-                      {filters.sortBy === 'newest' && <Clock size={14} className="text-red-600" />}
-                      {filters.sortBy === 'price_asc' && <Truck size={14} className="text-red-600" />}
-                      {filters.sortBy === 'price_desc' && <Truck size={14} className="text-red-600 rotate-180" />}
-                      {filters.sortBy === 'popular' && <Heart size={14} className="text-red-600" />}
+                      {filters.sortBy === 'newest' && <Clock size={14} className="text-[#ab1017]" />}
+                      {filters.sortBy === 'price_asc' && <Truck size={14} className="text-[#ab1017]" />}
+                      {filters.sortBy === 'price_desc' && <Truck size={14} className="text-[#ab1017] rotate-180" />}
+                      {filters.sortBy === 'popular' && <Heart size={14} className="text-[#ab1017]" />}
                     </div>
-                    <span className="truncate">
+                    <span className="truncate text-[var(--text-primary)]">
                       {filters.sortBy === 'newest' && t('newest_first')}
                       {filters.sortBy === 'price_asc' && t('price_low_high')}
                       {filters.sortBy === 'price_desc' && t('price_high_low')}
                       {filters.sortBy === 'popular' && t('most_popular')}
                     </span>
-                    <ChevronDown size={14} className="ml-auto text-zinc-600 group-hover:text-red-600 transition-colors" />
+                    <ChevronDown size={14} className="ml-auto text-[var(--text-secondary)] group-hover:text-[#ab1017] transition-colors" />
                   </div>
                   
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl min-w-[160px] sm:min-w-0">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl min-w-[160px] sm:min-w-0">
                     {[
                       { id: 'newest', label: t('newest_first'), icon: Clock },
                       { id: 'price_asc', label: t('price_low_high'), icon: Truck },
@@ -240,7 +240,7 @@ export const ShopPage: React.FC = () => {
                       <button
                         key={option.id}
                         onClick={() => setFilters({ sortBy: option.id as any })}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-zinc-900 ${filters.sortBy === option.id ? 'text-red-600 bg-red-600/5' : 'text-zinc-500'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-[var(--bg-secondary)] ${filters.sortBy === option.id ? 'text-[#ab1017] bg-[#ab1017]/5' : 'text-[var(--text-secondary)]'}`}
                       >
                         <option.icon size={14} className={option.rotate ? 'rotate-180' : ''} />
                         {option.label}
@@ -250,16 +250,16 @@ export const ShopPage: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-2 shrink-0 col-span-2 sm:col-auto justify-center sm:justify-start">
-                  <div className="flex border border-zinc-800 rounded-xl sm:rounded-2xl p-1 bg-zinc-950 shrink-0">
+                  <div className="flex border border-[var(--border-color)] rounded-xl sm:rounded-2xl p-1 bg-[var(--bg-tertiary)] shrink-0 shadow-inner">
                     <button 
                       onClick={() => setViewMode('grid')}
-                      className={`p-2.5 rounded-lg sm:rounded-xl transition-all ${viewMode === 'grid' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-600 hover:text-zinc-400'}`}
+                      className={`p-2.5 rounded-lg sm:rounded-xl transition-all ${viewMode === 'grid' ? 'bg-[#ab1017] text-white shadow-lg' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                     >
                       <Grid className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => setViewMode('list')}
-                      className={`p-2.5 rounded-lg sm:rounded-xl transition-all ${viewMode === 'list' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-600 hover:text-zinc-400'}`}
+                      className={`p-2.5 rounded-lg sm:rounded-xl transition-all ${viewMode === 'list' ? 'bg-[#ab1017] text-white shadow-lg' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                     >
                       <List className="w-4 h-4" />
                     </button>
@@ -272,21 +272,21 @@ export const ShopPage: React.FC = () => {
             {(filters.categories.length > 0 || filters.subcategories.length > 0 || filters.search) && (
               <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                 {filters.categories.map(cat => (
-                  <span key={cat} className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600/10 border border-red-600/20 text-red-500 text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
+                  <span key={cat} className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#ab1017]/10 border border-[#ab1017]/20 text-[#ab1017] text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
                     {t('category_label')}: {cat}
-                    <button onClick={() => setFilters({ categories: [] })} className="hover:text-red-400 transition-colors">×</button>
+                    <button onClick={() => setFilters({ categories: [] })} className="hover:text-[#8e0d13] transition-colors">×</button>
                   </span>
                 ))}
                 {filters.subcategories.map(sub => (
-                  <span key={sub} className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
+                  <span key={sub} className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
                     {t('sub_label')}: {sub}
-                    <button onClick={() => setFilters({ subcategories: [] })} className="hover:text-white transition-colors">×</button>
+                    <button onClick={() => setFilters({ subcategories: [] })} className="hover:text-[#ab1017] transition-colors">×</button>
                   </span>
                 ))}
                 {filters.search && (
-                  <span key="search-filter" className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
+                  <span key="search-filter" className="shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-[8px] sm:text-[10px] font-black tracking-widest uppercase rounded-lg sm:rounded-xl flex items-center gap-2">
                     {t('search_label')}: {filters.search}
-                    <button onClick={() => setFilters({ search: '' })} className="hover:text-white transition-colors">×</button>
+                    <button onClick={() => setFilters({ search: '' })} className="hover:text-[#ab1017] transition-colors">×</button>
                   </span>
                 )}
               </div>
@@ -296,7 +296,7 @@ export const ShopPage: React.FC = () => {
             {isLoading ? (
               <div className={getGridColsClass()}>
                 {[...Array(itemsPerPage)].map((_, i) => (
-                  <div key={i} className={viewMode === 'grid' ? "aspect-[3/4] bg-zinc-900/50 rounded-2xl sm:rounded-3xl animate-pulse border border-zinc-800" : "h-32 sm:h-48 bg-zinc-900/50 rounded-2xl sm:rounded-3xl animate-pulse border border-zinc-800 w-full"} />
+                  <div key={i} className={viewMode === 'grid' ? "aspect-[3/4] bg-[var(--bg-secondary)] rounded-2xl sm:rounded-3xl animate-pulse border border-[var(--border-color)]" : "h-32 sm:h-48 bg-[var(--bg-secondary)] rounded-2xl sm:rounded-3xl animate-pulse border border-[var(--border-color)] w-full"} />
                 ))}
               </div>
             ) : paginatedProducts.length > 0 ? (
@@ -316,11 +316,11 @@ export const ShopPage: React.FC = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 sm:gap-4 pt-12 md:pt-20 border-t border-zinc-900">
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 pt-12 md:pt-20 border-t border-[var(--border-color)]">
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-500 transition-all"
+                      className="p-3 sm:p-4 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-all shadow-sm"
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -332,8 +332,8 @@ export const ShopPage: React.FC = () => {
                           onClick={() => setCurrentPage(i + 1)}
                           className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black transition-all border ${
                             currentPage === i + 1
-                              ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20'
-                              : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-white'
+                              ? 'bg-[#ab1017] border-[#ab1017] text-white shadow-lg shadow-[#ab1017]/20'
+                              : 'bg-[var(--bg-primary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[#ab1017] hover:text-[#ab1017]'
                           }`}
                         >
                           {i + 1}
@@ -344,7 +344,7 @@ export const ShopPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="p-3 sm:p-4 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl text-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-500 transition-all"
+                      className="p-3 sm:p-4 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-all shadow-sm"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -352,15 +352,15 @@ export const ShopPage: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="bg-zinc-900/30 border border-zinc-800 rounded-3xl p-12 md:p-20 text-center space-y-6">
-                <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-3xl flex items-center justify-center mx-auto mb-8">
-                  <Search size={40} className="text-zinc-700" />
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-12 md:p-20 text-center space-y-6 shadow-xl">
+                <div className="w-20 h-20 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-3xl flex items-center justify-center mx-auto mb-8">
+                  <Search size={40} className="text-[var(--text-secondary)] opacity-50" />
                 </div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-white">No items match your hunt</h3>
-                <p className="text-zinc-500 max-w-sm mx-auto font-medium">Try adjusting your filters or search terms to find the gear you're looking for.</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)]">No items match your hunt</h3>
+                <p className="text-[var(--text-secondary)] max-w-sm mx-auto font-medium">Try adjusting your filters or search terms to find the gear you're looking for.</p>
                 <button 
                   onClick={() => setFilters({ search: '', categories: [], subcategories: [], brands: [], mountTypes: [], minPrice: 0, maxPrice: 10000, inStock: false, sortBy: 'newest', categoryFilters: {} })}
-                  className="px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-red-700 transition-all"
+                  className="px-8 py-4 bg-[#ab1017] text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-[#8e0d13] transition-all shadow-lg shadow-[#ab1017]/20"
                 >
                   Clear All Filters
                 </button>

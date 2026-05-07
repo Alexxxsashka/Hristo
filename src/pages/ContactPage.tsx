@@ -121,20 +121,20 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 pb-20">
+    <div className="min-h-screen bg-[var(--bg-primary)] pb-20 transition-colors duration-300">
       {/* Hero Section */}
-      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-zinc-950">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-zinc-900/40 to-zinc-950 z-10" />
+      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-[var(--bg-primary)]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-[var(--bg-secondary)] to-[var(--bg-primary)] z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.05)_0%,transparent_70%)]" />
         <div className="relative z-20 text-center space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-white"
+            className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-[var(--text-primary)]"
           >
-            {t('contact').toUpperCase()} <span className="text-red-600">&</span> {t('contact_support').toUpperCase()}
+            {t('contact').toUpperCase()} <span className="text-[#ab1017]">&</span> {t('contact_support').toUpperCase()}
           </motion.h1>
-          <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">
             {t('contact_hero_desc')}
           </p>
         </div>
@@ -144,50 +144,50 @@ export const ContactPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info Cards */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl space-y-6 hover:border-red-600/30 transition-all">
-              <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl space-y-6 hover:border-[#ab1017]/30 transition-all">
+              <div className="w-12 h-12 bg-[#ab1017]/10 rounded-2xl flex items-center justify-center text-[#ab1017]">
                 <MapPin size={24} />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2">{t('store_location')}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">
+                <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest mb-2">{t('store_location')}</h3>
+                <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
                   Ulica grada Chicaga 31<br />
                   10 000 Zagreb, Hrvatska
                 </p>
               </div>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl space-y-6 hover:border-red-600/30 transition-all">
-              <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl space-y-6 hover:border-[#ab1017]/30 transition-all">
+              <div className="w-12 h-12 bg-[#ab1017]/10 rounded-2xl flex items-center justify-center text-[#ab1017]">
                 <Phone size={24} />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2">{t('contact_info')}</h3>
-                <div className="space-y-1 text-zinc-400 text-sm">
+                <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest mb-2">{t('contact_info')}</h3>
+                <div className="space-y-1 text-[var(--text-secondary)] text-sm">
                   <p>Tel: 01 613 1713</p>
                   <p>Mob: 095 613 1713</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl space-y-6 hover:border-red-600/30 transition-all">
-              <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl space-y-6 hover:border-[#ab1017]/30 transition-all">
+              <div className="w-12 h-12 bg-[#ab1017]/10 rounded-2xl flex items-center justify-center text-[#ab1017]">
                 <Mail size={24} />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2">{t('email_address')}</h3>
-                <p className="text-red-500 font-bold text-sm">order@hristo.hr</p>
-                <p className="text-zinc-500 text-[10px] uppercase font-bold mt-1 tracking-widest">{t('reply_within_24h')}</p>
+                <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest mb-2">{t('email_address')}</h3>
+                <p className="text-[#ab1017] font-bold text-sm">order@hristo.hr</p>
+                <p className="text-[var(--text-secondary)] text-[10px] uppercase font-bold mt-1 tracking-widest opacity-50">{t('reply_within_24h')}</p>
               </div>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl space-y-6 hover:border-red-600/30 transition-all">
-              <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl space-y-6 hover:border-[#ab1017]/30 transition-all">
+              <div className="w-12 h-12 bg-[#ab1017]/10 rounded-2xl flex items-center justify-center text-[#ab1017]">
                 <Clock size={24} />
               </div>
               <div>
-                <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2">{t('working_hours')}</h3>
-                <div className="space-y-1 text-zinc-400 text-sm">
+                <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest mb-2">{t('working_hours')}</h3>
+                <div className="space-y-1 text-[var(--text-secondary)] text-sm">
                   <p>{t('mon_fri')}: {t('mon_fri_hours')}</p>
                   <p>{t('sat')}: {t('sat_hours')}</p>
                   <p>{t('sun')}: {t('closed')}</p>
@@ -198,7 +198,7 @@ export const ContactPage: React.FC = () => {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-zinc-900/50 border border-zinc-800 p-10 md:p-16 rounded-[40px] shadow-2xl h-full">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-10 md:p-16 rounded-[40px] shadow-2xl h-full">
               <AnimatePresence mode="wait">
                 {status === 'success' ? (
                   <motion.div 
@@ -211,12 +211,12 @@ export const ContactPage: React.FC = () => {
                       <CheckCircle2 size={48} />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{t('message_sent')}</h2>
-                      <p className="text-zinc-400">{t('message_sent_desc')}</p>
+                      <h2 className="text-3xl font-black text-[var(--text-primary)] uppercase tracking-tighter">{t('message_sent')}</h2>
+                      <p className="text-[var(--text-secondary)]">{t('message_sent_desc')}</p>
                     </div>
                     <button 
                       onClick={() => setStatus('idle')}
-                      className="px-8 py-3 bg-zinc-800 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-700 transition-all"
+                      className="px-8 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-bold uppercase tracking-widest rounded-xl hover:bg-[var(--border-color)] transition-all"
                     >
                       {t('send_new_message')}
                     </button>
@@ -230,21 +230,21 @@ export const ContactPage: React.FC = () => {
                     className="max-w-xl space-y-12"
                   >
                     <div className="space-y-4">
-                      <h2 className="text-4xl font-black text-white uppercase tracking-tighter">{t('send_message')}</h2>
-                      <p className="text-zinc-400 font-medium">{t('contact_form_desc')}</p>
+                      <h2 className="text-4xl font-black text-[var(--text-primary)] uppercase tracking-tighter">{t('send_message')}</h2>
+                      <p className="text-[var(--text-secondary)] font-medium">{t('contact_form_desc')}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_name')}</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] ml-4">{t('your_name')}</label>
                           <input 
                             type="text" 
                             placeholder={t('your_name_placeholder')}
                             value={formData.name}
                             onChange={e => handleFieldChange('name', e.target.value)}
-                            className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${
-                              fieldErrors.name ? 'border-red-500' : 'border-zinc-800'
+                            className={`w-full px-6 py-4 bg-[var(--bg-tertiary)] border rounded-2xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] outline-none focus:border-[#ab1017] transition-all ${
+                              fieldErrors.name ? 'border-red-500' : 'border-[var(--border-color)]'
                             }`}
                             maxLength={100}
                           />
@@ -253,14 +253,14 @@ export const ContactPage: React.FC = () => {
                           )}
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_email')}</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] ml-4">{t('your_email')}</label>
                           <input 
                             type="email" 
                             placeholder={t('your_email_placeholder')}
                             value={formData.email}
                             onChange={e => handleFieldChange('email', e.target.value)}
-                            className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all ${
-                              fieldErrors.email ? 'border-red-500' : 'border-zinc-800'
+                            className={`w-full px-6 py-4 bg-[var(--bg-tertiary)] border rounded-2xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] outline-none focus:border-[#ab1017] transition-all ${
+                              fieldErrors.email ? 'border-red-500' : 'border-[var(--border-color)]'
                             }`}
                             maxLength={255}
                           />
@@ -271,12 +271,12 @@ export const ContactPage: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('subject')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] ml-4">{t('subject')}</label>
                         <select 
                           value={formData.subject}
                           onChange={e => handleFieldChange('subject', e.target.value)}
-                          className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white outline-none focus:border-red-600 transition-all appearance-none cursor-pointer ${
-                            fieldErrors.subject ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-6 py-4 bg-[var(--bg-tertiary)] border rounded-2xl text-[var(--text-primary)] outline-none focus:border-[#ab1017] transition-all appearance-none cursor-pointer ${
+                            fieldErrors.subject ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                         >
                           <option>{t('product_question')}</option>
@@ -291,14 +291,14 @@ export const ContactPage: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">{t('your_message')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] ml-4">{t('your_message')}</label>
                         <textarea 
                           placeholder={t('how_can_we_help') || 'How can we help you?'}
                           rows={6}
                           value={formData.message}
                           onChange={e => handleFieldChange('message', e.target.value)}
-                          className={`w-full px-6 py-4 bg-zinc-950 border rounded-2xl text-white placeholder:text-zinc-700 outline-none focus:border-red-600 transition-all resize-none ${
-                            fieldErrors.message ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-6 py-4 bg-[var(--bg-tertiary)] border rounded-2xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] outline-none focus:border-[#ab1017] transition-all resize-none ${
+                            fieldErrors.message ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={2000}
                         />
@@ -317,24 +317,24 @@ export const ContactPage: React.FC = () => {
                       <button 
                         type="submit"
                         disabled={status === 'loading'}
-                        className="w-full py-5 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-red-600/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-[#ab1017]/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {status === 'loading' ? t('sending') : t('send_message')}
                         <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       </button>
                     </form>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 border-t border-zinc-800">
-                      <div className="flex items-center gap-3 text-zinc-500">
-                        <ShieldCheck size={20} className="text-red-600" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 border-t border-[var(--border-color)]">
+                      <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                        <ShieldCheck size={20} className="text-[#ab1017]" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">{t('secure_communication')}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-zinc-500">
-                        <Globe size={20} className="text-red-600" />
+                      <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                        <Globe size={20} className="text-[#ab1017]" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">{t('global_delivery')}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-zinc-500">
-                        <MessageSquare size={20} className="text-red-600" />
+                      <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                        <MessageSquare size={20} className="text-[#ab1017]" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">{t('fast_responses')}</span>
                       </div>
                     </div>

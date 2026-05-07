@@ -89,7 +89,7 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{t('total')}</p>
-                    <p className="font-black text-sm text-red-600">€{order.total.toFixed(2)}</p>
+                    <p className="font-black text-sm text-[#ab1017]">€{order.total.toFixed(2)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                       <button 
                         onClick={() => handleRequestCancel(order.id)}
                         disabled={requestingId === order.id}
-                        className="px-4 py-1 bg-red-600/10 text-red-600 hover:bg-red-600/20 rounded-full text-[10px] font-black uppercase transition-all disabled:opacity-50"
+                        className="px-4 py-1 bg-[#ab1017]/10 text-[#ab1017] hover:bg-[#ab1017]/20 rounded-full text-[10px] font-black uppercase transition-all disabled:opacity-50"
                       >
                         {requestingId === order.id ? t('sending') : t('request_cancellation')}
                       </button>
@@ -111,7 +111,7 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                   <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase ${
                     order.status === 'delivered' ? 'bg-green-500/10 text-green-500' : 
                     order.status === 'cancelled' ? 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]' :
-                    'bg-red-600/10 text-red-600'
+                    'bg-[#ab1017]/10 text-[#ab1017]'
                   }`}>
                     {t(`status_${order.status.toLowerCase().replace(/ /g, '_')}`)}
                   </span>
@@ -174,7 +174,7 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                 {order.shipping.trackingNumber && (
                   <div className="mt-6 p-4 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)] flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Truck className="text-red-600" size={20} />
+                      <Truck className="text-[#ab1017]" size={20} />
                       <div>
                         <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('tracking_number')} ({order.shipping.method})</p>
                         <p className="font-black text-sm text-[var(--text-primary)]">{order.shipping.trackingNumber}</p>

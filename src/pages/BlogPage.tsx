@@ -66,25 +66,25 @@ export const BlogPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 pb-20">
+    <div className="min-h-screen bg-[var(--bg-primary)] pb-20 transition-colors duration-300">
       <SEO 
         title="Airsoft Blog & News"
         description="The latest airsoft news, guides, and reviews. Stay up to date with the newest tactical equipment and airsoft technology."
         keywords="airsoft blog, airsoft news, airsoft reviews, tactical guides"
       />
       {/* Hero Section */}
-      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-zinc-950">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-zinc-900/40 to-zinc-950 z-10" />
+      <div className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-[var(--bg-primary)]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-[var(--bg-secondary)] to-[var(--bg-primary)] z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.05)_0%,transparent_70%)]" />
         <div className="relative z-20 text-center space-y-4 px-4">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white"
+            className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-[var(--text-primary)]"
           >
-            {t('blog')} <span className="text-red-600">&</span> NEWS
+            {t('blog')} <span className="text-[#ab1017]">&</span> NEWS
           </motion.h1>
-          <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+          <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-[10px] md:text-xs">
             Najnovije vijesti, vodiči i recenzije iz svijeta airsofta
           </p>
         </div>
@@ -92,15 +92,15 @@ export const BlogPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-12 relative z-30">
         {/* Search & Filter Bar */}
-        <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 p-4 rounded-3xl mb-12 flex flex-col md:row items-center gap-4">
+        <div className="bg-[var(--bg-secondary)] backdrop-blur-xl border border-[var(--border-color)] p-4 rounded-3xl mb-12 flex flex-col md:row items-center gap-4">
           <form onSubmit={handleSearch} className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={20} />
             <input 
               type="text" 
               placeholder="Pretraži članke..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-zinc-950 border border-zinc-800 rounded-2xl text-white outline-none focus:border-red-600 transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl text-[var(--text-primary)] outline-none focus:border-[#ab1017] transition-all"
             />
           </form>
           
@@ -108,7 +108,7 @@ export const BlogPage: React.FC = () => {
             <button 
               onClick={() => { setCategory(''); setPage(1); }}
               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                category === '' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                category === '' ? 'bg-[#ab1017] text-white' : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]'
               }`}
             >
               Sve
@@ -130,7 +130,7 @@ export const BlogPage: React.FC = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-zinc-900/50 border border-zinc-800 rounded-3xl h-[450px] animate-pulse" />
+              <div key={i} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl h-[450px] animate-pulse" />
             ))}
           </div>
         ) : (
@@ -145,7 +145,7 @@ export const BlogPage: React.FC = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 transition-all group flex flex-col"
+                    className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl overflow-hidden hover:border-[#ab1017]/50 transition-all group flex flex-col"
                   >
                     <Link to={`/blog/${post.slug}`} className="relative h-64 overflow-hidden block">
                       {post.image?.startsWith('http') ? (
@@ -160,38 +160,38 @@ export const BlogPage: React.FC = () => {
                         <NoImage className="w-full h-full" iconSize={48} />
                       )}
                       <div className="absolute top-4 left-4">
-                        <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                        <span className="px-3 py-1 bg-[#ab1017] text-white text-[10px] font-black uppercase tracking-widest rounded-full">
                           {post.category}
                         </span>
                       </div>
                     </Link>
                     
                     <div className="p-8 space-y-4 flex-1 flex flex-col">
-                      <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                      <div className="flex items-center gap-4 text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                         <div className="flex items-center gap-1">
-                          <Calendar size={12} className="text-red-600" />
+                          <Calendar size={12} className="text-[#ab1017]" />
                           {post.date}
                         </div>
                         <div className="flex items-center gap-1">
-                          <User size={12} className="text-red-600" />
+                          <User size={12} className="text-[#ab1017]" />
                           {post.author}
                         </div>
                       </div>
                       
                       <Link to={`/blog/${post.slug}`} className="block">
-                        <h2 className="text-2xl font-black text-white leading-tight group-hover:text-red-500 transition-colors line-clamp-2">
+                        <h2 className="text-2xl font-black text-[var(--text-primary)] leading-tight group-hover:text-[#ab1017] transition-colors line-clamp-2">
                           {post.title}
                         </h2>
                       </Link>
                       
-                      <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 flex-1">
+                      <p className="text-[var(--text-secondary)] text-sm leading-relaxed line-clamp-3 flex-1">
                         {post.excerpt}
                       </p>
                       
-                      <div className="pt-6 flex items-center justify-between border-t border-zinc-800">
+                      <div className="pt-6 flex items-center justify-between border-t border-[var(--border-color)]">
                         <Link 
                           to={`/blog/${post.slug}`}
-                          className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white hover:text-red-500 transition-colors"
+                          className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[var(--text-primary)] hover:text-[#ab1017] transition-colors"
                         >
                           {t('read_more')}
                           <ArrowRight size={16} />
@@ -208,8 +208,8 @@ export const BlogPage: React.FC = () => {
             </div>
 
             {posts.length === 0 && (
-              <div className="text-center py-20 bg-zinc-900/30 rounded-[40px] border border-zinc-800 border-dashed">
-                <p className="text-zinc-500 font-bold uppercase tracking-widest">Nema pronađenih članaka</p>
+              <div className="text-center py-20 bg-[var(--bg-secondary)] rounded-[40px] border border-[var(--border-color)] border-dashed">
+                <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest">Nema pronađenih članaka</p>
               </div>
             )}
 
@@ -219,7 +219,7 @@ export const BlogPage: React.FC = () => {
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white disabled:opacity-30 hover:bg-zinc-800 transition-all"
+                  className="p-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] disabled:opacity-30 hover:bg-[var(--border-color)] transition-all"
                 >
                   <ChevronLeft size={20} />
                 </button>
@@ -229,7 +229,7 @@ export const BlogPage: React.FC = () => {
                       key={i}
                       onClick={() => setPage(i + 1)}
                       className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
-                        page === i + 1 ? 'bg-red-600 text-white' : 'bg-zinc-900 text-zinc-500 hover:bg-zinc-800'
+                        page === i + 1 ? 'bg-[#ab1017] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]'
                       }`}
                     >
                       {i + 1}
@@ -239,7 +239,7 @@ export const BlogPage: React.FC = () => {
                 <button 
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white disabled:opacity-30 hover:bg-zinc-800 transition-all"
+                  className="p-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] disabled:opacity-30 hover:bg-[var(--border-color)] transition-all"
                 >
                   <ChevronRight size={20} />
                 </button>
@@ -249,7 +249,7 @@ export const BlogPage: React.FC = () => {
         )}
 
         {/* Newsletter Section */}
-        <div className="mt-20 bg-red-600 rounded-[40px] p-8 md:p-16 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl shadow-red-600/20 relative overflow-hidden">
+        <div className="mt-20 bg-[#ab1017] rounded-[40px] p-8 md:p-16 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl shadow-[#ab1017]/20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
           <div className="relative z-10 space-y-2 text-center lg:text-left">
             <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">{t('newsletter_subscribe')}</h2>

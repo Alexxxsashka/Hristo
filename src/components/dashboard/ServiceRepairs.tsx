@@ -65,7 +65,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
               <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center border border-[var(--border-color)]">
-                    <Wrench className="text-red-600" size={24} />
+                    <Wrench className="text-[#ab1017]" size={24} />
                   </div>
                   <div>
                     <h3 className="font-black uppercase tracking-tighter text-lg text-[var(--text-primary)]">{request.weaponName}</h3>
@@ -73,7 +73,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                   </div>
                 </div>
                 <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase ${
-                  request.status === 'Ready for Pickup' ? 'bg-green-500/10 text-green-500' : 'bg-red-600/10 text-red-600'
+                  request.status === 'Ready for Pickup' ? 'bg-green-500/10 text-green-500' : 'bg-[#ab1017]/10 text-[#ab1017]'
                 }`}>
                   {t(`status_${request.status.toLowerCase().replace(/ /g, '_')}`)}
                 </span>
@@ -83,7 +83,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                   {request.updates.map((update, idx) => (
                     <div key={idx} className="flex gap-4">
                       <div className="w-px bg-[var(--border-color)] relative">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#ab1017] shadow-[0_0_8px_rgba(171,16,23,0.5)]" />
                       </div>
                       <div className="pb-4">
                         <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{update.date}</p>
@@ -103,7 +103,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
           <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs mb-6">{t('need_upgrade_repair')}</p>
           <button 
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#ab1017] text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all"
           >
             {t('open_service_ticket')}
           </button>
@@ -129,7 +129,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                     type="text" 
                     value={weaponName}
                     onChange={e => setWeaponName(e.target.value)}
-                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
@@ -139,7 +139,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={4}
-                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors resize-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors resize-none"
                   />
                 </div>
                 <div className="flex gap-4 pt-4">
@@ -153,7 +153,7 @@ export const ServiceRepairs: React.FC<ServiceRepairsProps> = ({ requests, onRefr
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-4 bg-[#ab1017] text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all flex items-center justify-center gap-2"
                   >
                     {loading && <RefreshCw size={14} className="animate-spin" />}
                     {t('submit_request')}

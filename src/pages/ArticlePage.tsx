@@ -60,7 +60,7 @@ export const ArticlePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -68,9 +68,9 @@ export const ArticlePage: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center space-y-6">
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Članak nije pronađen</h2>
-        <Link to="/blog" className="flex items-center gap-2 text-red-600 font-bold uppercase tracking-widest hover:text-red-500 transition-colors">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center space-y-6">
+        <h2 className="text-4xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Članak nije pronađen</h2>
+        <Link to="/blog" className="flex items-center gap-2 text-[#ab1017] font-bold uppercase tracking-widest hover:text-red-500 transition-colors">
           <ChevronLeft size={20} />
           Povratak na blog
         </Link>
@@ -98,7 +98,7 @@ export const ArticlePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 pb-20">
+    <div className="min-h-screen bg-[var(--bg-primary)] pb-20 transition-colors duration-300">
       <SEO 
         title={post.title}
         description={post.excerpt}
@@ -114,7 +114,7 @@ export const ArticlePage: React.FC = () => {
 
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-end pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/40 to-transparent z-10" />
         {post.image?.startsWith('http') ? (
           <img 
             src={post.image} 
@@ -134,26 +134,26 @@ export const ArticlePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Link to="/blog" className="inline-flex items-center gap-2 text-red-600 font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors mb-4">
+            <Link to="/blog" className="inline-flex items-center gap-2 text-[#ab1017] font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors mb-4">
               <ChevronLeft size={16} />
               {post.category}
             </Link>
             
-            <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">
+            <h1 className="text-4xl md:text-7xl font-black text-[var(--text-primary)] uppercase tracking-tighter leading-none">
               {post.title}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-6 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-6 text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest">
               <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-red-600" />
+                <Calendar size={16} className="text-[#ab1017]" />
                 {post.date}
               </div>
               <div className="flex items-center gap-2">
-                <User size={16} className="text-red-600" />
+                <User size={16} className="text-[#ab1017]" />
                 {post.author}
               </div>
               <div className="flex items-center gap-2">
-                <Clock size={16} className="text-red-600" />
+                <Clock size={16} className="text-[#ab1017]" />
                 5 min čitanja
               </div>
             </div>
@@ -165,34 +165,34 @@ export const ArticlePage: React.FC = () => {
         {/* Main Content */}
         <div className="lg:col-span-8 space-y-12">
           <div className="prose prose-invert prose-red max-w-none">
-            <div className="text-zinc-300 text-lg leading-relaxed space-y-6">
+            <div className="text-[var(--text-secondary)] text-lg leading-relaxed space-y-6">
               <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
           </div>
 
           {/* Social Sharing */}
-          <div className="pt-12 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="pt-12 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <span className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Podijeli članak:</span>
+              <span className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">Podijeli članak:</span>
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all">
+                <button className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#ab1017] hover:border-[#ab1017] transition-all">
                   <Facebook size={18} />
                 </button>
-                <button className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all">
+                <button className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#ab1017] hover:border-[#ab1017] transition-all">
                   <Twitter size={18} />
                 </button>
-                <button className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all">
+                <button className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#ab1017] hover:border-[#ab1017] transition-all">
                   <Linkedin size={18} />
                 </button>
-                <button className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all">
+                <button className="w-10 h-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[#ab1017] hover:border-[#ab1017] transition-all">
                   <Share2 size={18} />
                 </button>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border border-zinc-800 rounded-full">
-              <Tag size={14} className="text-red-600" />
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{post.category}</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-full">
+              <Tag size={14} className="text-[#ab1017]" />
+              <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">{post.category}</span>
             </div>
           </div>
         </div>
@@ -202,8 +202,8 @@ export const ArticlePage: React.FC = () => {
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <div className="space-y-6">
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
-                <Package size={20} className="text-red-600" />
+              <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-tighter flex items-center gap-2">
+                <Package size={20} className="text-[#ab1017]" />
                 Povezani proizvodi
               </h3>
               <div className="space-y-4">
@@ -211,9 +211,9 @@ export const ArticlePage: React.FC = () => {
                   <Link 
                     key={product.id}
                     to={`/product/${product.id}`}
-                    className="flex items-center gap-4 p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-red-600/30 transition-all group"
+                    className="flex items-center gap-4 p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl hover:border-[#ab1017]/30 transition-all group"
                   >
-                    <div className="w-20 h-20 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center">
+                    <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-xl overflow-hidden flex items-center justify-center">
                       {product.image?.startsWith('http') || (product.images && product.images.length > 0) ? (
                         <img 
                           src={product.images && product.images.length > 0 ? product.images[0] : product.image} 
@@ -226,9 +226,9 @@ export const ArticlePage: React.FC = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-bold text-sm truncate group-hover:text-red-500 transition-colors">{product.name}</h4>
-                      <p className="text-red-600 font-black text-sm mt-1">€{product.price}</p>
-                      <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase mt-1">
+                      <h4 className="text-[var(--text-primary)] font-bold text-sm truncate group-hover:text-[#ab1017] transition-colors">{product.name}</h4>
+                      <p className="text-[#ab1017] font-black text-sm mt-1">€{product.price}</p>
+                      <div className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] font-bold uppercase mt-1">
                         Pogledaj <ArrowRight size={10} />
                       </div>
                     </div>
@@ -239,7 +239,7 @@ export const ArticlePage: React.FC = () => {
           )}
 
           {/* Newsletter Sidebar */}
-          <div className="bg-red-600 p-8 rounded-[32px] space-y-6 shadow-2xl shadow-red-600/20">
+          <div className="bg-[#ab1017] p-8 rounded-[32px] space-y-6 shadow-2xl shadow-[#ab1017]/20">
             <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-tight">
               Ne propustite nove objave
             </h3>

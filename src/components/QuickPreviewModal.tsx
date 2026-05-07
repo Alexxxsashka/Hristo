@@ -31,7 +31,7 @@ const RedIcon = ({ emoji, size = 20 }: { emoji: string; size?: number }) => {
   const IconComponent = iconMap[emoji];
 
   if (IconComponent) {
-    return <IconComponent className="text-red-600" size={size} />;
+    return <IconComponent className="text-[#ab1017]" size={size} />;
   }
 
   return <span style={{ fontSize: size }}>{emoji}</span>;
@@ -75,10 +75,10 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative bg-white rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-full max-h-[85vh]"
+            className="relative bg-[var(--bg-primary)] rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-full max-h-[85vh] border border-[var(--border-color)]"
           >
             {/* 3D Viewer Section */}
-            <div className="w-full md:w-1/2 h-64 md:h-auto bg-zinc-900 relative flex flex-col">
+            <div className="w-full md:w-1/2 h-64 md:h-auto bg-[var(--bg-tertiary)] relative flex flex-col">
               <div className="flex-1 relative">
                 {product.has3D ? (
                   <ModelViewer modelPath={product.model3D?.startsWith('http') ? product.model3D : (product.model3D || product.model)} />
@@ -108,11 +108,11 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
 
               {/* Gallery Thumbnails in Quick View */}
               {product.images && product.images.length > 0 && (
-                <div className="p-4 bg-zinc-950/50 border-t border-zinc-800 flex gap-2 overflow-x-auto custom-scrollbar">
+                <div className="p-4 bg-[var(--bg-primary)]/50 border-t border-[var(--border-color)] flex gap-2 overflow-x-auto custom-scrollbar">
                   {product.images.map((img, idx) => (
                     <div 
                       key={idx}
-                      className="w-12 h-12 rounded-lg border border-zinc-800 overflow-hidden shrink-0"
+                      className="w-12 h-12 rounded-lg border border-[var(--border-color)] overflow-hidden shrink-0"
                     >
                       <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     </div>
@@ -122,7 +122,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               
               <button 
                 onClick={onClose}
-                className="absolute top-6 left-6 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-colors md:hidden"
+                className="absolute top-6 left-6 p-2 bg-[var(--bg-secondary)]/80 backdrop-blur-md rounded-full shadow-lg hover:bg-[var(--bg-secondary)] transition-colors md:hidden text-[var(--text-primary)]"
               >
                 <X size={20} />
               </button>
@@ -133,20 +133,20 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               <div className="flex justify-between items-start mb-8">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-zinc-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    <span className="px-3 py-1 bg-[var(--bg-tertiary)] rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                       {product.brand}
                     </span>
-                    <span className="px-3 py-1 bg-zinc-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    <span className="px-3 py-1 bg-[var(--bg-tertiary)] rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                       {product.category}
                     </span>
                   </div>
-                  <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 leading-none">
+                  <h2 className="text-4xl font-black uppercase tracking-tighter text-[var(--text-primary)] leading-none">
                     {language === 'HR' && product.nameHr ? product.nameHr : product.name}
                   </h2>
                 </div>
                 <button 
                   onClick={onClose}
-                  className="p-2 hover:bg-zinc-100 rounded-xl transition-colors text-zinc-400 hidden md:block"
+                  className="p-2 hover:bg-[var(--bg-tertiary)] rounded-xl transition-colors text-[var(--text-secondary)] hidden md:block"
                 >
                   <X size={24} />
                 </button>
@@ -154,16 +154,16 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
 
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex flex-col">
-                  <span className="text-3xl font-mono font-bold text-red-600">
+                  <span className="text-3xl font-mono font-bold text-[#ab1017]">
                     €{getDiscountedPrice(product.price, product.discount).toFixed(2)}
                   </span>
                   {product.discount > 0 && (
-                    <span className="text-[10px] text-zinc-400 line-through font-bold">
+                    <span className="text-[10px] text-[var(--text-secondary)] line-through font-bold">
                       €{product.price.toFixed(2)}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase">
+                <div className="flex items-center gap-2 text-[var(--text-secondary)] text-xs font-bold uppercase">
                   <Box size={14} />
                   {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
                 </div>
@@ -179,28 +179,28 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                       { emoji: "🎯", label: 'precision', value: 'elite' }
                     ]
                 ).slice(0, 3).map((char, i) => (
-                  <div key={i} className="p-4 bg-zinc-50 border border-zinc-100 rounded-2xl flex flex-col items-center text-center">
+                  <div key={i} className="p-4 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl flex flex-col items-center text-center">
                     <div className="mb-2">
                       <RedIcon emoji={char.emoji} size={18} />
                     </div>
-                    <p className="text-[8px] font-black uppercase text-zinc-400 tracking-widest mb-1">{t(char.label.toLowerCase())}</p>
-                    <p className="text-[10px] font-black uppercase text-zinc-900">{t(char.value.toLowerCase())}</p>
+                    <p className="text-[8px] font-black uppercase text-[var(--text-secondary)] tracking-widest mb-1">{t(char.label.toLowerCase())}</p>
+                    <p className="text-[10px] font-black uppercase text-[var(--text-primary)]">{t(char.value.toLowerCase())}</p>
                   </div>
                 ))}
               </div>
 
               <div className="space-y-4 mb-10">
                 {product.description && (
-                  <p className="text-zinc-500 text-lg leading-relaxed">
+                  <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
                     {language === 'HR' && product.descriptionHr ? product.descriptionHr : product.description}
                   </p>
                 )}
                 
                 {product.longDescription && (
-                  <div className="p-6 bg-zinc-50 border border-zinc-100 rounded-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-red-600" />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Description</h4>
-                    <p className="text-zinc-600 text-sm leading-relaxed whitespace-pre-wrap italic">
+                  <div className="p-6 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#ab1017]" />
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-[#ab1017] mb-3">Description</h4>
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed whitespace-pre-wrap italic">
                       {product.longDescription}
                     </p>
                   </div>
@@ -208,16 +208,16 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               </div>
 
               {product.type === 'module' && product.compatibleWeapons && product.compatibleWeapons.length > 0 && (
-                <div className="mb-10 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Shield size={14} className="text-red-600" />
+                <div className="mb-10 p-6 bg-[var(--bg-tertiary)] rounded-2xl border border-[var(--border-color)]">
+                  <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Shield size={14} className="text-[#ab1017]" />
                     COMPATIBLE WEAPONS
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {product.compatibleWeapons.map(weaponId => (
                       <span 
                         key={weaponId}
-                        className="px-3 py-1 bg-white border border-zinc-200 text-zinc-600 rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                        className="px-3 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg text-[10px] font-bold uppercase tracking-wider"
                       >
                         {weaponId}
                       </span>
@@ -229,10 +229,10 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
               <div className="mt-auto flex flex-col gap-6">
                 {/* Variant Selectors in Quick View */}
                 {((product as any).variantAttributes || (product as any).variant_attributes)?.length > 0 && (
-                  <div className="space-y-4 border-t border-zinc-100 pt-6">
+                  <div className="space-y-4 border-t border-[var(--border-color)] pt-6">
                     {((product as any).variantAttributes || (product as any).variant_attributes).map((attr: any) => (
                       <div key={attr.name} className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{attr.name}</label>
+                        <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{attr.name}</label>
                         <div className="flex flex-wrap gap-2">
                           {attr.options?.map((opt: string) => (
                             <button
@@ -250,8 +250,8 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                               }}
                               className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border ${
                                 selectedAttributes[attr.name] === opt
-                                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
-                                  : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400'
+                                  ? 'bg-[#ab1017] text-white border-[#ab1017] shadow-lg shadow-[#ab1017]/20'
+                                  : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[#ab1017]/50'
                               }`}
                             >
                               {opt}
@@ -272,7 +272,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                       <button 
                         onClick={() => addItem(product, selectedVariant || undefined)}
                         disabled={product.stock <= 0 || !!missing}
-                        className="flex items-center justify-center gap-3 py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white rounded-2xl transition-all font-bold uppercase tracking-widest"
+                        className="flex items-center justify-center gap-3 py-4 bg-[#ab1017] hover:bg-[#8e0d13] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-secondary)] text-white rounded-2xl transition-all font-bold uppercase tracking-widest shadow-lg shadow-[#ab1017]/20"
                       >
                         <ShoppingCart size={20} />
                         {missing 
@@ -284,7 +284,7 @@ export const QuickPreviewModal: React.FC<QuickPreviewModalProps> = ({ product, i
                   <Link 
                     to={`/product/${product.id}/${product.slug}`}
                     onClick={onClose}
-                    className="flex items-center justify-center gap-3 py-4 bg-white border border-zinc-200 hover:border-zinc-900 text-zinc-900 rounded-2xl transition-all font-bold uppercase tracking-widest"
+                    className="flex items-center justify-center gap-3 py-4 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[#ab1017]/50 text-[var(--text-primary)] hover:text-[#ab1017] rounded-2xl transition-all font-bold uppercase tracking-widest shadow-sm"
                   >
                     FULL PAGE
                     <ArrowRight size={20} />

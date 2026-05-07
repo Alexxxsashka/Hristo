@@ -116,32 +116,32 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] px-4 py-12">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl backdrop-blur-xl shadow-2xl">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
+            <div className="w-16 h-16 bg-[#ab1017] rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#ab1017]/20">
               <LogIn className="text-white" size={32} />
             </div>
-            <h1 className="text-3xl font-black tracking-tighter uppercase">
+            <h1 className="text-3xl font-black tracking-tighter uppercase text-[var(--text-primary)]">
               {showForgot ? t('reset_password_title') : t('welcome_back_title')}
             </h1>
-            <p className="text-zinc-500 text-sm mt-2 text-center">
+            <p className="text-[var(--text-secondary)] text-sm mt-2 text-center">
               {showForgot 
                 ? t('forgot_password_subtitle') 
                 : t('login_subtitle')}
             </p>
           </div>
 
-          <div className="flex gap-2 mb-8 bg-black/40 p-1 rounded-xl border border-zinc-800">
+          <div className="flex gap-2 mb-8 bg-[var(--bg-tertiary)] p-1 rounded-xl border border-[var(--border-color)]">
             <button
               onClick={() => { setMethod('email'); setShowForgot(false); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                method === 'email' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
+                method === 'email' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-lg border border-[var(--border-color)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {t('email')}
@@ -149,7 +149,7 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={() => { setMethod('phone'); setShowForgot(false); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                method === 'phone' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
+                method === 'phone' ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-lg border border-[var(--border-color)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {t('phone_method')}
@@ -157,7 +157,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 text-sm">
+            <div className="mb-6 p-4 bg-[#ab1017]/10 border border-[#ab1017]/20 rounded-xl flex items-center gap-3 text-[#ab1017] text-sm">
               <AlertCircle size={18} />
               {error}
             </div>
@@ -181,15 +181,15 @@ export const LoginPage: React.FC = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
+                  <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                     <input 
                       type="email" 
                       value={email}
                       onChange={e => handleFieldChange('email', e.target.value)}
-                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                        fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                      className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                        fieldErrors.email ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                       }`}
                       placeholder="name@example.com"
                       maxLength={255}
@@ -202,14 +202,14 @@ export const LoginPage: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest"
+                  className="w-full bg-[#ab1017] hover:bg-[#8e0d13] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-[#ab1017]/20 uppercase tracking-widest"
                 >
                   {loading ? t('sending_reset_link') : t('send_reset_link')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForgot(false)}
-                  className="w-full flex items-center justify-center gap-2 text-zinc-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
+                  className="w-full flex items-center justify-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-bold uppercase tracking-widest transition-colors"
                 >
                   <ArrowLeft size={14} />
                   {t('back_to_login')}
@@ -225,58 +225,58 @@ export const LoginPage: React.FC = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
+                  <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                     <input 
                       type="email" 
                       value={email}
                       onChange={e => handleFieldChange('email', e.target.value)}
-                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                        fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                      className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                        fieldErrors.email ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                       }`}
                       placeholder="name@example.com"
                       maxLength={255}
                     />
                   </div>
                   {fieldErrors.email && (
-                    <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>
+                    <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.email}</p>
                   )}
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-1.5 ml-1">
-                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('password')}</label>
+                    <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('password')}</label>
                     <button
                       type="button"
                       onClick={() => setShowForgot(true)}
-                      className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-400"
+                      className="text-[10px] font-black text-[#ab1017] uppercase tracking-widest hover:text-[#8e0d13]"
                     >
                       {t('forgot_password')}
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                     <input 
                       type="password" 
                       value={password}
                       onChange={e => handleFieldChange('password', e.target.value)}
-                      className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                        fieldErrors.password ? 'border-red-500' : 'border-zinc-700'
+                      className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                        fieldErrors.password ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                       }`}
                       placeholder="••••••••"
                       maxLength={128}
                     />
                   </div>
                   {fieldErrors.password && (
-                    <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>
+                    <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.password}</p>
                   )}
                 </div>
 
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest mt-4"
+                  className="w-full bg-[#ab1017] hover:bg-[#8e0d13] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-[#ab1017]/20 uppercase tracking-widest mt-4"
                 >
                   {loading ? t('authenticating') : t('login')}
                 </button>
@@ -299,10 +299,10 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-8 pt-8 border-t border-zinc-800 text-center">
-            <p className="text-zinc-500 text-sm">
+          <div className="mt-8 pt-8 border-t border-[var(--border-color)] text-center">
+            <p className="text-[var(--text-secondary)] text-sm">
               {t('dont_have_account')}{' '}
-              <Link to="/register" className="text-red-500 hover:text-red-400 font-bold transition-colors">
+              <Link to="/register" className="text-[#ab1017] hover:text-[#8e0d13] font-bold transition-colors">
                 {t('register_now')}
               </Link>
             </p>

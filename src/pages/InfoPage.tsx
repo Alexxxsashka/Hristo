@@ -56,7 +56,7 @@ export const InfoPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -64,8 +64,8 @@ export const InfoPage: React.FC = () => {
 
   if (!policy) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center space-y-6">
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">{t('product_not_found') || 'Page not found'}</h2>
+      <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center space-y-6">
+        <h2 className="text-4xl font-black text-[var(--text-primary)] uppercase tracking-tighter">{t('product_not_found') || 'Page not found'}</h2>
       </div>
     );
   }
@@ -75,42 +75,42 @@ export const InfoPage: React.FC = () => {
   const displayContent = isHr && policy.content_hr ? policy.content_hr : policy.content;
 
   return (
-    <div className="min-h-screen bg-zinc-950 py-20 px-8">
+    <div className="min-h-screen bg-[var(--bg-primary)] py-20 px-4 sm:px-8 transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-900/50 border border-zinc-800 p-12 md:p-20 rounded-[40px] space-y-12"
+          className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 md:p-20 rounded-[40px] space-y-12"
         >
           <div className="flex flex-col items-center text-center space-y-6">
             <div className="w-20 h-20 bg-red-600/10 rounded-[30px] flex items-center justify-center text-red-600">
               <Icon size={40} />
             </div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">
+            <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter text-[var(--text-primary)]">
               {displayTitle}
             </h1>
-            <div className="flex items-center gap-2 text-zinc-500 text-xs font-bold uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest">
               <Calendar size={14} className="text-red-600" />
               {t('last_updated') || 'Last Updated'}: {new Date(policy.lastUpdated).toLocaleDateString()}
             </div>
           </div>
 
           <div className="prose prose-invert prose-red max-w-none">
-            <div className="text-zinc-300 text-lg leading-relaxed space-y-6">
+            <div className="text-[var(--text-secondary)] text-lg leading-relaxed space-y-6">
               <ReactMarkdown>{displayContent}</ReactMarkdown>
             </div>
           </div>
 
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-zinc-800">
-            <div className="p-8 bg-zinc-950 border border-zinc-800 rounded-3xl space-y-4">
-              <h3 className="text-white font-black uppercase text-sm tracking-widest">{t('need_help') || 'Need Help?'}</h3>
-              <p className="text-zinc-500 text-sm">{t('need_help_desc') || 'Our team is available for all your questions regarding this topic.'}</p>
-              <Link to="/contact" className="inline-block text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('contact_us') || 'Contact Us'} →</Link>
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-[var(--border-color)]">
+            <div className="p-8 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-3xl space-y-4">
+              <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest">{t('need_help') || 'Need Help?'}</h3>
+              <p className="text-[var(--text-secondary)] text-sm">{t('need_help_desc') || 'Our team is available for all your questions regarding this topic.'}</p>
+              <Link to="/contact" className="inline-block text-red-600 font-bold text-xs uppercase tracking-widest hover:text-red-500 transition-colors">{t('contact_us') || 'Contact Us'} →</Link>
             </div>
-            <div className="p-8 bg-zinc-950 border border-zinc-800 rounded-3xl space-y-4">
-              <h3 className="text-white font-black uppercase text-sm tracking-widest">{t('secure_shopping') || 'Secure Shopping'}</h3>
-              <p className="text-zinc-500 text-sm">{t('secure_shopping_desc') || 'Your security and satisfaction are our top priorities.'}</p>
-              <Link to="/blog" className="inline-block text-red-500 font-bold text-xs uppercase tracking-widest hover:text-red-400 transition-colors">{t('learn_more') || 'Learn More'} →</Link>
+            <div className="p-8 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-3xl space-y-4">
+              <h3 className="text-[var(--text-primary)] font-black uppercase text-sm tracking-widest">{t('secure_shopping') || 'Secure Shopping'}</h3>
+              <p className="text-[var(--text-secondary)] text-sm">{t('secure_shopping_desc') || 'Your security and satisfaction are our top priorities.'}</p>
+              <Link to="/blog" className="inline-block text-red-600 font-bold text-xs uppercase tracking-widest hover:text-red-500 transition-colors">{t('learn_more') || 'Learn More'} →</Link>
             </div>
           </div>
         </motion.div>

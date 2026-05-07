@@ -43,7 +43,7 @@ const RedIcon = ({ emoji, size = 24 }: { emoji: string; size?: number }) => {
   const IconComponent = iconMap[emoji];
 
   if (IconComponent) {
-    return <IconComponent className="text-red-600" size={size} />;
+    return <IconComponent className="text-[#ab1017]" size={size} />;
   }
 
   return <span style={{ fontSize: size }}>{emoji}</span>;
@@ -102,7 +102,7 @@ export const ProductPage: React.FC = () => {
   }, [id, slug]);
 
   if (loading) return <ProductPageSkeleton />;
-  if (!product) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">{t('product_not_found')}</div>;
+  if (!product) return <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center text-[var(--text-primary)]">{t('product_not_found')}</div>;
 
   const categoryObj = categories.find(c => c.id === product.category);
   const subcategoryObj = categories.find(c => c.id === product.subcategory);
@@ -165,7 +165,7 @@ export const ProductPage: React.FC = () => {
             </>
           )}
           <span>/</span>
-          <span className="text-red-600 truncate max-w-[150px] sm:max-w-none">{product.name}</span>
+          <span className="text-[#ab1017] truncate max-w-[150px] sm:max-w-none">{product.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 pb-16 md:pb-24">
@@ -199,7 +199,7 @@ export const ProductPage: React.FC = () => {
                 })()
               )}
               <div className="absolute top-4 left-4 md:top-8 md:left-8 flex flex-col gap-2 md:gap-3">
-                <span className="px-2.5 py-1 md:px-4 md:py-2 bg-red-600 text-white text-[8px] md:text-[10px] font-black tracking-widest uppercase rounded-lg md:rounded-xl shadow-xl shadow-red-600/20">
+                <span className="px-2.5 py-1 md:px-4 md:py-2 bg-[#ab1017] text-white text-[8px] md:text-[10px] font-black tracking-widest uppercase rounded-lg md:rounded-xl shadow-xl shadow-[#ab1017]/20">
                   {t('new_arrival')}
                 </span>
                 {product.stock < 5 && product.stock > 0 && (
@@ -217,7 +217,7 @@ export const ProductPage: React.FC = () => {
                   <button 
                     key={idx}
                     onClick={() => setPreviewImage(img)}
-                    className="aspect-square bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] overflow-hidden hover:border-red-600 transition-all group shadow-md"
+                    className="aspect-square bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] overflow-hidden hover:border-[#ab1017] transition-all group shadow-md"
                   >
                     <img 
                       src={img} 
@@ -240,7 +240,7 @@ export const ProductPage: React.FC = () => {
                     { emoji: "🎯", label: 'precision', value: 'elite' }
                   ]
               ).map((feature, i) => (
-                <div key={i} className="p-3 sm:p-4 md:p-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl md:rounded-3xl flex flex-col items-center text-center group hover:border-red-600/50 transition-all duration-500 min-w-[80px] shadow-sm">
+                <div key={i} className="p-3 sm:p-4 md:p-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl md:rounded-3xl flex flex-col items-center text-center group hover:border-[#ab1017]/50 transition-all duration-500 min-w-[80px] shadow-sm">
                   <div className="mb-2 md:mb-4 group-hover:scale-110 transition-transform">
                     <RedIcon emoji={feature.emoji || ''} size={window.innerWidth < 640 ? 16 : 20} />
                   </div>
@@ -257,10 +257,10 @@ export const ProductPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className={`p-6 md:p-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] md:rounded-[40px] relative overflow-hidden group shadow-lg ${!product.longDescription ? 'border-dashed border-[var(--border-color)] opacity-50' : ''}`}
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-red-600" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#ab1017]" />
                 <div className="relative z-10">
-                  <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-red-500 mb-6 flex items-center gap-3">
-                    <span className="w-4 h-px bg-red-600" />
+                  <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-[#ab1017] mb-6 flex items-center gap-3">
+                    <span className="w-4 h-px bg-[#ab1017]" />
                     {t('product_story') || 'Description'}
                     {!product.longDescription && <span className="text-[8px] text-[var(--text-secondary)] tracking-normal">(Admin: No description added yet)</span>}
                   </h3>
@@ -270,7 +270,7 @@ export const ProductPage: React.FC = () => {
                 </div>
                 
                 {/* Decorative background element */}
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-red-600/5 blur-[80px] rounded-full group-hover:bg-red-600/10 transition-colors duration-700" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#ab1017]/5 blur-[80px] rounded-full group-hover:bg-[#ab1017]/10 transition-colors duration-700" />
               </motion.div>
             )}
           </div>
@@ -283,8 +283,8 @@ export const ProductPage: React.FC = () => {
           >
             <div className="mb-8 md:mb-12">
               <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                <span className="w-6 md:w-8 h-1 bg-red-600" />
-                <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-red-500">
+                <span className="w-6 md:w-8 h-1 bg-[#ab1017]" />
+                <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-[#ab1017]">
                   {product.brand}
                 </span>
               </div>
@@ -308,7 +308,7 @@ export const ProductPage: React.FC = () => {
                 <div className="hidden sm:block h-12 w-px bg-[var(--border-color)]" />
                 <div className="flex flex-col">
                   <span className="text-[9px] md:text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1">{t('availability')}</span>
-                  <div className={`flex items-center gap-2 text-xs sm:text-sm font-black uppercase tracking-widest ${currentStock > 0 ? 'text-emerald-500' : 'text-red-600'}`}>
+                  <div className={`flex items-center gap-2 text-xs sm:text-sm font-black uppercase tracking-widest ${currentStock > 0 ? 'text-emerald-500' : 'text-[#ab1017]'}`}>
                     <Box size={14} className="sm:w-4 sm:h-4" />
                     {currentStock > 0 ? `${currentStock} ${t('in_stock')}` : t('out_of_stock')}
                   </div>
@@ -341,7 +341,7 @@ export const ProductPage: React.FC = () => {
                     {product.relatedProducts.map(rp => {
                       const isActive = rp.id === product.id;
                       return isActive ? (
-                        <div key={rp.id} className="w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 border-red-600 shadow-lg shadow-red-600/20 overflow-hidden relative cursor-default" title={rp.name}>
+                        <div key={rp.id} className="w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 border-[#ab1017] shadow-lg shadow-[#ab1017]/20 overflow-hidden relative cursor-default" title={rp.name}>
                           {rp.image || (rp.images && rp.images.length > 0) ? (
                             <img src={rp.image || rp.images[0]} className="w-full h-full object-cover" alt={rp.name} />
                           ) : (
@@ -352,7 +352,7 @@ export const ProductPage: React.FC = () => {
                         <Link
                           key={rp.id}
                           to={`/product/${rp.id}/${rp.slug}`}
-                          className="w-16 h-16 md:w-20 md:h-20 rounded-xl border border-[var(--border-color)] hover:border-red-600 overflow-hidden relative opacity-60 hover:opacity-100 transition-all"
+                          className="w-16 h-16 md:w-20 md:h-20 rounded-xl border border-[var(--border-color)] hover:border-[#ab1017] overflow-hidden relative opacity-60 hover:opacity-100 transition-all"
                           title={rp.name}
                         >
                           {rp.image || (rp.images && rp.images.length > 0) ? (
@@ -375,7 +375,7 @@ export const ProductPage: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{attr.name}</label>
                         {selectedAttributes[attr.name] && (
-                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{selectedAttributes[attr.name]}</span>
+                          <span className="text-[10px] font-bold text-[#ab1017] uppercase tracking-widest">{selectedAttributes[attr.name]}</span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -386,8 +386,8 @@ export const ProductPage: React.FC = () => {
                             onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: opt }))}
                             className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border ${
                               selectedAttributes[attr.name] === opt
-                                ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20'
-                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-red-600/50'
+                                ? 'bg-[#ab1017] text-white border-[#ab1017] shadow-lg shadow-[#ab1017]/20'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[#ab1017]/50'
                             }`}
                           >
                             {opt}
@@ -438,7 +438,7 @@ export const ProductPage: React.FC = () => {
                   addItem(product, selectedVariant || undefined, quantity);
                 }}
                 disabled={currentStock <= 0 || !isSelectionComplete}
-                className="flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 bg-red-600 hover:bg-red-700 disabled:bg-zinc-900 disabled:text-zinc-700 disabled:border-zinc-800 border border-red-500 text-white rounded-xl md:rounded-2xl transition-all shadow-2xl shadow-red-900/20 text-xs sm:text-sm font-black uppercase tracking-widest group"
+                className="flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 bg-[#ab1017] hover:bg-[#8e0d13] disabled:bg-zinc-900 disabled:text-zinc-700 disabled:border-zinc-800 border border-[#ab1017] text-white rounded-xl md:rounded-2xl transition-all shadow-2xl shadow-[#ab1017]/20 text-xs sm:text-sm font-black uppercase tracking-widest group"
               >
                 <ShoppingCart size={18} className="sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
                 {missingAttribute 
@@ -449,8 +449,8 @@ export const ProductPage: React.FC = () => {
                 onClick={() => toggleCompare(product)}
                 className={`flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 rounded-xl md:rounded-2xl transition-all text-xs sm:text-sm font-black uppercase tracking-widest border ${
                   isInCompare(product.id)
-                    ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-red-600/50 shadow-sm'
+                    ? 'bg-[#ab1017] text-white border-[#ab1017]'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[#ab1017]/50 shadow-sm'
                 }`}
               >
                 <GitCompare size={18} className="sm:w-5 sm:h-5" />
@@ -462,8 +462,8 @@ export const ProductPage: React.FC = () => {
               onClick={() => toggleWishlist(product)}
               className={`flex items-center justify-center gap-2 sm:gap-3 py-4 sm:py-5 md:py-6 w-full rounded-xl md:rounded-2xl transition-all text-xs sm:text-sm font-black uppercase tracking-widest border mb-4 sm:mb-6 md:mb-8 ${
                 isInWishlist(product.id)
-                  ? 'bg-red-600/10 text-red-500 border-red-600/20'
-                  : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-red-600/50 shadow-sm'
+                  ? 'bg-[#ab1017]/10 text-[#ab1017] border-[#ab1017]/20'
+                  : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[#ab1017]/50 shadow-sm'
               }`}
             >
               <Heart size={18} className="sm:w-5 sm:h-5" fill={isInWishlist(product.id) ? "currentColor" : "none"} />
@@ -483,7 +483,7 @@ export const ProductPage: React.FC = () => {
             {/* Technical Specs */}
             <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl md:rounded-[32px] p-5 sm:p-6 md:p-8 shadow-inner">
               <h3 className="text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[var(--text-primary)] mb-4 sm:mb-6 flex items-center gap-3">
-                <span className="w-4 h-1 bg-red-600" />
+                <span className="w-4 h-1 bg-[#ab1017]" />
                 {t('technical_specifications')}
               </h3>
               <div className="grid grid-cols-2 gap-y-4 md:gap-y-6 gap-x-6 sm:gap-x-8 md:gap-x-12">
@@ -520,7 +520,7 @@ export const ProductPage: React.FC = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-5xl w-full aspect-square md:aspect-[4/3] lg:aspect-video bg-zinc-900 rounded-[32px] overflow-hidden border border-zinc-800 shadow-2xl"
+              className="relative max-w-5xl w-full aspect-square md:aspect-[4/3] lg:aspect-video bg-[var(--bg-secondary)] rounded-[32px] overflow-hidden border border-[var(--border-color)] shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               <img 
@@ -531,7 +531,7 @@ export const ProductPage: React.FC = () => {
               />
               <button 
                 onClick={() => setPreviewImage(null)}
-                className="absolute top-6 right-6 p-3 bg-black/50 text-white rounded-full hover:bg-red-600 transition-all border border-white/10"
+                className="absolute top-6 right-6 p-3 bg-black/50 text-white rounded-full hover:bg-[#ab1017] transition-all border border-white/10"
               >
                 <X size={24} />
               </button>

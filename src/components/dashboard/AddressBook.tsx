@@ -96,7 +96,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
         </div>
         <button 
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-[#ab1017] text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all"
         >
           <Plus size={14} /> {t('add_address')}
         </button>
@@ -106,7 +106,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
         {profile?.addressBook?.map(address => (
           <div key={address.id} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-6 relative group shadow-sm">
             {address.isDefault && (
-              <span className="absolute top-4 right-4 px-2 py-0.5 bg-red-600 text-white text-[8px] font-black uppercase rounded shadow-lg shadow-red-600/20">{t('default')}</span>
+              <span className="absolute top-4 right-4 px-2 py-0.5 bg-[#ab1017] text-white text-[8px] font-black uppercase rounded shadow-lg shadow-[#ab1017]/20">{t('default')}</span>
             )}
             <h3 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)] mb-4">{address.label}</h3>
             <div className="space-y-1">
@@ -124,7 +124,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
               </button>
               <button 
                 onClick={() => handleDelete(address.id)}
-                className="p-2 bg-red-600/10 text-red-500 hover:bg-red-600/20 rounded-lg transition-all"
+                className="p-2 bg-[#ab1017]/10 text-[#ab1017] hover:bg-[#ab1017]/20 rounded-lg transition-all"
               >
                 <Trash2 size={16} />
               </button>
@@ -156,7 +156,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   required
                   value={label}
                   onChange={e => setLabel(e.target.value)}
-                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 />
               </div>
               <div className="space-y-2">
@@ -166,7 +166,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   required
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
-                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 />
               </div>
               <div className="space-y-2">
@@ -176,7 +176,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   required
                   value={address}
                   onChange={e => setAddress(e.target.value)}
-                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 />
               </div>
               <div className="space-y-2">
@@ -186,7 +186,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   required
                   value={city}
                   onChange={e => setCity(e.target.value)}
-                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 />
               </div>
               <div className="space-y-2">
@@ -196,7 +196,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   required
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 />
               </div>
               <div className="flex items-center gap-3 py-2">
@@ -205,7 +205,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                   id="isDefault"
                   checked={isDefault}
                   onChange={e => setIsDefault(e.target.checked)}
-                  className="w-4 h-4 rounded border-[var(--border-color)] bg-[var(--bg-tertiary)] text-red-600 focus:ring-red-600"
+                  className="w-4 h-4 rounded border-[var(--border-color)] bg-[var(--bg-tertiary)] text-[#ab1017] focus:ring-[#ab1017]"
                 />
                 <label htmlFor="isDefault" className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] cursor-pointer">
                   {t('set_as_default_address')}
@@ -222,7 +222,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-[#ab1017] text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all flex items-center justify-center gap-2"
                 >
                   {loading && <RefreshCw size={14} className="animate-spin" />}
                   {editingAddress ? t('update_address') : t('save_address')}

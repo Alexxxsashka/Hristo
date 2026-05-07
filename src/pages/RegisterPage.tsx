@@ -161,23 +161,23 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] px-4 py-12">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl backdrop-blur-xl shadow-2xl">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-8 rounded-3xl backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
+            <div className="w-16 h-16 bg-[#ab1017] rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#ab1017]/20">
               <UserPlus className="text-white" size={32} />
             </div>
-            <h1 className="text-3xl font-black tracking-tighter uppercase">{t('join_squad')}</h1>
-            <p className="text-zinc-500 text-sm mt-2 text-center">{t('create_account_desc')}</p>
+            <h1 className="text-3xl font-black tracking-tighter uppercase text-[var(--text-primary)]">{t('join_squad')}</h1>
+            <p className="text-[var(--text-secondary)] text-sm mt-2 text-center">{t('create_account_desc')}</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 text-sm">
+            <div className="mb-6 p-4 bg-[#ab1017]/10 border border-[#ab1017]/20 rounded-xl flex items-center gap-3 text-[#ab1017] text-sm">
               <AlertCircle size={18} />
               {error}
             </div>
@@ -185,55 +185,55 @@ export const RegisterPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('username')}</label>
+              <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('username')}</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                 <input 
                   type="text" 
                   value={username}
                   onChange={e => handleFieldChange('username', e.target.value)}
-                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                    fieldErrors.username ? 'border-red-500' : 'border-zinc-700'
+                  className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                    fieldErrors.username ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                   }`}
                   placeholder="johndoe"
                   maxLength={50}
                 />
               </div>
               {fieldErrors.username && (
-                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.username}</p>
+                <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.username}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
+              <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('email_address')}</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                 <input 
                   type="email" 
                   value={email}
                   onChange={e => handleFieldChange('email', e.target.value)}
-                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                    fieldErrors.email ? 'border-red-500' : 'border-zinc-700'
+                  className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                    fieldErrors.email ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                   }`}
                   placeholder="name@example.com"
                   maxLength={255}
                 />
               </div>
               {fieldErrors.email && (
-                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>
+                <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.email}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('password')}</label>
+              <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('password')}</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                 <input 
                   type="password" 
                   value={password}
                   onChange={e => handleFieldChange('password', e.target.value)}
-                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                    fieldErrors.password ? 'border-red-500' : 'border-zinc-700'
+                  className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                    fieldErrors.password ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                   }`}
                   placeholder="••••••••"
                   maxLength={128}
@@ -241,34 +241,34 @@ export const RegisterPage: React.FC = () => {
               </div>
               <PasswordStrength password={password} />
               {fieldErrors.password && (
-                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>
+                <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.password}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5 ml-1">{t('confirm_password')}</label>
+              <label className="block text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-1.5 ml-1">{t('confirm_password')}</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" size={18} />
                 <input 
                   type="password" 
                   value={confirmPassword}
                   onChange={e => handleFieldChange('confirmPassword', e.target.value)}
-                  className={`w-full bg-zinc-800/50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-red-600 transition-colors text-zinc-100 ${
-                    fieldErrors.confirmPassword ? 'border-red-500' : 'border-zinc-700'
+                  className={`w-full bg-[var(--bg-tertiary)] border rounded-xl py-3 pl-12 pr-4 outline-none focus:border-[#ab1017] transition-colors text-[var(--text-primary)] ${
+                    fieldErrors.confirmPassword ? 'border-[#ab1017]' : 'border-[var(--border-color)]'
                   }`}
                   placeholder="••••••••"
                   maxLength={128}
                 />
               </div>
               {fieldErrors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.confirmPassword}</p>
+                <p className="text-[#ab1017] text-xs mt-1 ml-1">{fieldErrors.confirmPassword}</p>
               )}
             </div>
 
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-red-600/20 uppercase tracking-widest mt-4"
+              className="w-full bg-[#ab1017] hover:bg-[#8e0d13] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-[#ab1017]/20 uppercase tracking-widest mt-4"
             >
               {loading ? t('creating_account') : t('register')}
             </button>
@@ -278,10 +278,10 @@ export const RegisterPage: React.FC = () => {
             <SocialLogin />
           </div>
 
-          <div className="mt-8 pt-8 border-t border-zinc-800 text-center">
-            <p className="text-zinc-500 text-sm">
+          <div className="mt-8 pt-8 border-t border-[var(--border-color)] text-center">
+            <p className="text-[var(--text-secondary)] text-sm">
               {t('already_have_account')}{' '}
-              <Link to="/login" className="text-red-500 hover:text-red-400 font-bold transition-colors">
+              <Link to="/login" className="text-[#ab1017] hover:text-[#8e0d13] font-bold transition-colors">
                 {t('login_now')}
               </Link>
             </p>

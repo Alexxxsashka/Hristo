@@ -17,7 +17,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
     <div className="space-y-8">
       <header>
         <h1 className="text-4xl font-black tracking-tighter uppercase mb-2">
-          {t('welcome_back')}, <span className="text-red-600">{profile?.callsign || t('operator')}</span>!
+          {t('welcome_back')}, <span className="text-[#ab1017]">{profile?.callsign || t('operator')}</span>!
         </h1>
         <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">
           {t('status')}: <span className="text-green-500">{profile?.rank ? t(`rank_${profile.rank.toLowerCase().replace(/ /g, '_')}`) : t('rank_recruit')}</span> • {t('team')}: {profile?.teamName || t('freelancer')}
@@ -28,7 +28,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
         <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center">
-              <Package className="text-red-600" size={20} />
+              <Package className="text-[#ab1017]" size={20} />
             </div>
             <h3 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)]">{t('active_orders')}</h3>
           </div>
@@ -41,7 +41,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
         <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center">
-              <TrendingUp className="text-red-600" size={20} />
+              <TrendingUp className="text-[#ab1017]" size={20} />
             </div>
             <h3 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)]">{t('loyalty_points')}</h3>
           </div>
@@ -54,14 +54,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
         <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-6 rounded-3xl shadow-sm">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-10 h-10 bg-[var(--bg-tertiary)] rounded-xl flex items-center justify-center">
-              <Shield className="text-red-600" size={20} />
+              <Shield className="text-[#ab1017]" size={20} />
             </div>
             <h3 className="font-black uppercase tracking-widest text-xs text-[var(--text-secondary)]">{t('rank')}</h3>
           </div>
           <p className="text-3xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{profile?.rank ? t(`rank_${profile.rank.toLowerCase().replace(/ /g, '_')}`) : t('rank_recruit')}</p>
           <div className="w-full h-1 bg-[var(--bg-tertiary)] rounded-full mt-4 overflow-hidden">
             <div 
-              className="h-full bg-red-600" 
+              className="h-full bg-[#ab1017]" 
               style={{ width: `${((profile?.points || 0) / (profile?.nextRankThreshold || 1000)) * 100}%` }} 
             />
           </div>
@@ -71,7 +71,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl overflow-hidden shadow-sm">
         <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center">
           <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('recent_activity')}</h3>
-          <Link to="/shop" className="text-[10px] font-black text-red-600 hover:text-red-500 uppercase tracking-widest">
+          <Link to="/shop" className="text-[10px] font-black text-[#ab1017] hover:text-[#8e0d13] uppercase tracking-widest">
             {t('gear_up')}
           </Link>
         </div>
@@ -92,7 +92,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
                   <div className="text-right">
                     <p className="font-black text-sm text-[var(--text-primary)]">€{order.total.toFixed(2)}</p>
                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
-                      order.status === 'delivered' ? 'bg-green-500/10 text-green-500' : 'bg-red-600/10 text-red-600'
+                      order.status === 'delivered' ? 'bg-green-500/10 text-green-500' : 'bg-[#ab1017]/10 text-[#ab1017]'
                     }`}>
                       {t(`status_${order.status.toLowerCase().replace(/ /g, '_')}`)}
                     </span>
@@ -102,9 +102,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ profile, o
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="mx-auto text-zinc-800 mb-4" size={48} />
-              <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-4">{t('your_arsenal_is_empty')}</p>
-              <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all">
+              <Package className="mx-auto text-[var(--text-secondary)] opacity-20 mb-4" size={48} />
+              <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs mb-4">{t('your_arsenal_is_empty')}</p>
+              <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-3 bg-[#ab1017] text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all">
                 {t('shop_new_arrivals')}
               </Link>
             </div>

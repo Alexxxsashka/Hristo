@@ -77,8 +77,8 @@ export const CategorySidebar: React.FC = () => {
       {/* Categories Section */}
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <span className="w-6 h-1 bg-red-600" />
-          <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+          <span className="w-6 h-1 bg-[#ab1017]" />
+          <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-[0.2em] flex items-center gap-2">
             {t('categories')}
           </h3>
         </div>
@@ -97,8 +97,8 @@ export const CategorySidebar: React.FC = () => {
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 text-[10px] font-black tracking-widest uppercase rounded-xl transition-all border ${
                     isActive 
-                      ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/20' 
-                      : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
+                      ? 'bg-[#ab1017] border-[#ab1017] text-white shadow-lg shadow-[#ab1017]/20' 
+                      : 'bg-[var(--bg-tertiary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   <span>{parent.name}</span>
@@ -121,8 +121,8 @@ export const CategorySidebar: React.FC = () => {
                           onClick={() => handleCategoryClick(sub.id, false)}
                           className={`w-full text-left px-4 py-2 text-[10px] font-bold tracking-widest uppercase rounded-lg transition-all ${
                             filters.subcategories.includes(sub.id)
-                              ? 'text-red-500 bg-red-500/5'
-                              : 'text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900/50'
+                              ? 'text-[#ab1017] bg-[#ab1017]/5'
+                              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
                           }`}
                         >
                           {sub.name}
@@ -141,27 +141,27 @@ export const CategorySidebar: React.FC = () => {
       {activeCategory?.filters && activeCategory.filters.length > 0 && (
         <div className="space-y-8">
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-6 h-1 bg-red-600" />
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">{activeCategory.name} {t('filters')}</h3>
+            <span className="w-6 h-1 bg-[#ab1017]" />
+            <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-[0.2em]">{activeCategory.name} {t('filters')}</h3>
           </div>
           
           {activeCategory.filters.map(filter => (
             <div key={filter.id} className="space-y-4">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">{formatLabel(filter.label)}</label>
+              <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest block">{formatLabel(filter.label)}</label>
               
               {filter.type === 'select' && filter.options && (
                 <div className="relative">
                   <select
                     value={filters.categoryFilters[filter.id] || ''}
                     onChange={(e) => handleCategoryFilterChange(filter.id, e.target.value)}
-                    className="w-full pl-4 pr-10 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[10px] font-bold text-zinc-300 focus:outline-none focus:border-red-600 appearance-none cursor-pointer"
+                    className="w-full pl-4 pr-10 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[10px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] appearance-none cursor-pointer"
                   >
                     <option value="">{t('all')} {formatLabel(filter.label)}</option>
                     {filter.options.map(opt => (
                       <option key={opt} value={opt}>{formatLabel(opt)}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none" />
                 </div>
               )}
 
@@ -172,7 +172,7 @@ export const CategorySidebar: React.FC = () => {
                       type="checkbox"
                       checked={!!filters.categoryFilters[filter.id]}
                       onChange={(e) => handleCategoryFilterChange(filter.id, e.target.checked)}
-                      className="peer appearance-none w-5 h-5 bg-zinc-950 border border-zinc-800 rounded-lg checked:bg-red-600 checked:border-red-500 transition-all"
+                      className="peer appearance-none w-5 h-5 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg checked:bg-[#ab1017] checked:border-[#ab1017] transition-all"
                     />
                     <div className="absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
@@ -180,7 +180,7 @@ export const CategorySidebar: React.FC = () => {
                       </svg>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
                     {formatLabel(filter.label)}
                   </span>
                 </label>
@@ -196,7 +196,7 @@ export const CategorySidebar: React.FC = () => {
                     onChange={(e) => handleCategoryFilterChange(filter.id, Number(e.target.value))}
                     className="w-full accent-red-600"
                   />
-                  <div className="flex justify-between text-[8px] font-black text-zinc-600 uppercase tracking-widest">
+                  <div className="flex justify-between text-[8px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
                     <span>0</span>
                     <span>{filters.categoryFilters[filter.id] || 0}</span>
                     <span>1000</span>
@@ -212,13 +212,13 @@ export const CategorySidebar: React.FC = () => {
       <div className="space-y-10">
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-6 h-1 bg-red-600" />
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">{t('filters')}</h3>
+            <span className="w-6 h-1 bg-[#ab1017]" />
+            <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-[0.2em]">{t('filters')}</h3>
           </div>
           
           {/* Price Range */}
           <div className="space-y-6">
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t('price_range')}</label>
+            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('price_range')}</label>
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 text-[10px]">€</span>
@@ -226,18 +226,18 @@ export const CategorySidebar: React.FC = () => {
                   type="number"
                   value={filters.minPrice}
                   onChange={(e) => setFilters({ minPrice: Number(e.target.value) })}
-                  className="w-full pl-7 pr-3 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[10px] font-bold text-zinc-300 focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full pl-7 pr-3 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[10px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                   placeholder={t('min') || "MIN"}
                 />
               </div>
-              <span className="text-zinc-800">—</span>
+              <span className="text-[var(--text-secondary)] opacity-50">—</span>
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 text-[10px]">€</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-[10px]">€</span>
                 <input
                   type="number"
                   value={filters.maxPrice}
                   onChange={(e) => setFilters({ maxPrice: Number(e.target.value) })}
-                  className="w-full pl-7 pr-3 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[10px] font-bold text-zinc-300 focus:outline-none focus:border-red-600 transition-colors"
+                  className="w-full pl-7 pr-3 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl text-[10px] font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                   placeholder={t('max') || "MAX"}
                 />
               </div>
@@ -248,7 +248,7 @@ export const CategorySidebar: React.FC = () => {
         {/* Brands Filter */}
         {availableBrands.length > 0 && (
           <div>
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4 block">{t('brands')}</label>
+            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4 block">{t('brands')}</label>
             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
               {availableBrands.map(brand => (
                 <label key={brand} className="flex items-center gap-3 group cursor-pointer">
@@ -264,7 +264,7 @@ export const CategorySidebar: React.FC = () => {
                             : [...filters.brands, brand]
                         });
                       }}
-                      className="peer appearance-none w-5 h-5 bg-zinc-950 border border-zinc-800 rounded-lg checked:bg-red-600 checked:border-red-500 transition-all"
+                      className="peer appearance-none w-5 h-5 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg checked:bg-[#ab1017] checked:border-[#ab1017] transition-all"
                     />
                     <div className="absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
@@ -272,7 +272,7 @@ export const CategorySidebar: React.FC = () => {
                       </svg>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
                     {brand}
                   </span>
                 </label>
@@ -284,7 +284,7 @@ export const CategorySidebar: React.FC = () => {
         {/* Mount Types Filter */}
         {availableMountTypes.length > 0 && (
           <div>
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4 block">{t('mount_type')}</label>
+            <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mb-4 block">{t('mount_type')}</label>
             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
               {availableMountTypes.map(type => (
                 <label key={type} className="flex items-center gap-3 group cursor-pointer">
@@ -300,7 +300,7 @@ export const CategorySidebar: React.FC = () => {
                             : [...filters.mountTypes, type]
                         });
                       }}
-                      className="peer appearance-none w-5 h-5 bg-zinc-950 border border-zinc-800 rounded-lg checked:bg-red-600 checked:border-red-500 transition-all"
+                      className="peer appearance-none w-5 h-5 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg checked:bg-[#ab1017] checked:border-[#ab1017] transition-all"
                     />
                     <div className="absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
@@ -308,7 +308,7 @@ export const CategorySidebar: React.FC = () => {
                       </svg>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
                     {t(type.toLowerCase()) || type}
                   </span>
                 </label>
@@ -325,7 +325,7 @@ export const CategorySidebar: React.FC = () => {
               id="inStock"
               checked={filters.inStock}
               onChange={(e) => setFilters({ inStock: e.target.checked })}
-              className="peer appearance-none w-5 h-5 bg-zinc-950 border border-zinc-800 rounded-lg checked:bg-red-600 checked:border-red-500 transition-all"
+              className="peer appearance-none w-5 h-5 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg checked:bg-[#ab1017] checked:border-[#ab1017] transition-all"
             />
             <div className="absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
@@ -333,14 +333,14 @@ export const CategorySidebar: React.FC = () => {
               </svg>
             </div>
           </div>
-          <span className="text-[10px] font-black text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-widest">
+          <span className="text-[10px] font-black text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest">
             {t('in_stock_only')}
           </span>
         </label>
 
         <button
           onClick={() => setFilters({ categories: [], subcategories: [], brands: [], mountTypes: [], minPrice: 0, maxPrice: 5000, inStock: false })}
-          className="w-full py-4 bg-zinc-900 border border-zinc-800 text-[10px] font-black text-zinc-500 hover:text-white hover:border-zinc-700 transition-all uppercase tracking-widest rounded-2xl"
+          className="w-full py-4 bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[10px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] transition-all uppercase tracking-widest rounded-2xl"
         >
           {t('reset_filters')}
         </button>

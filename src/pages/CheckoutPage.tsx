@@ -442,20 +442,20 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-24">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pb-24 transition-colors duration-300">
       {/* Header */}
-      <header className="h-16 sm:h-20 border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-xl sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
+      <header className="h-16 sm:h-20 border-b border-[var(--border-color)] bg-[var(--bg-primary)]/50 backdrop-blur-xl sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3 md:gap-6">
-          <button onClick={() => navigate('/cart')} className="p-1.5 sm:p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
+          <button onClick={() => navigate('/cart')} className="p-1.5 sm:p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
             <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
-          <h1 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tighter">{t('checkout')}</h1>
+          <h1 className="text-base sm:text-lg md:text-xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{t('checkout')}</h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           {[1, 2, 3].map(i => (
             <div 
               key={i} 
-              className={`h-1 sm:h-1.5 w-4 sm:w-8 rounded-full transition-all ${step >= i ? 'bg-red-600' : 'bg-zinc-800'}`} 
+              className={`h-1 sm:h-1.5 w-4 sm:w-8 rounded-full transition-all ${step >= i ? 'bg-[#ab1017]' : 'bg-[var(--bg-tertiary)]'}`} 
             />
           ))}
         </div>
@@ -475,20 +475,20 @@ export const CheckoutPage: React.FC = () => {
                   className="space-y-6 sm:space-y-8"
                 >
                   <section className="space-y-4 sm:space-y-6">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                      <MapPin className="text-red-600 sm:w-6 sm:h-6" size={20} />
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3 text-[var(--text-primary)]">
+                      <MapPin className="text-[#ab1017] sm:w-6 sm:h-6" size={20} />
                       {t('shipping_info')}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       <div className="space-y-1.5 sm:space-y-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('first_name')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('first_name')}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.firstName}
                           onChange={e => handleFieldChange('firstName', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.firstName ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.firstName ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={50}
                         />
@@ -497,14 +497,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('last_name')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('last_name')}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.lastName}
                           onChange={e => handleFieldChange('lastName', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.lastName ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.lastName ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={50}
                         />
@@ -513,14 +513,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('your_email')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('your_email')}</label>
                         <input 
                           type="email" 
                           required
                           value={formData.email}
                           onChange={e => handleFieldChange('email', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.email ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.email ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={255}
                         />
@@ -529,14 +529,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('address')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('address')}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.address}
                           onChange={e => handleFieldChange('address', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.address ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.address ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={200}
                         />
@@ -545,14 +545,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('city')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('city')}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.city}
                           onChange={e => handleFieldChange('city', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.city ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.city ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           maxLength={100}
                         />
@@ -561,14 +561,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('postal_code')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('postal_code')}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.postalCode}
                           onChange={e => handleFieldChange('postalCode', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.postalCode ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.postalCode ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                         />
                         {fieldErrors.postalCode && (
@@ -576,14 +576,14 @@ export const CheckoutPage: React.FC = () => {
                         )}
                       </div>
                       <div className="space-y-1.5 sm:space-y-2">
-                        <label className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{t('phone')}</label>
+                        <label className="text-[10px] sm:text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('phone')}</label>
                         <input 
                           type="tel" 
                           required
                           value={formData.phone}
                           onChange={e => handleFieldChange('phone', e.target.value)}
-                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-900 border rounded-lg sm:rounded-xl outline-none focus:border-red-600 transition-all text-sm ${
-                            fieldErrors.phone ? 'border-red-500' : 'border-zinc-800'
+                          className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] border rounded-lg sm:rounded-xl outline-none focus:border-[#ab1017] transition-all text-sm text-[var(--text-primary)] ${
+                            fieldErrors.phone ? 'border-red-500' : 'border-[var(--border-color)]'
                           }`}
                           placeholder="+385..."
                         />
@@ -595,8 +595,8 @@ export const CheckoutPage: React.FC = () => {
                   </section>
 
                   <section className="space-y-4 sm:space-y-6">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                      <Truck className="text-red-600 sm:w-6 sm:h-6" size={20} />
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3 text-[var(--text-primary)]">
+                      <Truck className="text-[#ab1017] sm:w-6 sm:h-6" size={20} />
                       {t('shipping_method')}
                     </h2>
                     <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -606,19 +606,19 @@ export const CheckoutPage: React.FC = () => {
                           onClick={() => setSelectedShipping(method)}
                           className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-xl sm:rounded-2xl border transition-all text-left ${
                             selectedShipping.id === method.id 
-                              ? 'bg-red-600/10 border-red-600' 
-                              : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                              ? 'bg-[#ab1017]/10 border-[#ab1017]' 
+                              : 'bg-[var(--bg-secondary)] border-[var(--border-color)] hover:border-[var(--border-color)]'
                           }`}
                         >
-                          <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${selectedShipping.id === method.id ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                          <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${selectedShipping.id === method.id ? 'bg-[#ab1017] text-white' : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'}`}>
                             {method.icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-center mb-0.5 sm:mb-1">
-                              <span className="font-bold text-white text-sm sm:text-base truncate pr-2">{t(method.name)}</span>
-                              <span className="font-mono font-bold text-sm sm:text-base whitespace-nowrap">€{method.price.toFixed(2)}</span>
+                              <span className="font-bold text-[var(--text-primary)] text-sm sm:text-base truncate pr-2">{t(method.name)}</span>
+                              <span className="font-mono font-bold text-[var(--text-primary)] text-sm sm:text-base whitespace-nowrap">€{method.price.toFixed(2)}</span>
                             </div>
-                            <p className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest truncate">{t(method.description)}</p>
+                            <p className="text-[10px] sm:text-xs text-[var(--text-secondary)] uppercase tracking-widest truncate opacity-60">{t(method.description)}</p>
                           </div>
                         </button>
                       ))}
@@ -627,7 +627,7 @@ export const CheckoutPage: React.FC = () => {
 
                   <button 
                     onClick={handleNext}
-                    className="w-full py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 text-xs sm:text-sm"
+                    className="w-full py-4 sm:py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#ab1017]/20 text-xs sm:text-sm"
                   >
                     {t('continue_to_payment')}
                   </button>
@@ -643,8 +643,8 @@ export const CheckoutPage: React.FC = () => {
                   className="space-y-6 sm:space-y-8"
                 >
                   <section className="space-y-4 sm:space-y-6">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                      <CreditCard className="text-red-600 sm:w-6 sm:h-6" size={20} />
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-3 text-[var(--text-primary)]">
+                      <CreditCard className="text-[#ab1017] sm:w-6 sm:h-6" size={20} />
                       {t('payment_method')}
                     </h2>
                     <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -654,16 +654,16 @@ export const CheckoutPage: React.FC = () => {
                           onClick={() => setSelectedPayment(method)}
                           className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-xl sm:rounded-2xl border transition-all text-left ${
                             selectedPayment.id === method.id 
-                              ? 'bg-red-600/10 border-red-600' 
-                              : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                              ? 'bg-[#ab1017]/10 border-[#ab1017]' 
+                              : 'bg-[var(--bg-secondary)] border-[var(--border-color)] hover:border-[var(--border-color)]'
                           }`}
                         >
-                          <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${selectedPayment.id === method.id ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                          <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${selectedPayment.id === method.id ? 'bg-[#ab1017] text-white' : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'}`}>
                             {method.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="block font-bold text-white mb-0.5 sm:mb-1 text-sm sm:text-base truncate">{t(method.name)}</span>
-                            <p className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest truncate">{t(method.description)}</p>
+                            <span className="block font-bold text-[var(--text-primary)] mb-0.5 sm:mb-1 text-sm sm:text-base truncate">{t(method.name)}</span>
+                            <p className="text-[10px] sm:text-xs text-[var(--text-secondary)] uppercase tracking-widest truncate opacity-60">{t(method.description)}</p>
                           </div>
                         </button>
                       ))}
@@ -677,13 +677,13 @@ export const CheckoutPage: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-3 sm:gap-4">
-                    <button 
-                      onClick={handleBack}
-                      className="flex-1 py-4 sm:py-5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all text-xs sm:text-sm"
-                    >
-                      {t('back')}
-                    </button>
+                    <div className="flex gap-3 sm:gap-4">
+                      <button 
+                        onClick={handleBack}
+                        className="flex-1 py-4 sm:py-5 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all border border-[var(--border-color)] text-xs sm:text-sm"
+                      >
+                        {t('back')}
+                      </button>
                     {selectedPayment.id === 'stripe' ? (
                       <div className="flex-[2]">
                         {stripeClientSecret ? (
@@ -704,15 +704,15 @@ export const CheckoutPage: React.FC = () => {
                             />
                           </Elements>
                         ) : (
-                          <div className="w-full py-4 sm:py-5 bg-zinc-800 rounded-xl sm:rounded-2xl flex items-center justify-center">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-full py-4 sm:py-5 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl flex items-center justify-center">
+                            <div className="w-5 h-5 border-2 border-[#ab1017] border-t-transparent rounded-full animate-spin" />
                           </div>
                         )}
                       </div>
                     ) : (
                       <button 
                         onClick={handleNext}
-                        className="flex-[2] py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 text-xs sm:text-sm"
+                        className="flex-[2] py-4 sm:py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#ab1017]/20 text-xs sm:text-sm"
                       >
                         {t('review_order')}
                       </button>
@@ -729,41 +729,41 @@ export const CheckoutPage: React.FC = () => {
                   exit={{ opacity: 0, x: 20 }}
                   className="space-y-6 sm:space-y-8"
                 >
-                  <section className="p-5 sm:p-8 bg-zinc-900/40 border border-zinc-800 rounded-xl sm:rounded-3xl space-y-5 sm:space-y-6">
-                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter">{t('review_order')}</h2>
+                  <section className="p-5 sm:p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl sm:rounded-3xl space-y-5 sm:space-y-6 shadow-sm">
+                    <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{t('review_order')}</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <div className="space-y-3 sm:space-y-4">
-                        <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-500">{t('shipping_info')}</h3>
-                        <div className="text-xs sm:text-sm text-zinc-300 space-y-1">
-                          <p className="font-bold text-white">{formData.firstName} {formData.lastName}</p>
-                          <p>{formData.address}</p>
-                          <p>{formData.postalCode} {formData.city}</p>
-                          <p>{t('croatia')}</p>
+                        <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">{t('shipping_info')}</h3>
+                        <div className="text-xs sm:text-sm text-[var(--text-primary)] space-y-1">
+                          <p className="font-black uppercase tracking-tighter">{formData.firstName} {formData.lastName}</p>
+                          <p className="opacity-70">{formData.address}</p>
+                          <p className="opacity-70">{formData.postalCode} {formData.city}</p>
+                          <p className="opacity-70">{t('croatia')}</p>
                         </div>
                       </div>
                       <div className="space-y-3 sm:space-y-4">
-                        <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-500">{t('shipping_method')}</h3>
-                        <div className="text-xs sm:text-sm text-zinc-300 space-y-1">
-                          <p className="font-bold text-white">{t(selectedShipping.name)}</p>
-                          <p className="font-bold text-white">{t(selectedPayment.name)}</p>
+                        <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">{t('shipping_method')}</h3>
+                        <div className="text-xs sm:text-sm text-[var(--text-primary)] space-y-1">
+                          <p className="font-black uppercase tracking-tighter">{t(selectedShipping.name)}</p>
+                          <p className="font-black uppercase tracking-tighter text-[#ab1017]">{t(selectedPayment.name)}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-5 sm:pt-6 border-t border-zinc-800">
-                      <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3 sm:mb-4">{t('available_parts')}</h3>
+                    <div className="pt-5 sm:pt-6 border-t border-[var(--border-color)]">
+                      <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-3 sm:mb-4">{t('available_parts')}</h3>
                       <div className="space-y-3 sm:space-y-4">
                         {cartItems.map(item => (
                           <div key={item.id} className="flex flex-col gap-1">
                             <div className="flex justify-between items-center gap-4">
-                              <span className="text-xs sm:text-sm font-bold text-white truncate">{item.productName}</span>
-                              <span className="font-mono text-zinc-300 text-xs sm:text-sm whitespace-nowrap">€{item.totalPrice.toLocaleString()}</span>
+                              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">{item.productName}</span>
+                              <span className="font-mono text-[var(--text-primary)] text-xs sm:text-sm whitespace-nowrap">€{item.totalPrice.toLocaleString()}</span>
                             </div>
                             {item.selectedVariant && (
                               <div className="flex flex-wrap gap-1.5">
                                 {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
-                                  <span key={key} className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">
+                                  <span key={key} className="text-[9px] text-[var(--text-secondary)] uppercase tracking-widest font-black opacity-50">
                                     {key}: {value}
                                   </span>
                                 ))}
@@ -785,14 +785,14 @@ export const CheckoutPage: React.FC = () => {
                   <div className="flex gap-3 sm:gap-4">
                     <button 
                       onClick={handleBack}
-                      className="flex-1 py-4 sm:py-5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all text-xs sm:text-sm"
+                      className="flex-1 py-4 sm:py-5 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all border border-[var(--border-color)] text-xs sm:text-sm"
                     >
                       {t('back')}
                     </button>
                     <button 
                       onClick={handleSubmit}
                       disabled={isProcessing}
-                      className="flex-[2] py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-900/20 flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm"
+                      className="flex-[2] py-4 sm:py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#ab1017]/20 flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm"
                     >
                       {isProcessing ? (
                         <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -814,16 +814,16 @@ export const CheckoutPage: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center py-16 sm:py-24 text-center"
                 >
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-red-600/20 rounded-full flex items-center justify-center mb-6 sm:mb-8 border border-red-600/30">
-                    <CheckCircle2 size={40} className="sm:w-12 sm:h-12 text-red-600" />
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#ab1017]/20 rounded-full flex items-center justify-center mb-6 sm:mb-8 border border-[#ab1017]/30">
+                    <CheckCircle2 size={40} className="sm:w-12 sm:h-12 text-[#ab1017]" />
                   </div>
-                  <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-4">{t('order_confirmed')}</h2>
-                  <p className="text-sm sm:text-base text-zinc-400 mb-8 sm:mb-12 max-w-md mx-auto px-4">
+                  <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-4 text-[var(--text-primary)]">{t('order_confirmed')}</h2>
+                  <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-8 sm:mb-12 max-w-md mx-auto px-4 font-medium">
                     {t('order_confirmed_desc').replace('{{email}}', formData.email)}
                   </p>
                   <Link 
                     to="/" 
-                    className="px-10 py-4 sm:px-12 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-red-900/20 text-xs sm:text-sm"
+                    className="px-10 py-4 sm:px-12 sm:py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-[#ab1017]/20 text-xs sm:text-sm"
                   >
                     {t('home')}
                   </Link>
@@ -835,12 +835,15 @@ export const CheckoutPage: React.FC = () => {
           {/* Sidebar Summary */}
           {step < 4 && (
             <div className="lg:col-span-1 order-1 lg:order-2">
-              <div className="lg:sticky lg:top-32 p-6 sm:p-8 bg-zinc-950 border border-zinc-800 rounded-2xl sm:rounded-3xl space-y-5 sm:space-y-6">
-                <h3 className="text-base sm:text-lg font-black uppercase tracking-tighter">{t('order_summary')}</h3>
-                <div className="space-y-3 sm:space-y-4">
+              <div className="lg:sticky lg:top-32 p-6 sm:p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl space-y-5 sm:space-y-6 shadow-2xl relative overflow-hidden group">
+                {/* Decorative background gradient */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#ab1017]/5 blur-[60px] rounded-full group-hover:bg-[#ab1017]/10 transition-colors" />
+                
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-tighter text-[var(--text-primary)] relative z-10">{t('order_summary')}</h3>
+                <div className="space-y-3 sm:space-y-4 relative z-10">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-zinc-500">{t('total_price')}</span>
-                    <span className="text-zinc-300 font-mono">€{subtotal.toLocaleString()}</span>
+                    <span className="text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('total_price')}</span>
+                    <span className="text-[var(--text-primary)] font-mono font-black">€{subtotal.toLocaleString()}</span>
                   </div>
                   {userDiscount > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
@@ -849,31 +852,31 @@ export const CheckoutPage: React.FC = () => {
                     </div>
                   )}
                   {promoDiscount > 0 && (
-                    <div className="flex justify-between text-xs sm:text-sm text-red-500">
-                      <span>Promo Code ({appliedCoupon?.code})</span>
-                      <span className="font-mono">-€{promoDiscount.toLocaleString()}</span>
+                    <div className="flex justify-between text-xs sm:text-sm text-[#ab1017] bg-[#ab1017]/5 p-2 rounded-lg border border-[#ab1017]/20">
+                      <span className="font-bold uppercase tracking-widest">Promo ({appliedCoupon?.code})</span>
+                      <span className="font-mono font-black">-€{promoDiscount.toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-zinc-500">{t('shipping_method')} ({t(selectedShipping.name)})</span>
-                    <span className="text-zinc-300 font-mono">€{selectedShipping.price.toFixed(2)}</span>
+                    <span className="text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('shipping_method')}</span>
+                    <span className="text-[var(--text-primary)] font-mono font-black">€{selectedShipping.price.toFixed(2)}</span>
                   </div>
-                  <div className="h-px bg-zinc-800 my-3 sm:my-4" />
+                  <div className="h-px bg-[var(--border-color)] my-3 sm:my-4" />
                   <div className="space-y-1">
                     <div className="flex justify-between items-baseline">
-                      <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">{t('total')}</span>
-                      <span className="text-3xl sm:text-4xl font-black text-red-600 font-mono">€{total.toLocaleString()}</span>
+                      <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[var(--text-primary)]">{t('total')}</span>
+                      <span className="text-3xl sm:text-4xl font-black text-[#ab1017] font-mono tracking-tighter">€{total.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                    <div className="flex justify-between text-[9px] text-[var(--text-secondary)] font-black uppercase tracking-[0.3em] opacity-50">
                       <span>{t('vat_included')}</span>
                       <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="pt-4 sm:pt-6 space-y-4">
-                  <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
-                    <ShieldCheck size={14} className="sm:w-4 sm:h-4 text-red-600" />
+                <div className="pt-4 sm:pt-6 space-y-4 relative z-10">
+                  <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] text-[var(--text-secondary)] uppercase tracking-[0.2em] font-black opacity-50">
+                    <ShieldCheck size={14} className="sm:w-4 sm:h-4 text-[#ab1017]" />
                     {t('secure_ssl_encryption')}
                   </div>
                   <div className="flex flex-wrap gap-4 grayscale opacity-30">

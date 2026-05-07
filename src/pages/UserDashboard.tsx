@@ -101,8 +101,8 @@ export const UserDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#ab1017] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -124,16 +124,16 @@ export const UserDashboard: React.FC = () => {
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0">
           <div className="bg-[var(--bg-secondary)] backdrop-blur-xl border border-[var(--border-color)] rounded-3xl overflow-hidden sticky top-28 shadow-xl">
-            <div className="p-6 border-b border-[var(--border-color)] bg-gradient-to-br from-red-600/5 to-transparent">
+            <div className="p-6 border-b border-[var(--border-color)] bg-gradient-to-br from-[#ab1017]/5 to-transparent">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/20">
+                <div className="w-12 h-12 bg-[#ab1017] rounded-2xl flex items-center justify-center shadow-lg shadow-[#ab1017]/20">
                   <UserIcon className="text-white" size={24} />
                 </div>
                 <div>
                   <h2 className="font-black text-lg tracking-tighter uppercase leading-none">
                     {profile?.callsign || user?.username}
                   </h2>
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+                  <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">
                     {profile?.teamName || 'NO TEAM'}
                   </p>
                 </div>
@@ -148,11 +148,11 @@ export const UserDashboard: React.FC = () => {
                       onClick={() => setActiveTab(item.id as Tab)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all group ${
                         activeTab === item.id 
-                          ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' 
+                          ? 'bg-[#ab1017] text-white shadow-lg shadow-[#ab1017]/20' 
                           : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
                       }`}
                     >
-                      <item.icon size={18} className={activeTab === item.id ? 'text-white' : 'text-[var(--text-secondary)] group-hover:text-red-600'} />
+                      <item.icon size={18} className={activeTab === item.id ? 'text-white' : 'text-[var(--text-secondary)] group-hover:text-[#ab1017]'} />
                       {item.label}
                       {activeTab === item.id && <ChevronRight size={14} className="ml-auto" />}
                     </button>
@@ -204,10 +204,10 @@ export const UserDashboard: React.FC = () => {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[32px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ab1017] to-transparent opacity-50" />
               
               <div className="flex items-center gap-4 mb-6">
-                <div className={`p-4 rounded-2xl ${confirmModal.type === 'danger' ? 'bg-red-600/20 text-red-600' : 'bg-amber-600/20 text-amber-600'}`}>
+                <div className={`p-4 rounded-2xl ${confirmModal.type === 'danger' ? 'bg-[#ab1017]/20 text-[#ab1017]' : 'bg-amber-600/20 text-amber-600'}`}>
                   <AlertCircle size={28} />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ export const UserDashboard: React.FC = () => {
                 </button>
                 <button 
                   onClick={confirmModal.onConfirm}
-                  className={`flex-1 px-6 py-4 ${confirmModal.type === 'danger' ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'} text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl`}
+                  className={`flex-1 px-6 py-4 ${confirmModal.type === 'danger' ? 'bg-[#ab1017] hover:bg-[#8e0d13] shadow-[#ab1017]/20' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'} text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl`}
                 >
                   {t('confirm')}
                 </button>

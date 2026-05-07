@@ -71,7 +71,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ profile }) => 
                 type="text" 
                 value={callsign}
                 onChange={e => setCallsign(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 placeholder={t('eg_ghost')}
               />
             </div>
@@ -81,7 +81,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ profile }) => 
                 type="text" 
                 value={teamName}
                 onChange={e => setTeamName(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                 placeholder={t('eg_task_force')}
               />
             </div>
@@ -91,7 +91,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ profile }) => 
                 type="text" 
                 value={displayName}
                 onChange={e => setDisplayName(e.target.value)}
-                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
               />
             </div>
             <div className="space-y-2">
@@ -136,13 +136,13 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ profile }) => 
                       value={newEmail}
                       onChange={e => setNewEmail(e.target.value)}
                       placeholder="new@example.com"
-                      className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl py-2 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+                      className="flex-1 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl py-2 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
                     />
                     <button 
                       type="button"
                       onClick={handleEmailChange}
                       disabled={loading}
-                      className="px-4 py-2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all"
+                      className="px-4 py-2 bg-[#ab1017] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#8e0d13] transition-all"
                     >
                       {t('update')}
                     </button>
@@ -168,7 +168,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ profile }) => 
             <button 
               type="submit"
               disabled={loading}
-              className="ml-auto px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all flex items-center gap-2"
+              className="ml-auto px-8 py-4 bg-[#ab1017] text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all flex items-center gap-2"
             >
               {loading && <RefreshCw size={14} className="animate-spin" />}
               {t('save_changes')}

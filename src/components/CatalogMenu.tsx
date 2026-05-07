@@ -64,7 +64,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
               {/* Sidebar / Main Categories */}
               <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-[var(--border-color)] bg-[var(--bg-tertiary)] overflow-y-auto py-6">
                 <div className="px-6 mb-6 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-red-500">
+                  <div className="flex items-center gap-2 text-[#ab1017]">
                     <LayoutGrid size={20} />
                     <span className="font-black uppercase tracking-widest text-sm">{t('catalog')}</span>
                   </div>
@@ -81,7 +81,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                       onMouseEnter={() => window.innerWidth >= 1024 && setActiveCategory(category)}
                       className={`shrink-0 lg:w-full flex items-center justify-between px-6 py-3 text-xs lg:text-sm font-bold uppercase tracking-wider transition-all border-r lg:border-r-0 border-[var(--border-color)] last:border-r-0 ${
                         activeCategory?.id === category.id
-                          ? 'bg-red-600 text-white'
+                          ? 'bg-[#ab1017] text-white'
                           : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
                       }`}
                     >
@@ -102,7 +102,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                         <Link 
                           to={`/shop/${activeCategory.slug}`} 
                           onClick={onClose}
-                          className="text-[10px] font-bold text-red-500 hover:underline tracking-widest uppercase"
+                          className="text-[10px] font-bold text-[#ab1017] hover:underline tracking-widest uppercase"
                         >
                           {t('view_all')}
                         </Link>
@@ -115,7 +115,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                               <Link
                                 to={`/shop/${activeCategory.slug}/${sub.slug}`}
                                 onClick={onClose}
-                                className="block text-base lg:text-lg font-bold text-[var(--text-primary)] hover:text-red-600 transition-all uppercase tracking-tight"
+                                className="block text-base lg:text-lg font-bold text-[var(--text-primary)] hover:text-[#ab1017] transition-all uppercase tracking-tight"
                               >
                                 {language === 'HR' && sub.nameHr ? sub.nameHr : sub.name}
                               </Link>
@@ -138,7 +138,7 @@ export const CatalogMenu: React.FC<CatalogMenuProps> = ({ isOpen, onClose }) => 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                       <div className="absolute bottom-6 left-6 lg:bottom-8 lg:left-8">
-                        <p className="text-[8px] lg:text-[10px] font-black text-red-600 uppercase tracking-[0.3em] mb-1 lg:mb-2">{t('featured_category')}</p>
+                        <p className="text-[8px] lg:text-[10px] font-black text-[#ab1017] uppercase tracking-[0.3em] mb-1 lg:mb-2">{t('featured_category')}</p>
                         <h4 className="text-xl lg:text-3xl font-black text-white uppercase tracking-tighter">{language === 'HR' && activeCategory.nameHr ? activeCategory.nameHr : activeCategory.name}</h4>
                       </div>
                     </div>

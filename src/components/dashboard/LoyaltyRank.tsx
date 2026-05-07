@@ -33,7 +33,7 @@ export const LoyaltyRank: React.FC<LoyaltyRankProps> = ({ profile }) => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
           <div className="text-center md:text-left">
             <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">{t('current_rank')}</p>
-            <h3 className="text-5xl font-black uppercase tracking-tighter text-red-600">{profile?.rank ? t(`rank_${profile.rank.toLowerCase().replace(/ /g, '_')}`) : t('rank_recruit')}</h3>
+            <h3 className="text-5xl font-black uppercase tracking-tighter text-[#ab1017]">{profile?.rank ? t(`rank_${profile.rank.toLowerCase().replace(/ /g, '_')}`) : t('rank_recruit')}</h3>
           </div>
           <div className="text-center md:text-right">
             <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2">{t('total_points')}</p>
@@ -44,13 +44,13 @@ export const LoyaltyRank: React.FC<LoyaltyRankProps> = ({ profile }) => {
         <div className="space-y-4">
           <div className="flex justify-between items-end">
             <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]">{t('progress_to')} {nextRank.name}</p>
-            <p className="text-xs font-black text-red-600">€{(nextRank.threshold - currentPoints).toFixed(0)} {t('more_to_rank_up')}</p>
+            <p className="text-xs font-black text-[#ab1017]">€{(nextRank.threshold - currentPoints).toFixed(0)} {t('more_to_rank_up')}</p>
           </div>
           <div className="w-full h-4 bg-[var(--bg-tertiary)] rounded-full border border-[var(--border-color)] overflow-hidden p-1">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              className="h-full bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.3)]"
+              className="h-full bg-[#ab1017] rounded-full shadow-[0_0_15px_rgba(171,16,23,0.3)]"
             />
           </div>
           <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest text-center">
@@ -63,7 +63,7 @@ export const LoyaltyRank: React.FC<LoyaltyRankProps> = ({ profile }) => {
         {ranks.map((rank, idx) => (
           <div key={idx} className={`p-4 rounded-2xl border ${
             currentPoints >= rank.threshold 
-              ? 'bg-red-600/10 border-red-600/50' 
+              ? 'bg-[#ab1017]/10 border-[#ab1017]/50' 
               : 'bg-[var(--bg-tertiary)] border-[var(--border-color)] opacity-50'
           }`}>
             <p className="text-[8px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1">{t('rank')} {idx + 1}</p>

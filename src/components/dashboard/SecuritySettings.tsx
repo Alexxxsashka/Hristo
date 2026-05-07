@@ -106,7 +106,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
         <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center">
-              <Lock className="text-red-600" size={24} />
+              <Lock className="text-[#ab1017]" size={24} />
             </div>
             <div>
               <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('password')}</h3>
@@ -124,12 +124,12 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
         <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center">
-              <Smartphone className="text-red-600" size={24} />
+              <Smartphone className="text-[#ab1017]" size={24} />
             </div>
             <div>
               <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('two_factor_auth')}</h3>
               <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
-                {t('status')}: <span className={user?.isMfaEnabled ? 'text-green-500' : 'text-red-500'}>
+                {t('status')}: <span className={user?.isMfaEnabled ? 'text-green-500' : 'text-[#ab1017]'}>
                   {user?.isMfaEnabled ? t('enabled') : t('disabled')}
                 </span>
               </p>
@@ -166,7 +166,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
             {user?.linkedProviders.includes('google.com') ? (
               <button 
                 onClick={() => handleUnlinkProvider('google.com')}
-                className="text-[10px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest"
+                className="text-[10px] font-black text-[#ab1017] hover:text-[#8e0d13] uppercase tracking-widest"
               >
                 {t('unlink')}
               </button>
@@ -195,7 +195,7 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
             {user?.linkedProviders.includes('apple.com') ? (
               <button 
                 onClick={() => handleUnlinkProvider('apple.com')}
-                className="text-[10px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest"
+                className="text-[10px] font-black text-[#ab1017] hover:text-[#8e0d13] uppercase tracking-widest"
               >
                 {t('unlink')}
               </button>
@@ -211,9 +211,9 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
         </div>
       </div>
 
-      <div className="bg-red-600/5 border border-red-600/20 rounded-3xl p-8 shadow-sm">
+      <div className="bg-[#ab1017]/5 border border-[#ab1017]/20 rounded-3xl p-8 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
-          <AlertCircle className="text-red-600" size={24} />
+          <AlertCircle className="text-[#ab1017]" size={24} />
           <h3 className="font-black uppercase tracking-widest text-sm text-[var(--text-primary)]">{t('danger_zone')}</h3>
         </div>
         <p className="text-sm text-[var(--text-secondary)] mb-6">{t('delete_account_warning')}</p>
@@ -221,26 +221,26 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ profile }) =
         {!showDeleteConfirm ? (
           <button 
             onClick={() => setShowDeleteConfirm(true)}
-            className="px-6 py-3 bg-red-600/10 text-red-500 font-black uppercase tracking-widest text-[10px] rounded-xl border border-red-600/20 hover:bg-red-600/20 transition-all"
+            className="px-6 py-3 bg-[#ab1017]/10 text-[#ab1017] font-black uppercase tracking-widest text-[10px] rounded-xl border border-[#ab1017]/20 hover:bg-[#ab1017]/20 transition-all"
           >
             {t('delete_account')}
           </button>
         ) : (
           <div className="space-y-4 max-w-sm">
-            <p className="text-xs font-bold text-red-500 uppercase tracking-widest">{t('confirm_deletion_password')}</p>
+            <p className="text-xs font-bold text-[#ab1017] uppercase tracking-widest">{t('confirm_deletion_password')}</p>
             <input 
               type="password"
               value={deletePassword}
               onChange={e => setDeletePassword(e.target.value)}
               placeholder={t('confirm_password')}
-              className="w-full bg-[var(--bg-tertiary)] border border-red-600/50 rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-red-600 transition-colors"
+              className="w-full bg-[var(--bg-tertiary)] border border-[#ab1017]/50 rounded-xl py-3 px-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ab1017] transition-colors"
             />
-            {deleteError && <p className="text-red-500 text-[10px] font-bold uppercase">{deleteError}</p>}
+            {deleteError && <p className="text-[#ab1017] text-[10px] font-bold uppercase">{deleteError}</p>}
             <div className="flex gap-3">
               <button 
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading}
-                className="flex-1 py-3 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all"
+                className="flex-1 py-3 bg-[#ab1017] text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-[#ab1017]/20 hover:bg-[#8e0d13] transition-all"
               >
                 {deleteLoading ? t('deleting') : t('confirm_delete')}
               </button>
