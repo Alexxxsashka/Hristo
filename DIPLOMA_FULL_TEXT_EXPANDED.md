@@ -685,25 +685,38 @@ classDiagram
 
 Ця діаграма підтверджує модульність системи та дотримання принципів Clean Architecture, де бізнес-логіка відділена від інфраструктурних сервісів.
 
-Внутрішня ієрархія 3D-сцени представлена на рис. 3.5.
+Внутрішня ієрархія 3D-сцени представлена на рис. 3.6. Вона базується на використанні допоміжних об'єктів типу «Empty» (пустушки), які слугують точками прив'язки (Anchor Points) для динамічних модулів.
 
-**Рисунок 3.5 — Структура Scene Graph 3D-моделі**
+**Рисунок 3.6 — Структура Scene Graph 3D-моделі (система слотів)**
 ```mermaid
 graph TD
-    Scene[Root Scene] --> Weapon[Base Weapon Mesh]
-    Weapon --> Slot1[Upper Rail Slot]
-    Weapon --> Slot2[Grip Slot]
-    Slot1 --> Attachment1[Optic/Scope]
-    Slot2 --> Attachment2[Vertical Grip]
-    Attachment1 --> Material1[PBR Material/Texture]
-    Attachment2 --> Material2[PBR Material/Texture]
+    Root[Scene Root] --> Base[Base Weapon Object]
+    
+    subgraph "Система кріплень (Anchors)"
+        Base --> S1["slot_optic (Empty)"]
+        Base --> S2["slot_handguard (Empty)"]
+        Base --> S3["slot_stock (Empty)"]
+        Base --> S4["slot_muzzle (Empty)"]
+    end
+
+    subgraph "Динамічні модулі (Attachments)"
+        S1 --> M1["mod_optic_t1 (Mesh)"]
+        S2 --> M2["mod_hg_ris_ii (Mesh)"]
+        S3 --> M3["mod_stock_crane (Mesh)"]
+        S4 --> M4["mod_muzzle_sf (Mesh)"]
+    end
+
+    M1 --> P1[PBR Materials]
+    M2 --> P2[PBR Materials]
+    M3 --> P3[PBR Materials]
+    M4 --> P4[PBR Materials]
 ```
 
-Згідно з рис. 3.5, кожна деталь зброї є окремим вузлом у дереві сцени, що дозволяє динамічно змінювати матеріали та геометрію незалежно від базової моделі.
+Згідно з рис. 3.6, кожне кріплення реалізовано через ієрархію `slot_` (точка на базовій моделі) та `mod_` (геометрія деталі). Це дозволяє змінювати обвіс без перерахунку координат, просто замінюючи дочірній об'єкт у відповідному слоті.
 
-Процес зміни станів замовлення відстежується за допомогою діаграми, наведеної на рис. 3.6.
+Процес зміни станів замовлення відстежується за допомогою діаграми, наведеної на рис. 3.7.
 
-**Рисунок 3.6 — Діаграма станів (State Machine) замовлення**
+**Рисунок 3.7 — Діаграма станів (State Machine) замовлення**
 ```mermaid
 stateDiagram-v2
     [*] --> Pending: Створення
