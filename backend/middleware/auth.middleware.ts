@@ -7,6 +7,12 @@ import { AuthenticatedRequest, UserPayload } from '../types/index.js';
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 
+// Admin emails — configurable via ADMIN_EMAILS env var (comma-separated)
+const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS || 'guardsowh@gmail.com')
+  .split(',')
+  .map(e => e.trim().toLowerCase())
+  .filter(Boolean);
+
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = (authHeader && authHeader.split(" ")[1]) || (req.query.token as string);
@@ -17,7 +23,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
 
   // Admin bypass for local development
   if (token === 'admin-bypass-key' && process.env.NODE_ENV !== 'production') {
-    req.user = { id: 'admin', email: 'guardsowh@gmail.com', role: 'admin', username: 'admin' };
+    req.user = { id: 'admin', email: ADMIN_EMAILS[0] || 'admin@hristo.hr', role: 'admin', username: 'admin' };
     return next();
   }
 
@@ -65,9 +71,9 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     const dbUser = userResult.rows[0];
     const userEmail = decoded.email || dbUser?.email;
     
-    // Force admin for the primary developer/admin email
+    // Force admin for emails listed in ADMIN_EMAILS env variable
     let finalRole = dbUser?.role || decoded.role || 'user';
-    if (userEmail === 'guardsowh@gmail.com') {
+    if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
       finalRole = 'admin';
     }
     
