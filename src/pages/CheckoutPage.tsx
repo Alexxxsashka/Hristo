@@ -280,7 +280,7 @@ export const CheckoutPage: React.FC = () => {
               subtotal: discountedSubtotal,
               tax: vatAmount,
               discountAmount: discountAmount,
-              shippingCost: selectedShipping.price,
+              shipping_cost: selectedShipping.price,
               total,
               profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
               couponId: appliedCoupon?.id,
@@ -296,6 +296,8 @@ export const CheckoutPage: React.FC = () => {
               },
               shipping: {
                 method: selectedShipping.id,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
                 fullName: `${formData.firstName} ${formData.lastName}`,
                 phone: formData.phone,
                 email: formData.email,
@@ -384,14 +386,14 @@ export const CheckoutPage: React.FC = () => {
         paymentStatus = 'pending';
       }
 
-      const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string } = {
+      const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string; discount_amount?: number; shipping_cost?: number } = {
         id: currentOrderId || undefined,
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,
         subtotal: discountedSubtotal,
         tax: vatAmount,
         discountAmount: discountAmount,
-        shippingCost: selectedShipping.price,
+        shipping_cost: selectedShipping.price,
         total,
         profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
         couponId: appliedCoupon?.id,
@@ -407,6 +409,8 @@ export const CheckoutPage: React.FC = () => {
         },
         shipping: {
           method: selectedShipping.id,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           fullName: `${formData.firstName} ${formData.lastName}`,
           phone: formData.phone,
           email: formData.email,
