@@ -5,8 +5,8 @@ const orderItemSchema = z.object({
   product_id: z.string().optional(),
   productId: z.string().optional(),
   name: z.string(),
-  price: z.number(),
-  quantity: z.number().int().positive(),
+  price: z.coerce.number(),
+  quantity: z.coerce.number().int().positive(),
   configuration: z.any().optional(),
   selectedVariant: z.any().optional()
 }).passthrough();
@@ -27,12 +27,12 @@ export const createOrderSchema = z.object({
       method: z.string(),
       status: z.string().optional()
     }).passthrough().optional(),
-    shipping_cost: z.number().optional(),
-    shippingCost: z.number().optional(),
-    discountAmount: z.number().optional(),
-    discount_amount: z.number().optional(),
+    shipping_cost: z.coerce.number().optional(),
+    shippingCost: z.coerce.number().optional(),
+    discountAmount: z.coerce.number().optional(),
+    discount_amount: z.coerce.number().optional(),
     notes: z.string().optional(),
-    pointsEarned: z.number().optional()
+    pointsEarned: z.coerce.number().optional()
   }).passthrough()
 });
 

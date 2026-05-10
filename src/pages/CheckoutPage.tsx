@@ -266,31 +266,31 @@ export const CheckoutPage: React.FC = () => {
             const orderItems: OrderItem[] = cartItems.map(item => ({
               productId: item.productId,
               name: item.productName,
-              price: item.price,
-              quantity: item.quantity,
+              price: Number(item.price),
+              quantity: Number(item.quantity),
               image: item.image,
               sku: item.sku,
               category: item.category,
-              landingCost: item.landingCost || (item.price * 0.6)
+              landingCost: Number(item.landingCost || (item.price * 0.6))
             }));
 
             const orderData = {
               userId: isAuthenticated ? user!.id : 'guest',
               items: orderItems,
-              subtotal: discountedSubtotal,
-              tax: vatAmount,
-              discountAmount: discountAmount,
-              shipping_cost: selectedShipping.price,
-              total,
-              profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
+              subtotal: Number(discountedSubtotal),
+              tax: Number(vatAmount),
+              discountAmount: Number(discountAmount),
+              shipping_cost: Number(selectedShipping.price),
+              total: Number(total),
+              profit: Number(total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price),
               couponId: appliedCoupon?.id,
               couponCode: appliedCoupon?.code,
-              promoDiscount: promoDiscount,
+              promoDiscount: Number(promoDiscount),
               status: 'awaiting_payment',
               payment: {
                 method: 'stripe',
                 status: 'pending',
-                amount: total,
+                amount: Number(total),
                 currency: 'EUR',
                 paidAt: null
               },
@@ -305,7 +305,7 @@ export const CheckoutPage: React.FC = () => {
                 address: formData.address,
                 postalCode: formData.postalCode,
                 status: 'pending',
-                cost: selectedShipping.price
+                cost: Number(selectedShipping.price)
               }
             };
 
@@ -359,12 +359,12 @@ export const CheckoutPage: React.FC = () => {
       const orderItems: OrderItem[] = cartItems.map(item => ({
         productId: item.productId,
         name: item.productName,
-        price: item.price,
-        quantity: item.quantity,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
         image: item.image,
         sku: item.sku,
         category: item.category,
-        landingCost: item.landingCost || (item.price * 0.6), // Fallback for demo
+        landingCost: Number(item.landingCost || (item.price * 0.6)), // Fallback for demo
         selectedVariant: item.selectedVariant ? {
           id: item.selectedVariant.id,
           name: item.selectedVariant.name,
@@ -390,20 +390,20 @@ export const CheckoutPage: React.FC = () => {
         id: currentOrderId || undefined,
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,
-        subtotal: discountedSubtotal,
-        tax: vatAmount,
-        discountAmount: discountAmount,
-        shipping_cost: selectedShipping.price,
-        total,
-        profit: total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price,
+        subtotal: Number(discountedSubtotal),
+        tax: Number(vatAmount),
+        discountAmount: Number(discountAmount),
+        shipping_cost: Number(selectedShipping.price),
+        total: Number(total),
+        profit: Number(total - orderItems.reduce((acc, i) => acc + (i.landingCost || 0) * i.quantity, 0) - selectedShipping.price),
         couponId: appliedCoupon?.id,
         couponCode: appliedCoupon?.code,
-        promoDiscount: promoDiscount,
+        promoDiscount: Number(promoDiscount),
         status: orderStatus,
         payment: {
           method: selectedPayment.id,
           status: paymentStatus,
-          amount: total,
+          amount: Number(total),
           currency: 'EUR',
           paidAt: paymentStatus === 'paid' ? new Date().toISOString() : null
         },
@@ -418,7 +418,7 @@ export const CheckoutPage: React.FC = () => {
           address: formData.address,
           postalCode: formData.postalCode,
           status: 'pending',
-          cost: selectedShipping.price
+          cost: Number(selectedShipping.price)
         }
       };
 
