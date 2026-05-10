@@ -262,7 +262,7 @@ mindmap
 | :--- | :--- | :--- | :--- |
 | 1 | 3D-конфігурація | Координати слотів, GLB-моделі | Візуалізована збірка, ціна збірки |
 | 2 | Генерація варіацій | Атрибути (колір, матеріал) | Список SKU та залишків |
-| 3 | Оплата (Stripe) | Дані кошика, метадані користувача | Статус платежу, створене замовлення |
+| 3 | Обробка замовлень та оплата | Дані кошика, метод оплати (Stripe / Bank / COD) | Підтвердження замовлення, платіжні реквізити, статус оплати |
 | 4 | BI-аналітика | Логи продажів за період | Графіки доходів та середнього чека |
 
 Логіка автоматизованої генерації варіацій представлена на рис. 2.3.
@@ -548,7 +548,7 @@ erDiagram
 |:---:|---------|-------------|---------|-------------|
 | 1 | `products` | id (PK), name, slug, description, base_price, discount, brand, category_id (FK), images[], model_3d_url | categories (N:1) | Основна сутність каталогу: зберігає назву, опис, базову ціну, знижку, бренд, масив URL зображень та посилання на 3D-модель |
 | 2 | `categories` | id (PK), name, slug, parent_id (FK), image_url, sort_order | products (1:N), self-ref (ієрархія) | Ієрархічна класифікація товарів з підтримкою вкладеності через parent_id |
-| 3 | `orders` | id (PK), user_id (FK), total_amount, status, stripe_session_id, shipping_address, created_at | users (N:1), order_items (1:N) | Замовлення клієнта: загальна сума, статус (pending/paid/shipped/delivered/cancelled), ID сесії Stripe |
+| 3 | `orders` | id (PK), user_id (FK), total_amount, status, payment_method, stripe_session_id, shipping_address, created_at | users (N:1), order_items (1:N) | Замовлення клієнта: метод оплати, статус (pending/paid/shipped/delivered/cancelled), ID сесії Stripe (для онлайн-оплат) |
 | 4 | `order_items` | id (PK), order_id (FK), product_id (FK), variant_sku, quantity, unit_price | orders (N:1), products (N:1) | Рядки замовлення: кількість, ціна за одиницю, SKU обраної варіації |
 | 5 | `users` | id (PK), firebase_uid, email, display_name, role, phone, created_at | orders (1:N) | Облікові записи з прив'язкою до Firebase UID; ролі: customer, admin |
 | 6 | `coupons` | id (PK), code, discount_type, discount_value, min_order, max_uses, used_count, expires_at, is_active | — | Промокоди: відсоткова або фіксована знижка, ліміт використань, термін дії |
@@ -651,14 +651,21 @@ flowchart TD
     
     OrderCreate --> StockVal{Перевірка залишків}
     StockVal -- "Немає" --> Error([Повідомлення про відсутність])
-    StockVal -- "Є" --> Stripe[Генерація сесії Stripe]
+    StockVal -- "Є" --> Method{Вибір методу}
+    
+    Method -- "Stripe" --> Stripe[Генерація сесії Stripe]
+    Method -- "Bank" --> Invoice[Надання реквізитів для оплати]
+    Method -- "COD" --> Process[Статус: В обробці]
     
     Stripe --> Payment{Результат оплати}
     Payment -- "Fail" --> Retry[Повторна спроба / Скасування]
-    Payment -- "Success" --> DBUpdate[Статус: Paid. Оновлення складу]
+    Payment -- "Success" --> DBUpdate[Статус: Paid]
     
-    DBUpdate --> AdminNotify[Сповіщення адміністратора]
-    AdminNotify --> Shipping[Комплектація та відправка]
+    Invoice --> ManualPay[Ручне підтвердження адміном]
+    ManualPay --> DBUpdate
+    Process --> Shipping[Комплектація та відправка]
+    
+    DBUpdate --> Shipping
     Shipping --> Delivery[Доставка клієнту]
     Delivery --> Finish([Завершення: Статус Delivered])
 
