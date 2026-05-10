@@ -430,7 +430,28 @@ erDiagram
     }
 ```
 
-Як показано на рис. 3.3, головна таблиця продуктів пов'язана з категоріями та варіаціями, що дозволяє гнучко масштабувати каталог без дублювання інформації.
+Як показано на рис. 3.3, головна таблиця продуктів пов'язана з категоріями та варіаціями, що дозволяє гнучко масштабувати каталог без дублювання інформації. Детальний опис кожної таблиці бази даних наведено у таблиці 3.2.
+
+**Таблиця 3.2. Специфікація таблиць бази даних системи Hristo**
+
+| № | Таблиця | Ключові поля | Зв'язки | Призначення |
+|:---:|---------|-------------|---------|-------------|
+| 1 | `products` | id (PK), name, slug, description, base_price, discount, brand, category_id (FK), images[], model_3d_url | categories (N:1) | Основна сутність каталогу: зберігає назву, опис, базову ціну, знижку, бренд, масив URL зображень та посилання на 3D-модель |
+| 2 | `categories` | id (PK), name, slug, parent_id (FK), image_url, sort_order | products (1:N), self-ref (ієрархія) | Ієрархічна класифікація товарів з підтримкою вкладеності через parent_id |
+| 3 | `orders` | id (PK), user_id (FK), total_amount, status, stripe_session_id, shipping_address, created_at | users (N:1), order_items (1:N) | Замовлення клієнта: загальна сума, статус (pending/paid/shipped/delivered/cancelled), ID сесії Stripe |
+| 4 | `order_items` | id (PK), order_id (FK), product_id (FK), variant_sku, quantity, unit_price | orders (N:1), products (N:1) | Рядки замовлення: кількість, ціна за одиницю, SKU обраної варіації |
+| 5 | `users` | id (PK), firebase_uid, email, display_name, role, phone, created_at | orders (1:N) | Облікові записи з прив'язкою до Firebase UID; ролі: customer, admin |
+| 6 | `coupons` | id (PK), code, discount_type, discount_value, min_order, max_uses, used_count, expires_at, is_active | — | Промокоди: відсоткова або фіксована знижка, ліміт використань, термін дії |
+| 7 | `messages` | id (PK), name, email, phone, subject, body, is_read, created_at | — | Звернення з контактної форми: тема, текст, статус прочитання |
+| 8 | `audit_logs` | id (PK), user_id, action, entity_type, entity_id, details (JSONB), ip_address, created_at | — | Журнал аудиту: хто, що, коли, з якої IP-адреси змінив; деталі у JSONB |
+| 9 | `inventory_logs` | id (PK), product_id (FK), variant_sku, change_type, quantity_change, previous_qty, new_qty, reason, created_at | products (N:1) | Історія руху товарів на складі: тип зміни (restock/sale/adjustment), кількість до/після |
+| 10 | `saved_builds` | id (PK), user_id (FK), name, config (JSONB), total_price, created_at | users (N:1) | Збережені конфігурації 3D-збірок: JSON-структура з переліком обраних деталей та їх позиціями |
+| 11 | `filters` | id (PK), name, slug, display_order | filter_values (1:N) | Типи фільтрів каталогу (Колір, Матеріал, Калібр, Тип кріплення) |
+| 12 | `filter_values` | id (PK), filter_id (FK), value, display_order | filters (N:1), product_filter_values (1:N) | Конкретні значення фільтрів (Чорний, OD Green, Tan, Picatinny, M-LOK) |
+| 13 | `product_filter_values` | id (PK), product_id (FK), filter_value_id (FK) | products (N:1), filter_values (N:1) | Зв'язок M:N між товарами та значеннями фільтрів для фасетного пошуку |
+| 14 | `blog_posts` | id (PK), title, slug, content, cover_image, author, is_published, published_at, created_at | — | Публікації блогу: SEO-оптимізовані статті для контент-маркетингу |
+
+Таблиця 3.2 демонструє, що ядро системи побудовано навколо зв'язок `products → categories` (класифікація), `products → order_items → orders` (продаж) та `products → filters → filter_values` (фасетний пошук). Використання JSONB-полів у таблицях `audit_logs` та `saved_builds` дозволяє зберігати довільні структуровані дані без необхідності зміни схеми бази даних.
 
 ### 3.3. Реалізація 3D-конфігуратора та модулів аналітики
 3D-конфігуратор побудований на базі Three.js та React Three Fiber. Моделі завантажуються у форматі GLB з використанням Draco-компресії для мінімізації трафіку. Логіка заміни деталей базується на маніпуляції деревом об'єктів сцени (Scene Graph). При виборі аксесуара система перевіряє його сумісність за метаданими з бази даних та динамічно приєднує меш до відповідного "anchor point" на базовій моделі зброї.
