@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState>()(
                 id: firebaseUser.uid,
                 username: userData?.username || firebaseUser.displayName || 'User',
                 email: firebaseUser.email || '',
-                role: (userData?.role === 'admin' || firebaseUser.email === 'guardsowh@gmail.com') ? 'admin' : 'user',
+                role: userData?.role === 'admin' ? 'admin' : 'user',
                 callsign: userData?.callsign,
                 teamName: userData?.teamName,
                 isEmailVerified: firebaseUser.emailVerified,

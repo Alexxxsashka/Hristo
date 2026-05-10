@@ -7,12 +7,6 @@ import { AuthenticatedRequest, UserPayload } from '../types/index.js';
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 
-// Admin emails — configurable via ADMIN_EMAILS env var (comma-separated)
-const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS || 'guardsowh@gmail.com')
-  .split(',')
-  .map(e => e.trim().toLowerCase())
-  .filter(Boolean);
-
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = (authHeader && authHeader.split(" ")[1]) || (req.query.token as string);
@@ -21,9 +15,9 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
-  // Admin bypass for local development
+  // Admin bypass for local development only
   if (token === 'admin-bypass-key' && process.env.NODE_ENV !== 'production') {
-    req.user = { id: 'admin', email: ADMIN_EMAILS[0] || 'admin@hristo.hr', role: 'admin', username: 'admin' };
+    req.user = { id: 'admin', email: 'admin@hristo.hr', role: 'admin', username: 'admin' };
     return next();
   }
 
@@ -35,7 +29,6 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
     } catch (localErr: any) {
       // 2. If local fail, try Firebase ID Token verification via REST API
-      // This avoids heavy firebase-admin initialization issues on Vercel
       if (FIREBASE_API_KEY) {
         try {
           const fbRes = await axios.post(
@@ -48,7 +41,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
             decoded = {
               id: fbUser.localId,
               email: fbUser.email,
-              role: 'user', // Default, will be refined by DB check below
+              role: 'user', // Default — actual role comes from DB below
               username: fbUser.displayName || fbUser.email
             };
           }
@@ -62,7 +55,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       return res.status(403).json({ error: "Forbidden: Invalid or expired token" });
     }
     
-    // 3. Fetch/Verify user in DB to ensure role and presence
+    // 3. Fetch user from DB — the role column is the SINGLE SOURCE OF TRUTH
     const userResult = await pool.query(
       'SELECT id, role, email, username FROM users WHERE id = $1',
       [decoded.id]
@@ -71,18 +64,24 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     const dbUser = userResult.rows[0];
     const userEmail = decoded.email || dbUser?.email;
     
-    // Force admin for emails listed in ADMIN_EMAILS env variable
-    let finalRole = dbUser?.role || decoded.role || 'user';
-    if (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) {
-      finalRole = 'admin';
-    }
+    // If user exists in DB, use their DB role. Otherwise default to 'user'.
+    const finalRole = dbUser?.role || 'user';
     
-    // Auto-create user in DB if they exist in Firebase but not yet in our SQL DB
-    if (!dbUser && decoded.email) {
-       await pool.query(
-         'INSERT INTO users (id, email, role, username) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING',
-         [decoded.id, decoded.email, finalRole, decoded.username]
-       );
+    // Auto-create or update user in DB when they log in via Firebase
+    if (decoded.email) {
+      if (!dbUser) {
+        await pool.query(
+          `INSERT INTO users (id, email, role, username) VALUES ($1, $2, 'user', $3)
+           ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, username = COALESCE(EXCLUDED.username, users.username)`,
+          [decoded.id, decoded.email, decoded.username]
+        );
+      } else if (dbUser.email !== decoded.email) {
+        // Sync email from Firebase if it changed (e.g. was a placeholder before)
+        await pool.query(
+          'UPDATE users SET email = $1 WHERE id = $2',
+          [decoded.email, decoded.id]
+        );
+      }
     }
 
     req.user = {
@@ -151,7 +150,7 @@ export const optionalAuthenticateToken = async (req: AuthenticatedRequest, res: 
       req.user = {
         id: decoded.id,
         email: decoded.email || dbUser?.email,
-        role: dbUser?.role || decoded.role || 'user',
+        role: dbUser?.role || 'user',
         username: dbUser?.username || decoded.username
       };
     }
