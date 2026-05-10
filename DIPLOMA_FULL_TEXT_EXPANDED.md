@@ -619,6 +619,72 @@ sequenceDiagram
 
 На рис. 3.4 відображено повний цикл покупки: від двох альтернативних шляхів вибору товару (каталог або 3D-конфігуратор), через додавання до кошика, заповнення форми оформлення замовлення з даними доставки та промокодом, до створення платіжної сесії Stripe, вибору методу оплати клієнтом та фінального перенаправлення на сторінку підтвердження.
 
+### 3.5 UML-діаграма класів (Class Diagram)
+
+Для відображення внутрішньої структури бекенд-частини платформи та взаємозв'язків між основними програмними компонентами розроблено UML-діаграму класів (рис. 3.5). Вона демонструє поділ логіки на контролери (Controllers), сервіси (Services) та рівень доступу до даних (Data Access).
+
+**Рисунок 3.5 — UML-діаграма класів бекенд-системи**
+
+```mermaid
+classDiagram
+    class AuthMiddleware {
+        +authenticateToken(req, res, next)
+        +authenticateAdmin(req, res, next)
+    }
+
+    class DatabaseService {
+        +pool: Pool
+        +query(text, params)
+        +getClient()
+    }
+
+    class ProductController {
+        +getProducts(req, res)
+        +getProductById(req, res)
+        +createProduct(req, res)
+        +updateProduct(req, res)
+        +deleteProduct(req, res)
+    }
+
+    class OrderController {
+        +createOrder(req, res)
+        +getOrders(req, res)
+        +updateOrderStatus(req, res)
+    }
+
+    class AuthController {
+        +register(req, res)
+        +login(req, res)
+        +getProfile(req, res)
+    }
+
+    class StripeService {
+        +createCheckoutSession(orderData)
+        +handleWebhook(payload)
+    }
+
+    class AuditService {
+        +logAction(action, userId, details)
+    }
+
+    class BlobService {
+        +uploadImage(file)
+        +deleteImage(url)
+    }
+
+    %% Relationships
+    ProductController ..> DatabaseService : uses
+    OrderController ..> DatabaseService : uses
+    AuthController ..> DatabaseService : uses
+    OrderController ..> StripeService : integrates
+    ProductController ..> BlobService : manages files
+    ProductController ..> AuditService : logs changes
+    OrderController ..> AuditService : logs status
+    AuthMiddleware ..> AuthController : protects
+```
+
+Ця діаграма підтверджує модульність системи та дотримання принципів Clean Architecture, де бізнес-логіка відділена від інфраструктурних сервісів.
+
 Внутрішня ієрархія 3D-сцени представлена на рис. 3.5.
 
 **Рисунок 3.5 — Структура Scene Graph 3D-моделі**
@@ -799,4 +865,15 @@ deploymentDiagram
 - **ДОДАТОК Б**: ER-діаграма бази даних та специфікація таблиць.
 - **ДОДАТОК В**: Календарний план проекту та діаграма Ганта.
 - **ДОДАТОК Г**: Альбом скриншотів інтерфейсу (12-15 шт).
+
+Нижче представлені ключові екрани адміністративної панелі керування платформою.
+
+**Рисунок Г.1 — Панель аналітики адміністратора (Admin Dashboard)**
+![Admin Dashboard](file:///C:/Users/Stafford/.gemini/antigravity/brain/4c0a59bb-c9cb-4c2a-b747-93ca0818c74d/admin_dashboard_hristo_1778440497736.png)
+*Опис: Візуалізація ключових метрик продажу, статистики замовлень та активності користувачів у реальному часі.*
+
+**Рисунок Г.2 — Інтерфейс керування каталогом (Product Manager)**
+![Product Manager](file:///C:/Users/Stafford/.gemini/antigravity/brain/4c0a59bb-c9cb-4c2a-b747-93ca0818c74d/product_manager_hristo_1778440511810.png)
+*Опис: Модуль керування товарами, що дозволяє адміністратору редагувати ціни, залишки на складі та параметри 3D-моделей.*
+
 - **ДОДАТОК Д**: Лістинги ключових алгоритмів (3D-рендеринг, генерація варіацій).
