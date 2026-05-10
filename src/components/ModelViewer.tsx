@@ -41,9 +41,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 export const ModelViewer: React.FC<ModelViewerProps> = ({ modelPath }) => {
   return (
     <div className="w-full h-full bg-transparent flex items-center justify-center">
-      <Canvas shadows dpr={[1, 2]} camera={{ fov: 45 }}>
+      <Canvas shadows dpr={[1, 2]} camera={{ fov: 35 }}>
         <Suspense fallback={null}>
-          <Stage environment="city" intensity={0.5} adjustCamera={0.7} shadows="contact">
+          <Stage environment="city" intensity={0.5} adjustCamera={0.6} shadows="contact">
             <ErrorBoundary>
               <Model path={modelPath} />
             </ErrorBoundary>
