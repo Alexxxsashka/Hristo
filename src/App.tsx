@@ -34,17 +34,22 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Error Boundary
-interface ErrorBoundaryProps { children: React.ReactNode; }
-interface ErrorBoundaryState { hasError: boolean; }
+// Error Boundary — typed to avoid useDefineForClassFields conflicts
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  declare readonly props: Readonly<{ children: React.ReactNode }>;
+  declare state: Readonly<{ hasError: boolean }>;
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): ErrorBoundaryState { return { hasError: true }; }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
   componentDidCatch(error: unknown, info: React.ErrorInfo) {
     console.error('App Error Boundary caught:', error, info);
   }
