@@ -331,7 +331,7 @@ export const databaseService = {
   },
 
   async createPaymentIntent(items: any[], shipping_cost: number, orderId?: string, subtotal?: number) {
-    const res = await fetch('/api/create-payment-intent', {
+    const res = await fetch('/api/stripe/create-payment-intent', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

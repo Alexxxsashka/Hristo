@@ -1,10 +1,10 @@
 import express, { Router } from 'express';
 import * as stripeController from '../controllers/stripe.controller.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+import { authenticateToken, optionalAuthenticateToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-router.post('/create-payment-intent', authenticateToken, stripeController.createPaymentIntent);
+router.post('/create-payment-intent', optionalAuthenticateToken, stripeController.createPaymentIntent);
 
 // Webhook needs raw body, so we use express.raw() here specifically if needed,
 // but app.ts already handles skipping express.json() for this path.

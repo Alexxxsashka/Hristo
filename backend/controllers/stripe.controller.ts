@@ -7,20 +7,21 @@ export const createPaymentIntent = async (req: AuthenticatedRequest, res: Respon
   try {
     const { items, subtotal, shipping_cost } = req.body;
     
-    if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-
-    const userResult = await pool.query('SELECT discount_level, stripe_customer_id FROM users WHERE id = $1', [req.user.id]);
-    
     const totalAmount = Math.round((Number(subtotal || 0) + Number(shipping_cost || 0)) * 100);
 
-    let stripeCustomerId = userResult.rows[0]?.stripe_customer_id;
-    if (!stripeCustomerId) {
-      const customer = await stripe.customers.create({
-        email: req.user.email,
-        metadata: { userId: req.user.id }
-      });
-      stripeCustomerId = customer.id;
-      await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [stripeCustomerId, req.user.id]);
+    let stripeCustomerId = undefined;
+    if (req.user) {
+      const userResult = await pool.query('SELECT discount_level, stripe_customer_id FROM users WHERE id = $1', [req.user.id]);
+      stripeCustomerId = userResult.rows[0]?.stripe_customer_id;
+      
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create({
+          email: req.user.email,
+          metadata: { userId: req.user.id }
+        });
+        stripeCustomerId = customer.id;
+        await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [stripeCustomerId, req.user.id]);
+      }
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -28,7 +29,7 @@ export const createPaymentIntent = async (req: AuthenticatedRequest, res: Respon
       currency: "eur",
       customer: stripeCustomerId,
       automatic_payment_methods: { enabled: true },
-      metadata: { userId: req.user.id }
+      metadata: { userId: req.user?.id || 'guest' }
     });
 
     res.json({ success: true, data: { clientSecret: paymentIntent.client_secret } });
