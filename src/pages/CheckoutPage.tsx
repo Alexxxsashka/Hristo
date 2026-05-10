@@ -843,18 +843,18 @@ export const CheckoutPage: React.FC = () => {
                 <div className="space-y-3 sm:space-y-4 relative z-10">
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('total_price')}</span>
-                    <span className="text-[var(--text-primary)] font-mono font-black">€{subtotal.toLocaleString()}</span>
+                    <span className="text-[var(--text-primary)] font-mono font-black">€{Number(subtotal).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   {userDiscount > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm text-emerald-500">
                       <span>{t('dashboard_discount')} ({formatLabel(user?.rank || '')}) -{userDiscount}%</span>
-                      <span className="font-mono">-€{discountAmount.toLocaleString()}</span>
+                      <span className="font-mono">-€{Number(discountAmount).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                     </div>
                   )}
                   {promoDiscount > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm text-[#ab1017] bg-[#ab1017]/5 p-2 rounded-lg border border-[#ab1017]/20">
                       <span className="font-bold uppercase tracking-widest">Promo ({appliedCoupon?.code})</span>
-                      <span className="font-mono font-black">-€{promoDiscount.toLocaleString()}</span>
+                      <span className="font-mono font-black">-€{Number(promoDiscount).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs sm:text-sm">
