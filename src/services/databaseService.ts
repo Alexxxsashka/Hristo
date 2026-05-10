@@ -327,7 +327,8 @@ export const databaseService = {
       const detailMsg = err.details ? ': ' + err.details.map((d: any) => `${d.path} ${d.message}`).join(', ') : '';
       throw new Error((err.error || 'Failed to create order') + detailMsg);
     }
-    return await res.json();
+    const json = await res.json();
+    return json.data || json;
   },
 
   async createPaymentIntent(items: any[], shipping_cost: number, orderId?: string, subtotal?: number) {
@@ -344,7 +345,8 @@ export const databaseService = {
       const detailMsg = err.details ? ': ' + err.details.map((d: any) => `${d.path} ${d.message}`).join(', ') : '';
       throw new Error((err.error || 'Failed to create payment intent') + detailMsg);
     }
-    return await res.json();
+    const json = await res.json();
+    return json.data || json;
   },
 
   async getUserOrders(uid: string) {
