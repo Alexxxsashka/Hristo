@@ -148,6 +148,23 @@ export const CheckoutPage: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0]);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [stockErrors, setStockErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const checkAllStock = async () => {
+      if (cartItems.length === 0) return;
+      const items = cartItems.map(item => ({ productId: item.productId, quantity: item.quantity }));
+      const stockStatus = await databaseService.checkStock(items);
+      const newErrors: Record<string, string> = {};
+      stockStatus.forEach((s: any) => {
+        if (!s.sufficient) {
+          newErrors[s.productId] = `Only ${s.available} in stock`;
+        }
+      });
+      setStockErrors(newErrors);
+    };
+    checkAllStock();
+  }, [cartItems]);
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -429,7 +446,7 @@ export const CheckoutPage: React.FC = () => {
       clearCart();
     } catch (err: any) {
       console.error('Checkout error:', err);
-      setError(t('order_place_error'));
+      setError(err.message || t('order_place_error'));
       setIsProcessing(false);
     }
   };
@@ -764,6 +781,11 @@ export const CheckoutPage: React.FC = () => {
                               <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">{item.productName}</span>
                               <span className="font-mono text-[var(--text-primary)] text-xs sm:text-sm whitespace-nowrap">€{item.totalPrice.toLocaleString()}</span>
                             </div>
+                            {stockErrors[item.productId] && (
+                              <div className="text-[#ab1017] text-[10px] font-black uppercase tracking-tight animate-pulse">
+                                {stockErrors[item.productId]}
+                              </div>
+                            )}
                             {item.selectedVariant && (
                               <div className="flex flex-wrap gap-1.5">
                                 {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
@@ -795,7 +817,7 @@ export const CheckoutPage: React.FC = () => {
                     </button>
                     <button 
                       onClick={handleSubmit}
-                      disabled={isProcessing}
+                      disabled={isProcessing || Object.keys(stockErrors).length > 0}
                       className="flex-[2] py-4 sm:py-5 bg-[#ab1017] hover:bg-[#8e0d13] text-white rounded-xl sm:rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#ab1017]/20 flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm"
                     >
                       {isProcessing ? (

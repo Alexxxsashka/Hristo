@@ -172,6 +172,18 @@ export const databaseService = {
     } catch { return null; }
   },
 
+  async checkStock(items: { productId: string, quantity: number }[]): Promise<any[]> {
+    try {
+      const res = await fetch('/api/products/check-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+      const data = await res.json();
+      return data.success ? data.data : [];
+    } catch { return []; }
+  },
+
   async saveProduct(product: any) {
     const url = product.id ? `/api/admin/products/${product.id}` : '/api/admin/products';
     const method = product.id ? 'PUT' : 'POST';

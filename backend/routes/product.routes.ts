@@ -8,6 +8,7 @@ const router = Router();
 router.get('/', productController.getProducts);
 router.get('/categories', productController.getCategories);
 router.get('/:id', productController.getProduct);
+router.post('/check-stock', productController.checkStock);
 
 router.post('/', authenticateAdmin, uploadMemory.fields([
   { name: "modelFile", maxCount: 1 },

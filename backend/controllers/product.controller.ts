@@ -290,3 +290,35 @@ export const deleteCategory = async (req: AuthenticatedRequest, res: Response) =
   }
 };
 
+export const checkStock = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { items } = req.body;
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ success: false, error: 'Items array required' });
+    }
+    const ids = items.map((i: any) => i.productId || i.id);
+    const result = await pool.query('SELECT id, name, stock FROM products WHERE id = ANY($1)', [ids]);
+    
+    const stockMap: Record<string, any> = {};
+    result.rows.forEach(p => {
+      stockMap[p.id] = { name: p.name, stock: parseInt(p.stock) };
+    });
+
+    const status = items.map((item: any) => {
+      const id = item.productId || item.id;
+      const info = stockMap[id];
+      return {
+        productId: id,
+        name: info?.name || 'Unknown',
+        requested: item.quantity,
+        available: info?.stock || 0,
+        sufficient: (info?.stock || 0) >= item.quantity
+      };
+    });
+
+    res.json({ success: true, data: status });
+  } catch (error: any) {
+    console.error('checkStock error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
