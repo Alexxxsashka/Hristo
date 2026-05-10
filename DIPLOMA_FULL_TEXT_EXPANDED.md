@@ -382,20 +382,42 @@ graph LR
 
 Окрему увагу приділено безпеці адміністративної панелі. Процес автентифікації та розмежування прав доступу базується на інтеграції з Firebase Auth, що деталізовано на рис. 3.2.
 
-**Рисунок 3.2 — Діаграма послідовності процесу автентифікації**
+**Рисунок 3.2 — Діаграма послідовності процесу автентифікації та синхронізації профілю**
 ```mermaid
 sequenceDiagram
     participant U as Користувач
     participant F as Frontend (React)
-    participant Auth as Firebase Auth
-    participant B as Backend (Node.js)
+    participant FA as Firebase Auth
+    participant B as Backend (Express)
+    participant DB as PostgreSQL
+
+    U->>F: Вибір методу (Google/Apple/Email/Phone)
     
-    U->>F: Введення логіна/пароля
-    F->>Auth: Запит на автентифікацію
-    Auth-->>F: Firebase ID Token
-    F->>B: Запит до API + Header: Bearer Token
-    B->>B: Перевірка підпису токена
-    B-->>F: Доступ дозволено (JSON Data)
+    alt Social Auth (Google/Apple)
+        F->>FA: signInWithPopup / Redirect
+        FA-->>F: ID Token + User Info
+    else Email/Password
+        U->>F: Введення Email та пароля
+        F->>FA: signInWithEmailAndPassword
+        FA-->>F: ID Token + User Info
+    else Phone Number
+        U->>F: Введення телефону
+        F->>FA: verifyPhoneNumber (SMS Recaptcha)
+        U->>F: Введення SMS-коду
+        F->>FA: confirm code
+        FA-->>F: ID Token + User Info
+    end
+
+    F->>B: POST /api/auth/login (Header: Bearer ID_TOKEN)
+    B->>FA: verifyIdToken (REST API validation)
+    FA-->>B: Decoded Token (uid, email, name)
+    
+    B->>DB: INSERT ... ON CONFLICT (firebase_uid) DO UPDATE
+    DB-->>B: Об'єкт користувача з роллю (role)
+    
+    B-->>F: JSON (Profile, Role, Permissions)
+    F->>F: Оновлення Zustand authStore
+    F-->>U: Перехід до Dashboard / Кабінету
 ```
 Використання TailwindCSS v4 дозволяє реалізувати адаптивний інтерфейс за методологією Mobile First без надлишкового коду. Система підтримує повноцінну темну тему через CSS-змінні, що перемикаються на рівні Zustand store. Управління глобальним станом реалізовано за допомогою Zustand — легковагої бібліотеки (менше 1 KB gzip), що забезпечує швидку синхронізацію між компонентами без складних архітектурних надбудов типу Redux. Для забезпечення синхронізації даних між вкладками браузера використовується Web API BroadcastChannel, що дозволяє адміністратору працювати з кількома панелями одночасно без ризику розсинхронізації.
 
