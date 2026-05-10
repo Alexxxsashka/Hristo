@@ -104,3 +104,53 @@ export const authenticateAdmin = async (req: AuthenticatedRequest, res: Response
   });
 };
 
+export const optionalAuthenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = (authHeader && authHeader.split(" ")[1]) || (req.query.token as string);
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    let decoded: UserPayload | null = null;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
+    } catch (localErr: any) {
+      if (FIREBASE_API_KEY) {
+        try {
+          const fbRes = await axios.post(
+            `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
+            { idToken: token }
+          );
+          if (fbRes.data?.users?.[0]) {
+            const fbUser = fbRes.data.users[0];
+            decoded = {
+              id: fbUser.localId,
+              email: fbUser.email,
+              role: 'user',
+              username: fbUser.displayName || fbUser.email
+            };
+          }
+        } catch (fbErr: any) {}
+      }
+    }
+
+    if (decoded) {
+      const userResult = await pool.query(
+        'SELECT id, role, email, username FROM users WHERE id = $1',
+        [decoded.id]
+      );
+      const dbUser = userResult.rows[0];
+      req.user = {
+        id: decoded.id,
+        email: decoded.email || dbUser?.email,
+        role: dbUser?.role || decoded.role || 'user',
+        username: dbUser?.username || decoded.username
+      };
+    }
+    next();
+  } catch (error: any) {
+    next();
+  }
+};

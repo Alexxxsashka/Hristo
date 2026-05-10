@@ -376,6 +376,11 @@ const initSchema = async () => {
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS callsign TEXT');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS team_name TEXT');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS addresses JSONB DEFAULT \'[]\'');
+    await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS change_amount INTEGER');
+    await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS previous_balance INTEGER');
+    await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS new_balance INTEGER');
+    await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS reason TEXT');
+    await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS reference_id TEXT');
 
     // 15. Indexes for performance
     await client.query('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)');

@@ -9,15 +9,18 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderNumber = `HRA-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
   const orderId = orderData.id || `order-${Date.now()}`;
   
-  if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-
+  // Guest checkout is allowed
+  const userId = req.user?.id || null;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     
-    // 1. Fetch user profile
-    const userResult = await client.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
-    const userProfile = userResult.rows[0];
+    // 1. Fetch user profile if exists
+    let userProfile = null;
+    if (userId) {
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+      userProfile = userResult.rows[0];
+    }
 
     // 2. Fetch products and calculate authoritative subtotal, total, and profit
     let authoritativeSubtotal = 0;
@@ -73,7 +76,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       await client.query(
         `INSERT INTO inventory_logs (product_id, user_id, change_amount, previous_balance, new_balance, reason, reference_id) 
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [product.id, req.user.id, -item.quantity, parseInt(product.stock), parseInt(product.stock) - item.quantity, `Order ${orderNumber}`, orderId]
+        [product.id, userId, -item.quantity, parseInt(product.stock), parseInt(product.stock) - item.quantity, `Order ${orderNumber}`, orderId]
       );
     }
 
@@ -95,7 +98,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       ) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
       [
-        orderId, orderNumber, req.user.id, authoritativeTotal, authoritativeSubtotal, tax, discountAmount, shippingCost,
+        orderId, orderNumber, userId, authoritativeTotal, authoritativeSubtotal, tax, discountAmount, shippingCost,
         'pending', payment.method || 'unknown', payment.status || 'pending', JSON.stringify(shipping),
         shipping.firstName || '', shipping.lastName || '', shipping.email || '', shipping.city || '', shipping.phone || '', shipping.postalCode || '',
         orderData.notes || '', authoritativeProfit, orderData.pointsEarned || 0
@@ -111,8 +114,10 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       );
     }
 
-    // 5. Trigger loyalty recalculation
-    await recalculateUserPointsAndRank(req.user.id);
+    // 5. Trigger loyalty recalculation (only for registered users)
+    if (userId) {
+      await recalculateUserPointsAndRank(userId);
+    }
 
     // 6. Audit Log
     await logAudit(
@@ -122,9 +127,9 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       `Order placed: ${orderNumber}`,
       AuditSeverity.INFO,
       {
-        userId: req.user.id,
-        userName: req.user.username || req.user.email,
-        userEmail: req.user.email,
+        userId: userId || 'guest',
+        userName: req.user?.username || req.user?.email || 'Guest User',
+        userEmail: req.user?.email || shipping.email || 'guest@example.com',
         ipAddress: req.ip
       }
     );
