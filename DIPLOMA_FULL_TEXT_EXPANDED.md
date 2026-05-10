@@ -403,30 +403,140 @@ sequenceDiagram
 **Рисунок 3.3 — ER-діаграма бази даних (ERD)**
 ```mermaid
 erDiagram
-    PRODUCTS ||--o{ VARIANTS : "має"
     CATEGORIES ||--o{ PRODUCTS : "містить"
+    PRODUCTS ||--o{ ORDER_ITEMS : "входить до"
     ORDERS ||--o{ ORDER_ITEMS : "включає"
-    VARIANTS ||--o{ ORDER_ITEMS : "продається як"
-    USERS ||--o{ ORDERS : "робить"
-    
+    USERS ||--o{ ORDERS : "створює"
+    USERS ||--o{ SAVED_BUILDS : "зберігає"
+    PRODUCTS ||--o{ INVENTORY_LOGS : "відстежує"
+    PRODUCTS ||--o{ PRODUCT_FILTER_VALUES : "має"
+    FILTERS ||--o{ FILTER_VALUES : "містить"
+    FILTER_VALUES ||--o{ PRODUCT_FILTER_VALUES : "застосовується"
+    CATEGORIES ||--o{ CATEGORIES : "батьківська"
+
     PRODUCTS {
-        uuid id
+        uuid id PK
         string name
+        string slug
         text description
-        uuid category_id
+        decimal base_price
+        int discount
+        string brand
+        uuid category_id FK
+        text[] images
+        string model_3d_url
     }
-    VARIANTS {
-        uuid id
-        uuid product_id
-        decimal price
-        int stock_level
-        string sku
+    CATEGORIES {
+        uuid id PK
+        string name
+        string slug
+        uuid parent_id FK
+        string image_url
+        int sort_order
     }
     ORDERS {
-        uuid id
-        uuid user_id
+        uuid id PK
+        uuid user_id FK
         decimal total_amount
         string status
+        string stripe_session_id
+        jsonb shipping_address
+        timestamp created_at
+    }
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        string variant_sku
+        int quantity
+        decimal unit_price
+    }
+    USERS {
+        uuid id PK
+        string firebase_uid
+        string email
+        string display_name
+        string role
+        string phone
+        timestamp created_at
+    }
+    COUPONS {
+        uuid id PK
+        string code
+        string discount_type
+        decimal discount_value
+        decimal min_order
+        int max_uses
+        int used_count
+        timestamp expires_at
+        boolean is_active
+    }
+    MESSAGES {
+        uuid id PK
+        string name
+        string email
+        string phone
+        string subject
+        text body
+        boolean is_read
+        timestamp created_at
+    }
+    AUDIT_LOGS {
+        uuid id PK
+        uuid user_id
+        string action
+        string entity_type
+        uuid entity_id
+        jsonb details
+        string ip_address
+        timestamp created_at
+    }
+    INVENTORY_LOGS {
+        uuid id PK
+        uuid product_id FK
+        string variant_sku
+        string change_type
+        int quantity_change
+        int previous_qty
+        int new_qty
+        string reason
+        timestamp created_at
+    }
+    SAVED_BUILDS {
+        uuid id PK
+        uuid user_id FK
+        string name
+        jsonb config
+        decimal total_price
+        timestamp created_at
+    }
+    FILTERS {
+        uuid id PK
+        string name
+        string slug
+        int display_order
+    }
+    FILTER_VALUES {
+        uuid id PK
+        uuid filter_id FK
+        string value
+        int display_order
+    }
+    PRODUCT_FILTER_VALUES {
+        uuid id PK
+        uuid product_id FK
+        uuid filter_value_id FK
+    }
+    BLOG_POSTS {
+        uuid id PK
+        string title
+        string slug
+        text content
+        string cover_image
+        string author
+        boolean is_published
+        timestamp published_at
+        timestamp created_at
     }
 ```
 
