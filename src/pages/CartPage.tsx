@@ -31,10 +31,10 @@ export const CartPage: React.FC = () => {
   const [appliedCoupon, setAppliedCoupon] = React.useState<any | null>(null);
   const [isValidating, setIsValidating] = React.useState(false);
 
-  const userDiscount = user?.discountLevel || 0;
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const userDiscount = Number(user?.discountLevel || 0);
+  const totalAmount = cartItems.reduce((acc, item) => acc + (Number(item.totalPrice) || 0), 0);
   const userDiscountAmount = totalAmount * (userDiscount / 100);
-  const finalTotal = Math.max(0, totalAmount - userDiscountAmount - promoDiscount);
+  const finalTotal = Math.max(0, totalAmount - userDiscountAmount - (Number(promoDiscount) || 0));
   const vatAmount = finalTotal * 0.2;
 
   const handleCheckout = () => {
@@ -208,11 +208,11 @@ export const CartPage: React.FC = () => {
                             <div className="flex items-baseline gap-2">
                               {item.discount ? (
                                 <>
-                                  <span className="text-lg sm:text-xl font-black text-[var(--text-primary)] font-mono">€{item.price.toLocaleString()}</span>
-                                  <span className="text-xs text-[var(--text-secondary)] line-through font-bold">€{item.originalPrice?.toLocaleString()}</span>
+                                  <span className="text-lg sm:text-xl font-black text-[var(--text-primary)] font-mono">€{Number(item.price).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
+                                  <span className="text-xs text-[var(--text-secondary)] line-through font-bold">€{Number(item.originalPrice).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                                 </>
                               ) : (
-                                <span className="text-lg sm:text-xl font-black text-[var(--text-primary)] font-mono">€{item.price.toLocaleString()}</span>
+                                <span className="text-lg sm:text-xl font-black text-[var(--text-primary)] font-mono">€{Number(item.price).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                               )}
                             </div>
                           </div>
@@ -240,7 +240,7 @@ export const CartPage: React.FC = () => {
 
                           <div className="flex flex-col items-end gap-3">
                             <span className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{t('total')}</span>
-                            <span className="text-xl sm:text-2xl font-black text-[#ab1017] font-mono tracking-tighter">€{item.totalPrice.toLocaleString()}</span>
+                            <span className="text-xl sm:text-2xl font-black text-[#ab1017] font-mono tracking-tighter">€{Number(item.totalPrice).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                           </div>
                         </div>
                       </div>
@@ -263,7 +263,7 @@ export const CartPage: React.FC = () => {
                   <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-10 relative z-10">
                     <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('total_price')}</span>
-                      <span className="text-[var(--text-primary)] font-mono font-black">€{totalAmount.toLocaleString()}</span>
+                      <span className="text-[var(--text-primary)] font-mono font-black">€{totalAmount.toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                     </div>
                     {userDiscount > 0 && (
                       <div className="flex justify-between text-xs sm:text-sm text-emerald-500 bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/20">
@@ -320,7 +320,7 @@ export const CartPage: React.FC = () => {
                           <span className="text-[10px] font-black text-[#ab1017] uppercase tracking-widest">Promo Discount</span>
                           <span className="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{appliedCoupon?.code} Applied</span>
                         </div>
-                        <span className="text-lg font-black text-[#ab1017] font-mono">-€{promoDiscount.toLocaleString()}</span>
+                        <span className="text-lg font-black text-[#ab1017] font-mono">-€{Number(promoDiscount).toLocaleString('hr-HR', { minimumFractionDigits: 2 })}</span>
                       </div>
                     )}
 
@@ -328,11 +328,11 @@ export const CartPage: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between items-baseline">
                         <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[var(--text-primary)]">{t('final_total')}</span>
-                        <span className="text-3xl sm:text-5xl font-black text-[#ab1017] font-mono tracking-tighter">€{finalTotal.toLocaleString()}</span>
+                        <span className="text-3xl sm:text-5xl font-black text-[#ab1017] font-mono tracking-tighter">€{finalTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between text-[9px] sm:text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-[0.3em] opacity-50">
                         <span>INC. {t('vat_included')}</span>
-                        <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="font-mono">€{vatAmount.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </div>

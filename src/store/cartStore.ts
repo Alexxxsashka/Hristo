@@ -54,22 +54,30 @@ export const useCartStore = create<CartStore>()(
 
           if (existingItemIndex > -1) {
             const newItems = [...state.cartItems];
-            newItems[existingItemIndex].quantity += item.quantity;
-            newItems[existingItemIndex].totalPrice = newItems[existingItemIndex].price * newItems[existingItemIndex].quantity;
+            newItems[existingItemIndex].quantity += Number(item.quantity);
+            const price = Number(newItems[existingItemIndex].price);
+            newItems[existingItemIndex].totalPrice = price * newItems[existingItemIndex].quantity;
             return { cartItems: newItems };
           }
 
+          const price = Number(item.price);
           return {
             cartItems: [
               ...state.cartItems,
-              { ...item, id: `${Date.now()}-${item.productId}` },
+              { 
+                ...item, 
+                id: `${Date.now()}-${item.productId}`,
+                price,
+                totalPrice: price * Number(item.quantity)
+              },
             ],
           };
         }),
       addItem: (product, variant, quantity = 1) =>
         set((state) => {
-          const basePrice = variant?.price ?? product.price;
+          const basePrice = Number(variant?.price ?? product.price);
           const discountedPrice = getDiscountedPrice(basePrice, product.discount);
+          const q = Number(quantity);
           
           // Check for existing
           const existingItemIndex = state.cartItems.findIndex(i => 
@@ -80,8 +88,9 @@ export const useCartStore = create<CartStore>()(
 
           if (existingItemIndex > -1) {
             const newItems = [...state.cartItems];
-            newItems[existingItemIndex].quantity += quantity;
-            newItems[existingItemIndex].totalPrice = newItems[existingItemIndex].price * newItems[existingItemIndex].quantity;
+            newItems[existingItemIndex].quantity += q;
+            const price = Number(newItems[existingItemIndex].price);
+            newItems[existingItemIndex].totalPrice = price * newItems[existingItemIndex].quantity;
             useToastStore.getState().addToast(`Updated ${product.name} quantity`, 'success');
             return { cartItems: newItems };
           }
@@ -96,19 +105,19 @@ export const useCartStore = create<CartStore>()(
                 price: discountedPrice,
                 originalPrice: basePrice,
                 discount: product.discount,
-                quantity: quantity,
+                quantity: q,
                 image: product.image,
                 sku: variant?.sku || product.sku,
                 category: product.category || product.category_id || 'Other',
-                landingCost: product.landingCost,
+                landingCost: Number(product.landingCost || 0),
                 selectedVariant: variant ? {
                   id: variant.id,
                   name: variant.name,
                   attributes: variant.attributes,
-                  price: variant.price
+                  price: Number(variant.price)
                 } : undefined,
                 selectedParts: [],
-                totalPrice: discountedPrice * quantity,
+                totalPrice: discountedPrice * q,
               },
             ],
           };
@@ -120,11 +129,12 @@ export const useCartStore = create<CartStore>()(
         set((state) => ({
           cartItems: state.cartItems.map((item) => {
             if (item.id === id) {
-              const newQuantity = Math.max(1, item.quantity + delta);
+              const newQuantity = Math.max(1, Number(item.quantity) + Number(delta));
+              const price = Number(item.price);
               return {
                 ...item,
                 quantity: newQuantity,
-                totalPrice: item.price * newQuantity,
+                totalPrice: price * newQuantity,
               };
             }
             return item;

@@ -249,11 +249,11 @@ export const CheckoutPage: React.FC = () => {
     fetchLogos();
   }, []);
 
-  const userDiscount = user?.discountLevel || 0;
-  const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const userDiscount = Number(user?.discountLevel || 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.totalPrice) || 0), 0);
   const discountAmount = subtotal * (userDiscount / 100);
   const discountedSubtotal = subtotal - discountAmount;
-  const total = Math.max(0, discountedSubtotal - promoDiscount) + selectedShipping.price;
+  const total = Math.max(0, discountedSubtotal - (Number(promoDiscount) || 0)) + (Number(selectedShipping.price) || 0);
   const vatAmount = total * 0.2;
 
   useEffect(() => {
@@ -313,7 +313,7 @@ export const CheckoutPage: React.FC = () => {
           }
 
           // 2. Create Payment Intent linked to this order
-          const { clientSecret } = await databaseService.createPaymentIntent(cartItems, selectedShipping.price, orderId || undefined);
+          const { clientSecret } = await databaseService.createPaymentIntent(cartItems, selectedShipping.price, orderId || undefined, discountedSubtotal);
           setStripeClientSecret(clientSecret);
         } catch (err: any) {
           console.error('Stripe Init Error:', err);
@@ -865,11 +865,11 @@ export const CheckoutPage: React.FC = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between items-baseline">
                       <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-[var(--text-primary)]">{t('total')}</span>
-                      <span className="text-3xl sm:text-4xl font-black text-[#ab1017] font-mono tracking-tighter">€{total.toLocaleString()}</span>
+                      <span className="text-3xl sm:text-4xl font-black text-[#ab1017] font-mono tracking-tighter">€{total.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div className="flex justify-between text-[9px] text-[var(--text-secondary)] font-black uppercase tracking-[0.3em] opacity-50">
                       <span>{t('vat_included')}</span>
-                      <span className="font-mono">€{vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="font-mono">€{vatAmount.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 </div>

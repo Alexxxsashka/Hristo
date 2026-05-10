@@ -11,7 +11,7 @@ export const createPaymentIntent = async (req: AuthenticatedRequest, res: Respon
 
     const userResult = await pool.query('SELECT discount_level, stripe_customer_id FROM users WHERE id = $1', [req.user.id]);
     
-    const totalAmount = Math.round((subtotal + (shipping_cost || 0)) * 100);
+    const totalAmount = Math.round((Number(subtotal || 0) + Number(shipping_cost || 0)) * 100);
 
     let stripeCustomerId = userResult.rows[0]?.stripe_customer_id;
     if (!stripeCustomerId) {
