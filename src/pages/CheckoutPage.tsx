@@ -386,7 +386,7 @@ export const CheckoutPage: React.FC = () => {
         paymentStatus = 'pending';
       }
 
-      const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string; discount_amount?: number; shipping_cost?: number } = {
+      const orderData: Omit<Order, 'orderNumber' | 'createdAt' | 'updatedAt' | 'auditTrail'> & { id?: string } = {
         id: currentOrderId || undefined,
         userId: isAuthenticated ? user!.id : 'guest',
         items: orderItems,

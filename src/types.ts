@@ -173,6 +173,8 @@ export interface UserProfile {
 
 export interface ShippingInfo {
   method: 'hp_shipping' | 'gls_express' | 'boxnow_locker' | 'pickup' | 'courier';
+  firstName: string;
+  lastName: string;
   fullName: string;
   phone: string;
   email: string;
@@ -218,7 +220,9 @@ export interface Order {
   subtotal: number;
   tax: number;
   discountAmount?: number;
-  shippingCost: number;
+  discount_amount?: number;
+  shippingCost?: number;
+  shipping_cost?: number;
   total: number;
   profit: number;
   pointsEarned?: number;
