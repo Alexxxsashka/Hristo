@@ -25,6 +25,8 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ defaul
 const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.InfoPage })));
 const WishlistPage = lazy(() => import('./pages/WishlistPage').then(m => ({ default: m.WishlistPage })));
 const UserDashboard = lazy(() => import('./pages/UserDashboard').then(m => ({ default: m.UserDashboard })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const CheckoutSuccessPage = lazy(() => import('./pages/CheckoutSuccessPage').then(m => ({ default: m.CheckoutSuccessPage })));
 
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated } = useAuthStore();
@@ -61,7 +63,7 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen bg-zinc-950">
       {!isConfigurator && <Navbar />}
-      <main className={`flex-grow flex flex-col ${isConfigurator ? '' : 'pt-20'}`}>
+      <main id="main-content" className={`flex-grow flex flex-col ${isConfigurator ? '' : 'pt-20'}`} role="main">
         <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -76,6 +78,7 @@ function AppContent() {
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/blog" element={<BlogPage />} />
@@ -100,7 +103,7 @@ function AppContent() {
               } 
             />
             {/* Catch-all redirect to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>

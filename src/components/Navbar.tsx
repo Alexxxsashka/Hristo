@@ -83,7 +83,8 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-[100]">
+    <header className="fixed top-0 left-0 w-full z-[100]" role="banner">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:bg-[#ab1017] focus:text-white focus:rounded-lg focus:text-sm focus:font-bold">Skip to content</a>
       {settings?.showAnnouncement && settings?.announcement && (
         <div className="bg-red-600 py-2.5 px-4 text-center">
           <Link 
@@ -165,7 +166,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      <nav className="bg-[var(--header-bg)] backdrop-blur-xl border-b border-white/10">
+      <nav className="bg-[var(--header-bg)] backdrop-blur-xl border-b border-white/10" role="navigation" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4 sm:gap-8">
           <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
             {settings?.logoUrl ? (
@@ -218,7 +219,7 @@ export const Navbar: React.FC = () => {
                 animate={{ width: isSearchOpen || searchQuery ? '280px' : '180px' }}
                 className="relative"
               >
-                <form onSubmit={handleSearch} className="w-full">
+                <form onSubmit={handleSearch} className="w-full" role="search" aria-label="Site search">
                   <input 
                     type="text"
                     placeholder={t('search_placeholder')}
@@ -226,6 +227,7 @@ export const Navbar: React.FC = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchOpen(true)}
                     onBlur={() => setIsSearchOpen(false)}
+                    aria-label="Search products"
                     className="w-full bg-black/10 border border-white/10 rounded-xl py-2 h-9 pl-10 pr-4 text-xs text-white placeholder:text-white/50 focus:outline-none focus:bg-black/20 transition-all duration-300"
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={16} />
@@ -271,6 +273,8 @@ export const Navbar: React.FC = () => {
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-white/80 hover:text-white transition-colors lg:hidden"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
