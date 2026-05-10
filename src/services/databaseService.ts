@@ -324,7 +324,8 @@ export const databaseService = {
     });
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Failed to create order');
+      const detailMsg = err.details ? ': ' + err.details.map((d: any) => `${d.path} ${d.message}`).join(', ') : '';
+      throw new Error((err.error || 'Failed to create order') + detailMsg);
     }
     return await res.json();
   },
@@ -340,7 +341,8 @@ export const databaseService = {
     });
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Failed to create payment intent');
+      const detailMsg = err.details ? ': ' + err.details.map((d: any) => `${d.path} ${d.message}`).join(', ') : '';
+      throw new Error((err.error || 'Failed to create payment intent') + detailMsg);
     }
     return await res.json();
   },

@@ -9,7 +9,7 @@ const orderItemSchema = z.object({
   quantity: z.number().int().positive(),
   configuration: z.any().optional(),
   selectedVariant: z.any().optional()
-});
+}).passthrough();
 
 export const createOrderSchema = z.object({
   body: z.object({
@@ -22,16 +22,18 @@ export const createOrderSchema = z.object({
       city: z.string().min(1),
       address: z.string().min(1),
       postalCode: z.string().min(1)
-    }),
+    }).passthrough(),
     payment: z.object({
       method: z.string(),
       status: z.string().optional()
-    }).optional(),
+    }).passthrough().optional(),
     shipping_cost: z.number().optional(),
+    shippingCost: z.number().optional(),
     discountAmount: z.number().optional(),
+    discount_amount: z.number().optional(),
     notes: z.string().optional(),
     pointsEarned: z.number().optional()
-  })
+  }).passthrough()
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>['body'];
