@@ -392,21 +392,30 @@ const Socket = ({
                     }`}
                   >
                     {currentPart ? (
-                      <img 
-                        src={currentPart.images && currentPart.images.length > 0 ? currentPart.images[0] : (currentPart.image?.startsWith('http') ? currentPart.image : (currentPart.image || `https://picsum.photos/seed/${currentPart.id}/200/200`))} 
-                        className="w-full h-full object-cover opacity-90 group-hover/cell:opacity-100 transition-opacity" 
-                        alt={currentPart.name}
-                      />
+                      <div className="w-full h-full relative">
+                        <img 
+                          src={currentPart.images && currentPart.images.length > 0 ? currentPart.images[0] : (currentPart.image?.startsWith('http') ? currentPart.image : (currentPart.image || `https://picsum.photos/seed/${currentPart.id}/200/200`))} 
+                          className="w-full h-full object-cover opacity-90 group-hover/cell:opacity-100 transition-opacity" 
+                          alt={currentPart.name}
+                        />
+                        {/* Module Name (Small Font) */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 py-0.5 px-1">
+                          <p className="text-[6px] font-bold text-white uppercase truncate leading-none">
+                            {currentPart.name}
+                          </p>
+                        </div>
+                      </div>
                     ) : (
                       <Plus size={16} className={`transition-all ${hovered ? 'text-white scale-110' : 'text-white/20'}`} />
                     )}
                     
+                    {/* Mounting Point Name */}
                     <div className="absolute -top-10 left-[-50px] right-[-50px] flex justify-center pointer-events-none">
-                      <div className={`px-2 py-0.5 rounded-md bg-zinc-900/90 backdrop-blur-md border border-zinc-800 shadow-xl transition-colors ${
+                      <div className={`px-2 py-0.5 rounded-sm bg-[#0a0a0a]/90 backdrop-blur-md border border-zinc-800 shadow-xl transition-colors ${
                         isSelected ? 'border-red-500/50' : ''
                       }`}>
-                        <span className={`text-[9px] sm:text-[7px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${
-                          isSelected ? 'text-red-500' : 'text-zinc-100'
+                        <span className={`text-[8px] sm:text-[6px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${
+                          isSelected ? 'text-red-500' : 'text-zinc-400'
                         }`}>
                           {slot.type}
                         </span>
