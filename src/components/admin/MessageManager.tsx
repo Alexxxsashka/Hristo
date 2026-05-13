@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Trash2, Mail, MessageSquare, Wrench } from 'lucide-react';
+import { Trash2, Mail, MessageSquare, Wrench, FileText } from 'lucide-react';
 import { ServiceRequest } from '../../types';
 import { ServiceRequestManager } from './ServiceRequestManager';
+import { ReportModal } from './ReportModal';
+import { generateCommunicationsReport } from '../../utils/reportGenerator';
 
 export const MessageManager: React.FC<{ 
   messages: any[], 
@@ -9,10 +11,12 @@ export const MessageManager: React.FC<{
   onDelete: (id: string) => void,
   onConfirm: (message: string, action: () => void) => void,
   onDeleteServiceRequest?: (id: string) => void,
-  onUpdateServiceRequestStatus?: (id: string, status: string, newUpdate?: string) => void
-}> = ({ messages, serviceRequests = [], onDelete, onConfirm, onDeleteServiceRequest, onUpdateServiceRequestStatus }) => {
+  onUpdateServiceRequestStatus?: (id: string, status: string, newUpdate?: string) => void,
+  onNotify?: (message: string, type?: 'success' | 'error') => void
+}> = ({ messages, serviceRequests = [], onDelete, onConfirm, onDeleteServiceRequest, onUpdateServiceRequestStatus, onNotify }) => {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<'messages' | 'service-requests'>('messages');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const safeDate = (date: any) => {
     if (!date) return 'N/A';
@@ -62,6 +66,13 @@ export const MessageManager: React.FC<{
           >
             <Wrench size={16} />
             Service Requests ({serviceRequests.length})
+          </button>
+          <button 
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all border border-[var(--border-color)]"
+          >
+            <FileText size={16} />
+            Report (PDF)
           </button>
         </div>
       </div>
@@ -164,6 +175,25 @@ export const MessageManager: React.FC<{
           />
         </div>
       )}
+      )}
+
+      <ReportModal 
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Communications & Service Audit"
+        onGenerate={(start, end) => {
+          const filteredMessages = messages.filter(m => {
+            const date = new Date(m.date);
+            return date >= start && date <= end;
+          });
+          const filteredRequests = serviceRequests.filter(r => {
+            const date = new Date(r.date || Date.now());
+            return date >= start && date <= end;
+          });
+          generateCommunicationsReport(filteredMessages, filteredRequests, { start, end });
+          if (onNotify) onNotify(`Communications report generated for the selected period`);
+        }}
+      />
     </div>
   );
 };

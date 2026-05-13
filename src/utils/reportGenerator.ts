@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Order } from '../types';
+import { Order, ServiceRequest } from '../types';
 import { formatEnum } from './format';
 
 export const generateOrdersReport = (orders: Order[], filters: { status: string, search: string, dateRange?: { start: Date, end: Date } }) => {
@@ -375,4 +375,221 @@ export const exportOrdersToCSV = (orders: Order[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+export const generateCommunicationsReport = (messages: any[], serviceRequests: ServiceRequest[], dateRange?: { start: Date, end: Date }) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const date = new Date().toLocaleString();
+
+  // --- Header ---
+  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HRISTO AIRSOFT STORE', 14, 22);
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const reportTitle = dateRange 
+    ? `COMMUNICATIONS REPORT (${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()})`
+    : 'COMMUNICATIONS & SERVICE REQUESTS REPORT';
+  doc.text(reportTitle, 14, 30);
+  
+  doc.setFontSize(8);
+  doc.text(`Generated on: ${date}`, pageWidth - 14, 30, { align: 'right' });
+
+  // --- Statistics Section ---
+  let yPos = 50;
+  doc.setTextColor(24, 24, 27);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SUMMARY STATISTICS', 14, yPos);
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Total Contact Messages: ${messages.length}`, 14, yPos + 8);
+  doc.text(`Total Service Requests: ${serviceRequests.length}`, 14, yPos + 14);
+  doc.text(`Pending Service Requests: ${serviceRequests.filter(r => r.status === 'Pending').length}`, 14, yPos + 20);
+
+  // --- Combined Table ---
+  yPos += 30;
+  
+  const tableColumn = ["Type", "Date", "Sender / Client", "Subject / Status", "Content Preview"];
+  
+  const msgRows = messages.map(m => [
+    "MESSAGE",
+    new Date(m.date).toLocaleDateString(),
+    m.name,
+    m.subject,
+    m.message.slice(0, 50) + (m.message.length > 50 ? '...' : '')
+  ]);
+
+  const srRows = serviceRequests.map(r => [
+    "SERVICE",
+    new Date(r.date || Date.now()).toLocaleDateString(),
+    r.userId,
+    formatEnum(r.status).toUpperCase(),
+    r.weaponName + " - " + r.description.slice(0, 30)
+  ]);
+
+  const tableRows = [...msgRows, ...srRows].sort((a, b) => new Date(b[1]).getTime() - new Date(a[1]).getTime());
+
+  autoTable(doc, {
+    startY: yPos,
+    head: [tableColumn],
+    body: tableRows,
+    theme: 'striped',
+    headStyles: { fillColor: [24, 24, 27], textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold' },
+    columnStyles: {
+      0: { fontStyle: 'bold', halign: 'center' },
+      4: { cellWidth: 60 }
+    },
+    styles: { fontSize: 7.5, cellPadding: 2.5 }
+  });
+
+  // --- Footer ---
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  doc.setFontSize(8);
+  doc.setTextColor(161, 161, 170);
+  doc.text('End of Communications Report', pageWidth / 2, finalY, { align: 'center' });
+
+  // Save the PDF
+  doc.save(`Communications_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+export const generateDashboardStatsReport = (data: { 
+  orders: Order[], 
+  messages: any[], 
+  serviceRequests: ServiceRequest[], 
+  users: any[],
+  dateRange: { start: Date, end: Date }
+}) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const date = new Date().toLocaleString();
+
+  // --- Header ---
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
+  doc.rect(0, 0, pageWidth, 45, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(26);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HRISTO AIRSOFT STORE', 14, 25);
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`EXECUTIVE DASHBOARD PERFORMANCE REPORT`, 14, 35);
+  doc.text(`${data.dateRange.start.toLocaleDateString()} - ${data.dateRange.end.toLocaleDateString()}`, 14, 41);
+  
+  doc.setFontSize(8);
+  doc.text(`Generated on: ${date}`, pageWidth - 14, 41, { align: 'right' });
+
+  // --- Key Metrics Section ---
+  let yPos = 60;
+  doc.setTextColor(24, 24, 27);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('KEY PERFORMANCE INDICATORS (KPI)', 14, yPos);
+
+  const totalRevenue = data.orders.reduce((sum, o) => sum + o.total, 0);
+  const totalItems = data.orders.reduce((sum, o) => sum + o.items.length, 0);
+  
+  const metrics = [
+    { label: 'Total Revenue', value: `EUR ${totalRevenue.toLocaleString()}`, color: [16, 185, 129] },
+    { label: 'Total Orders', value: data.orders.length.toString(), color: [24, 24, 27] },
+    { label: 'Total Items Sold', value: totalItems.toString(), color: [24, 24, 27] },
+    { label: 'New Communications', value: (data.messages.length + data.serviceRequests.length).toString(), color: [24, 24, 27] },
+    { label: 'Service Volume', value: data.serviceRequests.length.toString(), color: [24, 24, 27] },
+    { label: 'New Registered Users', value: data.users.length.toString(), color: [24, 24, 27] }
+  ];
+
+  yPos += 15;
+  metrics.forEach((m, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 14 + (col * (pageWidth / 2 - 14));
+    const y = yPos + (row * 15);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(113, 113, 122);
+    doc.setFont('helvetica', 'normal');
+    doc.text(m.label, x, y);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(m.color[0], m.color[1], m.color[2]);
+    doc.text(m.value, x + 50, y);
+  });
+
+  // --- Order Breakdown Table ---
+  yPos += 50;
+  doc.setTextColor(24, 24, 27);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SALES BREAKDOWN BY STATUS', 14, yPos);
+
+  const statusCounts = data.orders.reduce((acc: any, o) => {
+    acc[o.status] = (acc[o.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusRows = Object.entries(statusCounts).map(([status, count]) => [
+    formatEnum(status).toUpperCase(),
+    count,
+    ((Number(count) / data.orders.length) * 100).toFixed(1) + '%'
+  ]);
+
+  autoTable(doc, {
+    startY: yPos + 5,
+    head: [["Status", "Order Count", "Percentage"]],
+    body: statusRows,
+    theme: 'grid',
+    headStyles: { fillColor: [24, 24, 27], textColor: [255, 255, 255] },
+    styles: { halign: 'center' }
+  });
+
+  // --- Top Products Summary ---
+  yPos = (doc as any).lastAutoTable.finalY + 15;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TOP PERFORMING PRODUCTS', 14, yPos);
+
+  const productSales = new Map<string, { name: string, qty: number, revenue: number }>();
+  data.orders.forEach(o => {
+    o.items.forEach(item => {
+      const current = productSales.get(item.productId) || { name: item.name, qty: 0, revenue: 0 };
+      productSales.set(item.productId, {
+        name: item.name,
+        qty: current.qty + item.quantity,
+        revenue: current.revenue + (item.price * item.quantity)
+      });
+    });
+  });
+
+  const topProducts = Array.from(productSales.values())
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 5)
+    .map(p => [p.name, p.qty, `EUR ${p.revenue.toLocaleString()}`]);
+
+  autoTable(doc, {
+    startY: yPos + 5,
+    head: [["Product Name", "Units Sold", "Total Revenue"]],
+    body: topProducts,
+    theme: 'striped',
+    headStyles: { fillColor: [171, 16, 23] }
+  });
+
+  // --- Footer ---
+  const finalY = (doc as any).lastAutoTable.finalY + 15;
+  doc.setFontSize(8);
+  doc.setTextColor(161, 161, 170);
+  doc.text('Hristo Airsoft Store - Internal Business Intelligence Report', pageWidth / 2, 280, { align: 'center' });
+  doc.text(`Page 1 of 1`, pageWidth - 14, 280, { align: 'right' });
+
+  // Save the PDF
+  doc.save(`Dashboard_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 };

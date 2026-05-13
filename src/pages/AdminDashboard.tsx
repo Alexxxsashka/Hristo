@@ -78,7 +78,7 @@ import {
   Cell
 } from 'recharts';
 
-import { generateOrdersReport, generateProductsReport } from '../utils/reportGenerator';
+import { generateOrdersReport, generateProductsReport, generateDashboardStatsReport } from '../utils/reportGenerator';
 import { BIAnalytics } from '../components/admin/BIAnalytics';
 import { BlogManager } from '../components/admin/BlogManager';
 import { OrderManager } from '../components/admin/OrderManager';
@@ -122,6 +122,7 @@ export const AdminDashboard: React.FC = () => {
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
   const [isProductReportModalOpen, setIsProductReportModalOpen] = useState(false);
+  const [isDashboardReportModalOpen, setIsDashboardReportModalOpen] = useState(false);
   const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const navigate = useNavigate();
   const { user, logout, isInitialized } = useAuthStore();
@@ -444,12 +445,21 @@ export const AdminDashboard: React.FC = () => {
                     <h2 className="text-3xl font-black text-[var(--text-primary)] uppercase tracking-tighter">Dashboard</h2>
                     <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mt-1">Store Performance Overview</p>
                   </div>
-                  <button 
-                    onClick={() => loadAllData(true)}
-                    className="p-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 active:scale-95"
-                  >
-                    <RefreshCw size={18} />
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setIsDashboardReportModalOpen(true)}
+                      className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all border border-[var(--border-color)]"
+                    >
+                      <FileText size={18} />
+                      Report (PDF)
+                    </button>
+                    <button 
+                      onClick={() => loadAllData(true)}
+                      className="p-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20 active:scale-95"
+                    >
+                      <RefreshCw size={18} />
+                    </button>
+                  </div>
                 </div>
 
                 {isLoading ? (
@@ -779,6 +789,7 @@ export const AdminDashboard: React.FC = () => {
                 onDelete={deleteMessage}
                 onDeleteServiceRequest={deleteServiceRequest}
                 onUpdateServiceRequestStatus={updateServiceRequestStatus}
+                onNotify={showNotification}
               />
             )}
 
@@ -893,6 +904,39 @@ export const AdminDashboard: React.FC = () => {
           });
           generateProductsReport(products, filteredOrders, { start, end });
           showNotification(`Product report generated for ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`);
+        }}
+      />
+
+      <ReportModal 
+        isOpen={isDashboardReportModalOpen}
+        onClose={() => setIsDashboardReportModalOpen(false)}
+        title="Business Performance Report"
+        onGenerate={(start, end) => {
+          const filteredOrders = orders.filter(o => {
+            const date = new Date(o.createdAt);
+            return date >= start && date <= end;
+          });
+          const filteredMessages = messages.filter(m => {
+            const date = new Date(m.date);
+            return date >= start && date <= end;
+          });
+          const filteredRequests = serviceRequests.filter(r => {
+            const date = new Date(r.date || Date.now());
+            return date >= start && date <= end;
+          });
+          const filteredUsers = users_list.filter(u => {
+            const date = new Date(u.createdAt || Date.now());
+            return date >= start && date <= end;
+          });
+
+          generateDashboardStatsReport({
+            orders: filteredOrders,
+            messages: filteredMessages,
+            serviceRequests: filteredRequests,
+            users: filteredUsers,
+            dateRange: { start, end }
+          });
+          showNotification(`Dashboard performance report generated`);
         }}
       />
     </div>
