@@ -359,6 +359,21 @@ const initSchema = async () => {
       )
     `);
 
+    // 15. Service Requests
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS service_requests (
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        weapon_name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        status TEXT DEFAULT 'Pending',
+        date TEXT,
+        updates JSONB DEFAULT '[]',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // 🎯 Patching columns if they don't exist (for existing databases)
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password TEXT');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT');
@@ -389,6 +404,7 @@ const initSchema = async () => {
     await client.query('CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC)');
     await client.query('CREATE INDEX IF NOT EXISTS idx_inventory_logs_product ON inventory_logs(product_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_service_requests_user ON service_requests(user_id)');
 
     console.log('✅ Database schema initialized/verified');
   } catch (err) {

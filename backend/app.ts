@@ -12,6 +12,7 @@ import settingsRoutes from './routes/settings.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import buildRoutes from './routes/build.routes.js';
 import stripeRoutes from './routes/stripe.routes.js';
+import serviceRequestRoutes from './routes/service-request.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
@@ -72,6 +73,7 @@ app.use('/api/site-settings', settingsRoutes); // Alias
 app.use('/api/currency-rates', settingsRoutes); // Alias
 app.use('/api/contact', contactRoutes);
 app.use('/api/saved-builds', buildRoutes);
+app.use('/api/service-requests', serviceRequestRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
@@ -91,6 +93,7 @@ app.use('/api/admin/stock', productRoutes); // Stock is often part of products
 app.use('/api/admin/inventory-logs', productRoutes);
 app.use('/api/admin/audit', analyticsRoutes); 
 app.use('/api/admin/audit-logs', analyticsRoutes); 
+app.use('/api/admin/service-requests', serviceRequestRoutes);
 app.use('/api/admin/users', authRoutes);
 app.use('/api/admin', uploadRoutes);
 
