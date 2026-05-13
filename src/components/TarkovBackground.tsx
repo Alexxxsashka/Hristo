@@ -143,9 +143,9 @@ export const TarkovBackground: React.FC = () => {
           y: bgY,
           scale: 1.1 // Slightly larger to prevent edges from showing during parallax
         }}
-        className="absolute inset-[-5%] bg-cover bg-center bg-no-repeat opacity-60"
+        className="absolute inset-[-5%] bg-cover bg-center bg-no-repeat opacity-30"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.6 }}
+        animate={{ opacity: 0.3 }}
         transition={{ duration: 2 }}
       >
         <img 
