@@ -440,9 +440,6 @@ export const ERPManager = ({ products, onNotify, onConfirm, onEditProduct, onUpd
                     )}
                     {stock.length === 0 ? t('seed_stock_data') : t('sync_reset_stock')}
                   </button>
-                  <button className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[var(--bg-secondary)] transition-all border border-[var(--border-color)]">
-                    Export CSV
-                  </button>
                   <button className="px-4 py-2 bg-[var(--bg-primary)] text-[var(--text-secondary)] rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all">
                     Stock Audit
                   </button>

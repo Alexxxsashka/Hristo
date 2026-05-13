@@ -141,12 +141,6 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
             <FileText size={16} />
             Generate Report (PDF)
           </button>
-          <button 
-            onClick={() => exportOrdersToCSV(filteredOrders)}
-            className="px-6 py-3 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[var(--bg-tertiary)] transition-all border border-[var(--border-color)]"
-          >
-            Export CSV
-          </button>
         </div>
       </div>
 
