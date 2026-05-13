@@ -179,7 +179,7 @@ export const ShopPage: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 space-y-4 sm:space-y-8">
             {/* Top Bar */}
-            <div className="relative z-10 bg-[var(--bg-secondary)] backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-[var(--border-color)] flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between shadow-sm">
+            <div className="relative z-50 bg-[var(--bg-secondary)] backdrop-blur-xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl border border-[var(--border-color)] flex flex-col xl:flex-row gap-4 sm:gap-6 items-center justify-between shadow-sm">
               <div className="relative w-full xl:w-96">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
                 <input
@@ -200,7 +200,7 @@ export const ShopPage: React.FC = () => {
                     <ChevronDown size={14} className="ml-auto text-[var(--text-secondary)] group-hover:text-[#ab1017] transition-colors" />
                   </div>
                   
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] shadow-2xl">
                     {[10, 20, 30, 40, 50].map((count) => (
                       <button
                         key={count}
@@ -230,7 +230,7 @@ export const ShopPage: React.FC = () => {
                     <ChevronDown size={14} className="ml-auto text-[var(--text-secondary)] group-hover:text-[#ab1017] transition-colors" />
                   </div>
                   
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] shadow-2xl min-w-[160px] sm:min-w-0">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[150] shadow-2xl min-w-[160px] sm:min-w-0">
                     {[
                       { id: 'newest', label: t('newest_first'), icon: Clock },
                       { id: 'price_asc', label: t('price_low_high'), icon: Truck },
