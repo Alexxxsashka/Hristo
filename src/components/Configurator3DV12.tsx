@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { databaseService } from '../services/databaseService';
+import { TarkovBackground } from './TarkovBackground';
 
 // EFT Style Slot Metadata
 interface DiscoveredSlot {
@@ -808,8 +809,10 @@ export const Configurator3DV12: React.FC = () => {
   }, [toggleMarkers, toggleHUD, toggleFullscreen]);
   
   return (
-    <div className="w-full h-full bg-[#0a0a0a] relative overflow-hidden group/config">
+    <div className="w-full h-full bg-transparent relative overflow-hidden group/config">
+      <TarkovBackground />
       <Canvas 
+        gl={{ alpha: true }}
         shadows={{ type: THREE.PCFShadowMap }} 
         dpr={[1, 2]} 
         performance={{ min: 0.5 }} 
