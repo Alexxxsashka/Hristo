@@ -109,7 +109,7 @@ export const MessageManager: React.FC<{
 
                 <div className="flex gap-4">
                   <a 
-                    href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
+                    href={`mailto:${encodeURIComponent(selectedMessage.email)}?subject=${encodeURIComponent('Re: ' + selectedMessage.subject)}`}
                     className="px-6 py-3 bg-[#ab1017] text-white font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all text-xs flex items-center gap-2"
                   >
                     <Mail size={16} />
