@@ -235,44 +235,47 @@ const ModuleSelectorPopover = ({ slotId, slotType, onClose, parentId }: { slotId
   const currentPart = selectedParts[fullSlotId];
 
   return (
-    <div className="bg-[#18181b]/95 backdrop-blur-2xl border border-zinc-800 rounded-xl shadow-2xl w-56 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto p-2 pointer-events-auto custom-scrollbar">
-      <div className="flex items-center justify-between mb-2 px-2 py-1">
+    <div className="bg-[#18181b]/95 backdrop-blur-2xl border border-zinc-800 rounded-xl shadow-2xl w-56 sm:w-64 flex flex-col pointer-events-auto overflow-hidden">
+      <div className="flex items-center justify-between p-3 border-b border-zinc-800/50">
         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Select Module</span>
-        <button onClick={onClose} className="p-2 -mr-2 text-zinc-500 hover:text-white"><X size={14} /></button>
+        <button onClick={onClose} className="p-1 text-zinc-500 hover:text-white transition-colors"><X size={14} /></button>
       </div>
-      <div className="space-y-1.5">
-        {currentPart && (
-          <button 
-            onClick={() => { removePart(fullSlotId); onClose(); }}
-            className="w-full flex items-center gap-3 p-2 rounded-lg bg-red-600/10 border border-red-600/20 text-red-500 hover:bg-red-600/20 transition-all"
-          >
-            <div className="w-8 h-8 rounded bg-red-600/20 flex items-center justify-center shrink-0">
-              <X size={16} />
-            </div>
-            <span className="text-xs font-bold uppercase">Remove Current</span>
-          </button>
-        )}
-        {compatibleModules.length === 0 ? (
-          <p className="text-[10px] text-zinc-600 text-center py-6 uppercase font-bold tracking-widest">No compatible modules</p>
-        ) : (
-          compatibleModules.map(module => (
-            <button
-              key={module.id}
-              onClick={() => { addPart(module, fullSlotId); onClose(); }}
-              className={`w-full flex items-center gap-3 p-2 rounded-lg border transition-all ${
-                currentPart?.id === module.id 
-                  ? 'bg-red-600/20 border-red-500 text-white' 
-                  : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 text-zinc-300'
-              }`}
+      
+      <div className="p-2 overflow-y-auto custom-scrollbar" style={{ maxHeight: '320px' }}>
+        <div className="space-y-1.5">
+          {currentPart && (
+            <button 
+              onClick={() => { removePart(fullSlotId); onClose(); }}
+              className="w-full flex items-center gap-3 p-2 rounded-lg bg-red-600/10 border border-red-600/20 text-red-500 hover:bg-red-600/20 transition-all"
             >
-              <img src={module.images && module.images.length > 0 ? module.images[0] : (module.image?.startsWith('http') ? module.image : (module.image || `https://picsum.photos/seed/${module.id}/100/100`))} className="w-8 h-8 object-cover rounded bg-black shrink-0" alt={module.name} />
-              <div className="text-left overflow-hidden">
-                <p className="text-[10px] font-bold truncate uppercase">{module.name}</p>
-                <p className="text-[9px] text-zinc-500 font-mono mt-0.5">€{module.price}</p>
+              <div className="w-8 h-8 rounded bg-red-600/20 flex items-center justify-center shrink-0">
+                <X size={16} />
               </div>
+              <span className="text-xs font-bold uppercase">Remove Current</span>
             </button>
-          ))
-        )}
+          )}
+          {compatibleModules.length === 0 ? (
+            <p className="text-[10px] text-zinc-600 text-center py-6 uppercase font-bold tracking-widest">No compatible modules</p>
+          ) : (
+            compatibleModules.map(module => (
+              <button
+                key={module.id}
+                onClick={() => { addPart(module, fullSlotId); onClose(); }}
+                className={`w-full flex items-center gap-3 p-2 rounded-lg border transition-all ${
+                  currentPart?.id === module.id 
+                    ? 'bg-red-600/20 border-red-500 text-white' 
+                    : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 text-zinc-300'
+                }`}
+              >
+                <img src={module.images && module.images.length > 0 ? module.images[0] : (module.image?.startsWith('http') ? module.image : (module.image || `https://picsum.photos/seed/${module.id}/100/100`))} className="w-8 h-8 object-cover rounded bg-black shrink-0" alt={module.name} />
+                <div className="text-left overflow-hidden">
+                  <p className="text-[10px] font-bold truncate uppercase">{module.name}</p>
+                  <p className="text-[9px] text-zinc-500 font-mono mt-0.5">€{module.price}</p>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
