@@ -309,6 +309,7 @@ export interface ServiceRequest {
   description: string;
   status: 'Pending' | 'In Progress' | 'Completed' | 'Ready for Pickup';
   date: string;
+  createdAt?: string;
   updates: { date: string; message: string }[];
 }
 
