@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { logAudit, AuditSeverity } from '../services/audit.service.js';
 
 export const createServiceRequest = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -17,7 +18,7 @@ export const createServiceRequest = async (req: AuthenticatedRequest, res: Respo
     await pool.query(
       `INSERT INTO service_requests (id, user_id, weapon_name, description, status, date, updates)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [id, req.user.id, weaponName, description, status || 'Pending', date || new Date().toLocaleDateString(), JSON.stringify(updates || [])]
+      [id, req.user.id, weaponName, description, status || 'Pending', date || new Date().toISOString(), JSON.stringify(updates || [])]
     );
 
     // Also create a contact message so it appears in admin Messages section
@@ -32,6 +33,19 @@ export const createServiceRequest = async (req: AuthenticatedRequest, res: Respo
         `Service Request: ${weaponName}`,
         description
       ]
+    );
+
+    await logAudit(
+      req.user.id,
+      req.user.email,
+      req.user.username || 'User',
+      'CREATED_SERVICE_REQUEST',
+      'SERVICE_REQUEST',
+      id,
+      `Created service request for ${weaponName}`,
+      req.ip,
+      req.headers['user-agent'],
+      AuditSeverity.INFO
     );
 
     res.status(201).json({ success: true, data: { id } });
@@ -104,9 +118,56 @@ export const updateServiceRequest = async (req: AuthenticatedRequest, res: Respo
       values
     );
 
+    await logAudit(
+      req.user.id,
+      req.user.email,
+      req.user.username || 'Admin',
+      'UPDATED_SERVICE_REQUEST',
+      'SERVICE_REQUEST',
+      id,
+      `Updated service request ${id}`,
+      req.ip,
+      req.headers['user-agent'],
+      AuditSeverity.INFO
+    );
+
     res.json({ success: true });
   } catch (error: any) {
     console.error('Error updating service request:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const deleteServiceRequest = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+
+    const result = await pool.query('DELETE FROM service_requests WHERE id = $1 RETURNING *', [id]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, error: 'Service request not found' });
+    }
+
+    await logAudit(
+      req.user.id,
+      req.user.email,
+      req.user.username || 'Admin',
+      'DELETED_SERVICE_REQUEST',
+      'SERVICE_REQUEST',
+      id,
+      `Deleted service request ${id}`,
+      req.ip,
+      req.headers['user-agent'],
+      AuditSeverity.WARNING
+    );
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Error deleting service request:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

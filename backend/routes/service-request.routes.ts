@@ -7,5 +7,6 @@ const router = Router();
 router.get('/', authenticateToken, serviceRequestController.getServiceRequests);
 router.post('/', authenticateToken, serviceRequestController.createServiceRequest);
 router.put('/:id', authenticateAdmin, serviceRequestController.updateServiceRequest);
+router.delete('/:id', authenticateAdmin, serviceRequestController.deleteServiceRequest);
 
 export default router;

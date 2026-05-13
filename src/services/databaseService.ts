@@ -735,6 +735,33 @@ export const databaseService = {
     return await this._handleResponse(res) || [];
   },
 
+  async getAllServiceRequests() {
+    const res = await fetch('/api/service-requests', {
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    return await this._handleResponse(res) || [];
+  },
+
+  async updateServiceRequest(id: string, updates: any) {
+    const res = await fetch(`/api/admin/service-requests/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify(updates)
+    });
+    if (!res.ok) throw new Error('Failed to update service request');
+  },
+
+  async deleteServiceRequest(id: string) {
+    const res = await fetch(`/api/admin/service-requests/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${this.getToken()}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete service request');
+  },
+
   async updateAddress(uid: string, address: Address) {
     const user = await this.getUserProfile(uid);
     if (!user) return;

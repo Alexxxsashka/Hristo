@@ -46,7 +46,8 @@ import {
   Tag,
   Menu,
   History,
-  Ticket
+  Ticket,
+  Wrench
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
@@ -54,7 +55,7 @@ import { useShopStore } from '../store/shopStore';
 import { useOrderStore } from '../store/orderStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { WEAPON_SLOTS, MODULE_CATEGORIES, BLOG_CATEGORIES } from '../constants';
-import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order } from '../types';
+import { Category, Product, BlogPost, PolicyPage, Characteristic, BIWidgetData, Order, ServiceRequest } from '../types';
 import { databaseService } from '../services/databaseService';
 import { formatEnum, formatModelName } from '../utils/format';
 import { formatLabel } from '../utils/formatText';
@@ -88,6 +89,7 @@ import { SiteSettingsManager } from '../components/admin/SiteSettingsManager';
 import { CategoryManager } from '../components/admin/CategoryManager';
 import { CategoryForm } from '../components/admin/CategoryForm';
 import { MessageManager } from '../components/admin/MessageManager';
+import { ServiceRequestManager } from '../components/admin/ServiceRequestManager';
 import { ReportModal } from '../components/admin/ReportModal';
 import { AuditManager } from '../components/admin/AuditManager';
 import { CouponManager } from '../components/admin/CouponManager';
@@ -95,7 +97,7 @@ import { AuditLog } from '../types';
 import { DashboardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'service-requests' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { products, categories, fetchProducts, fetchCategories, deleteProduct: deleteProductStore } = useShopStore();
@@ -104,6 +106,7 @@ export const AdminDashboard: React.FC = () => {
   
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [policies, setPolicies] = useState<PolicyPage[]>([]);
   const [users_list, setUsersList] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -144,6 +147,7 @@ export const AdminDashboard: React.FC = () => {
         fetchSettings(),
         databaseService.getUsers().then(u => setUsersList(u || [])),
         databaseService.getMessages().then(m => setMessages(m || [])),
+        databaseService.getAllServiceRequests().then(sr => setServiceRequests(sr as ServiceRequest[] || [])),
         fetchAuditLogs()
       ]);
     } catch (e) {
@@ -253,6 +257,37 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const deleteServiceRequest = async (id: string) => {
+    try {
+      await databaseService.deleteServiceRequest(id);
+      setServiceRequests(serviceRequests.filter(sr => sr.id !== id));
+      showNotification('Service request deleted successfully');
+      fetchAuditLogs();
+    } catch (err) {
+      console.error('Failed to delete service request', err);
+      showNotification('Failed to delete service request', 'error');
+    }
+  };
+
+  const updateServiceRequestStatus = async (id: string, status: string, newUpdate?: string) => {
+    try {
+      const updates: any = { status };
+      if (newUpdate) {
+        const req = serviceRequests.find(r => r.id === id);
+        if (req) {
+          updates.updates = [...req.updates, { date: new Date().toLocaleDateString(), message: newUpdate }];
+        }
+      }
+      await databaseService.updateServiceRequest(id, updates);
+      showNotification('Status updated successfully');
+      fetchAuditLogs();
+      loadAllData(); // reload to get fresh data
+    } catch (err) {
+      console.error('Failed to update service request', err);
+      showNotification('Failed to update service request', 'error');
+    }
+  };
+
   const filteredProducts = products.filter(p => {
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch = 
@@ -354,6 +389,12 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => { setActiveTab('messages'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
+            icon={<Wrench size={20} />}
+            label="Service Requests"
+            active={activeTab === 'service-requests'}
+            onClick={() => { setActiveTab('service-requests'); setIsSidebarOpen(false); }}
+          />
+          <SidebarItem
             icon={<Shield size={20} />}
             label="Policies"
             active={activeTab === 'policies'}
@@ -439,6 +480,12 @@ export const AdminDashboard: React.FC = () => {
                             desc="See what customers are asking"
                             onClick={() => setActiveTab('messages')}
                             icon={<MessageSquare size={18} />}
+                          />
+                          <QuickLink
+                            title="Service Requests"
+                            desc="Manage repair tickets"
+                            onClick={() => setActiveTab('service-requests')}
+                            icon={<Wrench size={18} />}
                           />
                         </div>
                       </div>
@@ -740,6 +787,15 @@ export const AdminDashboard: React.FC = () => {
                 messages={messages}
                 onConfirm={confirmAction}
                 onDelete={deleteMessage}
+              />
+            )}
+
+            {activeTab === 'service-requests' && (
+              <ServiceRequestManager
+                requests={serviceRequests}
+                onDelete={deleteServiceRequest}
+                onUpdateStatus={updateServiceRequestStatus}
+                onConfirm={confirmAction}
               />
             )}
 
