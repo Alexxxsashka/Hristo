@@ -21,19 +21,7 @@ export const createServiceRequest = async (req: AuthenticatedRequest, res: Respo
       [id, req.user.id, weaponName, description, status || 'Pending', date || new Date().toISOString(), JSON.stringify(updates || [])]
     );
 
-    // Also create a contact message so it appears in admin Messages section
-    const msgId = `msg-sr-${Date.now()}`;
-    await pool.query(
-      `INSERT INTO contact_messages (id, name, email, subject, message)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [
-        msgId,
-        req.user.username || req.user.email || 'User',
-        req.user.email || '',
-        `Service Request: ${weaponName}`,
-        description
-      ]
-    );
+    // Contact message no longer generated for service request
 
     await logAudit(
       req.user.id,

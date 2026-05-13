@@ -97,7 +97,7 @@ import { AuditLog } from '../types';
 import { DashboardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'service-requests' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { products, categories, fetchProducts, fetchCategories, deleteProduct: deleteProductStore } = useShopStore();
@@ -386,13 +386,8 @@ export const AdminDashboard: React.FC = () => {
             icon={<MessageSquare size={20} />}
             label="Messages"
             active={activeTab === 'messages'}
+            badge={messages.length + serviceRequests.length > 0 ? messages.length + serviceRequests.length : undefined}
             onClick={() => { setActiveTab('messages'); setIsSidebarOpen(false); }}
-          />
-          <SidebarItem
-            icon={<Wrench size={20} />}
-            label="Service Requests"
-            active={activeTab === 'service-requests'}
-            onClick={() => { setActiveTab('service-requests'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Shield size={20} />}
@@ -480,12 +475,6 @@ export const AdminDashboard: React.FC = () => {
                             desc="See what customers are asking"
                             onClick={() => setActiveTab('messages')}
                             icon={<MessageSquare size={18} />}
-                          />
-                          <QuickLink
-                            title="Service Requests"
-                            desc="Manage repair tickets"
-                            onClick={() => setActiveTab('service-requests')}
-                            icon={<Wrench size={18} />}
                           />
                         </div>
                       </div>
@@ -785,17 +774,11 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'messages' && (
               <MessageManager
                 messages={messages}
+                serviceRequests={serviceRequests}
                 onConfirm={confirmAction}
                 onDelete={deleteMessage}
-              />
-            )}
-
-            {activeTab === 'service-requests' && (
-              <ServiceRequestManager
-                requests={serviceRequests}
-                onDelete={deleteServiceRequest}
-                onUpdateStatus={updateServiceRequestStatus}
-                onConfirm={confirmAction}
+                onDeleteServiceRequest={deleteServiceRequest}
+                onUpdateServiceRequestStatus={updateServiceRequestStatus}
               />
             )}
 
