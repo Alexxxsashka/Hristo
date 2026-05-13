@@ -175,6 +175,29 @@ export const CheckoutPage: React.FC = () => {
     postalCode: '',
     phone: ''
   });
+
+  useEffect(() => {
+    if (user?.id) {
+      databaseService.getUserProfile(user.id).then(profile => {
+        if (profile?.addresses) {
+          const defaultAddress = profile.addresses.find(a => a.isDefault);
+          if (defaultAddress) {
+            setFormData(prev => ({
+              ...prev,
+              address: defaultAddress.address || prev.address,
+              city: defaultAddress.city || prev.city,
+              phone: defaultAddress.phone || prev.phone,
+              firstName: defaultAddress.fullName ? defaultAddress.fullName.split(' ')[0] : prev.firstName,
+              lastName: defaultAddress.fullName && defaultAddress.fullName.split(' ').length > 1 
+                ? defaultAddress.fullName.split(' ').slice(1).join(' ') 
+                : prev.lastName,
+            }));
+          }
+        }
+      }).catch(console.error);
+    }
+  }, [user?.id]);
+
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const validateField = (field: string, value: any) => {

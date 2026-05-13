@@ -166,7 +166,7 @@ export interface UserProfile {
   nextRankThreshold?: number;
   discountLevel?: number;
   avatar?: string;
-  addressBook?: Address[];
+  addresses?: Address[];
   createdAt?: string;
   updatedAt?: string;
 }

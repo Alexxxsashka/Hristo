@@ -103,7 +103,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {profile?.addressBook?.map(address => (
+        {profile?.addresses?.map(address => (
           <div key={address.id} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-6 relative group shadow-sm">
             {address.isDefault && (
               <span className="absolute top-4 right-4 px-2 py-0.5 bg-[#ab1017] text-white text-[8px] font-black uppercase rounded shadow-lg shadow-[#ab1017]/20">{t('default')}</span>
@@ -131,7 +131,7 @@ export const AddressBook: React.FC<AddressBookProps> = ({ profile, onRefresh }) 
             </div>
           </div>
         ))}
-        {(!profile?.addressBook || profile.addressBook.length === 0) && (
+        {(!profile?.addresses || profile.addresses.length === 0) && (
           <div className="md:col-span-2 text-center py-12 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl shadow-sm">
             <p className="text-[var(--text-secondary)] font-bold uppercase tracking-widest text-xs">{t('no_addresses_found')}</p>
           </div>

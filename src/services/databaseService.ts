@@ -765,7 +765,10 @@ export const databaseService = {
   async updateAddress(uid: string, address: Address) {
     const user = await this.getUserProfile(uid);
     if (!user) return;
-    const addresses = (user.addresses || []).map(a => a.id === address.id ? address : a);
+    let addresses = (user.addresses || []).map(a => a.id === address.id ? address : a);
+    if (address.isDefault) {
+      addresses = addresses.map(a => ({ ...a, isDefault: a.id === address.id }));
+    }
     await this.updateProfile(uid, { addresses });
   },
 
@@ -773,7 +776,13 @@ export const databaseService = {
     const user = await this.getUserProfile(uid);
     if (!user) return;
     const newAddress = { ...address, id: address.id || Math.random().toString(36).substr(2, 9) };
-    const addresses = [...(user.addresses || []), newAddress];
+    let addresses = [...(user.addresses || []), newAddress];
+    if (newAddress.isDefault) {
+      addresses = addresses.map(a => ({ ...a, isDefault: a.id === newAddress.id }));
+    } else if (addresses.length === 1) {
+      // If it's the first address, make it default automatically
+      addresses[0].isDefault = true;
+    }
     await this.updateProfile(uid, { addresses });
   },
 
@@ -781,6 +790,10 @@ export const databaseService = {
     const user = await this.getUserProfile(uid);
     if (!user) return;
     const addresses = (user.addresses || []).filter(a => a.id !== addressId);
+    // If the deleted address was the default, make the first remaining address the new default
+    if (addresses.length > 0 && !addresses.some(a => a.isDefault)) {
+      addresses[0].isDefault = true;
+    }
     await this.updateProfile(uid, { addresses });
   },
 
