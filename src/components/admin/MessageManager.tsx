@@ -14,6 +14,28 @@ export const MessageManager: React.FC<{
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<'messages' | 'service-requests'>('messages');
 
+  const safeDate = (date: any) => {
+    if (!date) return 'N/A';
+    try {
+      const d = date.seconds ? new Date(date.seconds * 1000) : new Date(date);
+      if (isNaN(d.getTime())) return 'N/A';
+      return d.toLocaleDateString();
+    } catch (e) {
+      return 'N/A';
+    }
+  };
+
+  const safeDateTime = (date: any) => {
+    if (!date) return 'N/A';
+    try {
+      const d = date.seconds ? new Date(date.seconds * 1000) : new Date(date);
+      if (isNaN(d.getTime())) return 'N/A';
+      return d.toLocaleString();
+    } catch (e) {
+      return 'N/A';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -60,7 +82,7 @@ export const MessageManager: React.FC<{
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#ab1017]">{msg.subject}</span>
-                    <span className="text-[10px] font-bold text-[var(--text-secondary)] opacity-50">{new Date(msg.date).toLocaleDateString()}</span>
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] opacity-50">{safeDate(msg.date)}</span>
                   </div>
                   <h4 className="font-bold text-[var(--text-primary)] truncate">{msg.name}</h4>
                   <p className="text-xs text-[var(--text-secondary)] truncate">{msg.email}</p>
@@ -84,7 +106,7 @@ export const MessageManager: React.FC<{
                         {selectedMessage.subject}
                       </span>
                       <span className="text-xs font-bold text-[var(--text-secondary)] opacity-50">
-                        {new Date(selectedMessage.date).toLocaleString()}
+                        {safeDateTime(selectedMessage.date)}
                       </span>
                     </div>
                     <h3 className="text-2xl font-black text-[var(--text-primary)]">{selectedMessage.name}</h3>
