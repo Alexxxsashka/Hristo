@@ -375,53 +375,53 @@ const Socket = ({
                   transform: 'translate(-50%, -50%)'
                 }}
               >
-                <div className="relative group/cell">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClick();
-                    }}
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    className={`w-12 h-12 sm:w-10 sm:h-10 border flex items-center justify-center transition-all overflow-hidden relative ${
-                      isSelected 
-                        ? 'bg-red-600/20 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
-                        : (currentPart 
-                            ? 'bg-zinc-900/90 border-zinc-700 hover:border-zinc-500' 
-                            : 'bg-black/60 border-white/10 hover:border-white/30 hover:bg-black/80')
-                    }`}
-                  >
-                    {currentPart ? (
-                      <div className="w-full h-full relative">
-                        <img 
-                          src={currentPart.images && currentPart.images.length > 0 ? currentPart.images[0] : (currentPart.image?.startsWith('http') ? currentPart.image : (currentPart.image || `https://picsum.photos/seed/${currentPart.id}/200/200`))} 
-                          className="w-full h-full object-cover opacity-90 group-hover/cell:opacity-100 transition-opacity" 
-                          alt={currentPart.name}
-                        />
-                        {/* Module Name (Small Font) */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 py-0.5 px-1">
-                          <p className="text-[6px] font-bold text-white uppercase truncate leading-none">
-                            {currentPart.name}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <Plus size={16} className={`transition-all ${hovered ? 'text-white scale-110' : 'text-white/20'}`} />
-                    )}
-                    
+                  <div className="relative group/cell">
                     {/* Mounting Point Name */}
-                    <div className="absolute -top-10 left-[-50px] right-[-50px] flex justify-center pointer-events-none">
-                      <div className={`px-2 py-0.5 rounded-sm bg-[#0a0a0a]/90 backdrop-blur-md border border-zinc-800 shadow-xl transition-colors ${
-                        isSelected ? 'border-red-500/50' : ''
+                    <div className="absolute -top-10 left-[-50px] right-[-50px] flex justify-center pointer-events-none z-20">
+                      <div className={`px-2 py-0.5 rounded-sm bg-[#0a0a0a]/90 backdrop-blur-md border border-zinc-800 shadow-xl transition-all duration-300 ${
+                        isSelected ? 'border-red-500/50 scale-110' : 'group-hover/cell:border-zinc-600'
                       }`}>
                         <span className={`text-[8px] sm:text-[6px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${
-                          isSelected ? 'text-red-500' : 'text-zinc-400'
+                          isSelected ? 'text-red-500' : 'text-zinc-400 group-hover/cell:text-zinc-200'
                         }`}>
                           {slot.type}
                         </span>
                       </div>
                     </div>
-                  </button>
+
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClick();
+                      }}
+                      onMouseEnter={() => setHovered(true)}
+                      onMouseLeave={() => setHovered(false)}
+                      className={`w-12 h-12 sm:w-10 sm:h-10 border flex items-center justify-center transition-all overflow-hidden relative ${
+                        isSelected 
+                          ? 'bg-red-600/20 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
+                          : (currentPart 
+                              ? 'bg-zinc-900/90 border-zinc-700 hover:border-zinc-500' 
+                              : 'bg-black/60 border-white/10 hover:border-white/30 hover:bg-black/80')
+                      }`}
+                    >
+                      {currentPart ? (
+                        <div className="w-full h-full relative">
+                          <img 
+                            src={currentPart.images && currentPart.images.length > 0 ? currentPart.images[0] : (currentPart.image?.startsWith('http') ? currentPart.image : (currentPart.image || `https://picsum.photos/seed/${currentPart.id}/200/200`))} 
+                            className="w-full h-full object-cover opacity-90 group-hover/cell:opacity-100 transition-opacity" 
+                            alt={currentPart.name}
+                          />
+                          {/* Module Name (Small Font) */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/80 py-0.5 px-1">
+                            <p className="text-[6px] font-bold text-white uppercase truncate leading-none">
+                              {currentPart.name}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <Plus size={16} className={`transition-all ${hovered ? 'text-white scale-110' : 'text-white/20'}`} />
+                      )}
+                    </button>
 
                   <motion.div 
                     initial={false}
