@@ -899,7 +899,7 @@ export const AdminDashboard: React.FC = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { icon: any, label: string, description?: string, showHelp?: boolean, active: boolean, onClick: () => void }) => (
+const SidebarItem = ({ icon, label, description, showHelp, active, badge, onClick }: { icon: any, label: string, description?: string, showHelp?: boolean, active: boolean, badge?: number, onClick: () => void }) => (
   <button
     onClick={onClick}
     className={`w-full flex flex-col gap-1 px-4 py-3 rounded-xl transition-all group ${active
@@ -910,7 +910,12 @@ const SidebarItem = ({ icon, label, description, showHelp, active, onClick }: { 
     <div className="flex items-center gap-3 w-full">
       {icon}
       <span className="font-bold text-sm uppercase tracking-widest">{label}</span>
-      {active && <ChevronRight size={14} className="ml-auto opacity-50" />}
+      {badge !== undefined && badge > 0 && (
+        <span className="ml-auto bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+          {badge}
+        </span>
+      )}
+      {active && badge === undefined && <ChevronRight size={14} className="ml-auto opacity-50" />}
     </div>
     {showHelp && description && (
       <span className={`text-[10px] text-left font-medium transition-all ${active ? 'text-white/90' : 'text-white/50'}`}>

@@ -24,16 +24,18 @@ export const createServiceRequest = async (req: AuthenticatedRequest, res: Respo
     // Contact message no longer generated for service request
 
     await logAudit(
-      req.user.id,
-      req.user.email,
-      req.user.username || 'User',
       'CREATED_SERVICE_REQUEST',
       'SERVICE_REQUEST',
       id,
       `Created service request for ${weaponName}`,
-      req.ip,
-      req.headers['user-agent'],
-      AuditSeverity.INFO
+      AuditSeverity.INFO,
+      {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userName: req.user.username || 'User',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      }
     );
 
     res.status(201).json({ success: true, data: { id } });
@@ -107,16 +109,18 @@ export const updateServiceRequest = async (req: AuthenticatedRequest, res: Respo
     );
 
     await logAudit(
-      req.user.id,
-      req.user.email,
-      req.user.username || 'Admin',
       'UPDATED_SERVICE_REQUEST',
       'SERVICE_REQUEST',
       id,
       `Updated service request ${id}`,
-      req.ip,
-      req.headers['user-agent'],
-      AuditSeverity.INFO
+      AuditSeverity.INFO,
+      {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userName: req.user.username || 'Admin',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      }
     );
 
     res.json({ success: true });
@@ -141,16 +145,18 @@ export const deleteServiceRequest = async (req: AuthenticatedRequest, res: Respo
     }
 
     await logAudit(
-      req.user.id,
-      req.user.email,
-      req.user.username || 'Admin',
       'DELETED_SERVICE_REQUEST',
       'SERVICE_REQUEST',
       id,
       `Deleted service request ${id}`,
-      req.ip,
-      req.headers['user-agent'],
-      AuditSeverity.WARNING
+      AuditSeverity.WARNING,
+      {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userName: req.user.username || 'Admin',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      }
     );
 
     res.json({ success: true });
