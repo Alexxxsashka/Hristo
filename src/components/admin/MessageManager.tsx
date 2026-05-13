@@ -175,7 +175,7 @@ export const MessageManager: React.FC<{
           />
         </div>
       )}
-      )}
+
 
       <ReportModal 
         isOpen={isReportModalOpen}
