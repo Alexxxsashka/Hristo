@@ -95,9 +95,10 @@ import { AuditManager } from '../components/admin/AuditManager';
 import { CouponManager } from '../components/admin/CouponManager';
 import { AuditLog } from '../types';
 import { DashboardSkeleton, TableRowSkeleton } from '../components/Skeleton';
+import { RolesManager } from '../components/admin/RolesManager';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add' | 'categories' | 'add-category' | 'blog' | 'messages' | 'policies' | 'orders' | 'coupons' | 'settings' | 'audit' | 'roles'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { products, categories, fetchProducts, fetchCategories, deleteProduct: deleteProductStore } = useShopStore();
@@ -395,6 +396,12 @@ export const AdminDashboard: React.FC = () => {
             label="Policies"
             active={activeTab === 'policies'}
             onClick={() => { setActiveTab('policies'); setIsSidebarOpen(false); }}
+          />
+          <SidebarItem
+            icon={<Users size={20} />}
+            label="Roles"
+            active={activeTab === 'roles'}
+            onClick={() => { setActiveTab('roles'); setIsSidebarOpen(false); }}
           />
           <SidebarItem
             icon={<Globe size={20} />}
@@ -804,6 +811,22 @@ export const AdminDashboard: React.FC = () => {
                 onNotify={showNotification}
                 onConfirm={confirmAction}
               />
+            )}
+
+            {activeTab === 'roles' && (
+              <motion.div
+                key="roles"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <RolesManager
+                  users={users_list}
+                  onUpdate={() => { loadAllData(true); fetchAuditLogs(); }}
+                  onNotify={showNotification}
+                  onConfirm={confirmAction}
+                />
+              </motion.div>
             )}
 
 

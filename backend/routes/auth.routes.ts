@@ -20,5 +20,10 @@ router.put('/:id', authenticateToken, authController.updateProfile);
 // Admin Users list — GET /api/admin/users
 router.get('/', authenticateAdmin, authController.getUsers);
 
+// Admin User management actions
+router.put('/:id/role', authenticateAdmin, authController.updateUserRole);
+router.post('/:id/reset-password', authenticateAdmin, authController.resetUserPassword);
+router.put('/:id/email', authenticateAdmin, authController.resetUserEmail);
+router.delete('/:id', authenticateAdmin, authController.deleteUser);
 
 export default router;

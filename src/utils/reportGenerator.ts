@@ -593,3 +593,109 @@ export const generateDashboardStatsReport = (data: {
   // Save the PDF
   doc.save(`Dashboard_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 };
+
+export const generateUsersReport = (users: any[], dateRange?: { start: Date, end: Date }) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const date = new Date().toLocaleString();
+
+  // --- Header ---
+  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('HRISTO AIRSOFT STORE', 14, 22);
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const reportTitle = dateRange 
+    ? `USER REGISTRY & ROLES AUDIT (${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()})`
+    : 'USER REGISTRY & SECURITY ROLES REPORT';
+  doc.text(reportTitle, 14, 30);
+  
+  doc.setFontSize(8);
+  doc.text(`Generated on: ${date}`, pageWidth - 14, 30, { align: 'right' });
+
+  // --- Statistics calculation ---
+  const totalUsers = users.length;
+  const adminCount = users.filter(u => u.role === 'admin').length;
+  const managerCount = users.filter(u => u.role === 'manager').length;
+  const standardUsersCount = users.filter(u => u.role !== 'admin' && u.role !== 'manager').length;
+
+  // --- Summary Section ---
+  let yPos = 50;
+  doc.setTextColor(24, 24, 27);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('USER POPULATION SUMMARY', 14, yPos);
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Total Accounts: ${totalUsers}`, 14, yPos + 8);
+  doc.text(`Administrators (admin): ${adminCount}`, 14, yPos + 14);
+  
+  const summaryX = pageWidth / 2;
+  doc.setFont('helvetica', 'bold');
+  doc.text('ROLE BREAKDOWN', summaryX, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Managers (manager): ${managerCount}`, summaryX, yPos + 8);
+  doc.text(`Customers (user): ${standardUsersCount}`, summaryX, yPos + 14);
+
+  // --- Users Table ---
+  yPos += 25;
+  
+  const tableColumn = ["User ID", "Name", "Email", "Phone", "Role", "Rank", "Registered"];
+  const tableRows = users.map(u => [
+    u.id.slice(-8).toUpperCase(),
+    u.username || 'N/A',
+    u.email || 'N/A',
+    u.phone || 'N/A',
+    (u.role || 'user').toUpperCase(),
+    (u.rank || 'recruit').toUpperCase(),
+    u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'
+  ]);
+
+  autoTable(doc, {
+    startY: yPos,
+    head: [tableColumn],
+    body: tableRows,
+    theme: 'striped',
+    headStyles: {
+      fillColor: [24, 24, 27],
+      textColor: [255, 255, 255],
+      fontSize: 9,
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold', halign: 'center' },
+      4: { fontStyle: 'bold', halign: 'center' },
+      5: { halign: 'center' },
+      6: { halign: 'center' }
+    },
+    styles: {
+      fontSize: 8,
+      cellPadding: 3
+    },
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 4) {
+        if (data.cell.text[0] === 'ADMIN') {
+          data.cell.styles.textColor = [220, 38, 38]; // red-600
+        } else if (data.cell.text[0] === 'MANAGER') {
+          data.cell.styles.textColor = [37, 99, 235]; // blue-600
+        }
+      }
+    }
+  });
+
+  // --- Footer ---
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  doc.setFontSize(8);
+  doc.setTextColor(161, 161, 170);
+  doc.text('Confidential - User Registry & System Roles Security Audit', pageWidth / 2, finalY, { align: 'center' });
+
+  // Save the PDF
+  doc.save(`Users_Roles_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+};

@@ -843,6 +843,66 @@ export const databaseService = {
     return await this._handleResponse(res) || [];
   },
 
+  async updateUserRole(id: string, role: string): Promise<any> {
+    const res = await fetch(`/api/admin/users/${id}/role`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify({ role })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to update user role');
+    }
+    return await res.json();
+  },
+
+  async resetUserPassword(id: string): Promise<any> {
+    const res = await fetch(`/api/admin/users/${id}/reset-password`, {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${this.getToken()}`
+      }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to trigger password reset');
+    }
+    return await res.json();
+  },
+
+  async resetUserEmail(id: string, newEmail: string): Promise<any> {
+    const res = await fetch(`/api/admin/users/${id}/email`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify({ newEmail })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to update email');
+    }
+    return await res.json();
+  },
+
+  async deleteUser(id: string): Promise<any> {
+    const res = await fetch(`/api/admin/users/${id}`, {
+      method: 'DELETE',
+      headers: { 
+        'Authorization': `Bearer ${this.getToken()}`
+      }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to delete user account');
+    }
+    return await res.json();
+  },
+
   async getUserProfile(id: string): Promise<UserProfile | null> {
     const res = await fetch(`/api/users/${id}`, {
       headers: { 'Authorization': `Bearer ${this.getToken()}` }
