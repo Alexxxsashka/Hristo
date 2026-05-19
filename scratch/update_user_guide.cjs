@@ -1,0 +1,2 @@
+"const fs = require('fs');\nconst path = require('path');\n\nconst filePath = path.resolve('DIPLOMA_FULL_TEXT_EXPANDED.md');\nconsole.log(\"Reading file:\", filePath);\n\ntry {\n    let content = fs.readFileSync(filePath, 'utf8');\n    console.log(\"Origin
+<truncated 24153 bytes>

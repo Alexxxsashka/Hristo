@@ -14,7 +14,7 @@ import {
   MapPin, 
   CheckCircle2, 
   ShieldCheck,
-  Smartphone,
+
   Building2,
   Wallet,
   AlertCircle,
@@ -39,7 +39,7 @@ interface ShippingMethod {
 }
 
 interface PaymentMethod {
-  id: 'stripe' | 'cod' | 'bank_transfer' | 'keks_pay';
+  id: 'stripe' | 'cod' | 'bank_transfer';
   name: string;
   icon: React.ReactNode;
   description: string;
@@ -124,12 +124,7 @@ export const CheckoutPage: React.FC = () => {
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-4 grayscale opacity-50" referrerPolicy="no-referrer" />
       </div>
     },
-    {
-      id: 'keks_pay',
-      name: 'keks_pay',
-      description: 'keks_pay_desc',
-      icon: <Smartphone className="text-red-500" size={20} />
-    },
+
     {
       id: 'cod',
       name: 'cash_on_delivery',

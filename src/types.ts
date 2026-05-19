@@ -187,7 +187,7 @@ export interface ShippingInfo {
 }
 
 export interface PaymentInfo {
-  method: 'stripe' | 'keks_pay' | 'cod' | 'bank_transfer';
+  method: 'stripe' | 'cod' | 'bank_transfer';
   status: 'pending' | 'paid' | 'failed' | 'refunded';
   transactionId?: string;
   amount: number;
