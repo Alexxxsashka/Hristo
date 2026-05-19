@@ -14,7 +14,7 @@ export const NoImage: React.FC<NoImageProps> = ({
   iconSize = 32
 }) => {
   return (
-    <div className={`flex flex-col items-center justify-center bg-[var(--bg-tertiary)] text-[var(--text-secondary)] p-6 text-center ${className}`}>
+    <div className={`relative flex flex-col items-center justify-center bg-[var(--bg-tertiary)] text-[var(--text-secondary)] p-6 text-center ${className}`}>
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
