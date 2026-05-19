@@ -24,7 +24,7 @@ export interface User {
   username: string;
   displayName?: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'manager' | 'clerk' | 'tech';
   callsign?: string;
   teamName?: string;
   isEmailVerified: boolean;
@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState>()(
                 id: firebaseUser.uid,
                 username: userData?.username || firebaseUser.displayName || 'User',
                 email: firebaseUser.email || '',
-                role: userData?.role === 'admin' ? 'admin' : 'user',
+                role: userData?.role || 'user',
                 callsign: userData?.callsign,
                 teamName: userData?.teamName,
                 isEmailVerified: firebaseUser.emailVerified,

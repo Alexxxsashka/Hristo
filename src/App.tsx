@@ -30,7 +30,7 @@ const CheckoutSuccessPage = lazy(() => import('./pages/CheckoutSuccessPage').the
 
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated } = useAuthStore();
-  if (!isAuthenticated || user?.role !== 'admin') return <Navigate to="/" replace />;
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'manager')) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 

@@ -172,8 +172,8 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     if (!isInitialized) return;
     
-    const isAdmin = user?.role === 'admin';
-    if (!user || !isAdmin) {
+    const hasAccess = user?.role === 'admin' || user?.role === 'manager';
+    if (!user || !hasAccess) {
       if (isInitialized) navigate('/login');
       return;
     }
@@ -191,6 +191,12 @@ export const AdminDashboard: React.FC = () => {
       clearInterval(interval);
     };
   }, [user?.id, user?.role, navigate, isInitialized]);
+
+  useEffect(() => {
+    if (user?.role === 'manager' && ['categories', 'add-category', 'coupons', 'policies', 'roles', 'audit'].includes(activeTab)) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, user?.role]);
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });
@@ -314,6 +320,8 @@ export const AdminDashboard: React.FC = () => {
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const isManager = user?.role === 'manager';
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex text-[var(--text-primary)] relative transition-colors duration-300">
       <AnimatePresence>
@@ -360,24 +368,28 @@ export const AdminDashboard: React.FC = () => {
             active={activeTab === 'orders'}
             onClick={() => { setActiveTab('orders'); setIsSidebarOpen(false); }}
           />
-          <SidebarItem
-            icon={<Ticket size={20} />}
-            label="Coupons"
-            active={activeTab === 'coupons'}
-            onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
-          />
+          {!isManager && (
+            <SidebarItem
+              icon={<Ticket size={20} />}
+              label="Coupons"
+              active={activeTab === 'coupons'}
+              onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
+            />
+          )}
           <SidebarItem
             icon={<Package size={20} />}
             label="Products"
             active={activeTab === 'products'}
             onClick={() => { setActiveTab('products'); setIsSidebarOpen(false); }}
           />
-          <SidebarItem
-            icon={<Layers size={20} />}
-            label="Categories"
-            active={activeTab === 'categories'}
-            onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}
-          />
+          {!isManager && (
+            <SidebarItem
+              icon={<Layers size={20} />}
+              label="Categories"
+              active={activeTab === 'categories'}
+              onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}
+            />
+          )}
           <SidebarItem
             icon={<FileText size={20} />}
             label="Blog"
@@ -391,30 +403,36 @@ export const AdminDashboard: React.FC = () => {
             badge={messages.length + serviceRequests.length > 0 ? messages.length + serviceRequests.length : undefined}
             onClick={() => { setActiveTab('messages'); setIsSidebarOpen(false); }}
           />
-          <SidebarItem
-            icon={<Shield size={20} />}
-            label="Policies"
-            active={activeTab === 'policies'}
-            onClick={() => { setActiveTab('policies'); setIsSidebarOpen(false); }}
-          />
-          <SidebarItem
-            icon={<Users size={20} />}
-            label="Roles"
-            active={activeTab === 'roles'}
-            onClick={() => { setActiveTab('roles'); setIsSidebarOpen(false); }}
-          />
+          {!isManager && (
+            <SidebarItem
+              icon={<Shield size={20} />}
+              label="Policies"
+              active={activeTab === 'policies'}
+              onClick={() => { setActiveTab('policies'); setIsSidebarOpen(false); }}
+            />
+          )}
+          {!isManager && (
+            <SidebarItem
+              icon={<Users size={20} />}
+              label="Roles"
+              active={activeTab === 'roles'}
+              onClick={() => { setActiveTab('roles'); setIsSidebarOpen(false); }}
+            />
+          )}
           <SidebarItem
             icon={<Globe size={20} />}
             label="Website"
             active={activeTab === 'settings'}
             onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
           />
-          <SidebarItem
-            icon={<History size={20} />}
-            label="Audit"
-            active={activeTab === 'audit'}
-            onClick={() => { setActiveTab('audit'); setIsSidebarOpen(false); }}
-          />
+          {!isManager && (
+            <SidebarItem
+              icon={<History size={20} />}
+              label="Audit"
+              active={activeTab === 'audit'}
+              onClick={() => { setActiveTab('audit'); setIsSidebarOpen(false); }}
+            />
+          )}
         </nav>
 
         <div className="p-4 border-t border-white/10 space-y-2">
