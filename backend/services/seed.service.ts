@@ -120,13 +120,26 @@ export const seedDatabase = async () => {
       await pool.query(
         `INSERT INTO products (
           id, uid, sku, slug, name, name_hr, description, description_hr, type, 
-          category_id, brand, price, stock, status, image_url, category_filters
+          category_id, brand, price, stock, status, image_url, category_filters, compatible_ids
         )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'active', $14, $15)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'active', $14, $15, $16)`,
         [
-          pid, pid, sku, prod.slug, prod.name, prod.name_hr, prod.description, prod.description_hr, 
-          prod.type, prod.category_id, prod.brand, prod.price, prod.stock, prod.image, 
-          JSON.stringify(prod.category_filters)
+          pid, 
+          prod.slug, 
+          sku, 
+          prod.slug, 
+          prod.name, 
+          prod.name_hr, 
+          prod.description, 
+          prod.description_hr, 
+          prod.type, 
+          prod.category_id, 
+          prod.brand, 
+          prod.price, 
+          prod.stock, 
+          prod.image, 
+          JSON.stringify(prod.category_filters),
+          JSON.stringify((prod as any).compatible_ids || ((prod.slug === 'vo-maverick-gen2') ? ['sa-e04-edge'] : []))
         ]
       );
     }

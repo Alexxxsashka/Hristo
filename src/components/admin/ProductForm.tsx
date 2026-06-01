@@ -330,6 +330,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
 
           const productToSave = {
             ...formData,
+            compatibleIds: formData.compatibleWeapons || [],
             model3D: modelUrl,
             model3DName: modelName,
             images: finalImageUrls,

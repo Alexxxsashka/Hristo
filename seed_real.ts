@@ -366,7 +366,7 @@ const products = [
       { emoji: "🧱", label: "Material", value: "T6 Aluminum" }
     ]
   },
-  { name: "EOTech 558 Replica Red Dot", slug: "eotech-558-replica", brand: "Vector Optics", price: 65, type: "module", category_id: "optics", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", description: "Bright and clear holographic sight replica. Fits any standard picatinny rail.", stock: 10 },
+  { name: "EOTech 558 Replica Red Dot", slug: "eotech-558-replica", brand: "Vector Optics", price: 65, type: "module", category_id: "optics", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", description: "Bright and clear holographic sight replica. Fits any standard picatinny rail.", stock: 10, compatible_ids: ["sa-e04-edge"] },
   { name: "Magpul P-MAG 120rd Mid-Cap", slug: "magpul-pmag-120", brand: "Magpul", price: 22, type: "module", category_id: "magazines", image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80", description: "Reliable feeding mid-cap magazine for M4/AR15 series.", stock: 50 },
 
   // Consumables
@@ -425,11 +425,11 @@ const seedRealData = async () => {
         `INSERT INTO products (
           id, uid, sku, barcode, slug, name, description, type, 
           category_id, brand, price, stock, status, image_url,
-          variants, variant_attributes, characteristics, images, category_filters
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active', $13, $14, $15, $16, $17, $18)`,
+          variants, variant_attributes, characteristics, images, category_filters, compatible_ids
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active', $13, $14, $15, $16, $17, $18, $19)`,
         [
           pid, 
-          pid, 
+          prod.slug, 
           sku, 
           `BC${Math.floor(Math.random()*1000000)}`, 
           prod.slug, 
@@ -445,7 +445,8 @@ const seedRealData = async () => {
           JSON.stringify((prod as any).variant_attributes || []),
           JSON.stringify((prod as any).characteristics || []),
           JSON.stringify([prod.image]),
-          JSON.stringify((prod as any).category_filters || {})
+          JSON.stringify((prod as any).category_filters || {}),
+          JSON.stringify((prod as any).compatible_ids || [])
         ]
       );
     }

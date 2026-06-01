@@ -37,19 +37,22 @@ export class CompatibilityEngine {
 
     // 4. Check specific UID compatibility (Whitelisting)
     const allowedIds = (attachment.compatibleWeapons && attachment.compatibleWeapons.length > 0) ? attachment.compatibleWeapons : 
-                       ((parent.compatibleIds && parent.compatibleIds.length > 0) ? parent.compatibleIds : []);
+                       ((attachment.compatibleIds && attachment.compatibleIds.length > 0) ? attachment.compatibleIds :
+                       ((parent.compatibleIds && parent.compatibleIds.length > 0) ? parent.compatibleIds : []));
     
     if (allowedIds.length > 0) {
-      if (!allowedIds.includes(parent.uid) && !allowedIds.includes(attachment.uid)) {
+      if (!allowedIds.includes(parent.uid) && !allowedIds.includes(parent.id) && !allowedIds.includes(attachment.uid) && !allowedIds.includes(attachment.id)) {
         console.log(`CompatibilityEngine: ${parent.name} has a whitelist that does not include ${attachment.uid}`);
         return false;
       }
     }
 
     // 5. Check global weapon compatibility
-    if (attachment.compatibleWeapons && attachment.compatibleWeapons.length > 0) {
-      const weaponUid = rootProduct?.uid || (parent.type === 'weapon' ? parent.uid : null);
-      if (weaponUid && !attachment.compatibleWeapons.includes(weaponUid)) {
+    const attachmentAllowedWeapons = (attachment.compatibleWeapons && attachment.compatibleWeapons.length > 0) ? attachment.compatibleWeapons :
+                                    ((attachment.compatibleIds && attachment.compatibleIds.length > 0) ? attachment.compatibleIds : []);
+    if (attachmentAllowedWeapons.length > 0) {
+      const weaponUid = rootProduct?.uid || rootProduct?.id || (parent.type === 'weapon' ? (parent.uid || parent.id) : null);
+      if (weaponUid && !attachmentAllowedWeapons.includes(weaponUid) && !attachmentAllowedWeapons.includes(rootProduct?.id || '') && !attachmentAllowedWeapons.includes(parent.id)) {
         console.log(`CompatibilityEngine: ${attachment.name} is not compatible with weapon ${weaponUid}`);
         return false;
       }
