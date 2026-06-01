@@ -260,7 +260,7 @@ const HomePage: React.FC = () => {
               </Link>
             </div>
             <div className="absolute top-0 right-0 w-full md:w-2/3 h-full opacity-10 md:opacity-20 group-hover:opacity-40 transition-opacity">
-              <img src="" className="w-full h-full object-cover" alt="Tactical Equipment" referrerPolicy="no-referrer" />
+              <img src="/images/tactical_gear.png" className="w-full h-full object-cover" alt="Tactical Equipment" referrerPolicy="no-referrer" />
             </div>
           </div>
 
