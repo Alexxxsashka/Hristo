@@ -69,7 +69,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
       mountType: data.mountType || (data as any).mount_type || '',
       attachmentSlot: data.attachmentSlot || (data as any).attachment_slot || '',
       compatibleIds: data.compatibleIds || (data as any).compatible_ids || [],
-      compatibleWeapons: data.compatibleWeapons || (data as any).compatible_ids || [], // Map compatible_ids to compatibleWeapons for the form
+      compatibleWeapons: data.compatibleWeapons || data.compatibleIds || (data as any).compatible_ids || [], // Map compatibleIds/compatible_ids to compatibleWeapons for the form
       longDescription: data.longDescription || (data as any).long_description || '',
       nameHr: data.nameHr || (data as any).name_hr || '',
       descriptionHr: data.descriptionHr || (data as any).description_hr || '',
@@ -1223,21 +1223,7 @@ export const ProductForm = ({ initialData, categories, weapons, showHelp, onSucc
         {formData.type === 'module' && (
           <div className="space-y-6 p-6 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)]">
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest">Mount Type</label>
-              <select
-                value={formData.mountType || ''}
-                onChange={e => setFormData({ ...formData, mountType: e.target.value })}
-                className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none text-[var(--text-primary)]"
-              >
-                <option value="">Select Mount Type</option>
-                <option value="Picatinny">Picatinny</option>
-                <option value="M-LOK">M-LOK</option>
-                <option value="KeyMod">KeyMod</option>
-                <option value="Dovetail">Dovetail</option>
-              </select>
-              <p className="text-[10px] text-[var(--text-secondary)] uppercase font-bold">The mounting system this module uses</p>
-            </div>
+            {/* Mount Type field removed as requested */}
 
             <div className="space-y-4">
               <label className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest">Compatible Weapons</label>
