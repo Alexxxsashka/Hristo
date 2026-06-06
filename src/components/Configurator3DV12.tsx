@@ -838,10 +838,44 @@ export const Configurator3DV12: React.FC = () => {
           maxDistance={5}
         />
         
-        <Environment preset="city" />
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
-        <pointLight position={[-10, -10, -10]} intensity={1} color="#ff0000" />
+        <Environment preset="city" intensity={0.6} />
+        
+        {/* Soft Ambient fill light */}
+        <ambientLight intensity={0.4} />
+        
+        {/* Sky-Ground natural ambient light */}
+        <hemisphereLight skyColor="#ffffff" groundColor="#1a1a1e" intensity={0.6} />
+        
+        {/* Key Light (Main light from front-top-right) */}
+        <directionalLight 
+          position={[5, 8, 5]} 
+          intensity={1.8} 
+          castShadow 
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-bias={-0.0001}
+        />
+        
+        {/* Fill Light (Soft light from front-top-left) */}
+        <directionalLight 
+          position={[-5, 5, 5]} 
+          intensity={0.8} 
+          color="#d1d5db"
+        />
+        
+        {/* Rim Light / Backlight (separates model from background) */}
+        <directionalLight 
+          position={[-5, 8, -6]} 
+          intensity={3.0} 
+          color="#ffffff" 
+        />
+        
+        {/* Bottom Bounce Light (Reflected light from floor) */}
+        <directionalLight 
+          position={[0, -5, 0]} 
+          intensity={0.4} 
+          color="#2e2e33"
+        />
         
         <Suspense fallback={null}>
           <group position={[0, 0, 0]}>

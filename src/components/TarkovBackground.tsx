@@ -135,23 +135,24 @@ export const TarkovBackground: React.FC = () => {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-[#050505]">
-      {/* Base Layer: Industrial Warehouse */}
+    <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-[#080809]">
+      {/* Base Layer: Solid color with moving radial gradient (parallax radial glow) */}
       <motion.div 
         style={{ 
           x: bgX, 
           y: bgY,
-          scale: 1.1 // Slightly larger to prevent edges from showing during parallax
+          scale: 1.15 // Slightly larger to prevent edges from showing during parallax
         }}
-        className="absolute inset-[-5%] bg-cover bg-center bg-no-repeat opacity-30"
+        className="absolute inset-[-10%] opacity-90"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
-        transition={{ duration: 2 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
       >
-        <img 
-          src="/images/configurator/tarkov_bg.png" 
-          className="w-full h-full object-cover"
-          alt=""
+        <div 
+          className="w-full h-full"
+          style={{
+            background: 'radial-gradient(circle at center, #1b1b22 0%, #080809 70%)',
+          }}
         />
       </motion.div>
 
@@ -168,8 +169,8 @@ export const TarkovBackground: React.FC = () => {
       </motion.div>
 
       {/* Vignette & Cinematic Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505] opacity-80" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505] opacity-60" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080809] via-transparent to-[#080809] opacity-85" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#080809] via-transparent to-[#080809] opacity-65" />
       
       {/* Noise/Grain Overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
