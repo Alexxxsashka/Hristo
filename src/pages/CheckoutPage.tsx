@@ -363,6 +363,20 @@ export const CheckoutPage: React.FC = () => {
 
   const handleNext = () => {
     setError(null);
+    if (step === 1) {
+      const errors: Record<string, string> = {};
+      Object.keys(formData).forEach(key => {
+        const error = validateField(key, formData[key as keyof typeof formData]);
+        if (error) errors[key] = error;
+      });
+      
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        const errorFields = Object.keys(errors).join(', ');
+        setError(t('validation_error_fix', { fields: errorFields }));
+        return;
+      }
+    }
     setStep(s => s + 1);
   };
   const handleBack = () => {

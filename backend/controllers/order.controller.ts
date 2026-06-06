@@ -15,6 +15,10 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   try {
     await client.query('BEGIN');
     
+    // Check if order already exists
+    const existingResult = await client.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+    const isExisting = existingResult.rows.length > 0;
+
     // 1. Fetch user profile if exists
     let userProfile = null;
     if (userId) {
@@ -33,8 +37,9 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       if (productResult.rows.length === 0) throw new Error(`Product ${item.name || pid} not found`);
       const product = productResult.rows[0];
 
-      if (parseInt(product.stock) < item.quantity) {
-        throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stock}`);
+      const stockVal = Number(product.stock) || 0;
+      if (!isExisting && stockVal < item.quantity) {
+        throw new Error(`Insufficient stock for ${product.name}. Available: ${stockVal}`);
       }
 
       // Fetch category for category-level discounts
@@ -42,7 +47,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       const categoryDiscount = categoryResult.rows[0]?.discount || 0;
       const categoryName = categoryResult.rows[0]?.name || '';
       
-      const productDiscount = parseInt(product.discount) || 0;
+      const productDiscount = Number(product.discount) || 0;
       const userDiscount = userProfile?.discount_level || 0;
       
       const bestDiscount = Math.max(productDiscount, categoryDiscount, userDiscount);
@@ -66,18 +71,20 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       };
       orderItems.push(processedItem);
 
-      // Update stock
-      await client.query(
-        'UPDATE products SET stock = stock - $1 WHERE id = $2',
-        [item.quantity, product.id]
-      );
+      if (!isExisting) {
+        // Update stock
+        await client.query(
+          'UPDATE products SET stock = stock - $1 WHERE id = $2',
+          [item.quantity, product.id]
+        );
 
-      // Inventory log
-      await client.query(
-        `INSERT INTO inventory_logs (product_id, user_id, change_amount, previous_balance, new_balance, reason, reference_id) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [product.id, userId, -item.quantity, parseInt(product.stock), parseInt(product.stock) - item.quantity, `Order ${orderNumber}`, orderId]
-      );
+        // Inventory log
+        await client.query(
+          `INSERT INTO inventory_logs (product_id, user_id, change_amount, previous_balance, new_balance, reason, reference_id) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [product.id, userId, -item.quantity, stockVal, stockVal - item.quantity, `Order ${orderNumber}`, orderId]
+        );
+      }
     }
 
     const shippingCost = parseFloat(orderData.shipping_cost || orderData.shipping?.cost || 0);
@@ -89,28 +96,50 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     const shipping = orderData.shipping || {};
     const payment = orderData.payment || {};
     
-    await client.query(
-      `INSERT INTO orders (
-        id, order_number, user_id, total, subtotal, tax, discount_amount, shipping_cost, 
-        status, payment_method, payment_status, shipping_address, 
-        first_name, last_name, email, shipping_city, shipping_phone, shipping_postal_code,
-        notes, profit, points_earned
-      ) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
-      [
-        orderId, orderNumber, userId, authoritativeTotal, authoritativeSubtotal, tax, discountAmount, shippingCost,
-        'pending', payment.method || 'unknown', payment.status || 'pending', JSON.stringify(shipping),
-        shipping.firstName || '', shipping.lastName || '', shipping.email || '', shipping.city || '', shipping.phone || '', shipping.postalCode || '',
-        orderData.notes || '', authoritativeProfit, orderData.pointsEarned || 0
-      ]
-    );
+    if (isExisting) {
+      await client.query(
+        `UPDATE orders SET 
+          total = $1, subtotal = $2, tax = $3, discount_amount = $4, shipping_cost = $5,
+          status = $6, payment_method = $7, payment_status = $8, shipping_address = $9,
+          first_name = $10, last_name = $11, email = $12, shipping_city = $13, 
+          shipping_phone = $14, shipping_postal_code = $15, notes = $16, profit = $17, 
+          points_earned = $18, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $19`,
+        [
+          authoritativeTotal, authoritativeSubtotal, tax, discountAmount, shippingCost,
+          orderData.status || 'pending', payment.method || 'unknown', payment.status || 'pending', JSON.stringify(shipping),
+          shipping.firstName || '', shipping.lastName || '', shipping.email || '', shipping.city || '', 
+          shipping.phone || '', shipping.postalCode || '', orderData.notes || '', authoritativeProfit, 
+          orderData.pointsEarned || 0, orderId
+        ]
+      );
+      
+      // Delete old order items so we can refresh them
+      await client.query('DELETE FROM order_items WHERE order_id = $1', [orderId]);
+    } else {
+      await client.query(
+        `INSERT INTO orders (
+          id, order_number, user_id, total, subtotal, tax, discount_amount, shipping_cost, 
+          status, payment_method, payment_status, shipping_address, 
+          first_name, last_name, email, shipping_city, shipping_phone, shipping_postal_code,
+          notes, profit, points_earned
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
+        [
+          orderId, orderNumber, userId, authoritativeTotal, authoritativeSubtotal, tax, discountAmount, shippingCost,
+          orderData.status || 'pending', payment.method || 'unknown', payment.status || 'pending', JSON.stringify(shipping),
+          shipping.firstName || '', shipping.lastName || '', shipping.email || '', shipping.city || '', shipping.phone || '', shipping.postalCode || '',
+          orderData.notes || '', authoritativeProfit, orderData.pointsEarned || 0
+        ]
+      );
+    }
 
-    // 4. Save order items
+    // 4. Save order items (for both new and existing)
     for (const oi of orderItems) {
       await client.query(
         `INSERT INTO order_items (order_id, product_id, name, quantity, price, image, sku, variant_info, category) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [oi.order_id, oi.product_id, oi.name, oi.quantity, oi.price, oi.image, oi.sku, oi.variant_info, oi.category]
+        [oi.order_id, oi.product_id, oi.name, oi.quantity, oi.price, oi.image || null, oi.sku || '', oi.variant_info, oi.category || null]
       );
     }
 

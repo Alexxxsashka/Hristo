@@ -400,7 +400,12 @@ const HomePage: React.FC = () => {
             const actualCategory = categories.find(c => c.id === cat.categoryId);
             const categoryName = cat.customName || actualCategory?.name || cat.categoryId.replace('_', ' ').split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
             const categoryImage = actualCategory?.image || (cat as any).customImage || "";
-            const count = (Array.isArray(products) ? products : []).filter(p => p.category === cat.categoryId).length;
+            const count = (Array.isArray(products) ? products : []).filter(p => {
+              if (p.category === cat.categoryId || p.subcategory === cat.categoryId) return true;
+              const pCat = categories.find(c => c.id === p.category);
+              const pSub = categories.find(c => c.id === p.subcategory);
+              return pCat?.parent === cat.categoryId || pSub?.parent === cat.categoryId;
+            }).length;
             return (
               <Link 
                 key={cat.id}

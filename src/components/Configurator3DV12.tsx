@@ -26,11 +26,9 @@ const discoverSlots = (object: THREE.Object3D): DiscoveredSlot[] => {
   const slots: DiscoveredSlot[] = [];
   const seenPositions = new Set<string>();
   
-  // Ensure matrices are updated relative to the object root for accurate position discovery
   object.updateWorldMatrix(true, true);
 
   const search = (obj: THREE.Object3D) => {
-    // Skip if this is the mount point used to attach this part
     if ((obj as any).isMountPoint) {
       if (obj.children) obj.children.forEach(search);
       return;
@@ -40,10 +38,8 @@ const discoverSlots = (object: THREE.Object3D): DiscoveredSlot[] => {
     const prefix = SLOT_PREFIXES.find(p => name.startsWith(p));
     
     if (prefix) {
-      // Extract type (e.g. muzzle from slot_muzzle_01)
       const type = name.slice(prefix.length).split('_')[0]; 
       
-      // EFT Logic: If multiple slots exist at the exact same position, only take one
       const worldPos = new THREE.Vector3();
       worldPos.setFromMatrixPosition(obj.matrixWorld);
       const posKey = `${worldPos.x.toFixed(3)},${worldPos.y.toFixed(3)},${worldPos.z.toFixed(3)}`;
