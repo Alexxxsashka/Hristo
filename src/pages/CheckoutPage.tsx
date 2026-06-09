@@ -115,13 +115,17 @@ export const CheckoutPage: React.FC = () => {
       id: 'stripe',
       name: 'credit_card',
       description: 'credit_card_desc',
-      icon: <div className="flex gap-1">
+      icon: <div className="flex gap-1.5 items-center">
         {paymentLogos.visa ? (
-          <img src={paymentLogos.visa} alt="Visa" className="h-3 grayscale opacity-50" referrerPolicy="no-referrer" />
+          <img src={paymentLogos.visa} alt="Visa" className="h-4 w-auto object-contain grayscale opacity-50" referrerPolicy="no-referrer" />
         ) : (
           <span className="text-[8px] font-bold text-zinc-500">VISA</span>
         )}
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-4 grayscale opacity-50" referrerPolicy="no-referrer" />
+        {paymentLogos.mastercard ? (
+          <img src={paymentLogos.mastercard} alt="MasterCard" className="h-4 w-auto object-contain grayscale opacity-50" referrerPolicy="no-referrer" />
+        ) : (
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-4 grayscale opacity-50" referrerPolicy="no-referrer" />
+        )}
       </div>
     },
 
@@ -270,13 +274,15 @@ export const CheckoutPage: React.FC = () => {
   useEffect(() => {
     const fetchLogos = async () => {
       try {
-        const [applePay, maestro, visa, google] = await Promise.all([
-          databaseService.getFileURL('site/2d/5968630.png'),
-          databaseService.getFileURL('site/2d/Maestro_logo.png'),
-          databaseService.getFileURL('site/2d/Visa-Brandmark-Blue-RGB-800x800-16353.png'),
-          databaseService.getFileURL('site/2d/Google__G__logo.svg.png')
+        const [applePay, visa, google, mastercard, paypal, stripe] = await Promise.all([
+          databaseService.getFileURL('site/branding/applepay.png'),
+          databaseService.getFileURL('site/branding/visa.png'),
+          databaseService.getFileURL('site/branding/google.png'),
+          databaseService.getFileURL('site/branding/mastercard.png'),
+          databaseService.getFileURL('site/branding/paypal.png'),
+          databaseService.getFileURL('site/branding/stripe.png')
         ]);
-        setPaymentLogos({ applePay, maestro, visa, google });
+        setPaymentLogos({ applePay, visa, google, mastercard, paypal, stripe });
       } catch (err) {
         console.error('Error fetching payment logos:', err);
       }
@@ -937,13 +943,13 @@ export const CheckoutPage: React.FC = () => {
                     <ShieldCheck size={14} className="sm:w-4 sm:h-4 text-[#ab1017]" />
                     {t('secure_ssl_encryption')}
                   </div>
-                  <div className="flex flex-wrap gap-4 grayscale opacity-30">
-                    {paymentLogos.visa && <img src={paymentLogos.visa} alt="Visa" className="h-2" referrerPolicy="no-referrer" />}
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-4" referrerPolicy="no-referrer" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-3" referrerPolicy="no-referrer" />
-                    {paymentLogos.maestro && <img src={paymentLogos.maestro} alt="Maestro" className="h-4" referrerPolicy="no-referrer" />}
-                    {paymentLogos.applePay && <img src={paymentLogos.applePay} alt="Apple Pay" className="h-4" referrerPolicy="no-referrer" />}
-                    {paymentLogos.google && <img src={paymentLogos.google} alt="Google" className="h-4" referrerPolicy="no-referrer" />}
+                  <div className="flex flex-wrap gap-4 grayscale opacity-30 items-center">
+                    {paymentLogos.visa && <img src={paymentLogos.visa} alt="Visa" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
+                    {paymentLogos.mastercard && <img src={paymentLogos.mastercard} alt="MasterCard" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
+                    {paymentLogos.paypal && <img src={paymentLogos.paypal} alt="PayPal" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
+                    {paymentLogos.applePay && <img src={paymentLogos.applePay} alt="Apple Pay" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
+                    {paymentLogos.google && <img src={paymentLogos.google} alt="Google" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
+                    {paymentLogos.stripe && <img src={paymentLogos.stripe} alt="Stripe" className="h-4 w-auto object-contain" referrerPolicy="no-referrer" />}
                   </div>
                 </div>
               </div>

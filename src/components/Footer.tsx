@@ -132,9 +132,9 @@ export const Footer: React.FC = () => {
         {/* Payment & Trust */}
         <div className="border-t border-white/10 py-12 flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="flex flex-wrap justify-center gap-8 brightness-0 invert opacity-60 hover:opacity-100 transition-all duration-700 items-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-2.5" referrerPolicy="no-referrer" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-8" referrerPolicy="no-referrer" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-5" referrerPolicy="no-referrer" />
+            <img src="/site/branding/visa.png" alt="Visa" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
+            <img src="/site/branding/mastercard.png" alt="MasterCard" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
+            <img src="/site/branding/paypal.png" alt="PayPal" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
           </div>
           
           <div className="flex items-center gap-4 px-6 py-3 bg-white/10 rounded-2xl border border-white/10">
