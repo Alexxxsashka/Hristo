@@ -178,6 +178,9 @@ const initSchema = async () => {
         profit DECIMAL(10,2),
         points_earned INTEGER DEFAULT 0,
         stock_deducted BOOLEAN DEFAULT false,
+        cancel_requested BOOLEAN DEFAULT false,
+        cancel_requested_at TIMESTAMP WITH TIME ZONE,
+        cancel_reason TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
@@ -404,6 +407,9 @@ const initSchema = async () => {
     await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS new_balance INTEGER');
     await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS reason TEXT');
     await client.query('ALTER TABLE inventory_logs ADD COLUMN IF NOT EXISTS reference_id TEXT');
+    await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_requested BOOLEAN DEFAULT false');
+    await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_requested_at TIMESTAMP WITH TIME ZONE');
+    await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT');
 
     // 15. Indexes for performance
     await client.query('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)');

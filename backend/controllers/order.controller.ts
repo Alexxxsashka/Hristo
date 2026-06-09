@@ -3,7 +3,7 @@ import { pool } from '../services/db.service.js';
 import { recalculateUserPointsAndRank } from '../services/loyalty.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
 import { logAudit, AuditSeverity } from '../services/audit.service.js';
-import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from '../services/email.service.js';
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, sendOrderCancellationRequestEmail } from '../services/email.service.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderData = req.body;
@@ -234,6 +234,9 @@ export const getOrders = async (req: AuthenticatedRequest, res: Response) => {
         userId: o.user_id,
         createdAt: o.created_at,
         updatedAt: o.updated_at,
+        cancelRequested: o.cancel_requested || false,
+        cancelRequestedAt: o.cancel_requested_at || null,
+        cancelReason: o.cancel_reason || null,
         
         payment: {
           method: o.payment_method,
@@ -310,5 +313,69 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
+  }
+};
+
+export const requestOrderCancellation = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    const order = orderResult.rows[0];
+
+    if (req.user.role !== 'admin' && order.user_id !== req.user.id) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    if (order.status !== 'pending' && order.status !== 'processing') {
+      return res.status(400).json({ success: false, error: 'Order cannot be cancelled as it is already shipped or completed.' });
+    }
+
+    await pool.query(
+      `UPDATE orders SET 
+        cancel_requested = true, 
+        cancel_requested_at = CURRENT_TIMESTAMP, 
+        cancel_reason = $1, 
+        updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $2`,
+      [reason || 'User requested cancellation', id]
+    );
+
+    await logAudit(
+      'REQUEST_ORDER_CANCELLATION',
+      'ORDER',
+      id,
+      `Cancellation requested for order ${id}. Reason: ${reason || 'Not specified'}`,
+      AuditSeverity.INFO,
+      {
+        userId: req.user.id,
+        userEmail: req.user.email,
+        userName: req.user.username || 'User',
+        ipAddress: req.ip
+      }
+    );
+
+    // Send cancellation request email confirmation in Croatian (non-blocking)
+    const orderDataForEmail = {
+      orderNumber: order.order_number,
+      first_name: order.first_name || '',
+      last_name: order.last_name || '',
+      email: order.email || req.user.email || '',
+      shipping_address: order.shipping_address
+    };
+    sendOrderCancellationRequestEmail(orderDataForEmail, reason || 'User requested cancellation').catch(err => {
+      console.error('Error sending order cancellation request email:', err);
+    });
+
+    res.json({ success: true, message: 'Cancellation request submitted successfully' });
+  } catch (error: any) {
+    console.error('Error requesting order cancellation:', error);
+    res.status(500).json({ success: false, error: error.message || 'Database error' });
   }
 };

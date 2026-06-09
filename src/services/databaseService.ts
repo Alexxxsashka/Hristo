@@ -808,7 +808,18 @@ export const databaseService = {
   },
 
   async requestOrderCancellation(orderId: string, reason: string) {
-    await this.updateOrderStatus(orderId, 'cancelled', reason);
+    const res = await fetch(`/api/orders/${orderId}/request-cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify({ reason })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to request order cancellation');
+    }
   },
 
   async cancelOrder(orderId: string) {

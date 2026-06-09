@@ -20,7 +20,8 @@ import {
   User, 
   CreditCard, 
   Wallet,
-  X 
+  X,
+  AlertCircle
 } from 'lucide-react';
 import { Order } from '../../types';
 import { databaseService } from '../../services/databaseService';
@@ -175,9 +176,16 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
                   <div className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">{order.items.length} items</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
-                    {getStatusIcon(order.status)}
-                    {formatEnum(order.status)}
+                  <div className="flex flex-col gap-1 items-start">
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                      {getStatusIcon(order.status)}
+                      {formatEnum(order.status)}
+                    </div>
+                    {order.cancelRequested && (
+                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md text-[8px] font-black uppercase tracking-widest animate-pulse">
+                        ⚠️ Cancel Requested
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
@@ -269,6 +277,22 @@ export const OrderManager = ({ orders, onNotify, onConfirm, onUpdate, externalFi
               </div>
 
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                {selectedOrder.cancelRequested && (
+                  <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-3xl p-6 text-amber-500 space-y-2">
+                    <h5 className="font-black uppercase tracking-widest text-xs flex items-center gap-2">
+                      <AlertCircle size={16} />
+                      Customer Requested Cancellation
+                    </h5>
+                    <p className="text-xs opacity-90">
+                      <strong>Reason:</strong> {selectedOrder.cancelReason || 'No reason provided'}
+                    </p>
+                    {selectedOrder.cancelRequestedAt && (
+                      <p className="text-[10px] opacity-75 font-bold uppercase tracking-widest">
+                        Requested at: {new Date(selectedOrder.cancelRequestedAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-8">
                     {/* Items Section */}

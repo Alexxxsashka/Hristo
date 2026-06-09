@@ -8,6 +8,7 @@ const router = Router();
 
 router.post('/', optionalAuthenticateToken, validate(createOrderSchema), orderController.createOrder);
 router.get('/', authenticateToken, orderController.getOrders);
+router.post('/:id/request-cancel', authenticateToken, orderController.requestOrderCancellation);
 router.patch('/:id', authenticateAdmin, orderController.updateOrderStatus);
 router.put('/:id/status', authenticateAdmin, orderController.updateOrderStatus);
 

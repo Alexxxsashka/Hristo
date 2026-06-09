@@ -703,3 +703,100 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
     console.error('❌ Failed to send service request update email via SMTP:', error);
   }
 };
+
+export const sendOrderCancellationRequestEmail = async (order: any, reason: string) => {
+  const recipientEmail = order.email || order.shipping_address?.email || order.shipping?.email;
+  if (!recipientEmail) {
+    console.error('❌ Cannot send order cancellation request email: Recipient email is missing.', order);
+    return;
+  }
+
+  const orderNumber = order.orderNumber || order.order_number || 'N/A';
+  const firstName = order.first_name || order.shipping?.firstName || '';
+  const lastName = order.last_name || order.shipping?.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Kupac';
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Zahtjev za otkazivanje narudžbe</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">ZAHTJEV ZA OTKAZIVANJE</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">Pozdrav, ${fullName}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    Primili smo vaš zahtjev za otkazivanje narudžbe **#${orderNumber}**. Naš administrativni tim će obraditi vaš zahtjev u najkraćem mogućem roku.
+                  </p>
+                  
+                  <div style="background-color: #fffbeb; border-radius: 8px; border: 1px solid #fef3c7; padding: 15px; margin-bottom: 25px; text-align: left;">
+                    <p style="margin: 0 0 5px 0; color: #b45309; font-size: 13px; font-weight: bold; text-transform: uppercase;">Razlog otkazivanja:</p>
+                    <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">${reason || 'Nije naveden'}</p>
+                  </div>
+
+                  <p style="color: #555555; font-size: 14px; line-height: 1.6;">
+                    Ukoliko je narudžba već plaćena, povrat sredstava će biti izvršen nakon što zahtjev bude odobren. Status narudžbe možete pratiti na vašem korisničkom profilu.
+                  </p>
+
+                  <div align="center" style="margin: 35px 0 10px 0;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                      Pregledaj povijest narudžbi
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski nakon podnošenja zahtjeva za otkazivanje.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Zahtjev za otkazivanje narudžbe #${orderNumber}`);
+    return;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Hristo Airsoft" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: `Zahtjev za otkazivanje narudžbe #${orderNumber} - Hristo Airsoft`,
+      html: emailHtml,
+    });
+    console.log(`📧 Cancellation request email sent to ${recipientEmail}`);
+  } catch (error) {
+    console.error('❌ Failed to send order cancellation request email via SMTP:', error);
+  }
+};
