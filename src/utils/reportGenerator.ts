@@ -9,7 +9,7 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
   const date = new Date().toLocaleString();
 
   // --- Header ---
-  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
   doc.rect(0, 0, pageWidth, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
@@ -82,7 +82,7 @@ export const generateOrdersReport = (orders: Order[], filters: { status: string,
     body: tableRows,
     theme: 'striped',
     headStyles: {
-      fillColor: [24, 24, 27],
+      fillColor: [171, 16, 23],
       textColor: [255, 255, 255],
       fontSize: 10,
       fontStyle: 'bold',
@@ -116,7 +116,7 @@ export const generateProductsReport = (products: any[], orders: Order[], dateRan
   const date = new Date().toLocaleString();
 
   // --- Header ---
-  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
   doc.rect(0, 0, pageWidth, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
@@ -196,7 +196,7 @@ export const generateProductsReport = (products: any[], orders: Order[], dateRan
     body: tableRows,
     theme: 'striped',
     headStyles: {
-      fillColor: [24, 24, 27],
+      fillColor: [171, 16, 23],
       textColor: [255, 255, 255],
       fontSize: 9,
       fontStyle: 'bold'
@@ -239,7 +239,7 @@ export const generateSingleOrderInvoice = (order: Order) => {
   const date = new Date(order.createdAt).toLocaleDateString();
 
   // --- Header ---
-  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
   doc.rect(0, 0, pageWidth, 50, 'F');
   
   doc.setTextColor(255, 255, 255);
@@ -293,7 +293,7 @@ export const generateSingleOrderInvoice = (order: Order) => {
     body: tableRows,
     theme: 'striped',
     headStyles: {
-      fillColor: [24, 24, 27],
+      fillColor: [171, 16, 23],
       textColor: [255, 255, 255],
       fontSize: 10,
       fontStyle: 'bold'
@@ -383,7 +383,7 @@ export const generateCommunicationsReport = (messages: any[], serviceRequests: S
   const date = new Date().toLocaleString();
 
   // --- Header ---
-  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
   doc.rect(0, 0, pageWidth, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
@@ -442,7 +442,7 @@ export const generateCommunicationsReport = (messages: any[], serviceRequests: S
     head: [tableColumn],
     body: tableRows,
     theme: 'striped',
-    headStyles: { fillColor: [24, 24, 27], textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold' },
+    headStyles: { fillColor: [171, 16, 23], textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold' },
     columnStyles: {
       0: { fontStyle: 'bold', halign: 'center' },
       4: { cellWidth: 60 }
@@ -548,7 +548,7 @@ export const generateDashboardStatsReport = (data: {
     head: [["Status", "Order Count", "Percentage"]],
     body: statusRows,
     theme: 'grid',
-    headStyles: { fillColor: [24, 24, 27], textColor: [255, 255, 255] },
+    headStyles: { fillColor: [171, 16, 23], textColor: [255, 255, 255] },
     styles: { halign: 'center' }
   });
 
@@ -600,7 +600,7 @@ export const generateUsersReport = (users: any[], dateRange?: { start: Date, end
   const date = new Date().toLocaleString();
 
   // --- Header ---
-  doc.setFillColor(24, 24, 27); // zinc-900
+  doc.setFillColor(171, 16, 23); // #ab1017 - Hristo Red
   doc.rect(0, 0, pageWidth, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
@@ -663,7 +663,7 @@ export const generateUsersReport = (users: any[], dateRange?: { start: Date, end
     body: tableRows,
     theme: 'striped',
     headStyles: {
-      fillColor: [24, 24, 27],
+      fillColor: [171, 16, 23],
       textColor: [255, 255, 255],
       fontSize: 9,
       fontStyle: 'bold',

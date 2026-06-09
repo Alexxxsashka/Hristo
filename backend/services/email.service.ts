@@ -114,7 +114,7 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA NARUDŽBE</p>
                 </td>
               </tr>
@@ -182,7 +182,7 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
                     Ova poruka je poslana automatski. Molimo ne odgovarajte izravno na nju.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -205,9 +205,9 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
 
   try {
     const info = await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: `Potvrda narudžbe #${orderNumber} - Hristo Silk`,
+      subject: `Potvrda narudžbe #${orderNumber} - Hristo Airsoft`,
       html: emailHtml,
     });
 
@@ -270,7 +270,7 @@ export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, 
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">PROMJENA STATUSA NARUDŽBE</p>
                 </td>
               </tr>
@@ -312,7 +312,7 @@ export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, 
                     Ova poruka je poslana automatski. Molimo ne odgovarajte izravno na nju.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -335,9 +335,9 @@ export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, 
 
   try {
     const info = await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: `Ažuriranje statusa narudžbe #${orderNumber} - Hristo Silk`,
+      subject: `Ažuriranje statusa narudžbe #${orderNumber} - Hristo Airsoft`,
       html: emailHtml,
     });
 
@@ -353,7 +353,7 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Dobrodošli u Hristo Silk</title>
+      <title>Dobrodošli u Hristo Airsoft</title>
     </head>
     <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
@@ -363,7 +363,7 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">PRETPLATA NA NEWSLETTER</p>
                 </td>
               </tr>
@@ -373,7 +373,7 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
                 <td style="padding: 40px 30px; text-align: center;">
                   <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600; text-align: left;">Hvala vam na pretplati!</h2>
                   <p style="color: #555555; font-size: 15px; line-height: 1.6; text-align: left; margin-bottom: 25px;">
-                    Uspješno ste se pretplatili na Hristo Silk newsletter. Drago nam je što ste dio naše zajednice!
+                    Uspješno ste se pretplatili na Hristo Airsoft newsletter. Drago nam je što ste dio naše zajednice!
                   </p>
                   
                   <p style="color: #555555; font-size: 15px; line-height: 1.6; text-align: left; margin-bottom: 25px;">
@@ -393,10 +393,10 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
               <tr>
                 <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
                   <p style="margin: 0; color: #888888; font-size: 13px;">
-                    Primili ste ovu poruku jer ste se prijavili na newsletter na stranici Hristo Silk.
+                    Primili ste ovu poruku jer ste se prijavili na newsletter na stranici Hristo Airsoft.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -412,16 +412,16 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
   const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
 
   if (!transporter) {
-    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Dobrodošli u Hristo Silk Newsletter`);
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Dobrodošli u Hristo Airsoft Newsletter`);
     console.log(`[Email Mock/Log] HTML Body summary: Newsletter Welcome Email`);
     return;
   }
 
   try {
     const info = await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: `Dobrodošli u naš newsletter - Hristo Silk`,
+      subject: `Dobrodošli u naš newsletter - Hristo Airsoft`,
       html: emailHtml,
     });
 
@@ -447,7 +447,7 @@ export const sendContactMessageConfirmationEmail = async (name: string, recipien
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA ZAPRIMANJA UPITA</p>
                 </td>
               </tr>
@@ -479,7 +479,7 @@ export const sendContactMessageConfirmationEmail = async (name: string, recipien
                     Ova poruka je poslana automatski nakon ispunjavanja kontakt obrasca.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -501,9 +501,9 @@ export const sendContactMessageConfirmationEmail = async (name: string, recipien
 
   try {
     await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: `Primili smo vaš upit - Hristo Silk`,
+      subject: `Primili smo vaš upit - Hristo Airsoft`,
       html: emailHtml,
     });
     console.log(`📧 Contact confirmation email sent to ${recipientEmail}`);
@@ -528,7 +528,7 @@ export const sendServiceRequestConfirmationEmail = async (recipientEmail: string
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">NOVI ZAHTJEV ZA SERVISOM</p>
                 </td>
               </tr>
@@ -566,7 +566,7 @@ export const sendServiceRequestConfirmationEmail = async (recipientEmail: string
                     Ova poruka je poslana automatski nakon otvaranja servisnog naloga.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -588,9 +588,9 @@ export const sendServiceRequestConfirmationEmail = async (recipientEmail: string
 
   try {
     await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: `Zaprimljen zahtjev za servisom #${id} - Hristo Silk`,
+      subject: `Zaprimljen zahtjev za servisom #${id} - Hristo Airsoft`,
       html: emailHtml,
     });
     console.log(`📧 Service request confirmation sent to ${recipientEmail}`);
@@ -625,7 +625,7 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
               <!-- Header -->
               <tr>
                 <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">AŽURIRANJE SERVISNOG NALOGA</p>
                 </td>
               </tr>
@@ -671,7 +671,7 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
                     Ova poruka je poslana automatski nakon promjene statusa servisnog naloga.
                   </p>
                   <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
-                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                    &copy; ${new Date().getFullYear()} Hristo Airsoft. Sva prava pridržana.
                   </p>
                 </td>
               </tr>
@@ -693,9 +693,9 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
 
   try {
     await transporter.sendMail({
-      from: `"Hristo Silk" <${fromEmail}>`,
+      from: `"Hristo Airsoft" <${fromEmail}>`,
       to: recipientEmail,
-      subject: isFinished ? `Završen servis vašeg oružja - Hristo Silk` : `Ažuriranje statusa servisa #${id} - Hristo Silk`,
+      subject: isFinished ? `Završen servis vašeg oružja - Hristo Airsoft` : `Ažuriranje statusa servisa #${id} - Hristo Airsoft`,
       html: emailHtml,
     });
     console.log(`📧 Service request update email sent to ${recipientEmail}`);
