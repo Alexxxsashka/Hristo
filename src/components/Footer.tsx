@@ -131,7 +131,7 @@ export const Footer: React.FC = () => {
 
         {/* Payment & Trust */}
         <div className="border-t border-white/10 py-12 flex flex-col lg:flex-row items-center justify-between gap-12">
-          <div className="flex flex-wrap justify-center gap-8 brightness-0 invert opacity-60 hover:opacity-100 transition-all duration-700 items-center">
+          <div className="flex flex-wrap justify-center gap-8 opacity-60 hover:opacity-100 transition-all duration-700 items-center">
             <img src="/site/branding/visa.png" alt="Visa" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
             <img src="/site/branding/mastercard.png" alt="MasterCard" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
             <img src="/site/branding/paypal.png" alt="PayPal" className="h-6 w-auto object-contain" referrerPolicy="no-referrer" />
