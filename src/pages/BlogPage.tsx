@@ -18,9 +18,11 @@ import { NoImage } from '../components/NoImage';
 
 import { SEO } from '../components/SEO';
 import { databaseService } from '../services/databaseService';
+import { useToastStore } from '../store/toastStore';
 
 export const BlogPage: React.FC = () => {
   const { t } = useTranslation();
+  const { addToast } = useToastStore();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -28,6 +30,32 @@ export const BlogPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterStatus('loading');
+    
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to subscribe');
+      }
+      setNewsletterStatus('success');
+      addToast(t('newsletter_success') || 'Thank you for subscribing!', 'success');
+      setNewsletterEmail('');
+    } catch (err: any) {
+      addToast(err.message || 'Error subscribing to newsletter', 'error');
+      setNewsletterStatus('idle');
+    }
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -255,16 +283,26 @@ export const BlogPage: React.FC = () => {
             <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">{t('newsletter_subscribe')}</h2>
             <p className="text-red-100 font-medium">{t('newsletter_desc')}</p>
           </div>
-          <div className="relative z-10 flex flex-col sm:flex-row w-full lg:w-auto gap-4">
+          <form onSubmit={handleNewsletterSubmit} className="relative z-10 flex flex-col sm:flex-row w-full lg:w-auto gap-4">
             <input 
               type="email" 
+              required
               placeholder={t('email_placeholder')}
-              className="flex-1 lg:w-80 px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/50 outline-none focus:bg-white/20 transition-all"
+              value={newsletterEmail}
+              onChange={e => setNewsletterEmail(e.target.value)}
+              className="flex-1 lg:w-80 px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/50 outline-none focus:bg-white/20 transition-all text-sm"
+              disabled={newsletterStatus === 'loading' || newsletterStatus === 'success'}
             />
-            <button className="px-8 py-4 bg-white text-red-600 font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-colors shadow-lg whitespace-nowrap">
-              {t('subscribe')}
+            <button 
+              type="submit"
+              disabled={newsletterStatus === 'loading' || newsletterStatus === 'success'}
+              className="px-8 py-4 bg-white text-red-600 font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-100 transition-colors shadow-lg whitespace-nowrap text-sm disabled:opacity-50"
+            >
+              {newsletterStatus === 'loading' ? t('subscribing') || '...' : 
+               newsletterStatus === 'success' ? t('subscribed') || 'DONE' : 
+               t('subscribe')}
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>

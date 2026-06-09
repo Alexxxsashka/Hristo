@@ -8,6 +8,7 @@ import orderRoutes from './routes/order.routes.js';
 import blogRoutes from './routes/blog.routes.js';
 import policyRoutes from './routes/policy.routes.js';
 import couponRoutes from './routes/coupon.routes.js';
+import newsletterRoutes from './routes/newsletter.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import buildRoutes from './routes/build.routes.js';
@@ -72,6 +73,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/site-settings', settingsRoutes); // Alias
 app.use('/api/currency-rates', settingsRoutes); // Alias
 app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/saved-builds', buildRoutes);
 app.use('/api/service-requests', serviceRequestRoutes);
 app.use('/api/stripe', stripeRoutes);

@@ -59,13 +59,20 @@ const HomePage: React.FC = () => {
     setNewsletterStatus('loading');
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to subscribe');
+      }
       setNewsletterStatus('success');
       addToast(t('newsletter_success') || 'Thank you for subscribing!', 'success');
       setNewsletterEmail('');
-      // In a real app, we'd call databaseService.subscribeNewsletter(newsletterEmail)
-    } catch (err) {
+    } catch (err: any) {
+      addToast(err.message || 'Error subscribing to newsletter', 'error');
       setNewsletterStatus('idle');
     }
   };

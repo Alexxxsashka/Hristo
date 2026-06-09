@@ -374,6 +374,14 @@ const initSchema = async () => {
       )
     `);
 
+    // 16. Newsletter Subscribers
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        email TEXT PRIMARY KEY,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // 🎯 Patching columns if they don't exist (for existing databases)
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password TEXT');
     await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT');
