@@ -901,10 +901,6 @@ export const Configurator3DV12: React.FC = () => {
               <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter leading-none">
                 {activeProduct?.name}
               </h2>
-              <div className="px-1.5 sm:px-2 py-0.5 bg-red-600 rounded text-[8px] font-black text-white uppercase tracking-widest flex items-center gap-1">
-                <Sparkles size={8} />
-                V1.2
-              </div>
             </div>
           </div>
 
@@ -971,7 +967,7 @@ export const Configurator3DV12: React.FC = () => {
 
                 <div className="mt-4 pt-4 border-t border-zinc-800">
                   <p className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest leading-relaxed">
-                    V1.2 features enhanced lighting and faster response times.
+                    System features enhanced lighting and faster response times.
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <span className="text-[7px] bg-zinc-800 px-1 py-0.5 rounded text-zinc-400">[M] Markers</span>

@@ -155,10 +155,6 @@ export const ConfiguratorPageV12: React.FC = () => {
               <span className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest leading-none sm:leading-normal">
                 {isSelectionScreen ? t('platform_selection') : t('configurator')}
               </span>
-              <div className="px-1.5 py-0.5 bg-red-600 rounded text-[8px] font-black text-white uppercase tracking-widest flex items-center gap-1">
-                <Sparkles size={8} />
-                V1.2
-              </div>
             </div>
             {!isSelectionScreen && (
               <div className="flex items-center gap-2">
@@ -227,7 +223,7 @@ export const ConfiguratorPageV12: React.FC = () => {
                   className="mb-12 text-center"
                 >
                   <h2 className="text-5xl sm:text-7xl font-black text-white uppercase tracking-tighter mb-4 leading-none">
-                    V1.2 <span className="text-red-600">{t('armory')}</span>
+                    <span className="text-red-600">{t('armory')}</span>
                   </h2>
                   <p className="text-zinc-500 font-mono text-xs sm:text-sm uppercase tracking-[0.3em]">
                     {t('armory_access_granted')}

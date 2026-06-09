@@ -68,7 +68,7 @@ export const LoadingScreen: React.FC = () => {
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <div className="w-1 h-1 bg-red-600 rounded-full animate-ping" />
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">System V1.2</span>
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">System</span>
             </div>
           </div>
         </motion.div>
