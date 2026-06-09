@@ -216,3 +216,133 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
     console.error('❌ Failed to send order confirmation email via SMTP:', error);
   }
 };
+
+export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, trackingNumber?: string) => {
+  const recipientEmail = order.email || order.shipping_address?.email || order.shipping?.email;
+  if (!recipientEmail) {
+    console.error('❌ Cannot send status update email: Recipient email is missing.', order);
+    return;
+  }
+
+  const orderNumber = order.orderNumber || order.order_number || 'N/A';
+  const firstName = order.first_name || order.shipping?.firstName || '';
+  const lastName = order.last_name || order.shipping?.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Kupac';
+
+  const STATUS_TRANSLATIONS: Record<string, string> = {
+    'pending': 'U iščekivanju',
+    'awaiting_payment': 'Čeka plaćanje',
+    'paid': 'Plaćeno',
+    'processing': 'U obradi',
+    'shipped': 'Poslano / Otpremljeno',
+    'delivered': 'Dostavljeno',
+    'cancelled': 'Otkazano',
+    'refunded': 'Vraćeno / Refundirano'
+  };
+
+  const statusHr = STATUS_TRANSLATIONS[newStatus] || newStatus;
+
+  let trackingHtml = '';
+  if (trackingNumber || order.tracking_number) {
+    const trackNum = trackingNumber || order.tracking_number;
+    trackingHtml = `
+      <div style="margin-top: 20px; padding: 15px; background-color: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; text-align: left;">
+        <h4 style="margin: 0 0 5px 0; color: #0369a1; font-size: 15px; font-weight: 700;">Podaci za praćenje:</h4>
+        <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
+          <strong>Broj pošiljke:</strong> <span style="font-family: monospace; font-weight: bold;">${trackNum}</span>
+        </p>
+      </div>
+    `;
+  }
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Ažuriranje statusa narudžbe</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">PROMJENA STATUSA NARUDŽBE</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px; text-align: center;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600; text-align: left;">Pozdrav, ${fullName}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; text-align: left; margin-bottom: 25px;">
+                    Obavještavamo vas da je status vaše narudžbe <strong>#${orderNumber}</strong> promijenjen.
+                  </p>
+                  
+                  <!-- Status Card -->
+                  <div style="background-color: #f9f9f9; border-radius: 10px; border: 1px solid #eeeeee; padding: 25px; margin: 25px 0; text-align: center;">
+                    <span style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888888; display: block; margin-bottom: 5px;">Novi status narudžbe:</span>
+                    <strong style="font-size: 22px; color: #ab1017; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">${statusHr}</strong>
+                  </div>
+
+                  <!-- Tracking info if available -->
+                  ${trackingHtml}
+
+                  <p style="color: #777777; font-size: 14px; line-height: 1.6; text-align: left; margin-top: 25px;">
+                    Detaljnije informacije o vašoj narudžbi, povijesti kupnje i statusu dostave možete pratiti na vašem korisničkom profilu.
+                  </p>
+
+                  <!-- Order History Button -->
+                  <div align="center" style="margin: 35px 0 10px 0;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                      Pregledaj povijest narudžbi
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski. Molimo ne odgovarajte izravno na nju.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Status narudžbe #${orderNumber} ažuriran`);
+    console.log(`[Email Mock/Log] HTML Body summary: New Status: ${statusHr}`);
+    return;
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Hristo Silk" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: `Ažuriranje statusa narudžbe #${orderNumber} - Hristo Silk`,
+      html: emailHtml,
+    });
+
+    console.log(`📧 Status update email sent successfully: ${info.messageId}`);
+  } catch (error) {
+    console.error('❌ Failed to send order status update email via SMTP:', error);
+  }
+};

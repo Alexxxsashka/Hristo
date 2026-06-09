@@ -3,7 +3,7 @@ import { pool } from '../services/db.service.js';
 import { recalculateUserPointsAndRank } from '../services/loyalty.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
 import { logAudit, AuditSeverity } from '../services/audit.service.js';
-import { sendOrderConfirmationEmail } from '../services/email.service.js';
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from '../services/email.service.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderData = req.body;
@@ -296,6 +296,15 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
           ipAddress: req.ip
         }
       );
+    }
+    
+    // Fetch the updated order details to send the notification email
+    const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (orderResult.rows.length > 0) {
+      const order = orderResult.rows[0];
+      sendOrderStatusUpdateEmail(order, status, tracking_number).catch(err => {
+        console.error('Error sending order status update email:', err);
+      });
     }
     
     res.json({ success: true });
