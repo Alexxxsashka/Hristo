@@ -81,7 +81,7 @@ export const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, setConfirmMo
                 <div className="flex items-center gap-6">
                   <div>
                     <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{t('order_id')}</p>
-                    <p className="font-black text-sm text-[var(--text-primary)]">#{order.id.toUpperCase()}</p>
+                    <p className="font-black text-sm text-[var(--text-primary)]">#{order.orderNumber || order.id.toUpperCase()}</p>
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">{t('date')}</p>
