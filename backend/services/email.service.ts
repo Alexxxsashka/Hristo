@@ -113,7 +113,7 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA NARUDŽBE</p>
                 </td>
@@ -168,7 +168,7 @@ export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
 
                   <!-- Order History Button -->
                   <div align="center" style="margin: 35px 0 10px 0;">
-                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #ab1017; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
                       Pregledaj povijest narudžbi
                     </a>
                   </div>
@@ -269,7 +269,7 @@ export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, 
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">PROMJENA STATUSA NARUDŽBE</p>
                 </td>
@@ -298,7 +298,7 @@ export const sendOrderStatusUpdateEmail = async (order: any, newStatus: string, 
 
                   <!-- Order History Button -->
                   <div align="center" style="margin: 35px 0 10px 0;">
-                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #ab1017; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
                       Pregledaj povijest narudžbi
                     </a>
                   </div>
@@ -362,7 +362,7 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">PRETPLATA NA NEWSLETTER</p>
                 </td>
@@ -446,7 +446,7 @@ export const sendContactMessageConfirmationEmail = async (name: string, recipien
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA ZAPRIMANJA UPITA</p>
                 </td>
@@ -527,7 +527,7 @@ export const sendServiceRequestConfirmationEmail = async (recipientEmail: string
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">NOVI ZAHTJEV ZA SERVISOM</p>
                 </td>
@@ -552,7 +552,7 @@ export const sendServiceRequestConfirmationEmail = async (recipientEmail: string
                   </p>
 
                   <div align="center" style="margin: 35px 0 10px 0;">
-                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #ab1017; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
                       Prati status servisa
                     </a>
                   </div>
@@ -624,7 +624,7 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">AŽURIRANJE SERVISNOG NALOGA</p>
                 </td>
@@ -657,7 +657,7 @@ export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name
                   </p>
 
                   <div align="center" style="margin: 35px 0 10px 0;">
-                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #ab1017; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
                       Prati nalog na profilu
                     </a>
                   </div>
@@ -730,7 +730,7 @@ export const sendOrderCancellationRequestEmail = async (order: any, reason: stri
             <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
               <!-- Header -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                <td align="center" style="background: linear-gradient(135deg, #ab1017 0%, #8e0d13 100%); padding: 35px 20px;">
                   <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO AIRSOFT</h1>
                   <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">ZAHTJEV ZA OTKAZIVANJE</p>
                 </td>
@@ -754,7 +754,7 @@ export const sendOrderCancellationRequestEmail = async (order: any, reason: stri
                   </p>
 
                   <div align="center" style="margin: 35px 0 10px 0;">
-                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #ab1017; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
                       Pregledaj povijest narudžbi
                     </a>
                   </div>
