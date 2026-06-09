@@ -22,6 +22,9 @@ const getTransporter = () => {
       user,
       pass,
     },
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 };
 
