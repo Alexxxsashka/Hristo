@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
+import { sendContactMessageConfirmationEmail } from '../services/email.service.js';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { name, email, subject, message } = req.body;
@@ -15,6 +16,12 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       'INSERT INTO contact_messages (id, name, email, subject, message) VALUES ($1, $2, $3, $4, $5)',
       [id, name, email, subject, message]
     );
+
+    // Send confirmation email asynchronously (non-blocking)
+    sendContactMessageConfirmationEmail(name, email, subject, message).catch(err => {
+      console.error('Error sending contact message confirmation email:', err);
+    });
+
     res.status(201).json({ success: true, message: "Message sent successfully" });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });

@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { pool } from '../services/db.service.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { logAudit, AuditSeverity } from '../services/audit.service.js';
+import { sendServiceRequestConfirmationEmail, sendServiceRequestUpdateEmail } from '../services/email.service.js';
 
 export const createServiceRequest = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -37,6 +38,15 @@ export const createServiceRequest = async (req: AuthenticatedRequest, res: Respo
         userAgent: req.headers['user-agent']
       }
     );
+
+    // Send service request confirmation email asynchronously (non-blocking)
+    const email = req.user.email;
+    const name = req.user.username || 'Korisnik';
+    if (email) {
+      sendServiceRequestConfirmationEmail(email, name, weaponName, description, id).catch(err => {
+        console.error('Error sending service request confirmation email:', err);
+      });
+    }
 
     res.status(201).json({ success: true, data: { id } });
   } catch (error: any) {
@@ -122,6 +132,45 @@ export const updateServiceRequest = async (req: AuthenticatedRequest, res: Respo
         userAgent: req.headers['user-agent']
       }
     );
+
+    // Fetch user email and latest update asynchronously to send update email
+    try {
+      const srResult = await pool.query(
+        `SELECT sr.weapon_name, sr.status, sr.updates, u.email as user_email, u.username as user_name 
+         FROM service_requests sr 
+         LEFT JOIN users u ON sr.user_id = u.id 
+         WHERE sr.id = $1`,
+        [id]
+      );
+
+      if (srResult.rowCount > 0) {
+        const sr = srResult.rows[0];
+        const recipientEmail = sr.user_email;
+        const userName = sr.user_name || 'Korisnik';
+        const weaponName = sr.weapon_name || '';
+        const finalStatus = sr.status || 'Pending';
+        
+        let latestMessage = '';
+        if (sr.updates) {
+          try {
+            const parsedUpdates = typeof sr.updates === 'string' ? JSON.parse(sr.updates) : sr.updates;
+            if (Array.isArray(parsedUpdates) && parsedUpdates.length > 0) {
+              latestMessage = parsedUpdates[parsedUpdates.length - 1].message || '';
+            }
+          } catch (e) {
+            console.error('Error parsing updates for email:', e);
+          }
+        }
+
+        if (recipientEmail) {
+          sendServiceRequestUpdateEmail(recipientEmail, userName, weaponName, finalStatus, latestMessage || undefined, id).catch(err => {
+            console.error('Error sending service request update email:', err);
+          });
+        }
+      }
+    } catch (emailFetchErr) {
+      console.error('Error fetching service request info for email update:', emailFetchErr);
+    }
 
     res.json({ success: true });
   } catch (error: any) {

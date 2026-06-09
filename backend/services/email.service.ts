@@ -430,3 +430,276 @@ export const sendNewsletterWelcomeEmail = async (recipientEmail: string) => {
     console.error('❌ Failed to send newsletter welcome email via SMTP:', error);
   }
 };
+
+export const sendContactMessageConfirmationEmail = async (name: string, recipientEmail: string, subject: string, message: string) => {
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Potvrda upita</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA ZAPRIMANJA UPITA</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">Pozdrav, ${name}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    Hvala vam što ste nas kontaktirali. Uspješno smo zaprimili vaš upit sa sljedećim detaljima:
+                  </p>
+                  
+                  <div style="background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eeeeee; padding: 15px; margin-bottom: 25px; text-align: left;">
+                    <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Predmet:</strong> ${subject}</p>
+                    <p style="margin: 10px 0 4px 0; color: #444444; font-size: 14px;"><strong>Poruka:</strong></p>
+                    <p style="margin: 0; color: #666666; font-size: 13px; line-height: 1.5; font-style: italic; white-space: pre-wrap;">${message}</p>
+                  </div>
+
+                  <p style="color: #555555; font-size: 14px; line-height: 1.6;">
+                    Naš tim će pregledati vaš upit i odgovoriti vam u najkraćem mogućem roku na ovu e-mail adresu.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski nakon ispunjavanja kontakt obrasca.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Potvrda zaprimanja upita`);
+    return;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Hristo Silk" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: `Primili smo vaš upit - Hristo Silk`,
+      html: emailHtml,
+    });
+    console.log(`📧 Contact confirmation email sent to ${recipientEmail}`);
+  } catch (error) {
+    console.error('❌ Failed to send contact message confirmation email via SMTP:', error);
+  }
+};
+
+export const sendServiceRequestConfirmationEmail = async (recipientEmail: string, name: string, weaponName: string, description: string, id: string) => {
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Novi zahtjev za servisom</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">NOVI ZAHTJEV ZA SERVISOM</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">Pozdrav, ${name}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    Uspješno ste podnijeli zahtjev za servisom/popravkom vašeg oružja pod brojem: <strong style="color: #ab1017;">#${id}</strong>
+                  </p>
+                  
+                  <div style="background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eeeeee; padding: 15px; margin-bottom: 25px; text-align: left;">
+                    <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Oružje/Oprema:</strong> ${weaponName}</p>
+                    <p style="margin: 10px 0 4px 0; color: #444444; font-size: 14px;"><strong>Opis kvara ili zahtjeva:</strong></p>
+                    <p style="margin: 0; color: #666666; font-size: 13px; line-height: 1.5; white-space: pre-wrap;">${description}</p>
+                  </div>
+
+                  <p style="color: #555555; font-size: 14px; line-height: 1.6;">
+                    Status i tijek popravka možete pratiti u bilo kojem trenutku na vašem korisničkom profilu u sekciji «Servis».
+                  </p>
+
+                  <div align="center" style="margin: 35px 0 10px 0;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                      Prati status servisa
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski nakon otvaranja servisnog naloga.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Zaprimljen zahtjev za servisom`);
+    return;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Hristo Silk" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: `Zaprimljen zahtjev za servisom #${id} - Hristo Silk`,
+      html: emailHtml,
+    });
+    console.log(`📧 Service request confirmation sent to ${recipientEmail}`);
+  } catch (error) {
+    console.error('❌ Failed to send service request confirmation email via SMTP:', error);
+  }
+};
+
+export const sendServiceRequestUpdateEmail = async (recipientEmail: string, name: string, weaponName: string, status: string, latestUpdate?: string, id?: string) => {
+  const STATUS_TRANSLATIONS: Record<string, string> = {
+    'Pending': 'U iščekivanju',
+    'In Progress': 'U radu / Servisiranje u tijeku',
+    'Completed': 'Završeno',
+    'Ready for Pickup': 'Spremno za preuzimanje'
+  };
+
+  const statusHr = STATUS_TRANSLATIONS[status] || status;
+  const isFinished = status === 'Completed' || status === 'Ready for Pickup';
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Ažuriranje zahtjeva za servisom</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">AŽURIRANJE SERVISNOG NALOGA</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">Pozdrav, ${name}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    Obavještavamo vas da je vaš servisni nalog za **${weaponName}** ažuriran.
+                  </p>
+                  
+                  <!-- Status Card -->
+                  <div style="background-color: #f9f9f9; border-radius: 10px; border: 1px solid #eeeeee; padding: 20px; margin: 20px 0; text-align: center;">
+                    <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #888888; display: block; margin-bottom: 5px;">Status servisa:</span>
+                    <strong style="font-size: 20px; color: #ab1017; font-weight: 800; text-transform: uppercase;">${statusHr}</strong>
+                  </div>
+
+                  <!-- Latest message if exists -->
+                  ${latestUpdate ? `
+                  <div style="background-color: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; padding: 15px; margin-bottom: 25px; text-align: left;">
+                    <p style="margin: 0 0 5px 0; color: #166534; font-size: 13px; font-weight: bold; text-transform: uppercase; tracking-widest: 0.5px;">Poruka servisera:</p>
+                    <p style="margin: 0; color: #14532d; font-size: 14px; line-height: 1.5;">${latestUpdate}</p>
+                  </div>
+                  ` : ''}
+
+                  <p style="color: #555555; font-size: 14px; line-height: 1.6;">
+                    ${isFinished ? 'Svoje servisirano oružje možete preuzeti na našoj lokaciji, ili pratiti daljnje upute na korisničkom profilu.' : 'Status i daljnji tijek popravka možete pratiti na vašem korisničkom profilu.'}
+                  </p>
+
+                  <div align="center" style="margin: 35px 0 10px 0;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=service" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                      Prati nalog na profilu
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski nakon promjene statusa servisnog naloga.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Ažuriranje servisnog naloga #${id}`);
+    return;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"Hristo Silk" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: isFinished ? `Završen servis vašeg oružja - Hristo Silk` : `Ažuriranje statusa servisa #${id} - Hristo Silk`,
+      html: emailHtml,
+    });
+    console.log(`📧 Service request update email sent to ${recipientEmail}`);
+  } catch (error) {
+    console.error('❌ Failed to send service request update email via SMTP:', error);
+  }
+};
