@@ -1,0 +1,215 @@
+import nodemailer from 'nodemailer';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const getTransporter = () => {
+  const host = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
+  const port = parseInt(process.env.SMTP_PORT || '587');
+  const user = process.env.SMTP_USER || 'ab25bd001@smtp-brevo.com';
+  const pass = process.env.SMTP_PASS;
+
+  if (!pass) {
+    console.warn('⚠️ SMTP_PASS is not configured. Email service will run in mock/log mode.');
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // true for 465, false for other ports (like 587)
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+export const sendOrderConfirmationEmail = async (order: any, items: any[]) => {
+  const recipientEmail = order.email || order.shipping_address?.email || order.shipping?.email;
+  if (!recipientEmail) {
+    console.error('❌ Cannot send order confirmation email: Recipient email is missing.', order);
+    return;
+  }
+
+  const orderNumber = order.orderNumber || order.order_number || 'N/A';
+  const total = parseFloat(order.total) || 0;
+  const subtotal = parseFloat(order.subtotal) || 0;
+  const shippingCost = parseFloat(order.shipping_cost || order.shippingCost) || 0;
+  const discountAmount = parseFloat(order.discount_amount || order.discountAmount) || 0;
+
+  const firstName = order.first_name || order.shipping?.firstName || '';
+  const lastName = order.last_name || order.shipping?.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Kupac';
+
+  // Format Items list for HTML email
+  const itemsHtml = items.map((item: any) => {
+    const itemName = item.name || 'Proizvod';
+    const itemQty = item.quantity || 1;
+    const itemPrice = parseFloat(item.price) || 0;
+    const itemTotal = itemPrice * itemQty;
+    const itemImage = item.image || item.image_url || '';
+    
+    let variantDetails = '';
+    if (item.variant_info) {
+      try {
+        const parsed = typeof item.variant_info === 'string' ? JSON.parse(item.variant_info) : item.variant_info;
+        if (parsed && typeof parsed === 'object') {
+          variantDetails = `<br/><span style="font-size: 12px; color: #666;">${Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join(', ')}</span>`;
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+
+    return `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #eeeeee; vertical-align: middle;">
+          ${itemImage ? `<img src="${itemImage}" alt="${itemName}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 10px; vertical-align: middle;"/>` : ''}
+          <span style="font-weight: 600; color: #333333; vertical-align: middle;">${itemName}</span>${variantDetails}
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: center; color: #666666;">
+          ${itemQty}
+        </td>
+        <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: right; font-weight: 600; color: #333333;">
+          ${itemTotal.toFixed(2)} EUR
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Shipping details HTML
+  let shippingAddressHtml = '';
+  const shipping = typeof order.shipping_address === 'string' 
+    ? JSON.parse(order.shipping_address) 
+    : (order.shipping_address || order.shipping || {});
+  
+  if (shipping && (shipping.address || shipping.city)) {
+    shippingAddressHtml = `
+      <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px; border: 1px solid #eeeeee;">
+        <h3 style="margin-top: 0; color: #1a1a1a; font-size: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">Adresa dostave:</h3>
+        <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Ime i prezime:</strong> ${shipping.firstName || firstName} ${shipping.lastName || lastName}</p>
+        <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Adresa:</strong> ${shipping.address || shipping.addressLine1 || ''}</p>
+        <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Grad:</strong> ${shipping.postalCode || ''} ${shipping.city || ''}</p>
+        <p style="margin: 4px 0; color: #444444; font-size: 14px;"><strong>Telefon:</strong> ${shipping.phone || ''}</p>
+      </div>
+    `;
+  }
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Potvrda narudžbe</title>
+    </head>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+              <!-- Header -->
+              <tr>
+                <td align="center" style="background: linear-gradient(135deg, #111111 0%, #333333 100%); padding: 35px 20px;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">HRISTO SILK</h1>
+                  <p style="color: #cccccc; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 0.5px;">POTVRDA NARUDŽBE</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <h2 style="margin-top: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">Hvala vam na narudžbi, ${fullName}!</h2>
+                  <p style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                    Vaša narudžba <strong>#${orderNumber}</strong> je uspješno zaprimljena i trenutno se obrađuje. U nastavku možete pronaći detalje vaše kupnje.
+                  </p>
+                  
+                  <!-- Items Table -->
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; margin-bottom: 25px;">
+                    <thead>
+                      <tr style="background-color: #f8f8f8;">
+                        <th style="padding: 12px; text-align: left; font-size: 13px; text-transform: uppercase; color: #666666; font-weight: 600; border-bottom: 2px solid #eeeeee;">Proizvod</th>
+                        <th style="padding: 12px; text-align: center; font-size: 13px; text-transform: uppercase; color: #666666; font-weight: 600; border-bottom: 2px solid #eeeeee;">Kol.</th>
+                        <th style="padding: 12px; text-align: right; font-size: 13px; text-transform: uppercase; color: #666666; font-weight: 600; border-bottom: 2px solid #eeeeee;">Cijena</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${itemsHtml}
+                    </tbody>
+                  </table>
+                  
+                  <!-- Totals -->
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                      <td style="padding: 6px 12px; text-align: right; color: #666666; font-size: 14px;">Međuzbroj:</td>
+                      <td style="padding: 6px 12px; text-align: right; font-weight: 500; color: #333333; font-size: 14px; width: 120px;">${subtotal.toFixed(2)} EUR</td>
+                    </tr>
+                    ${discountAmount > 0 ? `
+                    <tr>
+                      <td style="padding: 6px 12px; text-align: right; color: #e53e3e; font-size: 14px;">Popust:</td>
+                      <td style="padding: 6px 12px; text-align: right; font-weight: 500; color: #e53e3e; font-size: 14px;">-${discountAmount.toFixed(2)} EUR</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td style="padding: 6px 12px; text-align: right; color: #666666; font-size: 14px;">Dostava:</td>
+                      <td style="padding: 6px 12px; text-align: right; font-weight: 500; color: #333333; font-size: 14px;">${shippingCost === 0 ? 'BESPLATNO' : `${shippingCost.toFixed(2)} EUR`}</td>
+                    </tr>
+                    <tr style="border-top: 2px solid #eeeeee;">
+                      <td style="padding: 15px 12px; text-align: right; font-weight: 700; color: #1a1a1a; font-size: 18px;">Ukupno:</td>
+                      <td style="padding: 15px 12px; text-align: right; font-weight: 700; color: #1a1a1a; font-size: 18px;">${total.toFixed(2)} EUR</td>
+                    </tr>
+                  </table>
+
+                  <!-- Shipping Address Block -->
+                  ${shippingAddressHtml}
+
+                  <!-- Order History Button -->
+                  <div align="center" style="margin: 35px 0 10px 0;">
+                    <a href="https://hristo-silk.vercel.app/account?tab=orders" target="_blank" style="background-color: #111111; color: #ffffff; display: inline-block; padding: 14px 28px; font-weight: 600; font-size: 15px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.2s;">
+                      Pregledaj povijest narudžbi
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 20px; background-color: #fcfcfc; border-top: 1px solid #eeeeee; text-align: center;">
+                  <p style="margin: 0; color: #888888; font-size: 13px;">
+                    Ova poruka je poslana automatski. Molimo ne odgovarajte izravno na nju.
+                  </p>
+                  <p style="margin: 8px 0 0 0; color: #888888; font-size: 13px;">
+                    &copy; ${new Date().getFullYear()} Hristo Silk. Sva prava pridržana.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const transporter = getTransporter();
+  const fromEmail = process.env.SMTP_FROM || 'guardsowh@gmail.com';
+
+  if (!transporter) {
+    console.log(`[Email Mock/Log] To: ${recipientEmail} | Subject: Potvrda narudžbe #${orderNumber}`);
+    console.log(`[Email Mock/Log] HTML Body summary: Total ${total.toFixed(2)} EUR, ${items.length} items`);
+    return;
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Hristo Silk" <${fromEmail}>`,
+      to: recipientEmail,
+      subject: `Potvrda narudžbe #${orderNumber} - Hristo Silk`,
+      html: emailHtml,
+    });
+
+    console.log(`📧 Email sent successfully: ${info.messageId}`);
+  } catch (error) {
+    console.error('❌ Failed to send order confirmation email via SMTP:', error);
+  }
+};

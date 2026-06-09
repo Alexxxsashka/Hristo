@@ -3,6 +3,7 @@ import { pool } from '../services/db.service.js';
 import { recalculateUserPointsAndRank } from '../services/loyalty.service.js';
 import { AuthenticatedRequest, ApiResponse } from '../types/index.js';
 import { logAudit, AuditSeverity } from '../services/audit.service.js';
+import { sendOrderConfirmationEmail } from '../services/email.service.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderData = req.body;
@@ -164,6 +165,23 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     );
 
     await client.query('COMMIT');
+
+    // Send order confirmation email in Croatian (non-blocking)
+    const fullOrderData = {
+      order_number: orderNumber,
+      total: authoritativeTotal,
+      subtotal: authoritativeSubtotal,
+      shipping_cost: shippingCost,
+      discount_amount: discountAmount,
+      first_name: shipping.firstName || '',
+      last_name: shipping.lastName || '',
+      email: shipping.email || req.user?.email || '',
+      shipping_address: shipping
+    };
+    sendOrderConfirmationEmail(fullOrderData, orderItems).catch(err => {
+      console.error('Error sending order confirmation email:', err);
+    });
+
     res.status(201).json({ success: true, data: { id: orderId, orderNumber, status: 'pending' } });
   } catch (error: any) {
     if (client) await client.query('ROLLBACK');
