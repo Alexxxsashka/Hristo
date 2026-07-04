@@ -7,12 +7,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load Firebase Config
-const authConfigPath = path.resolve(process.cwd(), 'auth-config.json');
-let firebaseConfig: any = {};
-if (fs.existsSync(authConfigPath)) {
-  firebaseConfig = JSON.parse(fs.readFileSync(authConfigPath, 'utf-8'));
-}
+const firebaseConfig: any = {
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET,
+  firestoreDatabaseId: process.env.FIREBASE_DATABASE_ID || '(default)'
+};
 
 let db: any = null;
 let bucket: any = null;
