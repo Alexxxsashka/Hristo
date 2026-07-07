@@ -46,7 +46,22 @@ const createPool = () => {
   });
 };
 
-export const pool = createPool();
+// Lazy pool: created on first use, not at module import time.
+// This prevents crashes on Vercel where env vars aren't available during module init.
+let _pool: pg.Pool | null = null;
+
+const getPool = (): pg.Pool => {
+  if (!_pool) {
+    _pool = createPool();
+  }
+  return _pool;
+};
+
+export const pool = new Proxy({} as pg.Pool, {
+  get(_target, prop) {
+    return (getPool() as any)[prop];
+  }
+});
 
 const initSchema = async () => {
   console.log('🚀 Initializing database schema...');

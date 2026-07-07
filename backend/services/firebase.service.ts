@@ -7,18 +7,31 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load Firebase Config
+// Load Firebase Config: env vars take priority, then fall back to auth-config.json (local dev)
 const authConfigPath = path.resolve(process.cwd(), 'auth-config.json');
-let firebaseConfig: any = {};
+let fileConfig: any = {};
 if (fs.existsSync(authConfigPath)) {
-  firebaseConfig = JSON.parse(fs.readFileSync(authConfigPath, 'utf-8'));
+  try {
+    fileConfig = JSON.parse(fs.readFileSync(authConfigPath, 'utf-8'));
+  } catch (e) {
+    console.warn('⚠️ Could not parse auth-config.json:', e);
+  }
 }
+
+const firebaseConfig: any = {
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || fileConfig.projectId,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || fileConfig.storageBucket,
+  firestoreDatabaseId: process.env.FIREBASE_DATABASE_ID || '(default)'
+};
 
 let db: any = null;
 let bucket: any = null;
 
 const initializeFirebase = () => {
-  if (!firebaseConfig.projectId) return;
+  if (!firebaseConfig.projectId) {
+    console.warn('⚠️ Firebase Admin: projectId not set. Firebase Admin features disabled.');
+    return;
+  }
 
   try {
     let credential;
