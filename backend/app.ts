@@ -63,18 +63,6 @@ app.use((req, res, next) => {
   }
 });
 
-// Temporary endpoint to list Vercel Blob store contents
-import { list } from '@vercel/blob';
-app.get('/api/debug-blobs', async (req, res) => {
-  try {
-    const token = process.env.HR_STORAGE_TOKEN || process.env.hrstorage_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-    const response = await list({ token });
-    return res.json({ success: true, blobs: response.blobs });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authRoutes);
