@@ -257,6 +257,7 @@ const initSchema = async () => {
         about_us_link TEXT,
         footer_tags TEXT[] DEFAULT '{}',
         footer_description TEXT,
+        live_demo_model_url TEXT,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -411,6 +412,7 @@ const initSchema = async () => {
     await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_requested BOOLEAN DEFAULT false');
     await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_requested_at TIMESTAMP WITH TIME ZONE');
     await client.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT');
+    await client.query('ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS live_demo_model_url TEXT');
 
     // 15. Indexes for performance
     await client.query('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)');
