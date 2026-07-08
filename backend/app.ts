@@ -21,6 +21,9 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware.js'
 
 const app = express();
 
+// Trust proxy on Vercel (fixes express-rate-limit X-Forwarded-For errors)
+app.set('trust proxy', 1);
+
 // 1. Security Headers
 app.use(helmet());
 
